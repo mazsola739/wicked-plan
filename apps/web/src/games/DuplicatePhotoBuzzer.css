@@ -1,0 +1,80 @@
+.db-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.db-pic {
+  display: block;
+  width: 100%;
+  max-width: min(100%, 46dvh);
+  aspect-ratio: 1;
+  border-radius: 16px;
+}
+
+.db-pic.flash {
+  animation: db-in 0.12s ease-out;
+}
+
+@keyframes db-in {
+  from {
+    opacity: 0.2;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.db-caption {
+  margin: 0;
+  text-align: center;
+}
+
+.db-buzz {
+  min-height: 96px;
+  border: none;
+  border-radius: 48px;
+  background: radial-gradient(circle at 50% 35%, #e8395a, var(--accent) 70%);
+  box-shadow: 0 6px 0 #7d0f25;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.db-buzz:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #7d0f25;
+}
+
+.db-buzz:disabled {
+  opacity: 0.4;
+  font-size: 1.2rem;
+  letter-spacing: 0;
+}
+
+.db-seats li {
+  gap: 8px;
+}
+
+.db-seats li > span:first-child {
+  flex: 1;
+}
+
+.db-right {
+  color: var(--ok);
+}
+
+.db-wrong {
+  color: var(--bad);
+}
+
+@media (min-width: 720px) {
+  .db-pic {
+    max-width: min(100%, 62vh);
+  }
+}

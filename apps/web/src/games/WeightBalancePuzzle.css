@@ -1,0 +1,155 @@
+.wb-scale {
+  max-height: 30dvh;
+}
+
+.wb-stand {
+  fill: #3a3342;
+}
+
+.wb-beam {
+  fill: var(--accent-2);
+}
+
+.wb-pivot {
+  fill: var(--text);
+}
+
+.wb-string {
+  stroke: var(--muted);
+  stroke-width: 2;
+}
+
+.wb-pan {
+  fill: #4a4256;
+  stroke: var(--muted);
+  stroke-width: 2;
+}
+
+.wb-block {
+  fill: #e8dcc4;
+  stroke: #3b3346;
+  stroke-width: 1.5;
+}
+
+.wb-letter,
+.wb-grams,
+.wb-result {
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-weight: 800;
+}
+
+.wb-letter {
+  fill: #1d1a23;
+  font-size: 16px;
+}
+
+.wb-weight {
+  fill: #8b8496;
+}
+
+.wb-grams {
+  fill: #121016;
+  font-size: 11px;
+}
+
+.wb-result {
+  fill: var(--accent-2);
+  font-size: 18px;
+}
+
+.wb-log {
+  max-height: 30dvh;
+  overflow-y: auto;
+}
+
+.wb-log li {
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.wb-res {
+  color: var(--accent-2);
+}
+
+.wb-blocks {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.wb-block-btn {
+  min-height: 60px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.wb-block-btn strong {
+  font-size: 1.2rem;
+}
+
+.wb-block-btn span {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.wb-block-btn.left {
+  background: #3b2a4a;
+  border-color: var(--accent);
+}
+
+.wb-block-btn.right {
+  background: #2a3a4a;
+  border-color: #4f8fe6;
+}
+
+.wb-block-btn.sel {
+  border-color: var(--accent-2);
+  background: #3a3342;
+}
+
+.wb-block-btn .wb-val {
+  font-size: 1.1rem;
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
+.wb-block-btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.wb-steppers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wb-stepper {
+  display: grid;
+  grid-template-columns: 1fr 56px 72px 56px;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.wb-stepper span {
+  text-align: left;
+}
+
+.wb-stepper .key {
+  min-height: var(--touch);
+}
+
+.wb-pad {
+  grid-template-columns: repeat(3, 1fr);
+}

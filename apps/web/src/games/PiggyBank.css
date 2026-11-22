@@ -1,0 +1,101 @@
+.piggy-bank-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.piggy-bank-pig {
+  width: 140px;
+  flex: none;
+}
+
+.piggy-bank-pig .body,
+.piggy-bank-pig .ear {
+  fill: #e79bb4;
+}
+
+.piggy-bank-pig .snout {
+  fill: #d77e9c;
+}
+
+.piggy-bank-pig .dark {
+  fill: #5a2a3c;
+}
+
+.piggy-bank-pig .count {
+  text-anchor: middle;
+  font-size: 30px;
+  font-weight: 800;
+  fill: #5a2a3c;
+}
+
+.piggy-bank-pig.open {
+  animation: piggy-bank-shake 0.5s;
+}
+
+.piggy-bank-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.piggy-bank-coin {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  vertical-align: middle;
+  border: 2px solid #8a7d6a;
+}
+
+.piggy-bank-white {
+  background: radial-gradient(circle at 35% 35%, #fff, #d9d2c4);
+}
+
+.piggy-bank-black {
+  background: radial-gradient(circle at 35% 35%, #5a5462, #121016);
+}
+
+.piggy-bank-pending {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  min-height: 30px;
+  align-items: center;
+}
+
+.piggy-bank-pending .piggy-bank-coin {
+  width: 28px;
+  height: 28px;
+}
+
+.piggy-bank-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.piggy-bank-stepper .key {
+  width: 64px;
+}
+
+.piggy-bank-stepper strong {
+  font-size: 2.4rem;
+  min-width: 48px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.list li.piggy-bank-holder {
+  outline: 2px solid var(--accent-2);
+}
+
+@keyframes piggy-bank-shake {
+  25% {
+    transform: rotate(-6deg);
+  }
+  75% {
+    transform: rotate(6deg);
+  }
+}

@@ -1,0 +1,79 @@
+.ma-monster {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--accent);
+  background: linear-gradient(135deg, #2a1420, var(--panel));
+}
+
+.ma-monster h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.ma-monster p {
+  margin: 4px 0 0;
+}
+
+.ma-face svg {
+  width: 72px;
+  height: 72px;
+}
+
+.ma-face path:first-child {
+  fill: #5b2a3a;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.ma-eye {
+  fill: var(--accent-2);
+}
+
+.ma-teeth {
+  fill: none;
+  stroke: #f1ecf4;
+  stroke-width: 3;
+}
+
+.ma-bonus {
+  color: var(--accent-2);
+  font-size: 1.2rem;
+}
+
+.ma-players li {
+  padding: 6px 10px;
+}
+
+.ma-ally {
+  color: var(--accent-2);
+}
+
+.ma-last {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.ma-last li.won {
+  color: var(--ok);
+}
+
+.ma-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.ma-hand {
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+}
+
+.ma-log p {
+  margin: 2px 0;
+}
+
+.ma-log p:first-child {
+  color: var(--accent-2);
+}

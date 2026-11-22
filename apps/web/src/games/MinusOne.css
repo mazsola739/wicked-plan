@@ -1,0 +1,81 @@
+.minus-one-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 46px;
+  border-radius: 6px;
+  background: #e8dcc4;
+  color: #1d1a23;
+  font-weight: 800;
+  font-size: 1.1rem;
+  border: 2px solid transparent;
+}
+
+.minus-one-card.small {
+  width: 28px;
+  height: 38px;
+  font-size: 0.95rem;
+}
+
+.minus-one-card.dim {
+  opacity: 0.3;
+}
+
+.minus-one-card.on {
+  border-color: var(--accent-2);
+}
+
+.minus-one-seat {
+  display: flex;
+  gap: 4px;
+}
+
+.list li.minus-one-won {
+  outline: 2px solid var(--accent-2);
+}
+
+.minus-one-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.minus-one-hand {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.minus-one-hand .card-btn:disabled {
+  cursor: default;
+}
+
+.minus-one-hand .card-btn:disabled:not(.picked) {
+  background: #3a3342;
+  color: var(--muted);
+}
+
+.minus-one-big {
+  min-height: 120px;
+  border-radius: 14px;
+  border: 2px solid var(--accent-2);
+  background: #e8dcc4;
+  color: #1d1a23;
+  font-size: 3rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.minus-one-big small {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}

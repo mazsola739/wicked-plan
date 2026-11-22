@@ -1,0 +1,176 @@
+.cm-ring {
+  max-height: 46dvh;
+}
+
+.cm-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.cm-hole > .cm-base {
+  fill: #2a2532;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.cm-hole.mine > .cm-base {
+  fill: #33293d;
+}
+
+.cm-hole.store > .cm-base {
+  fill: #1a171f;
+}
+
+.cm-hole.turn > .cm-base {
+  stroke: var(--accent-2);
+}
+
+.cm-hole.path > .cm-base {
+  stroke: var(--text);
+  stroke-dasharray: 4 3;
+}
+
+.cm-hole.from > .cm-base {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.cm-stone.red,
+.cm-swatch.red {
+  fill: #e0564f;
+  background: #e0564f;
+}
+
+.cm-stone.green,
+.cm-swatch.green {
+  fill: #3fb874;
+  background: #3fb874;
+}
+
+.cm-stone.blue,
+.cm-swatch.blue {
+  fill: #4f8fe6;
+  background: #4f8fe6;
+}
+
+.cm-count,
+.cm-center,
+.cm-store-text {
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: var(--muted);
+  font-size: 13px;
+}
+
+.cm-store-text {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cm-store-text .red,
+.cm-mini .red {
+  fill: #ff7b73;
+  color: #ff7b73;
+}
+
+.cm-store-text .green,
+.cm-mini .green {
+  fill: #5fd394;
+  color: #5fd394;
+}
+
+.cm-store-text .blue,
+.cm-mini .blue {
+  fill: #7fb0ff;
+  color: #7fb0ff;
+}
+
+.cm-center {
+  fill: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.cm-center.small {
+  fill: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.cm-first {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cm-colour {
+  flex: 1;
+  min-height: var(--touch);
+  padding: 0 6px;
+  text-transform: capitalize;
+}
+
+.cm-colour.on {
+  border-color: var(--accent-2);
+  background: #3a3342;
+}
+
+.cm-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+
+.cm-pits {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.cm-pit {
+  min-height: 64px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.cm-pit strong {
+  font-size: 1.3rem;
+}
+
+.cm-pit:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.cm-pit:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.cm-mini {
+  display: inline-flex;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cm-scores li.cm-now {
+  background: #2f2838;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cm-pit:hover:not(:disabled) {
+    border-color: var(--accent-2);
+  }
+}

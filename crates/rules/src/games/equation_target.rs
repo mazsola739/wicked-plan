@@ -1,0 +1,183 @@
+//! Equation Target (Prison, played solo here). Rules page: docs/games/equation-target.md
+//!
+//! Five rounds. Ten number cards (1–9) and a target are shown. Pick three
+//! different cards and two operators (+ − ×); the expression is worked out
+//! left to right, ((a ∘ b) ∘ c), and must equal the target. 40 seconds a round.
+
+use serde::{Deserialize, Serialize};
+
+use crate::game::GameInfo;
+use crate::quiz::QuizPuzzle;
+use crate::rng::Rng;
+
+pub const ROUND_MS: i64 = 40_000;
+pub const CARDS: usize = 10;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Op {
+    #[serde(rename = "+")]
+    Add,
+    #[serde(rename = "-")]
+    Sub,
+    #[serde(rename = "*")]
+    Mul,
+}
+
+impl Op {
+    pub const ALL: [Op; 3] = [Op::Add, Op::Sub, Op::Mul];
+    fn apply(self, a: i64, b: i64) -> i64 {
+        match self {
+            Op::Add => a + b,
+            Op::Sub => a - b,
+            Op::Mul => a * b,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct EquationAnswer {
+    /// Card indices, in the order they are used.
+    pub picks: [usize; 3],
+    pub ops: [Op; 2],
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EquationPuzzle {
+    pub cards: Vec<i64>,
+    pub target: i64,
+    /// Kept on the server only; it could be brute-forced, but the phone does not need it.
+    #[serde(skip)]
+    pub known: Option<EquationAnswer>,
+}
+
+impl EquationPuzzle {
+    pub fn eval(&self, a: &EquationAnswer) -> Option<i64> {
+        let [i, j, k] = a.picks;
+        if i == j || j == k || i == k || [i, j, k].iter().any(|&n| n >= self.cards.len()) {
+            return None;
+        }
+        Some(a.ops[1].apply(a.ops[0].apply(self.cards[i], self.cards[j]), self.cards[k]))
+    }
+
+    /// Every right answer (used by the tests and to keep targets fair).
+    pub fn solutions(&self) -> Vec<EquationAnswer> {
+        let n = self.cards.len();
+        let mut out = Vec::new();
+        for i in 0..n {
+            for j in 0..n {
+                for k in 0..n {
+                    for o1 in Op::ALL {
+                        for o2 in Op::ALL {
+                            let a = EquationAnswer { picks: [i, j, k], ops: [o1, o2] };
+                            if self.eval(&a) == Some(self.target) {
+                                out.push(a);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        out
+    }
+
+    /// Later rounds use bigger targets, which need × more often.
+    pub fn generate(rng: &mut Rng, level: usize) -> Self {
+        let (lo, hi) = [(5, 20), (10, 30), (15, 45), (20, 70), (30, 99)][level.clamp(1, 5) - 1];
+        loop {
+            let cards: Vec<i64> = (0..CARDS).map(|_| rng.int(1, 9)).collect();
+            let mut idx: Vec<usize> = (0..CARDS).collect();
+            rng.shuffle(&mut idx);
+            let a = EquationAnswer { picks: [idx[0], idx[1], idx[2]], ops: [*rng.pick(&Op::ALL), *rng.pick(&Op::ALL)] };
+            let mut p = Self { cards, target: 0, known: None };
+            let Some(target) = p.eval(&a) else { continue };
+            if (lo..=hi).contains(&target) {
+                p.target = target;
+                p.known = Some(a);
+                return p;
+            }
+        }
+    }
+}
+
+impl QuizPuzzle for EquationPuzzle {
+    type Answer = EquationAnswer;
+    fn is_correct(&self, answer: &EquationAnswer) -> bool {
+        self.eval(answer) == Some(self.target)
+    }
+    fn solution(&self) -> EquationAnswer {
+        self.known.clone().unwrap_or_else(|| self.solutions().remove(0))
+    }
+    fn validate(&self, answer: &EquationAnswer) -> Result<(), String> {
+        self.eval(answer).map(|_| ()).ok_or_else(|| "Pick three different cards".into())
+    }
+}
+
+crate::quiz_game!(
+    EquationTarget,
+    EquationPuzzle,
+    GameInfo {
+        id: "equation-target",
+        kind: "prison",
+        min_players: 1,
+        max_players: 1,
+        name: "Equation Target",
+        short: "Pick three of ten number cards and two operators to hit the target.",
+    },
+    ROUND_MS,
+    |rng| (1..=5).map(|level| EquationPuzzle::generate(rng, level)).collect(),
+    |state, rng| {
+        let right = state.current_solution().expect("round in progress");
+        if rng.next_f64() < 0.7 {
+            right
+        } else {
+            // A plausible miss: same cards, other operators.
+            EquationAnswer { picks: right.picks, ops: [*rng.pick(&Op::ALL), *rng.pick(&Op::ALL)] }
+        }
+    }
+);
+
+pub const READY: bool = true;
+pub type Rules = EquationTarget;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::game::testing::bot_games;
+
+    #[test]
+    fn evaluates_left_to_right() {
+        let p = EquationPuzzle { cards: vec![2, 3, 4], target: 20, known: None };
+        let a = EquationAnswer { picks: [0, 1, 2], ops: [Op::Add, Op::Mul] };
+        assert_eq!(p.eval(&a), Some(20)); // (2 + 3) × 4
+        assert!(p.is_correct(&a));
+        assert_eq!(p.eval(&EquationAnswer { picks: [0, 0, 2], ops: [Op::Add, Op::Add] }), None);
+        assert_eq!(p.eval(&EquationAnswer { picks: [0, 1, 9], ops: [Op::Add, Op::Add] }), None);
+    }
+
+    #[test]
+    fn every_generated_target_is_reachable_and_in_range() {
+        for seed in 1..=300 {
+            let mut rng = Rng::new(seed);
+            for level in 1..=5 {
+                let p = EquationPuzzle::generate(&mut rng, level);
+                assert_eq!(p.cards.len(), CARDS);
+                assert!(p.cards.iter().all(|c| (1..=9).contains(c)));
+                assert!(p.is_correct(&p.solution()));
+                assert!(!p.solutions().is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn the_phone_never_gets_the_known_answer() {
+        let p = EquationPuzzle::generate(&mut Rng::new(1), 3);
+        let v = serde_json::to_value(&p).unwrap();
+        assert!(v.get("known").is_none());
+    }
+
+    #[test]
+    fn thousand_bot_games() {
+        bot_games::<EquationTarget>(1000, 200);
+    }
+}

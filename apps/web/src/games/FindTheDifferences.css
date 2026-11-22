@@ -1,0 +1,92 @@
+.fd-pics {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.fd-pic {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  cursor: crosshair;
+  touch-action: manipulation;
+}
+
+.fd-ring {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 14;
+}
+
+.fd-ring.all {
+  stroke: var(--accent-2);
+  stroke-dasharray: 26 18;
+}
+
+.fd-miss line {
+  stroke: var(--bad);
+  stroke-width: 16;
+  stroke-linecap: round;
+}
+
+.fd-count {
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.fd-count strong {
+  font-size: 1.8rem;
+  color: var(--accent-2);
+}
+
+.fd-seats li {
+  gap: 10px;
+}
+
+.fd-who {
+  width: 48px;
+}
+
+.fd-bar {
+  flex: 1;
+  display: flex;
+  gap: 3px;
+}
+
+.fd-bar span {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--line);
+}
+
+.fd-bar span.on {
+  background: var(--ok);
+}
+
+/* Mid widths: side by side; a narrow phone: one above the other, small enough that both fit. */
+@media (max-width: 719px) {
+  .fd-pics {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 479px) {
+  .fd-pics {
+    grid-template-columns: 1fr;
+  }
+
+  .fd-pic {
+    max-height: 38dvh;
+    width: auto;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 720px) {
+  .fd-pics {
+    grid-template-columns: 1fr 1fr;
+  }
+}

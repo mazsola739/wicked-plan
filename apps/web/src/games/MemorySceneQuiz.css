@@ -1,0 +1,72 @@
+.msq-scene {
+  max-height: 42dvh;
+}
+
+.msq-cell {
+  fill: #2a2532;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.msq-hidden {
+  fill: var(--muted);
+  font-size: 32px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.msq-shape {
+  stroke: #121016;
+  stroke-width: 2;
+}
+
+.msq-shape.red {
+  fill: #e0564f;
+}
+
+.msq-shape.blue {
+  fill: #4f8fe6;
+}
+
+.msq-shape.green {
+  fill: #3fb874;
+}
+
+.msq-shape.yellow {
+  fill: #f0c53a;
+}
+
+.msq-shape.purple {
+  fill: #a46be0;
+}
+
+.msq-question {
+  font-size: 1.15rem;
+}
+
+.msq-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.msq-option {
+  min-height: 56px;
+  text-transform: capitalize;
+}
+
+/* The key number only where there is a keyboard; it would clash with number answers on a phone. */
+.msq-key {
+  display: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-right: 6px;
+  font-weight: 400;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .msq-key {
+    display: inline;
+  }
+}

@@ -1,0 +1,25 @@
+# Colour Mancala
+
+Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/games/colour_mancala.rs`.
+
+- **Board:** a ring. Every player owns a row of **5 pits** followed by their own **store**. Players sit
+  around the ring in seat order.
+- **Stones** come in three colours: **red, green, blue**. At the start every pit holds **4 stones**;
+  the colour pattern is random but the same in every player's row, so nobody starts ahead.
+- **Turn:** pick one of your non-empty pits and a **first colour**. Take all its stones and sow them one by
+  one along the ring: first every stone of the chosen colour, then the next colour (red → green → blue →
+  red), then the last. Sowing passes through your own store but skips the other players' stores.
+- **Extra turn:** if the last stone lands in your own store, you move again.
+- **Capture:** if the last stone lands in an **empty pit of your own** and the facing pit (counting pits 1–5,
+  pit 6 − i of the next player's row) has stones, both pits go into your store.
+- **Turn timer:** 20 seconds; then a default move (the bot's choice) is made for you.
+- **End:** when the player to move has no stones left in their pits, or after **40 turns per player**.
+  Every player then moves the stones left in their own pits into their own store.
+- **Score:** your **lowest colour total** in the store counts. Points = **50 × lowest colour + total stones**
+  (so the total breaks ties). Highest points win; equal points share a rank.
+- **View:** everything is public (all pits, stores, whose turn, the last move's path).
+- **Moves:** `{type:"sow", pit, first}`: `pit` 0–4 in your own row, `first` 0 = red, 1 = green, 2 = blue.
+- **Bot:** tries every pit and first colour, and picks the one that raises its own points most
+  (an extra turn and a capture count extra), with a little noise.
+- **Screen:** the ring drawn in SVG (your row at the bottom); below it the colour toggle and your five pits
+  as big buttons. Desktop keys: 1–5 sow from a pit, R / G / B pick the first colour.

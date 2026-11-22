@@ -1,0 +1,26 @@
+# Polyomino Territory
+
+Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/games/polyomino_territory.rs`.
+Our short version of the 30 × 30 original: a **14 × 14** board.
+
+- **Start:** every player owns one start square: the corners (with 3 players: two top corners and the
+  middle of the bottom edge).
+- **Hand:** everyone holds **3 pieces** (polyominoes of 1–5 squares, drawn at random from 17 shapes) and
+  draws a new one after placing. Only you see your hand.
+- **Turn:** place one piece from your hand, turned and flipped any way, on empty squares, so that at least
+  one of its squares touches your territory **edge to edge**. Its squares become yours.
+- **Key squares (8, placed the same in every quarter of the board):**
+  - **⟳ Encore:** cover it and you place again at once.
+  - **↗ Leap:** cover it and you gain a leap: one later piece may go **anywhere** empty, touching nothing.
+- **Stuck:** a player who cannot place any piece is skipped. The game ends when **nobody** can place, or
+  after **40 turns** per player.
+- **Turn timer:** 30 seconds; then a default move (the bot's choice) is made for you.
+- **Score:** **10 points per square** you own. Highest wins; equal scores share a rank.
+- **View:** the board, the key squares left, everyone's leaps and squares, your own hand.
+- **Moves:** `{type:"place", piece, cells:[[x,y]…], leap}`: `piece` is the hand index, `cells` the board
+  squares it covers (any turn or flip of the shape), `leap` true to use a leap.
+- **Bot:** tries every piece, orientation and place; prefers big pieces, key squares, more room to grow and
+  squares next to rivals; saves leaps until they are worth it.
+- **Screen:** board in SVG; pick a piece, turn ↻ / flip ⇋ it, tap the board to put the ghost there, then
+  Place. Desktop keys: 1–3 pick a piece, R turns, F flips, arrows move the ghost, Enter places, L toggles the
+  leap.

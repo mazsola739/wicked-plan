@@ -1,0 +1,82 @@
+.wall-territory-board {
+  max-height: 60dvh;
+  aspect-ratio: 1;
+}
+
+.wall-territory-cell {
+  fill: #2a2532;
+  cursor: pointer;
+}
+
+.wall-territory-cell.can {
+  stroke: var(--accent-2);
+  stroke-width: 0.05;
+}
+
+.wall-territory-cell.dest {
+  stroke: var(--accent-2);
+  stroke-width: 0.1;
+}
+
+.wall-territory-wall {
+  stroke: var(--accent-2);
+  stroke-width: 0.12;
+  stroke-linecap: round;
+}
+
+.wall-territory-piece {
+  stroke: #1d1a23;
+  stroke-width: 0.05;
+  pointer-events: none;
+}
+
+.wall-territory-piece.sel {
+  stroke: var(--accent-2);
+  stroke-width: 0.08;
+}
+
+.wall-territory-last {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 0.03;
+  stroke-dasharray: 0.1 0.07;
+  pointer-events: none;
+}
+
+.wall-territory-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.wall-territory-turn {
+  outline: 1px solid var(--accent-2);
+}
+
+.wall-territory-sides {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas:
+    ". n ."
+    "w . e"
+    ". s .";
+  gap: 6px;
+}
+
+.wall-territory-n {
+  grid-area: n;
+}
+
+.wall-territory-e {
+  grid-area: e;
+}
+
+.wall-territory-s {
+  grid-area: s;
+}
+
+.wall-territory-w {
+  grid-area: w;
+}

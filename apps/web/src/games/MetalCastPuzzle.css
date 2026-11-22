@@ -1,0 +1,71 @@
+.mcp {
+  max-height: 34dvh;
+}
+
+.mcp-bar {
+  fill: #4a4352;
+}
+
+.mcp-post {
+  stroke: #8a8292;
+  stroke-width: 4;
+}
+
+.mcp-loop {
+  stroke: url(#mcp-steel);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.mcp-handle {
+  fill: #6b2a38;
+  stroke: #3b1720;
+  stroke-width: 2;
+}
+
+.mcp-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.mcp-wire {
+  fill: none;
+  stroke: #8a8292;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.mcp-wire.back {
+  stroke: #5d5666;
+}
+
+.mcp-ring.on .mcp-wire.back {
+  stroke: #8f6f22;
+}
+
+.mcp-wire.front.on {
+  stroke: var(--accent-2);
+}
+
+.mcp-num {
+  text-anchor: middle;
+  font-size: 14px;
+  fill: var(--muted);
+}
+
+.mcp-keys {
+  display: grid;
+  gap: 8px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mcp-ring:hover .mcp-wire.back {
+    stroke: var(--text);
+  }
+}
+
+@media (min-width: 720px) {
+  .mcp {
+    max-height: 60vh;
+  }
+}

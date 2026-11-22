@@ -1,0 +1,155 @@
+.tc-map {
+  width: 100%;
+  max-height: 58dvh;
+}
+
+.tc-line {
+  stroke-width: 7;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.tc-hit {
+  fill: transparent;
+}
+
+.tc-dot {
+  fill: #f1ecf4;
+  stroke: #1d1a23;
+  stroke-width: 4;
+}
+
+.tc-station.can {
+  cursor: pointer;
+}
+
+.tc-station.can .tc-hit {
+  fill: rgba(212, 166, 55, 0.25);
+  stroke: var(--accent-2);
+  stroke-width: 2;
+}
+
+.tc-station.chosen .tc-dot {
+  fill: var(--accent-2);
+}
+
+.tc-name {
+  fill: var(--muted);
+  font-size: 17px;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.tc-loot {
+  fill: #2fd2c4;
+  stroke: #0d3d39;
+  stroke-width: 2;
+}
+
+.tc-taken {
+  fill: var(--bad);
+  font-size: 16px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.tc-ghost circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.tc-token circle {
+  stroke: #1d1a23;
+  stroke-width: 2;
+}
+
+.tc-token text,
+.tc-ghost text {
+  fill: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.tc-token.police circle {
+  fill: #4a8fd9;
+}
+
+.tc-token.thief circle {
+  fill: var(--accent);
+}
+
+.tc-token.corrupt circle {
+  fill: #6b5a2a;
+}
+
+.tc-token.me circle {
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.tc-token.caught {
+  opacity: 0.4;
+}
+
+.tc-ghost text {
+  fill: var(--accent);
+  font-size: 10px;
+}
+
+.tc-card {
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.tc-card p {
+  margin: 4px 0 0;
+}
+
+.tc-card.tc-thief,
+.tc-card.tc-corrupt {
+  border-color: var(--accent);
+}
+
+.tc-accuse {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tc-badge {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 22px;
+  background: #4a8fd9;
+}
+
+.tc-badge.thief {
+  background: var(--accent);
+}
+
+.tc-badge.corrupt {
+  background: #6b5a2a;
+}
+
+.tc-players li {
+  padding: 6px 10px;
+}
+
+.tc-log p {
+  margin: 2px 0;
+}
+
+.tc-log p:first-child {
+  color: var(--accent-2);
+}

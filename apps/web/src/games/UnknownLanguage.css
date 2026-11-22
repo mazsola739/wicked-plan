@@ -1,0 +1,102 @@
+.ul-wall {
+  background: #2a2532;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.ul-examples {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ul-examples li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.ul-examples li:last-child {
+  border-bottom: none;
+}
+
+.ul-script {
+  display: inline-flex;
+  gap: 2px 8px;
+  flex-wrap: wrap;
+}
+
+.ul-glyph {
+  width: 30px;
+  height: 35px;
+}
+
+.ul-glyph line {
+  stroke: #efe7dc;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.ul-glyph .ul-mark {
+  stroke: var(--accent-2);
+}
+
+.ul-dot {
+  fill: var(--accent-2);
+}
+
+.ul-ring {
+  fill: none;
+  stroke: var(--accent-2);
+  stroke-width: 1.8;
+}
+
+.ul-english {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.ul-ask-script {
+  display: flex;
+  justify-content: center;
+}
+
+.ul-ask-script .ul-glyph {
+  width: 42px;
+  height: 49px;
+}
+
+.ul-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ul-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.ul-option.script {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.ul-num {
+  color: var(--muted);
+  font-size: 0.8rem;
+  min-width: 1em;
+}
+
+.last .ul-script {
+  vertical-align: middle;
+}

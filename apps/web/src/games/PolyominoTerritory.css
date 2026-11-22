@@ -1,0 +1,112 @@
+.pt-board {
+  max-height: 52dvh;
+  padding: 4px;
+}
+
+.pt-cell {
+  fill: #2a2532;
+  cursor: pointer;
+}
+
+.pt-cell.s0,
+.pt-swatch.s0 {
+  fill: #e0564f;
+  background: #e0564f;
+}
+
+.pt-cell.s1,
+.pt-swatch.s1 {
+  fill: #4f8fe6;
+  background: #4f8fe6;
+}
+
+.pt-cell.s2,
+.pt-swatch.s2 {
+  fill: #3fb874;
+  background: #3fb874;
+}
+
+.pt-cell.s3,
+.pt-swatch.s3 {
+  fill: #e0b53a;
+  background: #e0b53a;
+}
+
+.pt-cell.last {
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.pt-key {
+  font-size: 18px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.pt-key.encore {
+  fill: var(--accent-2);
+}
+
+.pt-key.leap {
+  fill: #c7a4ff;
+}
+
+.pt-ghost {
+  fill: rgba(255, 255, 255, 0.55);
+  stroke: #fff;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.pt-ghost.bad {
+  fill: rgba(217, 83, 79, 0.6);
+  stroke: var(--bad);
+}
+
+.pt-hand {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.pt-piece {
+  min-height: 72px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  cursor: pointer;
+  padding: 6px;
+}
+
+.pt-piece.on {
+  border-color: var(--accent-2);
+  background: #3a3342;
+}
+
+.pt-mini {
+  width: 56px;
+  height: 56px;
+}
+
+.pt-mini rect {
+  fill: #e0564f;
+}
+
+.pt-leap-on {
+  border-color: #c7a4ff;
+  background: #3b2d52;
+}
+
+.pt-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+
+.list li.pt-now {
+  background: #2f2838;
+}

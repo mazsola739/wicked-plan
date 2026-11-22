@@ -1,0 +1,136 @@
+.msm-board {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.msm-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 96px 36px;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #24202b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.msm-row.sel {
+  border-color: var(--accent-2);
+  background: #2c2536;
+}
+
+.msm-ticker {
+  display: flex;
+  flex-direction: column;
+}
+
+.msm-ticker small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.msm-spark {
+  width: 100%;
+  height: 30px;
+}
+
+.msm-spark polyline {
+  fill: none;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.msm-spark .up {
+  stroke: var(--ok);
+}
+
+.msm-spark .down {
+  stroke: var(--bad);
+}
+
+.msm-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.msm-price small {
+  font-weight: 400;
+  font-size: 0.75rem;
+}
+
+.msm-price .up {
+  color: var(--ok);
+}
+
+.msm-price .down {
+  color: var(--bad);
+}
+
+.msm-own {
+  color: var(--accent-2);
+  font-weight: 700;
+  text-align: right;
+}
+
+.msm-rule {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--accent-2);
+}
+
+.msm-wallet {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+.msm-trade {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.msm-trade p {
+  margin: 0;
+}
+
+.msm-trade-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.msm-qty .btn.small {
+  min-height: 44px;
+}
+
+.msm-clue {
+  margin: 0;
+  color: var(--accent-2);
+}
+
+.msm-rules ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.msm-rules summary {
+  cursor: pointer;
+  min-height: 32px;
+}
+
+.msm-log p {
+  margin: 2px 0;
+}

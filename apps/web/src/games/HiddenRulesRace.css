@@ -1,0 +1,116 @@
+.hrr-board {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  max-width: min(100%, 52dvh);
+  margin: 0 auto;
+}
+
+.hrr-sq {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.hrr-red {
+  background: #b8323f;
+}
+
+.hrr-blue {
+  background: #3d6fc4;
+}
+
+.hrr-green {
+  background: #3a9a5b;
+}
+
+.hrr-yellow {
+  background: #d1a92c;
+}
+
+.hrr-purple {
+  background: #8a4fc0;
+}
+
+.hrr-goal {
+  background: #f1ecf4;
+}
+
+.hrr-star {
+  position: absolute;
+  color: var(--accent);
+  font-size: 1.4rem;
+  opacity: 0.5;
+}
+
+.hrr-piece {
+  position: relative;
+  width: 40%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  border: 2px solid #1d1a23;
+  background: #f1ecf4;
+  color: #1d1a23;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hrr-piece.me {
+  background: var(--accent);
+  color: #fff;
+  border-color: #fff;
+}
+
+.hrr-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-areas: ". up ." "left . right" ". down .";
+  gap: 6px;
+  justify-content: center;
+}
+
+.hrr-pad .btn {
+  min-height: 56px;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+.hrr-up {
+  grid-area: up;
+}
+
+.hrr-left {
+  grid-area: left;
+}
+
+.hrr-right {
+  grid-area: right;
+}
+
+.hrr-down {
+  grid-area: down;
+}
+
+.hrr-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.hrr-notes .btn.small {
+  min-height: 40px;
+}
+
+.hrr-log li {
+  padding: 6px 10px;
+}

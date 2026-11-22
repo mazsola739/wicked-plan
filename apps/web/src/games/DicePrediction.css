@@ -1,0 +1,79 @@
+.dice-prediction-die {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 8px;
+  border-radius: 12px;
+  background: #f4eee2;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.dice-prediction-die.small {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border-radius: 7px;
+}
+
+.dice-prediction-die.secret {
+  background: #cfe0f4;
+}
+
+.dice-prediction-die.blind {
+  background: #f4d6cf;
+}
+
+.dice-prediction-die i {
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+}
+
+.dice-prediction-die i.on {
+  background: #1d1a23;
+}
+
+.dice-prediction-die b {
+  grid-area: 1 / 1 / 4 / 4;
+  color: #6b6175;
+  font-size: 1.6rem;
+}
+
+.dice-prediction-die.small b {
+  font-size: 0.95rem;
+}
+
+.dice-prediction-dice {
+  display: flex;
+  gap: 4px;
+}
+
+.dice-prediction-mine {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.dice-prediction-mine figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dice-prediction-mine figcaption {
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dice-prediction-ranks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 8px;
+}

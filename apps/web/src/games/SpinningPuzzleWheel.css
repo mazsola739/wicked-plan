@@ -1,0 +1,142 @@
+.spw-stage {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.spw-wheel,
+.spw-board {
+  max-height: 34dvh;
+  padding: 4px;
+}
+
+.spw-rim {
+  fill: #1a171f;
+  stroke: var(--accent-2);
+  stroke-width: 4;
+}
+
+.spw-pointer {
+  fill: var(--accent);
+}
+
+.spw-thumb {
+  transition: transform 0.45s ease;
+}
+
+.spw-plate {
+  fill: #2a2532;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.spw-thumb.now .spw-plate {
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+
+.spw-thumb.done .spw-plate {
+  fill: #213a2c;
+}
+
+.spw-center {
+  fill: var(--text);
+  font-size: 30px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.spw-center.small {
+  fill: var(--muted);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.spw-cell {
+  fill: #221e29;
+}
+
+.spw-cell.target {
+  fill: #6b6378;
+}
+
+.spw-board .spw-cell {
+  cursor: pointer;
+}
+
+.spw-cell.piece.p0,
+.spw-piece .p0 rect {
+  fill: #e0564f;
+}
+
+.spw-cell.piece.p1,
+.spw-piece .p1 rect {
+  fill: #4f8fe6;
+}
+
+.spw-cell.piece.p2,
+.spw-piece .p2 rect {
+  fill: #3fb874;
+}
+
+.spw-cell.piece.p3,
+.spw-piece .p3 rect {
+  fill: #e0b53a;
+}
+
+.spw-ghost {
+  fill: rgba(255, 255, 255, 0.6);
+  stroke: #fff;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.spw-ghost.bad {
+  fill: rgba(217, 83, 79, 0.6);
+  stroke: var(--bad);
+}
+
+.spw-tray {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.spw-piece {
+  min-height: 64px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  cursor: pointer;
+  padding: 6px;
+}
+
+.spw-piece svg {
+  width: 48px;
+  height: 48px;
+}
+
+.spw-piece.on {
+  border-color: var(--accent-2);
+  background: #3a3342;
+}
+
+.spw-piece.used svg {
+  opacity: 0.35;
+}
+
+@media (min-width: 720px) {
+  .spw-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .spw-wheel {
+    max-height: 30vh;
+  }
+
+  .spw-board {
+    max-height: 40vh;
+  }
+}

@@ -1,0 +1,80 @@
+.tiger-and-goat-board {
+  max-height: 58dvh;
+  aspect-ratio: 1;
+}
+
+.tiger-and-goat-line {
+  stroke: #5a5066;
+  stroke-width: 0.04;
+}
+
+.tiger-and-goat-point {
+  cursor: pointer;
+}
+
+.tiger-and-goat-point .hit {
+  fill: transparent;
+}
+
+.tiger-and-goat-point .stone {
+  fill: #5a5066;
+}
+
+.tiger-and-goat-point text {
+  font-size: 0.3px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: #1d1a23;
+  pointer-events: none;
+}
+
+.tiger-and-goat-point.tiger .stone {
+  fill: var(--accent-2);
+}
+
+.tiger-and-goat-point.goat .stone {
+  fill: #e8dcc4;
+}
+
+.tiger-and-goat-point.last .hit {
+  stroke: var(--muted);
+  stroke-width: 0.03;
+  stroke-dasharray: 0.08 0.06;
+}
+
+.tiger-and-goat-point.can .hit {
+  fill: rgba(212, 166, 55, 0.22);
+}
+
+.tiger-and-goat-point.sel .stone {
+  stroke: var(--accent);
+  stroke-width: 0.08;
+}
+
+.tiger-and-goat-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tiger-and-goat-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  min-height: var(--touch);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  cursor: pointer;
+}
+
+.tiger-and-goat-tab.on {
+  border-color: var(--accent-2);
+}
+
+.tiger-and-goat-tab.turn strong {
+  color: var(--accent-2);
+}

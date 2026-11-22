@@ -1,0 +1,143 @@
+.ab-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: min(100%, 320px);
+  margin: 0 auto;
+}
+
+.ab-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: #24202b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ab-cell:disabled {
+  cursor: default;
+}
+
+.ab-cell em {
+  position: absolute;
+  top: 4px;
+  left: 7px;
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.ab-cell.marked {
+  background: #3a2e18;
+  border-color: var(--accent-2);
+}
+
+.ab-cell.picked {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.ab-shape {
+  width: 60%;
+  height: 60%;
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+}
+
+.ab-cell.marked .ab-shape {
+  fill: currentColor;
+}
+
+.ab-s0 {
+  stroke: #6fc3ff;
+  color: #6fc3ff;
+}
+
+.ab-s1 {
+  stroke: #7ddc8f;
+  color: #7ddc8f;
+}
+
+.ab-s2 {
+  stroke: #f0c94a;
+  color: #f0c94a;
+}
+
+.ab-grid.small {
+  width: 96px;
+  gap: 3px;
+}
+
+.ab-grid.small .ab-cell {
+  border-radius: 6px;
+  border-width: 1px;
+}
+
+.ab-counts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.ab-counts > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px;
+  border-radius: 10px;
+  background: #24202b;
+  font-size: 0.85rem;
+}
+
+.ab-counts > div.mine {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.ab-counts svg {
+  width: 32px;
+  height: 32px;
+}
+
+.ab-bid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ab-bid .pad-display {
+  text-align: center;
+}
+
+.ab-finals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.ab-final {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.ab-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: var(--muted);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ab-log li.own {
+  color: var(--text);
+}

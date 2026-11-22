@@ -1,0 +1,131 @@
+.sniper-holdem-table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 14px;
+  background: radial-gradient(ellipse at center, #1f4a36, #14301f);
+}
+
+.sniper-holdem-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.sniper-holdem-card {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 46px;
+  height: 64px;
+  padding: 4px 6px;
+  border-radius: 7px;
+  background: #f4eee2;
+  font-weight: 800;
+  font-size: 1.3rem;
+  line-height: 1;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.sniper-holdem-card.small {
+  width: 32px;
+  height: 44px;
+  font-size: 0.95rem;
+  padding: 3px 4px;
+}
+
+.sniper-holdem-card i {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.sniper-holdem-card.small i {
+  width: 9px;
+  height: 9px;
+  right: 4px;
+  bottom: 4px;
+}
+
+.sniper-holdem-card.red {
+  color: #c42a3a;
+}
+
+.sniper-holdem-card.blue {
+  color: #2a5fc4;
+}
+
+.sniper-holdem-card.green {
+  color: #22874c;
+}
+
+.sniper-holdem-card.gold {
+  color: #b2861a;
+}
+
+.sniper-holdem-card.gold i {
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.sniper-holdem-card.blue i {
+  border-radius: 2px;
+}
+
+.sniper-holdem-card.green i {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  border-radius: 0;
+}
+
+.sniper-holdem-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.list li.sniper-holdem-turn,
+.list li.sniper-holdem-win {
+  outline: 2px solid var(--accent-2);
+}
+
+.list li.sniper-holdem-out {
+  opacity: 0.5;
+}
+
+.sniper-holdem-hit {
+  color: var(--bad);
+  text-decoration: line-through;
+  font-size: 0.85rem;
+}
+
+.sniper-holdem-mine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.sniper-holdem-snipes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.sniper-holdem-snipes .sniper-holdem-own {
+  border-color: var(--accent-2);
+}

@@ -1,0 +1,36 @@
+# Hidden Fourth Player
+
+Mini team game, 3 players (you and two bots). Code: `crates/rules/src/games/hidden_fourth_player.rs`,
+screen: `apps/web/src/games/HiddenFourthPlayer.tsx`.
+
+Three players play three-in-a-row on one board, each in their own colour, against a fourth player nobody
+controls: **the Shadow**, run by the rules. Its plan is unknown; all you see is where it plays.
+
+- **7×7 board.** The Shadow opens with one stone on a square dealt by the seed.
+- **Rounds:** the three players place one stone each, in seat order (you first), then the Shadow places
+  one at once. Repeat.
+- **Lines:** every run of **3 squares in a row** (across, down or diagonal) all in one colour is a line.
+  Longer runs count once per 3-square stretch (4 in a row = 2 lines).
+- **The Shadow wins** the moment it has a line: the game ends at once.
+- **The team survives** when the board is full without a Shadow line.
+- **The Shadow's play:** complete a line if it can; otherwise the square that gives it the most open
+  twos (two Shadow stones and an empty square in a 3-stretch), ties dealt by the seed.
+- Turn timer: **30 s**; when it runs out, the bot plays your stone.
+
+## Points (cooperation matters)
+
+- Survived: **100 + 100 per own line + 300** team bonus for everyone.
+- Shadow won: **100 + 50 per own line** (lines are worth half, no bonus).
+
+So each player wants their own lines, but if nobody blocks, everybody loses most of their points. The
+last player before the Shadow is the one who must cover the threats the others left open.
+
+## Moves and view
+
+- Moves: `{type:"place", x, y}` (0–6 from the top-left).
+- View: the board (0 empty, 1–3 the seats in order, 4 the Shadow), your seat, each seat's lines, whose turn,
+  the squares where the Shadow would complete a line now (danger), the last stones played, the round, the
+  timer, and at the end whether the team survived.
+- Bot: scores every empty square: blocking a Shadow line (a must when the threats outnumber the players
+  still to move before the Shadow), blocking squares where the Shadow would make two threats at once, its
+  own lines and open twos, a little for blocking the other players, and a little for the centre.

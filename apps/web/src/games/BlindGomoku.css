@@ -1,0 +1,99 @@
+.bg-board {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 6px;
+  border-radius: 12px;
+  background: #6b4e2e;
+  transition: box-shadow 0.2s;
+}
+
+.bg-board.peeking {
+  box-shadow: 0 0 0 3px var(--accent-2);
+}
+
+.bg-sq {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  padding: 0;
+  background: #c79a5f;
+  cursor: pointer;
+}
+
+.bg-sq:disabled {
+  cursor: default;
+}
+
+.bg-sq.cursor {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.bg-sq.last {
+  background: #e0b878;
+}
+
+.bg-sq.win {
+  background: var(--accent-2);
+}
+
+.bg-tile {
+  display: inline-block;
+  width: 76%;
+  height: 76%;
+  border-radius: 50%;
+}
+
+.bg-tile.dark {
+  background: radial-gradient(circle at 35% 30%, #5a5266, #141018);
+}
+
+.bg-tile.light {
+  background: radial-gradient(circle at 35% 30%, #fff, #cfc6d6);
+}
+
+.bg-tile.down {
+  background: repeating-linear-gradient(45deg, #7a6f86 0 4px, #615770 4px 8px);
+  border-radius: 22%;
+}
+
+.bg-tile.ghost {
+  background: rgba(20, 16, 24, 0.35);
+}
+
+.bg-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.bg-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bg-legend .bg-tile {
+  width: 16px;
+  height: 16px;
+}
+
+@media (min-width: 720px) {
+  .bg-board {
+    max-width: min(100%, 66vh);
+    margin: 0 auto;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bg-sq:hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "wicked-plan",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run wasm && npm run dev -w @wicked-plan/web",
+    "wasm": "cargo build --manifest-path crates/Cargo.toml -p wp-wasm --target wasm32-unknown-unknown --release && wasm-bindgen --target web --out-dir apps/web/src/wasm crates/target/wasm32-unknown-unknown/release/wp_wasm.wasm",
+    "build": "npm run wasm && npm run build -w @wicked-plan/web",
+    "test": "cargo test --manifest-path crates/Cargo.toml",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "hooks": "git config core.hooksPath .githooks",
+    "precommit": "node scripts/pre-commit.mjs",
+    "tunnel": "cloudflared tunnel --url http://localhost:5173",
+    "map": "node scripts/repomap.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.4",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

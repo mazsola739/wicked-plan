@@ -1,0 +1,89 @@
+.eo-round {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  text-align: center;
+}
+
+.eo-round.surprise {
+  border-color: var(--accent-2);
+  background: #2a2318;
+}
+
+.eo-prompt {
+  margin: 8px 0 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.eo-scores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.eo-scores li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #24202b;
+}
+
+.eo-scores li > span:first-child {
+  flex: 1;
+}
+
+.eo-scores li.me > span:first-child {
+  color: var(--accent-2);
+}
+
+.eo-scores em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.eo-tick {
+  color: var(--ok);
+  width: 1em;
+}
+
+.eo-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.eo-choices.n5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.eo-choice {
+  min-height: 64px;
+  font-size: 1.05rem;
+  padding: 0 6px;
+}
+
+.eo-choice.side0 {
+  border-color: #6fc3ff;
+}
+
+.eo-choice.side1 {
+  border-color: #f08a5d;
+}
+
+.eo-choice.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  opacity: 1;
+}
+
+.eo-minus {
+  color: var(--bad);
+}

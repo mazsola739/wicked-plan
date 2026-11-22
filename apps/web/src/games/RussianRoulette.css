@@ -1,0 +1,104 @@
+.russian-roulette-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.russian-roulette-drum {
+  width: 120px;
+  height: 120px;
+  flex: none;
+}
+
+.russian-roulette-drum .body {
+  fill: #4a4452;
+  stroke: #6b6375;
+  stroke-width: 3;
+}
+
+.russian-roulette-drum .chamber {
+  fill: #1d1a23;
+}
+
+.russian-roulette-drum .chamber.next {
+  stroke: var(--accent-2);
+  stroke-width: 3;
+}
+
+.russian-roulette-drum .hub {
+  fill: #6b6375;
+}
+
+.russian-roulette-drum .paint {
+  fill: #e0329a;
+  opacity: 0.9;
+}
+
+.russian-roulette-drum.splat {
+  animation: russian-roulette-kick 0.35s;
+}
+
+.russian-roulette-odds {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.russian-roulette-charges,
+.russian-roulette-lives {
+  display: flex;
+  gap: 6px;
+}
+
+.russian-roulette-charges i,
+.russian-roulette-lives i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.russian-roulette-charges i.on {
+  background: #e0329a;
+}
+
+.russian-roulette-lives i.on {
+  background: var(--ok);
+}
+
+.list li.russian-roulette-turn {
+  outline: 2px solid var(--accent-2);
+}
+
+.list li.russian-roulette-out {
+  opacity: 0.45;
+}
+
+.russian-roulette-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.russian-roulette-hit {
+  color: #ff5fb8;
+}
+
+.russian-roulette-safe {
+  color: var(--ok);
+}
+
+.russian-roulette-pull {
+  min-height: 64px;
+  font-size: 1.3rem;
+}
+
+@keyframes russian-roulette-kick {
+  30% {
+    transform: rotate(-12deg) scale(1.05);
+  }
+}

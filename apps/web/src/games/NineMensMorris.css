@@ -1,0 +1,97 @@
+.nine-mens-morris-board {
+  max-height: 60dvh;
+  aspect-ratio: 1;
+}
+
+.nine-mens-morris-line {
+  fill: none;
+  stroke: #5a5066;
+  stroke-width: 0.06;
+}
+
+.nine-mens-morris-point {
+  cursor: pointer;
+}
+
+.nine-mens-morris-point .hit {
+  fill: transparent;
+}
+
+.nine-mens-morris-point.empty .stone {
+  fill: #5a5066;
+}
+
+.nine-mens-morris-point.mine .stone {
+  fill: #e8dcc4;
+  stroke: #1d1a23;
+  stroke-width: 0.04;
+}
+
+.nine-mens-morris-point.theirs .stone {
+  fill: var(--accent);
+  stroke: #1d1a23;
+  stroke-width: 0.04;
+}
+
+.nine-mens-morris-point.can .hit {
+  fill: rgba(212, 166, 55, 0.25);
+}
+
+.nine-mens-morris-point.empty.can .stone {
+  fill: var(--accent-2);
+}
+
+.nine-mens-morris-point.mine.sel .stone {
+  stroke: var(--accent-2);
+  stroke-width: 0.1;
+}
+
+.nine-mens-morris-point.last .hit {
+  stroke: var(--muted);
+  stroke-width: 0.04;
+  stroke-dasharray: 0.08 0.06;
+}
+
+.nine-mens-morris-point.gone .hit {
+  stroke: var(--bad);
+  stroke-width: 0.05;
+}
+
+.nine-mens-morris-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.nine-mens-morris-side > span:first-child {
+  min-width: 44px;
+  font-weight: 600;
+}
+
+.nine-mens-morris-hand {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.nine-mens-morris-hand i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.nine-mens-morris-hand i.mine {
+  background: #e8dcc4;
+}
+
+.nine-mens-morris-hand i.theirs {
+  background: var(--accent);
+}
+
+.nine-mens-morris-mill {
+  color: var(--accent-2);
+}

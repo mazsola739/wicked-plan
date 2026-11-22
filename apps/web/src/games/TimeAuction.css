@@ -1,0 +1,99 @@
+.time-auction-live {
+  background: #4a3f58;
+}
+
+.time-auction-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.time-auction-dot.on {
+  background: var(--ok);
+}
+
+.time-auction-tokens {
+  display: flex;
+  gap: 4px;
+}
+
+.time-auction-tokens i {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f3d37a, var(--accent-2) 60%, #8c6a1c);
+}
+
+.time-auction-log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.time-auction-bank {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.time-auction-bar {
+  position: relative;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--panel);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.time-auction-bar div {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #3a5a7a;
+  transition: width 0.25s linear;
+}
+
+.time-auction-bar span {
+  position: relative;
+}
+
+.time-auction-btn {
+  align-self: center;
+  width: min(50vw, 200px);
+  margin-bottom: 10px;
+  aspect-ratio: 1;
+  margin-top: auto;
+  border-radius: 50%;
+  border: 6px solid #6b1023;
+  background: radial-gradient(circle at 40% 35%, #e2415f, var(--accent) 65%, #7a0f24);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 8px 0 #4a0a17;
+  transition:
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+
+.time-auction-btn.held {
+  transform: translateY(6px);
+  box-shadow: 0 2px 0 #4a0a17;
+  background: radial-gradient(circle at 40% 35%, #ff6a83, #e2264a 65%, #8d1029);
+}
+
+.time-auction-btn:disabled {
+  opacity: 0.4;
+}

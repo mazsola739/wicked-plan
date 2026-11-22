@@ -1,0 +1,52 @@
+.fb {
+  max-height: 48dvh;
+}
+
+.fb-post {
+  fill: var(--muted);
+}
+
+.fb-clue {
+  font-size: 0.55px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: var(--text);
+}
+
+.fb-clue.met {
+  fill: var(--ok);
+}
+
+.fb-clue.over {
+  fill: var(--bad);
+}
+
+.fb-fence {
+  stroke: var(--accent-2);
+  stroke-width: 0.12;
+  stroke-linecap: round;
+}
+
+.fb-cross {
+  stroke: var(--muted);
+  stroke-width: 0.04;
+}
+
+.fb-hit {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fb-hit:hover {
+    fill: rgb(212 166 55 / 0.12);
+  }
+}
+
+@media (min-width: 720px) {
+  .fb {
+    max-height: 66vh;
+  }
+}
