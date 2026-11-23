@@ -29,19 +29,34 @@ The earlier base-building mobile game was dropped on 2026-11-22.
   Difficulty keeps green / yellow / red.
 - **Type:** Cinzel (bundled, `@fontsource/cinzel`) for the title and headings; the system sans for
   everything else; tiny labels in letter-spaced capitals.
-- **Shapes:** long hexagonal buttons (pointed ends), thin divider lines with a small diamond in the
-  middle, thin geometric line art. Glow only on the emblem and focus/hover; `prefers-reduced-motion`
+- **Shapes:** long hexagonal buttons (pointed ends); filter chips, step badges and difficulty pills
+  are small hexagons too; thin divider lines with a small diamond in the middle, thin geometric line art. Glow only on the emblem and focus/hover; `prefers-reduced-motion`
   turns animation off.
 - **Inside the games** (decided 2026-11-23): the games share the page's world, not each its own.
   - **Named game colours** are neon on near-black, from one set of tokens: `--g-red`, `--g-orange`,
     `--g-yellow` (also gold), `--g-green`, `--g-cyan`, `--g-blue`, `--g-purple`, `--g-pink`,
-    `--g-white`, `--g-black`. A colour the rules name ("red") stays recognisably that colour.
+    `--g-white`, `--g-black`. A colour the rules name ("red") stays recognisably that colour, and a
+    thing that *is* a colour (a red card, a yellow stack, a green square) is **filled** with it
+    (softened a little toward the dark, e.g. `color-mix(in srgb, var(--g-red) 80%, #15121f)`), not
+    dark glass with a coloured edge. Dark glass is for neutral things: number cards, playing cards.
   - **Seats** use one order everywhere: `--seat-0` is you (cyan), then violet, pink, yellow, green,
     orange, blue, white (`--seat-1`…`--seat-7`).
   - **Surfaces:** no felt, wood, soil or sand; boards are `--board` (near-black) with thin silver
     `--board-line` lines. Cards and tiles are dark glass (`--glass`, edge `--glass-edge`) with light
     text and neon symbols, like the floating cards of the key art. Glow is soft and only on what
     matters (your pieces, a selection, a win).
+- **Broadcast feel** (decided 2026-11-23): the games feel like a televised mind-game show where an
+  unseen host watches and speaks to you over a live feed. Our own wording and look, no lines or
+  images from films.
+  - Opening a game switches it on like an old monitor (a short CRT flash, never blocking).
+  - How to play is a **transmission from the Observer**: the emblem on a scan-lined "monitor", a red
+    LIVE dot (it blinks a few times, then stays) and a channel tag (CH and the game's catalogue
+    number; nothing counts up, the game waits). The Goal line types itself out, the bullets follow;
+    a tap or any key shows everything at once.
+  - **The Observer watches**: small in the game bar (and large on the landing page); every 7–16 s its
+    signal glitches for a moment: one soft pulse and a cyan/violet split, under three flashes per
+    second (WCAG 2.3.1).
+  - With `prefers-reduced-motion` none of this moves: no flash, no typing, no glitches.
 - **Landing:** the emblem and the title on top, a short "How it works", then the catalogue with
   filters (type, difficulty, solo or with bots). No sign-in, lobby or leaderboard until rooms exist.
 

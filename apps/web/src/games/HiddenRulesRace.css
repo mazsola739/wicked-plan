@@ -11,8 +11,8 @@
   position: relative;
   aspect-ratio: 1;
   border-radius: 6px;
-  border: 1px solid color-mix(in srgb, var(--c) 75%, transparent);
-  background: color-mix(in srgb, var(--c) 32%, var(--board));
+  background: color-mix(in srgb, var(--c) 78%, #15121f);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -20,7 +20,7 @@
   gap: 1px;
 }
 
-/* Each colour sets --c: a square is the dark board tinted with it, a swatch is the colour itself. */
+/* Each colour sets --c: a square is the colour, softened a little toward the dark; a swatch is the colour itself. */
 .hrr-red {
   --c: var(--g-red);
 }
@@ -46,7 +46,7 @@
 }
 
 .hrr-sq.hrr-goal {
-  background: color-mix(in srgb, var(--silver) 16%, var(--board));
+  background: var(--g-white);
 }
 
 .hrr-star {
@@ -62,7 +62,8 @@
   aspect-ratio: 1;
   border-radius: 4px;
   border: 2px solid var(--panel);
-  color: #08080c;
+  background: var(--g-white);
+  color: #12111a;
   font-size: 0.7rem;
   font-weight: 800;
   display: flex;
@@ -71,6 +72,7 @@
 }
 
 .hrr-piece.me {
+  background: var(--seat-0);
   color: #06232b;
   border-color: var(--g-white);
   box-shadow: 0 0 12px color-mix(in srgb, var(--seat-0) 45%, transparent);

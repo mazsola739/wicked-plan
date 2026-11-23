@@ -9,29 +9,29 @@
   flex: none;
 }
 
-/* A pink neon line pig on the dark card. */
+/* A pink pig, filled pink (softened toward the dark) with a neon edge. */
 .piggy-bank-pig .body,
 .piggy-bank-pig .ear {
-  fill: color-mix(in srgb, var(--g-pink) 18%, var(--board));
+  fill: color-mix(in srgb, var(--g-pink) 80%, #15121f);
   stroke: var(--g-pink);
   stroke-width: 2.5;
 }
 
 .piggy-bank-pig .snout {
-  fill: color-mix(in srgb, var(--g-pink) 30%, var(--board));
+  fill: color-mix(in srgb, var(--g-pink) 70%, #15121f);
   stroke: var(--g-pink);
   stroke-width: 2.5;
 }
 
 .piggy-bank-pig .dark {
-  fill: var(--g-pink);
+  fill: #12111a;
 }
 
 .piggy-bank-pig .count {
   text-anchor: middle;
   font-size: 30px;
   font-weight: 800;
-  fill: var(--text);
+  fill: #12111a;
 }
 
 .piggy-bank-pig.open {

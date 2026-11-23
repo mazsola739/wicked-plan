@@ -320,8 +320,8 @@ h2 {
   gap: 8px;
 }
 
-/* A game card: a still preview of the game on top, coloured by difficulty
-   (green easy, yellow medium, red hard); the button covers the whole card. */
+/* A game card: a still preview of the game on top; the difficulty (green easy, yellow medium,
+   red hard) shows in its pill and the hover border; the button covers the whole card. */
 .game-card {
   --level: var(--warn);
   position: relative;
@@ -329,10 +329,12 @@ h2 {
   flex-direction: column;
   border-radius: 12px;
   border: 1px solid var(--line);
-  border-top: 3px solid var(--level);
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
   overflow: hidden;
-  transition: transform 0.06s;
+  transition:
+    transform 0.06s,
+    border-color 0.25s,
+    box-shadow 0.25s;
 }
 
 .game-card.easy {
@@ -396,16 +398,31 @@ h2 {
   gap: 8px;
 }
 
+/* The difficulty pill: a small hexagon, drawn like .chip (edge = background, fill = ::before). */
 .level {
+  position: relative;
+  isolation: isolate;
   flex: none;
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 2px 8px;
-  border-radius: 999px;
+  letter-spacing: 0.08em;
+  padding: 3px 13px;
   color: var(--level);
-  background: color-mix(in srgb, var(--level) 18%, transparent);
+  background: color-mix(in srgb, var(--level) 75%, transparent);
+  clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 7px 100%, 0 50%);
+  transition:
+    color 0.25s,
+    text-shadow 0.25s;
+}
+
+.level::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: color-mix(in srgb, var(--level) 16%, var(--panel));
+  clip-path: inherit;
 }
 
 .game-short {
@@ -788,8 +805,27 @@ h2 {
     filter: brightness(1.2);
   }
 
+  /* Hover lights the card up like a neon tube in its difficulty colour: it warms up slowly after a
+     short pause (so sweeping across cards does not flash them) and goes out faster. */
   .game-card:hover {
-    border-color: var(--level);
+    transition:
+      transform 0.06s,
+      border-color 0.5s ease-out 0.12s,
+      box-shadow 0.5s ease-out 0.12s;
+    border-color: color-mix(in srgb, var(--level) 85%, #ffffff);
+    box-shadow:
+      0 0 0 1px var(--level),
+      0 0 12px color-mix(in srgb, var(--level) 60%, transparent),
+      0 0 34px color-mix(in srgb, var(--level) 28%, transparent),
+      inset 0 0 22px color-mix(in srgb, var(--level) 14%, transparent);
+  }
+
+  .game-card:hover .level {
+    transition:
+      color 0.5s ease-out 0.12s,
+      text-shadow 0.5s ease-out 0.12s;
+    color: color-mix(in srgb, var(--level) 70%, #ffffff);
+    text-shadow: 0 0 8px var(--level);
   }
 
   .chip:hover:not([aria-pressed="true"]) {
@@ -1224,9 +1260,66 @@ a.btn {
   margin-top: 4px;
 }
 
+/* The game bar: back on the left, the watching Observer in the middle, How to play on the right. */
 .game-nav {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-nav > :first-child {
+  justify-self: start;
+}
+
+.game-nav > :last-child {
+  justify-self: end;
+}
+
+.watcher {
+  width: 46px;
+}
+
+/* The game bar keeps one height (touch-size buttons), whether the watcher shows or not. */
+.game-nav .btn {
+  min-height: var(--touch);
+}
+
+/* Opening a game switches it on like an old monitor: a bright line that opens into the picture. */
+.tv-on {
+  animation: tv-on 0.55s ease-out;
+  transform-origin: 50% 40%;
+}
+
+@keyframes tv-on {
+  0% {
+    transform: scale(0.6, 0.004);
+    filter: brightness(6);
+    opacity: 0.9;
+  }
+  35% {
+    transform: scale(1, 0.004);
+    filter: brightness(4);
+  }
+  65% {
+    transform: scale(1, 1.04);
+    filter: brightness(1.6) contrast(1.2);
+  }
+  100% {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+}
+
+/* Visible only to screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .howto {
@@ -1247,6 +1340,188 @@ a.btn {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* How to play as a transmission from the Observer (docs/design.md, Broadcast feel). */
+.transmission {
+  border-color: color-mix(in srgb, var(--violet) 35%, var(--line));
+}
+
+.tx-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tx-bar .label {
+  flex: 1;
+}
+
+.tx-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--g-red);
+}
+
+.tx-live::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--g-red);
+  box-shadow: 0 0 4px var(--g-red);
+  animation: tx-blink 1.2s steps(1, end) 4;
+}
+
+.tx-channel {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+/* The little monitor the Observer speaks from: scan lines, a vignette and a slow rolling band. */
+.tx-screen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 104px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-edge);
+  background: radial-gradient(ellipse at center, #120f1d, #050508 75%);
+  overflow: hidden;
+}
+
+/* Above the emblem, so the scan lines run over the picture too. */
+.tx-screen::before,
+.tx-screen::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tx-screen::before {
+  background:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.38) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.7));
+  animation: tx-flicker 3.4s 2;
+}
+
+.tx-screen::after {
+  height: 30%;
+  background: linear-gradient(180deg, transparent, rgb(255 255 255 / 0.05), transparent);
+  animation: tx-roll 4.5s linear 2;
+}
+
+.tx-emblem {
+  width: 92px;
+}
+
+@media (min-width: 720px) {
+  .tx-screen {
+    height: 170px;
+  }
+
+  .tx-emblem {
+    width: 150px;
+  }
+}
+
+.tx-goal {
+  font-size: 1.05rem;
+}
+
+/* The not-yet-typed rest of the Goal line keeps its place, so the text below does not jump. */
+.tx-pending {
+  visibility: hidden;
+}
+
+.tx-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 2px;
+  margin-right: -0.55em;
+  vertical-align: text-bottom;
+  background: var(--cyan);
+  animation: tx-blink 0.9s steps(1, end) infinite;
+}
+
+.tx-rest {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tx-in {
+  animation: tx-in 0.35s ease-out both;
+}
+
+.tx-rest.waiting .tx-in {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes tx-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tx-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes tx-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.75;
+  }
+  52% {
+    opacity: 1;
+  }
+}
+
+@keyframes tx-roll {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(340%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tv-on,
+  .tx-in,
+  .tx-caret,
+  .tx-live::before,
+  .tx-screen::before,
+  .tx-screen::after {
+    animation: none;
+  }
 }
 
 .result {

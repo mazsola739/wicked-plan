@@ -18,7 +18,7 @@
   border-radius: 7px;
 }
 
-/* The secret die is tinted blue, the blind die pink: glass with a coloured wash and edge. */
+/* The secret die is blue, the blind die pink: filled with the colour, softened a little toward the dark. */
 .dice-prediction-die.secret {
   --tone: var(--g-blue);
 }
@@ -29,9 +29,8 @@
 
 .dice-prediction-die.secret,
 .dice-prediction-die.blind {
-  background:
-    linear-gradient(color-mix(in srgb, var(--tone) 18%, transparent), color-mix(in srgb, var(--tone) 18%, transparent)), var(--glass);
-  border-color: color-mix(in srgb, var(--tone) 70%, transparent);
+  background: color-mix(in srgb, var(--tone) 80%, #15121f);
+  border-color: rgb(255 255 255 / 25%);
 }
 
 .dice-prediction-die i {
@@ -52,6 +51,12 @@
 
 .dice-prediction-die.small b {
   font-size: 0.95rem;
+}
+
+.dice-prediction-die.secret b,
+.dice-prediction-die.blind b {
+  color: #fff;
+  text-shadow: 0 1px 2px #000;
 }
 
 .dice-prediction-dice {

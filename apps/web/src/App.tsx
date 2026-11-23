@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Crown, Emblem } from './Emblem';
 import { nameOf } from './games/common';
 import { SCREENS } from './games/registry';
@@ -27,7 +27,7 @@ export function App() {
       {!play.ready ? (
         <p className="muted center">Loading…</p>
       ) : current && info ? (
-        <GameView info={info} view={current.view} results={current.results} />
+        <GameView info={info} channel={play.games.indexOf(info) + 1} view={current.view} results={current.results} />
       ) : (
         <Picker games={play.games} />
       )}
@@ -81,7 +81,7 @@ function Picker({ games }: { games: GameInfo[] }) {
       </nav>
 
       <header className="hero" id="top">
-        <Emblem className="hero-emblem" />
+        <Emblem className="hero-emblem" watching />
         <div className="hero-text">
           <p className="label tagline">A digital arena of strategy</p>
           <h1 className="title">Wicked Plan</h1>
@@ -240,7 +240,7 @@ function markSeen(id: string): void {
   } catch {}
 }
 
-function GameView({ info, view, results }: { info: GameInfo; view: unknown; results: PlayerResult[] | null }) {
+function GameView({ info, channel, view, results }: { info: GameInfo; channel: number; view: unknown; results: PlayerResult[] | null }) {
   const Screen = SCREENS[info.id];
   const [rules, setRules] = useState(() => !seen(info.id));
   useEffect(() => markSeen(info.id), [info.id]);
@@ -248,20 +248,36 @@ function GameView({ info, view, results }: { info: GameInfo; view: unknown; resu
     setPaused(rules);
     return () => setPaused(false);
   }, [rules]);
+  // Each switch between the rules and the board starts at the top, with the game bar in view.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs on purpose whenever `rules` flips
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [rules]);
+  // Closing the rules puts focus back on the button that opens them.
+  const howTo = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(rules);
+  useEffect(() => {
+    if (wasOpen.current && !rules) howTo.current?.focus({ preventScroll: true });
+    wasOpen.current = rules;
+  }, [rules]);
   return (
-    <div className="screen">
+    <div className="screen tv-on">
       <nav className="game-nav">
         <button type="button" className="btn small ghost" onClick={stop}>
           ← Games
         </button>
-        {!rules && (
-          <button type="button" className="btn small ghost" onClick={() => setRules(true)}>
+        {/* While you play, the Observer watches from the bar (the transmission shows it otherwise). */}
+        {rules ? <span /> : <Emblem className="watcher" watching decorative />}
+        {rules ? (
+          <span />
+        ) : (
+          <button ref={howTo} type="button" className="btn small ghost" onClick={() => setRules(true)}>
             How to play
           </button>
         )}
       </nav>
       {rules ? (
-        <HowToPlay id={info.id} name={info.name} onClose={() => setRules(false)} />
+        <HowToPlay key={info.id} id={info.id} name={info.name} channel={channel} onClose={() => setRules(false)} />
       ) : (
         <Board info={info} view={view} results={results} Screen={Screen} />
       )}

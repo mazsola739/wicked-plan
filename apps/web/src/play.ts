@@ -47,8 +47,11 @@ export function start(gameId: string): void {
   let last = performance.now();
   timer = setInterval(() => {
     const now = performance.now();
-    if (!paused) game?.tick(Math.round(now - last));
+    const ms = Math.round(now - last);
     last = now;
+    // While paused no time passes, so the view cannot change: skip the redraw too.
+    if (paused) return;
+    game?.tick(ms);
     refresh();
   }, TICK_MS);
 }

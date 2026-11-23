@@ -12,3 +12,103 @@
   display: inline-block;
   overflow: visible;
 }
+
+/* The watching Observer: the image plus a cyan and a violet ghost copy that only show during a glitch. */
+.emblem-watch {
+  position: relative;
+  display: block;
+}
+
+.emblem-watch .emblem {
+  width: 100%;
+}
+
+.em-ghost {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.em-cyan {
+  filter: sepia(1) saturate(6) hue-rotate(140deg) brightness(1.2);
+}
+
+.em-violet {
+  filter: sepia(1) saturate(6) hue-rotate(225deg) brightness(1.1);
+}
+
+/* One soft pulse and three band jumps in 0.7 s: well under three flashes per second (WCAG 2.3.1),
+   also for the large emblem on the landing page. */
+.emblem-watch.glitch > .emblem:first-child {
+  animation: em-flash 0.7s ease-out;
+}
+
+.emblem-watch.glitch .em-cyan {
+  animation: em-split-cyan 0.7s steps(1, end);
+}
+
+.emblem-watch.glitch .em-violet {
+  animation: em-split-violet 0.7s steps(1, end);
+}
+
+@keyframes em-flash {
+  0% {
+    filter: none;
+  }
+  12% {
+    filter: brightness(1.5);
+    transform: translateX(2px);
+  }
+  40% {
+    filter: none;
+    transform: none;
+  }
+}
+
+@keyframes em-split-cyan {
+  0% {
+    opacity: 0.6;
+    transform: translateX(-4%);
+    clip-path: inset(22% 0 52% 0);
+  }
+  33% {
+    transform: translateX(3%);
+    clip-path: inset(58% 0 18% 0);
+  }
+  66% {
+    opacity: 0.4;
+    transform: translateX(-2%);
+    clip-path: inset(36% 0 44% 0);
+  }
+  80% {
+    opacity: 0;
+  }
+}
+
+@keyframes em-split-violet {
+  0% {
+    opacity: 0.6;
+    transform: translateX(4%);
+    clip-path: inset(48% 0 30% 0);
+  }
+  33% {
+    transform: translateX(-3%);
+    clip-path: inset(14% 0 64% 0);
+  }
+  66% {
+    opacity: 0.4;
+    transform: translateX(2%);
+    clip-path: inset(62% 0 20% 0);
+  }
+  80% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emblem-watch.glitch > .emblem:first-child,
+  .emblem-watch.glitch .em-ghost {
+    animation: none;
+  }
+}

@@ -113,7 +113,7 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
                 type="button"
                 aria-label={`Square ${x + 1}, ${y + 1}`}
                 className={`lg-sq${c === -2 ? ' rock' : ''}${g ? (fits ? ' ghost' : ' ghost bad') : ''}${lastSet.has(i) ? ' last' : ''}`}
-                style={c >= 0 ? { background: `color-mix(in srgb, ${GRASS[c]} 40%, var(--board))`, borderColor: GRASS[c] } : undefined}
+                style={c >= 0 ? { background: `color-mix(in srgb, ${GRASS[c]} 80%, #15121f)`, borderColor: GRASS[c] } : undefined}
                 disabled={!mine}
                 onClick={() => tap(x, y)}
               />

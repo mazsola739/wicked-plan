@@ -70,9 +70,17 @@
   justify-content: center;
   font-weight: 800;
   font-size: 1.3rem;
-  color: var(--c);
-  border: 2px solid var(--c);
-  background: var(--glass);
+  color: #fff;
+  text-shadow: 0 1px 2px #000;
+  border: 2px solid rgb(255 255 255 / 25%);
+  background: color-mix(in srgb, var(--c) 80%, #15121f);
+}
+
+/* Light fills (green, yellow) take dark text. */
+.ccb-card.ccb-c2,
+.ccb-card.ccb-c3 {
+  color: #12111a;
+  text-shadow: none;
 }
 
 .ccb-hand.small {
@@ -85,7 +93,6 @@
   border-radius: 4px;
   border-width: 1px;
   border-color: var(--glass-edge);
-  background: var(--c);
 }
 
 .ccb-c0 {

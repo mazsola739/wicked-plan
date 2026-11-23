@@ -15,24 +15,24 @@
   cursor: pointer;
 }
 
-/* Owned squares: a tint of the owner's seat colour with a neon edge. */
+/* Owned squares: filled with the owner's seat colour, softened toward the dark, with a neon edge. */
 .pt-cell.s0 {
-  fill: color-mix(in srgb, var(--seat-0) 40%, var(--board));
+  fill: color-mix(in srgb, var(--seat-0) 80%, #15121f);
   stroke: var(--seat-0);
 }
 
 .pt-cell.s1 {
-  fill: color-mix(in srgb, var(--seat-1) 40%, var(--board));
+  fill: color-mix(in srgb, var(--seat-1) 80%, #15121f);
   stroke: var(--seat-1);
 }
 
 .pt-cell.s2 {
-  fill: color-mix(in srgb, var(--seat-2) 40%, var(--board));
+  fill: color-mix(in srgb, var(--seat-2) 80%, #15121f);
   stroke: var(--seat-2);
 }
 
 .pt-cell.s3 {
-  fill: color-mix(in srgb, var(--seat-3) 40%, var(--board));
+  fill: color-mix(in srgb, var(--seat-3) 80%, #15121f);
   stroke: var(--seat-3);
 }
 

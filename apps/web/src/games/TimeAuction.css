@@ -20,13 +20,13 @@
   gap: 4px;
 }
 
-/* A gold token: a neon gold ring on dark glass. */
+/* A gold token: filled gold, a brighter gold rim. */
 .time-auction-tokens i {
   width: 18px;
   height: 18px;
   border-radius: 50%;
   border: 2px solid var(--g-yellow);
-  background: color-mix(in srgb, var(--g-yellow) 28%, var(--panel));
+  background: color-mix(in srgb, var(--g-yellow) 80%, #15121f);
 }
 
 .time-auction-log {
