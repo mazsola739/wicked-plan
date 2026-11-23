@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const N: usize = 7;
@@ -322,7 +322,14 @@ pub struct WallState {
     turn_no: u32,
     time_left_ms: i64,
     over: bool,
+    /// Replay moments: one wall sealing off 15 squares or more; a rival shut in with 4 or fewer.
+    pub moments: Moments,
 }
+
+/// A wall that adds at least this much secured area in one turn is a replay moment.
+const BIG_SEAL: usize = 15;
+/// A rival sealed in with at most this much area is a replay moment.
+const SMALL_POCKET: usize = 4;
 
 impl WallState {
     fn seat(&self, player: &str) -> Option<usize> {
@@ -406,6 +413,7 @@ impl Game for WallTerritory {
             id: "wall-territory",
             kind: "prison",
             difficulty: "hard",
+            tags: &["board"],
             min_players: 2,
             max_players: 3,
             name: "Wall Territory",
@@ -430,6 +438,7 @@ impl Game for WallTerritory {
             turn_no: 1,
             time_left_ms: TURN_MS,
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -459,8 +468,20 @@ impl Game for WallTerritory {
                     return Err("No wall can go on that side".into());
                 }
                 let t = Turn { piece, to, wall };
+                let before = s.board.areas();
                 play(&mut s.board, seat, t);
                 s.last = Some((seat, t));
+                // Replay moments (the board is public): a big area sealed off for the mover, or a
+                // rival shut in with a small pocket.
+                let after = s.board.areas();
+                let sealed = s.board.sealed();
+                if after[seat] >= before[seat] + BIG_SEAL {
+                    s.moments.push(&s.players[seat].clone(), format!("Wall seals off {} squares", after[seat] - before[seat]));
+                }
+                for k in (0..s.players.len()).filter(|&k| k != seat && !s.sealed[k] && sealed[k] && after[k] <= SMALL_POCKET) {
+                    let squares = if after[k] == 1 { "1 square".to_string() } else { format!("{} squares", after[k]) };
+                    s.moments.push(&s.players[seat].clone(), format!("{{{}}} shut in with only {squares}", s.players[k]));
+                }
             }
         }
         s.end_turn();
@@ -535,6 +556,10 @@ impl Game for WallTerritory {
             Some(t) => WallMove::Turn { piece: t.piece, x: t.to % N, y: t.to / N, wall: t.wall },
             None => WallMove::Pass,
         }
+    }
+
+    fn moments(s: &WallState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -640,5 +665,42 @@ mod tests {
     #[test]
     fn bot_games_for_three() {
         bot_games_with::<WallTerritory>(300, 3, 1500);
+    }
+
+    #[test]
+    fn a_big_seal_is_a_replay_moment() {
+        // A wall between columns 2 and 3 with one gap in row 3; a's pieces are on the left.
+        let mut s = two();
+        s.board.pieces = vec![[3 * N + 1, 0], [6, 48]];
+        for y in (0..N).filter(|&y| y != 3) {
+            s.board.east[y * N + 2] = true;
+        }
+        WallTerritory::apply_move(&mut s, "a", turn(0, 2, 3, Dir::E)).unwrap();
+        let m = WallTerritory::moments(&s, "b");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("a", "Wall seals off 21 squares"));
+    }
+
+    #[test]
+    fn shutting_a_rival_in_a_small_pocket_is_a_replay_moment() {
+        let ids: Vec<String> = (1..=3).map(|i| format!("p{i}")).collect();
+        let mut s = WallTerritory::setup(&ids, 1).unwrap();
+        // p3 sits in the top-left corner, walled on two sides; p1 closes the third.
+        s.board.pieces = vec![[2 * N + 1, 30], [48, 47], [0, 1]];
+        s.board.east[1] = true;
+        s.board.south[0] = true;
+        s.turn = 0;
+        WallTerritory::apply_move(&mut s, "p1", turn(0, 1, 1, Dir::N)).unwrap();
+        let m = WallTerritory::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "{p3} shut in with only 2 squares"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<WallTerritory>(300, 3, 1_500);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

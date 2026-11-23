@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const STOCKS: usize = 7;
@@ -130,6 +130,21 @@ pub fn apply_pct(price: i64, pct: i64) -> i64 {
     ((price * (100 + pct) + 50) / 100).max(FLOOR)
 }
 
+const MILLION: i64 = 1_000_000;
+
+/// 1376000 → "1,376,000".
+fn money(v: i64) -> String {
+    let digits = v.to_string();
+    let mut out = String::new();
+    for (i, c) in digits.chars().enumerate() {
+        if i > 0 && (digits.len() - i).is_multiple_of(3) {
+            out.push(',');
+        }
+        out.push(c);
+    }
+    out
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Phase {
     Trade,
@@ -162,6 +177,9 @@ pub struct MarketState {
     pub time_left_ms: i64,
     pub log: Vec<String>,
     pub rng: Rng,
+    /// Replay moments: a portfolio up 30% in one round (only its owner sees it),
+    /// the richest worth at the close when it is a million or more.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -257,7 +275,16 @@ impl MarketState {
         }
         let old = *self.prices.last().expect("prices");
         let new: [i64; STOCKS] = std::array::from_fn(|k| apply_pct(old[k], pcts[k]));
+        let before: Vec<i64> = (0..n).map(|i| self.worth(i)).collect();
         self.prices.push(new);
+        // A replay moment only its owner sees (holdings and cash are secret): worth up 30% in one round.
+        for (i, &was) in before.iter().enumerate() {
+            let gain = (self.worth(i) - was) * 100 / was.max(1);
+            if gain >= 30 {
+                let id = self.traders[i].id.clone();
+                self.moments.push_for(&id, format!("Portfolio up {gain}% in one round"), &[&id]);
+            }
+        }
         self.net.push(self.current_net);
         self.holders.push(held);
         self.current_net = [0; STOCKS];
@@ -280,6 +307,13 @@ impl MarketState {
             self.phase = Phase::Reveal;
             self.time_left_ms = REVEAL_MS;
             self.say("The market is closed. All rules revealed.".into());
+            // A public replay moment (every worth is shown at the close): the richest player is a millionaire.
+            let top = (0..n).rev().max_by_key(|&i| self.worth(i)).unwrap_or(0);
+            let worth = self.worth(top);
+            if worth >= MILLION {
+                let id = self.traders[top].id.clone();
+                self.moments.push(&id, format!("A millionaire at the close: {}", money(worth)));
+            }
         } else {
             self.round += 1;
             self.time_left_ms = TRADE_MS;
@@ -368,6 +402,7 @@ impl Game for Rules {
             id: "mystery-stock-market",
             kind: "main",
             difficulty: "hard",
+            tags: &["logic", "numbers"],
             min_players: 3,
             max_players: 8,
             name: "Mystery Stock Market",
@@ -423,6 +458,7 @@ impl Game for Rules {
             time_left_ms: TRADE_MS,
             log: vec!["The market opens. Every stock costs 10,000.".into()],
             rng,
+            moments: Moments::default(),
         })
     }
 
@@ -530,6 +566,10 @@ impl Game for Rules {
             return Vec::new();
         }
         s.traders.iter().filter(|t| !t.done).map(|t| t.id.clone()).collect()
+    }
+
+    fn moments(s: &MarketState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &MarketState, player: &str, _seed: u64) -> MarketMove {
@@ -656,5 +696,46 @@ mod tests {
     fn bot_games() {
         bot_games_with::<Rules>(1000, 4, 6000);
         bot_games_with::<Rules>(200, 3, 6000);
+    }
+
+    #[test]
+    fn a_big_round_is_a_moment_only_its_owner_sees() {
+        let mut s = Rules::setup(&players(3), 2).unwrap();
+        s.rules = [Rule::Steady, Rule::Seesaw, Rule::Crowd, Rule::Shadow(1), Rule::Mirror(0), Rule::Lonely, Rule::Calendar];
+        // All cash into Crowd: 10 shares bought → +40%.
+        Rules::apply_move(&mut s, "p1", MarketMove::Trade { stock: 2, qty: 10 }).unwrap();
+        all_done(&mut s);
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Portfolio up 40% in one round"));
+        assert!(Rules::moments(&s, "p2").is_empty(), "the others must not learn p1's holdings");
+    }
+
+    #[test]
+    fn a_millionaire_at_the_close_is_a_public_moment() {
+        let mut s = Rules::setup(&players(3), 3).unwrap();
+        s.traders[1].cash = 1_376_000;
+        for _ in 0..ROUNDS {
+            assert!(Rules::moments(&s, "p1").is_empty());
+            all_done(&mut s);
+        }
+        assert_eq!(s.phase, Phase::Reveal);
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "A millionaire at the close: 1,376,000"));
+        // Nobody near a million: no moment.
+        let mut s = Rules::setup(&players(3), 3).unwrap();
+        for _ in 0..ROUNDS {
+            all_done(&mut s);
+        }
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 6000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 8, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const TRACK: i64 = 18;
@@ -128,6 +128,8 @@ pub struct RaceState {
     pub rng: Rng,
     pub last_roll: Option<(usize, Face)>,
     pub log: Vec<String>,
+    /// Replay moments: a rule that pushes a racer off the goal, swaps 6+ squares or wins the race.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -314,6 +316,11 @@ impl RaceState {
             }
         }
         if self.racers.iter().any(|r| r.pos >= TRACK) {
+            // Replay moment: a rule that carries its owner onto the goal on someone else's roll.
+            if let Some(w) = self.racers.iter().position(|r| r.pos >= TRACK).filter(|&w| w != i) {
+                let roller = self.name(i);
+                self.moments.push(&self.name(w), format!("Reaches the goal on {{{roller}}}'s roll"));
+            }
             self.phase = Phase::Over;
             self.time_left_ms = 0;
             return;
@@ -331,6 +338,7 @@ impl RaceState {
             format!("{}'s rule fires again.", self.name(owner))
         };
         self.say(line);
+        let (mine, theirs) = (self.racers[owner].pos, self.racers[them].pos);
         match effect {
             Effect::MeForward2 => self.advance(owner, 2),
             Effect::ThemBack2 => self.racers[them].pos = (self.racers[them].pos - 2).max(0),
@@ -343,6 +351,14 @@ impl RaceState {
                 }
             }
             Effect::MeEscapeCard => self.racers[owner].escape = true,
+        }
+        // Replay moments (a rule that fires is shown to everyone): a rule pushing a racer back off
+        // the goal, or a swap that jumps 6 squares or more (one onto the goal is a win, see `roll`).
+        let (by, target) = (self.name(owner), self.name(them));
+        if effect == Effect::ThemBack2 && theirs >= TRACK {
+            self.moments.push(&by, format!("Rule pushes {{{target}}} back off the goal"));
+        } else if effect == Effect::SwapIfAhead && theirs >= mine + 6 && theirs < TRACK {
+            self.moments.push(&by, format!("Swap with {{{target}}}: from {mine} to {theirs}"));
         }
     }
 
@@ -420,6 +436,7 @@ impl Game for Rules {
             id: "rules-race",
             kind: "main",
             difficulty: "medium",
+            tags: &["dice", "secret-role"],
             min_players: 4,
             max_players: 8,
             name: "Rules Race",
@@ -445,6 +462,7 @@ impl Game for Rules {
             rng: Rng::new(seed),
             last_roll: None,
             log: vec!["Write your secret rule.".into()],
+            moments: Moments::default(),
         })
     }
 
@@ -516,10 +534,11 @@ impl Game for Rules {
                 pos: r.pos,
                 in_prison: r.prison.is_some(),
                 escape: r.escape,
-                rule: r
-                    .rule
-                    .filter(|_| r.revealed || r.id == player || s.phase == Phase::Over)
-                    .map(|(c, e)| RuleView { condition: c, effect: e, text: rule_text(c, e) }),
+                rule: r.rule.filter(|_| r.revealed || r.id == player || s.phase == Phase::Over).map(|(c, e)| RuleView {
+                    condition: c,
+                    effect: e,
+                    text: rule_text(c, e),
+                }),
                 written: r.rule.is_some(),
                 voted: r.vote.is_some(),
             })
@@ -568,6 +587,10 @@ impl Game for Rules {
             Phase::Vote => s.racers.iter().filter(|r| r.vote.is_none()).map(|r| r.id.clone()).collect(),
             Phase::Over => Vec::new(),
         }
+    }
+
+    fn moments(s: &RaceState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &RaceState, player: &str, seed: u64) -> RaceMove {
@@ -696,5 +719,40 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<Rules>(1000, 4, 3000);
         bot_games_with::<Rules>(200, 8, 6000);
+    }
+
+    #[test]
+    fn rules_that_stop_a_finish_swap_far_or_win_are_replay_moments() {
+        let mut s = Rules::setup(&players(4), 7).unwrap();
+        write_all(&mut s, Cond::RollsPrison, Effect::MeEscapeCard);
+        s.racers[0].pos = TRACK;
+        s.fire(1, 0, Effect::ThemBack2);
+        s.racers[0].pos = 12;
+        s.racers[2].pos = 3;
+        s.fire(2, 0, Effect::SwapIfAhead);
+        // A short swap is no moment.
+        s.racers[3].pos = 10;
+        s.fire(3, 0, Effect::SwapIfAhead);
+        let m = Rules::moments(&s, "p4");
+        let texts: Vec<(&str, &str)> = m.iter().map(|m| (m.by.as_str(), m.text.as_str())).collect();
+        assert_eq!(texts, vec![("p2", "Rule pushes {p1} back off the goal"), ("p3", "Swap with {p1}: from 3 to 12")]);
+        // p1 rolls a 1 and p2's rule carries p2 onto the goal.
+        let mut s = Rules::setup(&players(4), 7).unwrap();
+        write_all(&mut s, Cond::RollsPrison, Effect::MeEscapeCard);
+        s.racers[1].rule = Some((Cond::RollsOne, Effect::MeForward2));
+        s.racers[1].pos = TRACK - 2;
+        s.rng = Rng::new((0..1000).find(|&k| Rng::new(k).index(FACES.len()) == 0).unwrap());
+        Rules::apply_move(&mut s, "p1", RaceMove::Roll).unwrap();
+        assert!(Rules::is_over(&s));
+        let m = Rules::moments(&s, "p1");
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Reaches the goal on {p1}'s roll"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        // 15 rounds of four rolls: a long game may hold a few more.
+        assert!(stats.most <= 5, "too many in one game: {stats:?}");
     }
 }

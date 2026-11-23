@@ -4,10 +4,19 @@ export interface GameInfo {
   id: string;
   kind: string;
   difficulty: 'easy' | 'medium' | 'hard';
+  /** 1-3 categories (docs/games.md, Categories). */
+  tags: string[];
   minPlayers: number;
   maxPlayers: number;
   name: string;
   short: string;
+}
+
+/** A big moment worth a replay (crates/rules game.rs `Moment`); `{seat-id}` in the text is a name. */
+export interface Moment {
+  seq: number;
+  by: string;
+  text: string;
 }
 
 export interface PlayerResult {

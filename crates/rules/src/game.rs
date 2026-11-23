@@ -20,6 +20,10 @@ pub struct PlayerResult {
     pub points: i64,
 }
 
+/// The game categories (docs/games.md, Categories).
+pub const CATEGORIES: [&str; 12] =
+    ["cards", "bluff", "secret-role", "bidding", "memory", "logic", "numbers", "board", "dice", "words", "speed", "alliance"];
+
 /// Catalogue entry the game picker shows (docs/games.md).
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,6 +33,8 @@ pub struct GameInfo {
     pub kind: &'static str,
     /// easy | medium | hard (docs/games.md); the picker colours the card by it.
     pub difficulty: &'static str,
+    /// 1-3 categories from `CATEGORIES` (docs/games.md, Categories); the picker filters by them.
+    pub tags: &'static [&'static str],
     pub min_players: u32,
     pub max_players: u32,
     pub name: &'static str,
@@ -40,6 +46,62 @@ impl GameInfo {
     /// when the game allows more, never above the maximum.
     pub fn seats(&self) -> u32 {
         self.min_players.max(4.min(self.max_players))
+    }
+}
+
+/// A big moment worth a replay (docs/design.md, Broadcast feel), as one seat may see it.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct Moment {
+    /// 1, 2, 3… among the moments this seat sees (so a hidden one leaves no gap): the page
+    /// replays each number once.
+    pub seq: u32,
+    /// The seat whose move it was ("you", "bot-1"…); the page shows its name above the text.
+    pub by: String,
+    /// One short line on what happened, without the actor as subject, e.g.
+    /// "Lowest unique 2 takes the pot (+23)" or "{bot-2}'s straight sniped (+12)".
+    /// `{seat-id}` stands for that seat's name.
+    pub text: String,
+}
+
+/// The big moments of a game, kept in its `State`. Each is public or only for some seats,
+/// so a replay never shows a secret.
+#[derive(Clone, Debug, Default)]
+pub struct Moments {
+    list: Vec<(Moment, Option<Vec<String>>)>,
+}
+
+impl Moments {
+    /// A moment every seat may see.
+    pub fn push(&mut self, by: &str, text: impl Into<String>) {
+        self.add(by, text.into(), None);
+    }
+
+    /// A moment only `seats` may see (for example the mover and the seat it hit).
+    pub fn push_for(&mut self, by: &str, text: impl Into<String>, seats: &[&str]) {
+        self.add(by, text.into(), Some(seats.iter().map(|s| (*s).to_string()).collect()));
+    }
+
+    fn add(&mut self, by: &str, text: String, seats: Option<Vec<String>>) {
+        self.list.push((Moment { seq: 0, by: by.to_string(), text }, seats));
+    }
+
+    /// The moments `seat` may see, oldest first, numbered 1, 2, 3… for that seat.
+    pub fn for_seat(&self, seat: &str) -> Vec<Moment> {
+        self.list
+            .iter()
+            .filter(|(_, seats)| seats.as_ref().is_none_or(|s| s.iter().any(|x| x == seat)))
+            .zip(1..)
+            .map(|((m, _), seq)| Moment { seq, ..m.clone() })
+            .collect()
+    }
+
+    /// Every moment, for tests.
+    pub fn len(&self) -> usize {
+        self.list.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.list.is_empty()
     }
 }
 
@@ -65,6 +127,11 @@ pub trait Game {
     }
     /// For bots and the "1,000 bot games" tests. Should be a sensible move.
     fn bot_move(state: &Self::State, player: &str, seed: u64) -> Self::Move;
+    /// The big moments `player` may see, oldest first (keep a `Moments` in the state).
+    /// The page replays each new one once. Default: none.
+    fn moments(_state: &Self::State, _player: &str) -> Vec<Moment> {
+        Vec::new()
+    }
 }
 
 /// A running game behind JSON, so the page can hold any game the same way.
@@ -78,6 +145,8 @@ pub trait Session: Send {
     fn to_move(&self) -> Vec<String>;
     /// Lets `player` make its bot move.
     fn bot_act(&mut self, player: &str, seed: u64) -> Result<(), String>;
+    /// The big moments `player` may see, oldest first.
+    fn moments(&self, player: &str) -> Vec<Moment>;
 }
 
 pub struct Typed<G: Game> {
@@ -110,6 +179,9 @@ impl<G: Game + Send + 'static> Session for Typed<G> {
     fn bot_act(&mut self, player: &str, seed: u64) -> Result<(), String> {
         let mv = G::bot_move(&self.state, player, seed);
         G::apply_move(&mut self.state, player, mv)
+    }
+    fn moments(&self, player: &str) -> Vec<Moment> {
+        G::moments(&self.state, player)
     }
 }
 
@@ -175,6 +247,9 @@ impl Session for WithBots {
     fn bot_act(&mut self, player: &str, seed: u64) -> Result<(), String> {
         self.inner.bot_act(player, seed)
     }
+    fn moments(&self, player: &str) -> Vec<Moment> {
+        self.inner.moments(player)
+    }
 }
 
 /// Points for a correct timed answer: 100, plus up to 100 for speed.
@@ -233,7 +308,72 @@ pub mod testing {
             for id in &ids {
                 // Views must serialize for every seat, also after the end.
                 assert!(serde_json::to_value(G::view_for(&s, id)).is_ok());
+                // Replay moments: numbered in order, short, never empty.
+                let moments = G::moments(&s, id);
+                assert!(moments.windows(2).all(|w| w[0].seq < w[1].seq), "moment numbers go up");
+                for m in &moments {
+                    assert!(!m.text.trim().is_empty() && m.text.chars().count() <= 80, "moment text: {:?}", m.text);
+                    assert!(ids.contains(&m.by), "moment by an unknown seat: {}", m.by);
+                }
             }
         }
+    }
+
+    /// How often bot games make replay moments that seat "p1" sees.
+    #[derive(Debug)]
+    pub struct MomentStats {
+        pub games: u64,
+        /// Games with at least one moment.
+        pub with_any: u64,
+        pub total: usize,
+        /// The most moments in one game.
+        pub most: usize,
+    }
+
+    /// Plays `games` bot games like `bot_games_with` and counts the moments "p1" may see.
+    pub fn moment_stats<G: Game>(games: u64, players: usize, max_steps: usize) -> MomentStats {
+        let ids: Vec<String> = (1..=players).map(|i| format!("p{i}")).collect();
+        let mut stats = MomentStats { games, with_any: 0, total: 0, most: 0 };
+        for seed in 1..=games {
+            let mut rng = Rng::new(seed * 104_729);
+            let mut s = G::setup(&ids, seed).expect("setup");
+            let mut steps = 0;
+            while !G::is_over(&s) && steps < max_steps {
+                let waiting = G::to_move(&s);
+                let solo_turn = players == 1 && rng.next_f64() < 0.7;
+                if !waiting.is_empty() && rng.next_f64() < 0.85 || solo_turn {
+                    let p = if waiting.is_empty() { ids[0].clone() } else { rng.pick(&waiting).clone() };
+                    let mv = G::bot_move(&s, &p, rng.int(0, 1_000_000_000) as u64);
+                    let _ = G::apply_move(&mut s, &p, mv);
+                } else {
+                    G::tick(&mut s, rng.int(200, 30_000) as u64);
+                }
+                steps += 1;
+            }
+            let n = G::moments(&s, &ids[0]).len();
+            stats.with_any += u64::from(n > 0);
+            stats.total += n;
+            stats.most = stats.most.max(n);
+        }
+        stats
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Moments;
+
+    #[test]
+    fn moments_for_some_seats_stay_hidden_from_the_others() {
+        let mut m = Moments::default();
+        m.push("p1", "Lowest unique 2 takes the pot (+23)");
+        m.push_for("p2", "{p1}'s straight sniped (+12)", &["p1", "p2"]);
+        m.push("p3", "Lead stolen in the very last round");
+        assert_eq!(m.for_seat("p1").len(), 3);
+        assert_eq!(m.for_seat("p3").len(), 2);
+        assert_eq!(m.for_seat("p2")[1].seq, 2);
+        // The hidden moment leaves no gap in p3's numbers.
+        let seqs: Vec<u32> = m.for_seat("p3").iter().map(|x| x.seq).collect();
+        assert_eq!(seqs, [1, 2]);
     }
 }

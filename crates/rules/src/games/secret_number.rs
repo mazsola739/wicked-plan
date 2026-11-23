@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 5;
@@ -95,6 +95,8 @@ pub struct SecretState {
     pub log: Vec<String>,
     pub notes: Vec<Vec<String>>,
     pub over: bool,
+    /// Replay moments: a number cracked in round 1 or 2; a long shot (only the guesser sees it).
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -177,6 +179,19 @@ impl SecretState {
             let Some(Action::Guess(other, number)) = self.actions[seat] else { continue };
             let v = self.numbers[other];
             if number == v {
+                // Replay moments: a number cracked in the first two rounds (public: a right guess
+                // exposes the number to everyone; one moment per number, for the first seat that
+                // cracked it), or else a long shot, right with 10 or more numbers still possible as far
+                // as the guesser knew (only the guesser sees it: its clues are private).
+                let (by, target) = (self.players[seat].clone(), self.players[other].clone());
+                let possible = self.candidates(seat, other).len();
+                if self.round < 2 {
+                    if !caught[other] {
+                        self.moments.push(&by, format!("{{{target}}}'s number {v} cracked in round {}", self.round + 1));
+                    }
+                } else if possible >= 10 {
+                    self.moments.push_for(&by, format!("Long shot: {{{target}}}'s {v} out of {possible} possible"), &[&by]);
+                }
                 self.scores[seat] += RIGHT;
                 caught[other] = true;
                 self.log.push(format!("{} guessed {}'s number: right, {v}!", self.players[seat], self.players[other]));
@@ -247,6 +262,7 @@ impl Game for Rules {
             id: "secret-number",
             kind: "main",
             difficulty: "hard",
+            tags: &["logic", "numbers"],
             min_players: 4,
             max_players: 8,
             name: "Secret Number",
@@ -276,6 +292,7 @@ impl Game for Rules {
             log: vec!["Round 1 begins.".into()],
             notes: vec![Vec::new(); n],
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -330,11 +347,7 @@ impl Game for Rules {
                     score: s.scores[o],
                     exposed: s.exposed[o].then_some(s.numbers[o]),
                     done: s.actions[o].is_some(),
-                    clues: if o == me {
-                        Vec::new()
-                    } else {
-                        s.clues[me].iter().filter(|(a, _)| *a == o).map(|(_, c)| c.text()).collect()
-                    },
+                    clues: if o == me { Vec::new() } else { s.clues[me].iter().filter(|(a, _)| *a == o).map(|(_, c)| c.text()).collect() },
                     possible: cands.len(),
                     low: cands.first().copied().unwrap_or(0),
                     high: cands.last().copied().unwrap_or(0),
@@ -379,6 +392,10 @@ impl Game for Rules {
             return Vec::new();
         }
         (0..s.players.len()).filter(|&i| s.actions[i].is_none()).map(|i| s.players[i].clone()).collect()
+    }
+
+    fn moments(s: &SecretState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &SecretState, player: &str, seed: u64) -> SecretMove {
@@ -518,5 +535,37 @@ mod tests {
         for n in [4, 8] {
             bot_games_with::<Rules>(500, n, 3000);
         }
+    }
+
+    #[test]
+    fn an_early_crack_and_a_private_long_shot_are_replay_moments() {
+        let mut s = Rules::setup(&ids(4), 3).unwrap();
+        s.numbers = vec![10, 50, 70, 90];
+        Rules::tick(&mut s, TRADE_MS as u64);
+        // p1 and p3 both crack p2's number in round 1: one moment, for p1.
+        Rules::apply_move(&mut s, "p1", SecretMove::Guess { seat: 1, number: 50 }).unwrap();
+        Rules::apply_move(&mut s, "p3", SecretMove::Guess { seat: 1, number: 50 }).unwrap();
+        Rules::tick(&mut s, GUESS_MS as u64);
+        let m = Rules::moments(&s, "p4");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "{p2}'s number 50 cracked in round 1"));
+        // Round 3: p1 guesses p4's number knowing nothing but the exposed 50 and its own 10.
+        s.round = 2;
+        Rules::tick(&mut s, TRADE_MS as u64);
+        Rules::apply_move(&mut s, "p1", SecretMove::Guess { seat: 3, number: 90 }).unwrap();
+        Rules::tick(&mut s, GUESS_MS as u64);
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p1", "Long shot: {p4}'s 90 out of 98 possible"));
+        // What p1 knew stays p1's: the others see only the public moment.
+        assert_eq!(Rules::moments(&s, "p4").len(), 1);
+        assert_eq!(Rules::moments(&s, "p3").len(), 1);
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

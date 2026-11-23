@@ -37,3 +37,7 @@ Main game, 4–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/j
 - Bot: a bomb goes to a random player; a jewel worth 4+ is usually kept; a weaker card is swapped
   with the buyer, a player or the discard.
 - Desktop: K keeps, 1–3 swap with a buyer card, D the discard, the seat letters A–H a player.
+- **Replay moments** (at the end of a round): a card that scores 6 or more ("Silver 4 × 2 in the
+  buyer's space (+8)"), and a player who was behind before the last round and ends it alone in the lead
+  ("Lead stolen in the very last round"). Public: every card is shown after the round; nothing is said
+  about the swaps during it.

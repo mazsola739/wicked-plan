@@ -26,3 +26,5 @@ Hidden game, solo; our take on the exile's "trial" (a 7×7 square in an hour). C
 - Moves: `{type:"set", cell, value}` (value 0 clears), `{type:"submit"}`, `{type:"skip"}`.
 - Bot: copies the solution, with a slip now and then.
 - Desktop: type a number (two digits on the bigger boards), arrows move, Backspace clears, Enter checks.
+- **Replay moments:** the 5×5 solved with at least three quarters of its clock (7:30) left ("5×5 square
+  solved, 7:52 still on the clock"). Public: solo game.

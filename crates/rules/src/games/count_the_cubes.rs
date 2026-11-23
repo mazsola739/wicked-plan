@@ -9,14 +9,16 @@
 //! behind it on either axis, so no cube is hidden and the answer can be counted
 //! from the picture.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-use crate::game::GameInfo;
-use crate::quiz::QuizPuzzle;
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
+use crate::quiz::{QuizPuzzle, QuizState, QuizView};
 use crate::rng::Rng;
 
 pub const ROUND_MS: i64 = 20_000;
 pub const MAX_ANSWER: i64 = 999;
+/// Time left on the last (biggest) stack for a replay moment.
+pub const FAST_MS: i64 = 10_000;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -108,26 +110,92 @@ impl QuizPuzzle for CubesPuzzle {
     }
 }
 
-crate::quiz_game!(
-    CountTheCubes,
-    CubesPuzzle,
-    GameInfo {
-        id: "count-the-cubes",
-        kind: "mini-solo",
-        difficulty: "easy",
-        min_players: 1,
-        max_players: 1,
-        name: "Count the Cubes",
-        short: "How many cubes are in the drawing? Five rounds, 20 seconds each.",
-    },
-    ROUND_MS,
-    |rng| (1..=DIFFICULTIES.len()).map(|level| CubesPuzzle::generate(rng, level)).collect(),
-    |state, rng| {
-        // Right 75% of the time, otherwise off by one or two.
-        let answer = state.current_solution().unwrap_or(0);
-        if rng.next_f64() < 0.75 { answer } else { (answer + rng.pick(&[-2, -1, 1, 2])).max(0) }
+/// The shared quiz rounds plus the replay moments.
+#[derive(Clone, Debug)]
+pub struct CubesState {
+    pub quiz: QuizState<CubesPuzzle>,
+    /// Replay moments: the last (biggest) stack counted fast, and all five stacks right.
+    pub moments: Moments,
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+pub enum QuizMove {
+    Answer { value: i64 },
+}
+
+pub struct CountTheCubes;
+
+impl Game for CountTheCubes {
+    type State = CubesState;
+    type Move = QuizMove;
+    type View = QuizView<CubesPuzzle>;
+
+    fn info() -> GameInfo {
+        GameInfo {
+            id: "count-the-cubes",
+            kind: "mini-solo",
+            difficulty: "easy",
+            tags: &["numbers", "speed"],
+            min_players: 1,
+            max_players: 1,
+            name: "Count the Cubes",
+            short: "How many cubes are in the drawing? Five rounds, 20 seconds each.",
+        }
     }
-);
+
+    fn setup(players: &[String], seed: u64) -> Result<CubesState, String> {
+        let mut rng = Rng::new(seed);
+        let puzzles = (1..=DIFFICULTIES.len()).map(|level| CubesPuzzle::generate(&mut rng, level)).collect();
+        Ok(CubesState { quiz: QuizState::new(players, puzzles, ROUND_MS, Self::info().name)?, moments: Moments::default() })
+    }
+
+    fn apply_move(s: &mut CubesState, player: &str, mv: QuizMove) -> Result<(), String> {
+        let QuizMove::Answer { value } = mv;
+        let left = s.quiz.time_left_ms;
+        s.quiz.answer(player, value)?;
+        // Replay moments, after the last round (a timeout is never right, so only an answer can make one).
+        let q = &s.quiz;
+        let last = &q.rounds[q.current - 1];
+        if q.over && last.correct {
+            if left >= FAST_MS {
+                s.moments.push(&q.player, format!("{} cubes counted with {} s to spare", last.puzzle.count(), left / 1000));
+            }
+            if q.rounds.iter().all(|r| r.correct) {
+                s.moments.push(&q.player, "All five stacks counted right");
+            }
+        }
+        Ok(())
+    }
+
+    fn tick(s: &mut CubesState, ms: u64) {
+        s.quiz.tick(ms);
+    }
+
+    fn view_for(s: &CubesState, _player: &str) -> QuizView<CubesPuzzle> {
+        s.quiz.view()
+    }
+
+    fn is_over(s: &CubesState) -> bool {
+        s.quiz.over
+    }
+
+    fn results(s: &CubesState) -> Vec<PlayerResult> {
+        s.quiz.results()
+    }
+
+    fn bot_move(s: &CubesState, _player: &str, seed: u64) -> QuizMove {
+        let mut rng = Rng::new(seed);
+        // Right 75% of the time, otherwise off by one or two.
+        let answer = s.quiz.current_solution().unwrap_or(0);
+        let value = if rng.next_f64() < 0.75 { answer } else { (answer + rng.pick(&[-2, -1, 1, 2])).max(0) };
+        QuizMove::Answer { value }
+    }
+
+    fn moments(s: &CubesState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
+}
 
 pub const READY: bool = true;
 pub type Rules = CountTheCubes;
@@ -135,11 +203,11 @@ pub type Rules = CountTheCubes;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::{Game, testing::bot_games};
+    use crate::game::testing::bot_games;
 
     const P: &str = "p1";
 
-    fn setup(seed: u64) -> <CountTheCubes as Game>::State {
+    fn setup(seed: u64) -> CubesState {
         CountTheCubes::setup(&[P.to_string()], seed).unwrap()
     }
 
@@ -174,12 +242,45 @@ mod tests {
     #[test]
     fn perfect_game_scores_every_round() {
         let mut s = setup(1);
-        while !s.over {
-            let a = s.current_solution().unwrap();
+        while !s.quiz.over {
+            let a = s.quiz.current_solution().unwrap();
             CountTheCubes::apply_move(&mut s, P, QuizMove::Answer { value: a }).unwrap();
         }
-        assert!(s.score() >= 5 * 100);
-        assert!(s.rounds.iter().all(|r| r.correct));
+        assert!(s.quiz.score() >= 5 * 100);
+        assert!(s.quiz.rounds.iter().all(|r| r.correct));
+    }
+
+    #[test]
+    fn a_fast_last_count_and_a_perfect_run_are_replay_moments() {
+        let mut s = setup(1);
+        while !s.quiz.over {
+            let a = s.quiz.current_solution().unwrap();
+            CountTheCubes::tick(&mut s, 7_500);
+            CountTheCubes::apply_move(&mut s, P, QuizMove::Answer { value: a }).unwrap();
+        }
+        let cubes = s.quiz.rounds[4].puzzle.count();
+        let m: Vec<(String, String)> = CountTheCubes::moments(&s, P).into_iter().map(|m| (m.by, m.text)).collect();
+        assert_eq!(m, vec![
+            (P.to_string(), format!("{cubes} cubes counted with 12 s to spare")),
+            (P.to_string(), "All five stacks counted right".to_string()),
+        ]);
+        // A miss, then a slow last count: no moment.
+        let mut s = setup(1);
+        CountTheCubes::apply_move(&mut s, P, QuizMove::Answer { value: 0 }).unwrap();
+        while !s.quiz.over {
+            let a = s.quiz.current_solution().unwrap();
+            CountTheCubes::tick(&mut s, 10_500);
+            CountTheCubes::apply_move(&mut s, P, QuizMove::Answer { value: a }).unwrap();
+        }
+        assert!(CountTheCubes::moments(&s, P).is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<CountTheCubes>(300, 1, 200);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 2, "too many in one game: {stats:?}");
     }
 
     #[test]
@@ -187,16 +288,16 @@ mod tests {
         let mut slow = setup(3);
         CountTheCubes::tick(&mut slow, (ROUND_MS - 1000) as u64);
         let mut fast = setup(3);
-        let a = fast.current_solution().unwrap();
+        let a = fast.quiz.current_solution().unwrap();
         CountTheCubes::apply_move(&mut slow, P, QuizMove::Answer { value: a }).unwrap();
         CountTheCubes::apply_move(&mut fast, P, QuizMove::Answer { value: a }).unwrap();
-        assert!(fast.rounds[0].points > slow.rounds[0].points);
+        assert!(fast.quiz.rounds[0].points > slow.quiz.rounds[0].points);
 
         let mut s = setup(4);
         CountTheCubes::tick(&mut s, (ROUND_MS + 5) as u64);
-        assert_eq!(s.current, 1);
-        assert_eq!(s.rounds[0].given, Some(None));
-        assert_eq!(s.time_left_ms, ROUND_MS);
+        assert_eq!(s.quiz.current, 1);
+        assert_eq!(s.quiz.rounds[0].given, Some(None));
+        assert_eq!(s.quiz.time_left_ms, ROUND_MS);
     }
 
     #[test]
@@ -204,7 +305,7 @@ mod tests {
         let mut s = setup(6);
         assert!(CountTheCubes::apply_move(&mut s, "someone-else", QuizMove::Answer { value: 1 }).is_err());
         assert!(CountTheCubes::apply_move(&mut s, P, QuizMove::Answer { value: -1 }).is_err());
-        assert_eq!(s.current, 0);
+        assert_eq!(s.quiz.current, 0);
     }
 
     #[test]

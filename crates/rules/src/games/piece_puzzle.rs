@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 // --- The race --------------------------------------------------------------
@@ -377,6 +377,10 @@ pub struct PieceState {
     pub puzzle: Puzzle,
     /// Where each piece lies now.
     pub placed: Vec<Option<Vec<Cell>>>,
+    /// Rounds the solver finished first.
+    pub firsts: usize,
+    /// Replay moments: a round won by a whisker, first place in every round.
+    pub moments: Moments,
     seed: u64,
 }
 
@@ -390,6 +394,23 @@ impl PieceState {
 
     fn covered(&self) -> bool {
         self.placed.iter().all(Option::is_some)
+    }
+
+    /// After the solver covered the shape: replay moments for a first place won by less than a
+    /// tenth of the round time, and for first place in every round (all times are public now).
+    fn solved_moments(&mut self) {
+        let Some(last) = &self.race.last else { return };
+        let (Some(1), Some(t)) = (last[0].place, last[0].time_ms) else { return };
+        let me = self.race.players[0].clone();
+        let limit = self.race.round_ms[self.race.round - 1];
+        let next = last[1..].iter().filter_map(|f| f.time_ms.map(|b| (b - t, &f.id))).filter(|&(gap, _)| gap > 0).min();
+        if let Some((gap, id)) = next.filter(|&(gap, _)| gap * 10 <= limit) {
+            self.moments.push(&me, format!("Beat {{{id}}} to the finish by {}.{} s", gap / 1000, gap % 1000 / 100));
+        }
+        self.firsts += 1;
+        if self.race.over && self.firsts == self.race.round_ms.len() {
+            self.moments.push(&me, "First to finish in all three rounds");
+        }
     }
 }
 
@@ -432,6 +453,7 @@ impl Game for Rules {
             id: "piece-puzzle",
             kind: "exile",
             difficulty: "medium",
+            tags: &["logic", "speed"],
             min_players: 1,
             max_players: 4,
             name: "Piece Puzzle",
@@ -441,7 +463,8 @@ impl Game for Rules {
 
     fn setup(players: &[String], seed: u64) -> Result<PieceState, String> {
         let race = Race::new(players, seed, &ROUND_MS)?;
-        let mut s = PieceState { race, puzzle: generate(0, &mut Rng::new(seed)), placed: Vec::new(), seed };
+        let mut s =
+            PieceState { race, puzzle: generate(0, &mut Rng::new(seed)), placed: Vec::new(), firsts: 0, moments: Moments::default(), seed };
         s.load();
         Ok(s)
     }
@@ -467,6 +490,7 @@ impl Game for Rules {
                 s.placed[piece] = Some(cells);
                 if s.covered() {
                     s.race.solver_done(true);
+                    s.solved_moments();
                     s.load();
                 }
             }
@@ -514,6 +538,10 @@ impl Game for Rules {
 
     fn to_move(s: &PieceState) -> Vec<String> {
         s.race.to_move()
+    }
+
+    fn moments(s: &PieceState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &PieceState, _player: &str, _seed: u64) -> PieceMove {
@@ -610,5 +638,47 @@ mod tests {
     fn thousand_bot_games() {
         bot_games::<Rules>(1000, 3000);
         bot_games_with::<Rules>(1000, 4, 3000);
+    }
+
+    /// Lays every piece where the puzzle was cut.
+    fn solve(s: &mut PieceState) {
+        for (k, cells) in s.puzzle.solution.clone().into_iter().enumerate() {
+            Rules::apply_move(s, "p1", PieceMove::Place { piece: k, cells }).unwrap();
+        }
+    }
+
+    #[test]
+    fn a_close_win_and_a_clean_sweep_are_replay_moments() {
+        let mut s = Rules::setup(&players(4), 5).unwrap();
+        // Round 1: p1 finishes at 15 s, p2 at 20 s.
+        s.race.bot_times = vec![None, Some(20_000), Some(50_000), Some(90_000)];
+        Rules::tick(&mut s, 15_000);
+        solve(&mut s);
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Beat {p2} to the finish by 5.0 s"));
+        // Rounds 2 and 3: easy wins, no close finish, but first every time.
+        solve(&mut s);
+        assert_eq!(Rules::moments(&s, "p1").len(), 1);
+        solve(&mut s);
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p1", "First to finish in all three rounds"));
+        // Second place is no moment.
+        let mut s = Rules::setup(&players(4), 5).unwrap();
+        s.race.bot_times = vec![None, Some(1_000), None, None];
+        Rules::tick(&mut s, 5_000);
+        solve(&mut s);
+        assert_eq!(s.race.last.as_ref().unwrap()[0].place, Some(2));
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3000);
+        // The test solver lays a piece on nearly every step, so it wins almost every round and
+        // sweeps most test games; someone racing the bots by hand wins a round far less often.
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

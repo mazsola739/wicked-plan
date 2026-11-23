@@ -998,6 +998,12 @@ a.btn {
   width: min(64vw, 250px);
 }
 
+/* The hooded Observer from the poster: a square on black, the hood's hem fading into the dark. */
+.hero-emblem .emblem {
+  aspect-ratio: 1;
+  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+}
+
 .hero-text {
   display: flex;
   flex-direction: column;
@@ -1143,6 +1149,69 @@ a.btn {
   gap: 14px;
 }
 
+/* The search field: a long hexagon like the buttons (edge = background, fill = ::before). */
+.search {
+  --edge: #34304a;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--touch);
+  padding: 0 24px;
+  background: var(--edge);
+  clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%);
+  cursor: text;
+  transition: filter 0.15s;
+}
+
+.search::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--panel);
+  clip-path: inherit;
+}
+
+.search:focus-within {
+  --edge: var(--cyan);
+}
+
+.search-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--touch);
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 1rem;
+}
+
+.search input::placeholder {
+  color: var(--muted);
+}
+
+.search-key {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+}
+
 .filters {
   display: flex;
   flex-direction: column;
@@ -1276,11 +1345,7 @@ a.btn {
   justify-self: end;
 }
 
-.watcher {
-  width: 46px;
-}
-
-/* The game bar keeps one height (touch-size buttons), whether the watcher shows or not. */
+/* The game bar keeps one height (touch-size buttons), with or without the peeking face. */
 .game-nav .btn {
   min-height: var(--touch);
 }

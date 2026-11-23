@@ -23,3 +23,5 @@ Final duel, played solo here. Code: `crates/rules/src/games/hexagon.rs`.
 - Moves: `{type:"ready"}`, `{type:"answer", cells:[a,b,c]}` (indices 0–18).
 - Bot: remembers the board 60% of the time.
 - Desktop: letters A–S pick cells, Backspace undoes, Enter submits (or ends the study time).
+- **Replay moments:** the last round's line found within 10 seconds ("Line for 21 found with 18 s to
+  spare"), and every round right ("All five lines from memory"). Public: a solo game.

@@ -22,3 +22,6 @@ Mini solo. Code: `crates/rules/src/games/count_the_cubes.rs`.
 - Move: `{type:"answer", value}` with 0–999.
 - Bot: right 75% of the time, otherwise off by 1–2.
 - Desktop: type the number, Enter submits.
+- **Replay moments:** the last (biggest) stack counted right within 10 seconds ("38 cubes counted
+  with 12 s to spare"), and all five stacks right ("All five stacks counted right"). Yours alone:
+  it is a solo game.

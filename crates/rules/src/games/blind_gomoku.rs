@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const SIZE: usize = 9;
@@ -49,6 +49,8 @@ pub struct State {
     pub outcome: Option<Outcome>,
     pub win_line: Vec<usize>,
     pub rng: Rng,
+    /// Replay moments: your winning line, with or without a peek.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -177,6 +179,12 @@ impl State {
         self.last = Some(cell);
         let tiles = self.tiles();
         if let Some(line) = runs(&tiles, cell, tile).into_iter().find(|l| l.len() >= 5) {
+            // A replay moment: your winning line (every tile is shown at the end anyway).
+            if tile == Tile::Dark {
+                let n = ["Five", "Six", "Seven", "Eight", "Nine"][line.len().min(9) - 5];
+                let how = if self.peeks_left == PEEKS { "without a peek" } else { "on a blind board" };
+                self.moments.push(&self.player, format!("{n} in a row {how}"));
+            }
             self.win_line = line;
             self.outcome = Some(if tile == Tile::Dark { Outcome::Won } else { Outcome::Lost });
         } else if self.board.iter().all(Option::is_some) {
@@ -223,6 +231,7 @@ impl Game for BlindGomoku {
             id: "blind-gomoku",
             kind: "hidden",
             difficulty: "hard",
+            tags: &["board", "memory"],
             min_players: 1,
             max_players: 1,
             name: "Blind Gomoku",
@@ -243,6 +252,7 @@ impl Game for BlindGomoku {
             outcome: None,
             win_line: Vec::new(),
             rng: Rng::new(seed),
+            moments: Moments::default(),
         })
     }
 
@@ -344,6 +354,10 @@ impl Game for BlindGomoku {
             None => Move::Place { cell: s.board.iter().position(Option::is_none).unwrap_or(0) },
         }
     }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -413,6 +427,36 @@ mod tests {
         assert_eq!(s.win_line, vec![0, 1, 2, 3, 4]);
         assert_eq!(s.score(), 1000);
         assert_eq!(BlindGomoku::view_for(&s, P).cells[0], Some("dark"));
+        let m = BlindGomoku::moments(&s, P);
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), (P, "Five in a row without a peek"));
+    }
+
+    #[test]
+    fn a_win_after_a_peek_and_a_loss_are_told_apart() {
+        let mut s = BlindGomoku::setup(&[P.into()], 4).unwrap();
+        BlindGomoku::apply_move(&mut s, P, Move::Peek).unwrap();
+        for x in [0, 1, 2, 4, 5] {
+            s.board[x] = Some(Stone { tile: Tile::Dark, bot_knows: true });
+        }
+        BlindGomoku::apply_move(&mut s, P, Move::Place { cell: 3 }).unwrap();
+        let m = BlindGomoku::moments(&s, P);
+        assert_eq!((m.len(), m[0].text.as_str()), (1, "Six in a row on a blind board"));
+        // The house bot's five is no moment of yours.
+        let mut s = BlindGomoku::setup(&[P.into()], 4).unwrap();
+        for x in 0..4 {
+            s.board[SIZE * 8 + x] = Some(Stone { tile: Tile::Light, bot_knows: true });
+        }
+        s.place(SIZE * 8 + 4, Tile::Light);
+        assert_eq!(s.outcome, Some(Outcome::Lost));
+        assert!(BlindGomoku::moments(&s, P).is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<BlindGomoku>(300, 1, 2000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 1, "one win at most: {stats:?}");
     }
 
     #[test]

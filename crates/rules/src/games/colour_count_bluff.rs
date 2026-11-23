@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const COLOURS: [&str; 4] = ["red", "blue", "green", "yellow"];
@@ -55,6 +55,8 @@ pub struct BluffState {
     pub log: Vec<String>,
     pub last: Option<Showdown>,
     pub over: bool,
+    /// Replay moments: a bet well above the average that holds exactly, a bluff caught by 3 or more.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -141,6 +143,16 @@ impl BluffState {
                     self.players[seat], COLOURS[bet.colour], self.players[loser]
                 ));
                 self.lives[loser] -= 1;
+                // Replay moments (every hand is shown now): a bet 2 or more above the table's average
+                // that holds exactly, or a bluff caught 3 or more short.
+                let colour = COLOURS[bet.colour];
+                if actual == bet.count && bet.count * COLOURS.len() >= self.total_cards() + 2 * COLOURS.len() {
+                    let text = format!("Exactly {actual} {colour}: {{{}}}'s call fails", self.players[seat]);
+                    self.moments.push(&self.players[bet.seat], text);
+                } else if bet.count >= actual + 3 {
+                    let text = format!("{{{}}}'s {} {colour} caught: only {actual} there", self.players[bet.seat], bet.count);
+                    self.moments.push(&self.players[seat], text);
+                }
                 self.last = Some(Showdown { round: self.round + 1, hands: self.hands.clone(), bet, caller: seat, actual, loser });
                 for s in 0..self.players.len() {
                     if self.alive(s) {
@@ -196,6 +208,7 @@ impl Game for Rules {
             id: "colour-count-bluff",
             kind: "main",
             difficulty: "medium",
+            tags: &["bluff", "cards"],
             min_players: 3,
             max_players: 6,
             name: "Colour Count Bluff",
@@ -221,6 +234,7 @@ impl Game for Rules {
             log: Vec::new(),
             last: None,
             over: false,
+            moments: Moments::default(),
         };
         s.deal(0);
         Ok(s)
@@ -317,6 +331,10 @@ impl Game for Rules {
             _ => BluffMove::Bet { count: 1, colour: 0 },
         }
     }
+
+    fn moments(s: &BluffState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -397,6 +415,42 @@ mod tests {
         let v = serde_json::to_value(Rules::view_for(&s, "p3")).unwrap();
         assert_eq!(v["hand"].as_array().unwrap().len(), 4);
         assert!(v.get("hands").is_none());
+    }
+
+    #[test]
+    fn an_exact_bet_and_a_caught_bluff_are_replay_moments() {
+        let mut s = Rules::setup(&ids(3), 3).unwrap();
+        let hands = vec![vec![0, 0, 1, 2], vec![0, 3, 0, 3], vec![1, 1, 0, 2]];
+        // 5 reds of 12 cards: 2 above the average of 3, and exactly right.
+        s.hands = hands.clone();
+        Rules::apply_move(&mut s, "p1", BluffMove::Bet { count: 5, colour: 0 }).unwrap();
+        Rules::apply_move(&mut s, "p2", BluffMove::Call).unwrap();
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Exactly 5 red: {p2}'s call fails"));
+        // p2 starts and bets 5 green with 2 there: p3 calls it.
+        s.hands = hands.clone();
+        Rules::apply_move(&mut s, "p2", BluffMove::Bet { count: 5, colour: 2 }).unwrap();
+        Rules::apply_move(&mut s, "p3", BluffMove::Call).unwrap();
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p3", "{p2}'s 5 green caught: only 2 there"));
+        // A bet 1 above the average that holds exactly, or a bluff 2 short, is no moment.
+        s.hands = vec![vec![0, 0, 1, 2], vec![0, 3, 1, 3], vec![1, 1, 0, 2]];
+        Rules::apply_move(&mut s, "p2", BluffMove::Bet { count: 4, colour: 0 }).unwrap();
+        Rules::apply_move(&mut s, "p3", BluffMove::Call).unwrap();
+        s.hands = hands;
+        Rules::apply_move(&mut s, "p3", BluffMove::Bet { count: 4, colour: 2 }).unwrap();
+        Rules::apply_move(&mut s, "p1", BluffMove::Call).unwrap();
+        assert_eq!(s.round, 4);
+        assert_eq!(Rules::moments(&s, "p1").len(), 2);
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 4000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 
     #[test]

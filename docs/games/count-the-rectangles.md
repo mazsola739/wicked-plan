@@ -24,3 +24,6 @@ Mini solo. Code: `crates/rules/src/games/count_the_rectangles.rs`.
 - Move: `{type:"answer", value}` with 0–999.
 - Bot: right 70% of the time.
 - Desktop: type the number, Enter submits.
+- **Replay moments:** the last (biggest) figure counted right within 15 seconds ("27 rectangles
+  counted with 18 s to spare"), and all five figures right ("All five figures counted right").
+  Yours alone: it is a solo game.

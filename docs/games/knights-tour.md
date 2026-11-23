@@ -24,3 +24,5 @@ Hidden game, solo. Code: `crates/rules/src/games/knights_tour.rs`.
 - Points: **200, 300, 500** for the three boards; if all three are done, every second left is worth 1 more point.
 - Moves: `{type:"step", x, y}`, `{type:"restart"}`.
 - Bot: Warnsdorff's rule (jump to the square with the fewest onward jumps), starting from a corner.
+- **Replay moments:** all three boards toured before the clock runs out ("All three tours done, 840 s to
+  spare"; without a single restart: "Three tours, not one restart, 412 s left"). Public: solo game.

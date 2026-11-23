@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const QUESTIONS: usize = 10;
@@ -76,6 +76,8 @@ pub struct EitherState {
     pub time_left_ms: i64,
     pub last: Option<Outcome>,
     pub over: bool,
+    /// Replay moments: a lone grab, and the lead stolen in the last round.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -213,8 +215,19 @@ impl EitherState {
                 }
             }
         };
+        let top_before = self.scores.iter().copied().max().unwrap_or(0);
         for (s, g) in self.scores.iter_mut().zip(&gains) {
             *s += g;
+        }
+        // Replay moments (every pick is shown after the round anyway).
+        if round.kind == Kind::ShareGrab && side(1) == 1 {
+            let g = picks.iter().position(|&p| p == 1).unwrap_or(0);
+            self.moments.push(&self.players[g], "Lone grab while the rest shared (+5)");
+        }
+        let top = self.scores.iter().copied().max().unwrap_or(0);
+        let leaders: Vec<usize> = (0..n).filter(|&i| self.scores[i] == top).collect();
+        if self.current + 1 == self.rounds.len() && leaders.len() == 1 && self.scores[leaders[0]] - gains[leaders[0]] < top_before {
+            self.moments.push(&self.players[leaders[0]], "Lead stolen in the very last round");
         }
         self.last = Some(Outcome {
             number: self.current + 1,
@@ -259,6 +272,7 @@ impl Game for Rules {
             id: "either-or",
             kind: "main",
             difficulty: "hard",
+            tags: &["alliance", "words"],
             min_players: 3,
             max_players: 8,
             name: "Either Or",
@@ -307,6 +321,7 @@ impl Game for Rules {
             time_left_ms: ROUND_MS,
             last: None,
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -405,6 +420,10 @@ impl Game for Rules {
         };
         EitherMove::Pick { value }
     }
+
+    fn moments(s: &EitherState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -487,5 +506,32 @@ mod tests {
         for n in [3, 8] {
             bot_games_with::<Rules>(500, n, 3000);
         }
+    }
+
+    #[test]
+    fn a_lone_grab_and_a_last_round_steal_are_replay_moments() {
+        let mut s = Rules::setup(&ids(4), 2).unwrap();
+        play(&mut s, Kind::ShareGrab, &[0, 1, 0, 0]);
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Lone grab while the rest shared (+5)"));
+        // Two grabbers: no moment.
+        play(&mut s, Kind::ShareGrab, &[1, 1, 0, 0]);
+        assert_eq!(Rules::moments(&s, "p1").len(), 1);
+        // Last round: p4 trails p1 by one, then takes the lead alone.
+        s.current = s.rounds.len() - 1;
+        s.scores = vec![5, 0, 0, 4];
+        play(&mut s, Kind::Minority, &[0, 0, 0, 1]);
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p4", "Lead stolen in the very last round"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 2, "too many in one game: {stats:?}");
     }
 }

@@ -32,3 +32,6 @@ Exile game, a race: 1–4 seats (the page: you + 3 bots). Code: `crates/rules/sr
   find exactly the generated differences.
 - Bot (for the first seat in tests): taps a difference 70% of the time, otherwise a random spot.
 - Desktop: N or Enter goes on after the reveal.
+- **Replay moments** (by the first seat, when it finds the last difference of a round): every difference
+  found without a single miss ("All 5 found without a miss"), and the last one found with under 5 seconds
+  left ("All 6 found with 3 s left"). Public: the finds and misses are shown in the reveal anyway.

@@ -19,6 +19,11 @@ Main game, 3–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 Trade seven made-up stocks over 24 rounds. Every stock moves by its own **secret rule**; work the
 rules out from the price charts and trade on what you know. The richest player wins.
 
+- **Replay moments:** a player's worth rising **30% or more** in one round ("Portfolio up 40% in one
+  round"), shown **only to that player**, since holdings and cash are secret; and the richest player at
+  the close when they hold a million or more ("A millionaire at the close: 1,376,000"), public, since
+  every worth is shown at the close.
+
 ## Setup
 
 - Seven stocks: Lumen Labs, Cobalt Rail, Pebble Foods, Vortex Media, Quill Paper, Ember Energy,

@@ -35,3 +35,5 @@ Mini game, 1–4 seats (the page: you + 3 bots). Code: `crates/rules/src/games/m
   makes the best hand with the shared cards and its other pick, or a random free square when it
   remembers none.
 - Desktop: keys A–P pick a square (row by row), Enter is Ready / Next.
+- **Replay moments:** a straight or better at the showdown ("Straight from memory (+240)", "Full house
+  from memory (+250)"). Public: every hand is shown at the showdown, never before.

@@ -20,6 +20,11 @@ The classic hunt game, played on **two boards at once**: on board A you are the 
 the goats; on board B the sides are swapped. Both players play the same boards, so the results compare
 directly.
 
+- **Replay moments:** the goats trapping every tiger ("Every tiger trapped: board B won"), the goats
+  lasting all 100 turns ("Board A held for all 100 turns"), and the tigers taking the fifth goat after
+  all 20 were placed ("Board A won: fifth goat taken after all 20 placed"). Public: both boards are
+  open to both players.
+
 ## One board
 
 - 5×5 points. Every point joins its orthogonal neighbours; points where x + y is even also join their

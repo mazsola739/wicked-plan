@@ -8,7 +8,7 @@ use std::collections::VecDeque;
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const RINGS: [usize; 3] = [4, 5, 6];
@@ -50,6 +50,8 @@ pub struct CastState {
     pub score: i64,
     pub time_left_ms: i64,
     pub over: bool,
+    /// Replay moments: a mixed level (5 or 6 rings) solved in the fewest moves.
+    pub moments: Moments,
     seed: u64,
 }
 
@@ -104,6 +106,10 @@ impl CastState {
             let base = LEVEL_POINTS[self.level];
             let moves = i64::from(self.moves.max(self.best).max(1));
             self.score += (base * i64::from(self.best) + moves / 2) / moves + self.time_left_ms / 2000;
+            if self.level > 0 && self.moves == self.best {
+                let text = format!("{} rings off in {} moves, the fewest possible", self.n(), self.moves);
+                self.moments.push(&self.player.clone(), text);
+            }
         }
         self.solved.push(solved);
         self.level += 1;
@@ -128,6 +134,7 @@ impl Game for Rules {
             id: "metal-cast-puzzle",
             kind: "prison",
             difficulty: "easy",
+            tags: &["logic"],
             min_players: 1,
             max_players: 1,
             name: "Metal Cast Puzzle",
@@ -148,6 +155,7 @@ impl Game for Rules {
             score: 0,
             time_left_ms: 0,
             over: false,
+            moments: Moments::default(),
             seed,
         };
         s.load_level();
@@ -213,6 +221,10 @@ impl Game for Rules {
 
     fn results(s: &CastState) -> Vec<PlayerResult> {
         vec![PlayerResult { player_id: s.player.clone(), rank: 1, points: s.score }]
+    }
+
+    fn moments(s: &CastState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &CastState, _player: &str, seed: u64) -> CastMove {
@@ -283,5 +295,43 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games::<Rules>(1000, 5000);
+    }
+
+    /// Plays the shortest path, plus `detour` wasted moves (ring 1 off and on again) first.
+    fn solve(s: &mut CastState, detour: bool) {
+        if detour {
+            Rules::apply_move(s, P, CastMove::Toggle { ring: 1 }).unwrap();
+            Rules::apply_move(s, P, CastMove::Toggle { ring: 1 }).unwrap();
+        }
+        let (level, dist) = (s.level, distances(s.n()));
+        while s.level == level {
+            let r = (0..s.n()).find(|&r| can_toggle(s.mask, r) && dist[(s.mask ^ (1 << r)) as usize] < dist[s.mask as usize]).unwrap();
+            Rules::apply_move(s, P, CastMove::Toggle { ring: r + 1 }).unwrap();
+        }
+    }
+
+    #[test]
+    fn a_mixed_level_in_the_fewest_moves_is_a_replay_moment() {
+        let mut s = Rules::setup(&[P.into()], 5).unwrap();
+        // Level 1 (all rings on, always the same) is no moment, even when perfect.
+        solve(&mut s, false);
+        assert!(Rules::moments(&s, P).is_empty());
+        let best = s.best;
+        solve(&mut s, false);
+        let m = Rules::moments(&s, P);
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), (P, format!("5 rings off in {best} moves, the fewest possible").as_str()));
+        // Two wasted moves: no moment.
+        solve(&mut s, true);
+        assert_eq!(s.solved, vec![true, true, true]);
+        assert_eq!(Rules::moments(&s, P).len(), 1);
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 1, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 8, "too common: {stats:?}");
+        assert!(stats.most <= 2, "too many in one game: {stats:?}");
     }
 }

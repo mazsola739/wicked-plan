@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const SHAPES: [&str; 6] = ["circle", "square", "triangle", "star", "heart", "moon"];
@@ -67,6 +67,8 @@ pub struct State {
     pub given: Vec<Option<usize>>,
     pub failed: bool,
     pub time_left_ms: i64,
+    /// Replay moments: the tenth right answer that makes a perfect quiz.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -234,6 +236,12 @@ impl State {
             self.failed = true;
         }
         if !right || self.given.len() == self.questions.len() {
+            if right {
+                // A replay moment: the last question answered right, a perfect quiz (answers are public).
+                let by = self.players[(self.given.len() - 1) % self.players.len()].clone();
+                let points = self.right_answers() as i64 * POINTS;
+                self.moments.push(&by, format!("Question {} right: a perfect {points}", self.given.len()));
+            }
             self.phase = Phase::Over;
             self.time_left_ms = 0;
         } else {
@@ -254,6 +262,7 @@ impl Game for MemorySceneQuiz {
             id: "memory-scene-quiz",
             kind: "mini-team",
             difficulty: "medium",
+            tags: &["memory", "alliance"],
             min_players: 1,
             max_players: 4,
             name: "Memory Scene Quiz",
@@ -277,6 +286,7 @@ impl Game for MemorySceneQuiz {
             given: Vec::new(),
             failed: false,
             time_left_ms: STUDY_MS,
+            moments: Moments::default(),
         })
     }
 
@@ -370,6 +380,10 @@ impl Game for MemorySceneQuiz {
             Phase::Questions => s.answerer().map(|k| vec![s.players[k].clone()]).unwrap_or_default(),
             Phase::Over => Vec::new(),
         }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &State, _player: &str, seed: u64) -> Move {
@@ -490,5 +504,35 @@ mod tests {
         for seats in 1..=4 {
             bot_games_with::<MemorySceneQuiz>(1000, seats, 2000);
         }
+    }
+
+    #[test]
+    fn a_perfect_quiz_is_a_replay_moment() {
+        let mut s = MemorySceneQuiz::setup(&team(4), 3).unwrap();
+        MemorySceneQuiz::tick(&mut s, STUDY_MS as u64);
+        for i in 0..QUESTIONS {
+            assert!(MemorySceneQuiz::moments(&s, "p1").is_empty());
+            let choice = s.questions[i].answer;
+            MemorySceneQuiz::apply_move(&mut s, &format!("p{}", i % 4 + 1), Move::Answer { choice }).unwrap();
+        }
+        // The tenth question went to the second seat.
+        let m = MemorySceneQuiz::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Question 10 right: a perfect 1000"));
+        // A failed quiz is no moment.
+        let mut s = MemorySceneQuiz::setup(&team(4), 3).unwrap();
+        MemorySceneQuiz::tick(&mut s, STUDY_MS as u64);
+        MemorySceneQuiz::tick(&mut s, QUESTION_MS as u64);
+        assert!(MemorySceneQuiz::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<MemorySceneQuiz>(300, 4, 2000);
+        // The test's long ticks run out many answer clocks (about a quarter of games stay perfect);
+        // bots on the page answer within 2 s, so a perfect quiz comes in about 60% of games.
+        assert!(stats.with_any * 5 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 8, "too common: {stats:?}");
+        assert!(stats.most <= 1, "too many in one game: {stats:?}");
     }
 }

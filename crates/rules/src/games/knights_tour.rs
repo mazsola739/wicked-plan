@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const BOARDS: [usize; 3] = [5, 6, 7];
@@ -26,6 +26,8 @@ pub struct KnightState {
     pub score: i64,
     pub time_left_ms: i64,
     pub over: bool,
+    /// Replay moments: all three boards toured before the clock runs out.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -81,7 +83,14 @@ impl KnightState {
         if self.board >= BOARDS.len() {
             self.over = true;
             // Time left is worth 1 point a second.
-            self.score += self.time_left_ms / 1000;
+            let bonus = self.time_left_ms / 1000;
+            self.score += bonus;
+            let text = if self.restarts == 0 {
+                format!("Three tours, not one restart, {bonus} s left")
+            } else {
+                format!("All three tours done, {bonus} s to spare")
+            };
+            self.moments.push(&self.player.clone(), text);
         }
     }
 }
@@ -116,6 +125,7 @@ impl Game for KnightsTour {
             id: "knights-tour",
             kind: "hidden",
             difficulty: "hard",
+            tags: &["logic", "board"],
             min_players: 1,
             max_players: 1,
             name: "Knight's Tour",
@@ -134,6 +144,7 @@ impl Game for KnightsTour {
             score: 0,
             time_left_ms: TIME_MS,
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -199,6 +210,10 @@ impl Game for KnightsTour {
 
     fn results(s: &KnightState) -> Vec<PlayerResult> {
         vec![PlayerResult { player_id: s.player.clone(), rank: 1, points: s.score }]
+    }
+
+    fn moments(s: &KnightState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &KnightState, _player: &str, seed: u64) -> KnightMove {
@@ -273,5 +288,46 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games::<KnightsTour>(1000, 5000);
+    }
+
+    fn tour(n: usize) -> Vec<(usize, usize)> {
+        (0..200).map(|seed| warnsdorff(n, (0, 0), &mut Rng::new(seed))).find(|t| t.len() == n * n).unwrap()
+    }
+
+    #[test]
+    fn touring_all_three_boards_is_a_replay_moment() {
+        let mut s = KnightsTour::setup(&[P.into()], 1).unwrap();
+        for n in [5, 6] {
+            for (x, y) in tour(n) {
+                KnightsTour::apply_move(&mut s, P, KnightMove::Step { x, y }).unwrap();
+            }
+        }
+        // A single board done is no moment.
+        assert!(KnightsTour::moments(&s, P).is_empty());
+        KnightsTour::apply_move(&mut s, P, KnightMove::Step { x: 3, y: 3 }).unwrap();
+        KnightsTour::apply_move(&mut s, P, KnightMove::Restart).unwrap();
+        KnightsTour::tick(&mut s, 60_000);
+        for (x, y) in tour(7) {
+            KnightsTour::apply_move(&mut s, P, KnightMove::Step { x, y }).unwrap();
+        }
+        let m = KnightsTour::moments(&s, P);
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), (P, "All three tours done, 840 s to spare"));
+        // Without any restart the text says so.
+        let mut s = KnightsTour::setup(&[P.into()], 1).unwrap();
+        for n in BOARDS {
+            for (x, y) in tour(n) {
+                KnightsTour::apply_move(&mut s, P, KnightMove::Step { x, y }).unwrap();
+            }
+        }
+        assert_eq!(KnightsTour::moments(&s, P)[0].text, "Three tours, not one restart, 900 s left");
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<KnightsTour>(300, 1, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 9, "too common: {stats:?}");
+        assert!(stats.most <= 1, "too many in one game: {stats:?}");
     }
 }

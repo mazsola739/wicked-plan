@@ -6,13 +6,15 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 6;
 pub const BUILD_MS: i64 = 15_000;
 pub const PREDICT_MS: i64 = 15_000;
 pub const RESULT_MS: i64 = 6_000;
+/// Exact rank calls in a row for a replay moment.
+pub const STREAK: usize = 4;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -93,6 +95,8 @@ pub struct DpState {
     pub round: usize,
     pub time_left_ms: i64,
     pub log: Vec<RoundLog>,
+    /// Replay moments: a triple whose rank was called exactly, 4 or more exact calls in a row.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -183,6 +187,15 @@ impl DpState {
                 points += 1;
             }
             s.score += points;
+            // Replay moments (every die and prediction is shown now).
+            if prediction == r[i] {
+                let streak = 1 + self.log.iter().rev().take_while(|l| l.seats[i].prediction == l.seats[i].rank).count();
+                if kind(s.dice) == Kind::Triple {
+                    self.moments.push(&s.id, format!("Triple {}s, rank {} called", s.dice[0], r[i]));
+                } else if streak >= STREAK {
+                    self.moments.push(&s.id, format!("{streak} exact rank calls in a row"));
+                }
+            }
             seats.push(SeatLog { id: s.id.clone(), dice: s.dice, kind: kind(s.dice), rank: r[i], prediction, points });
         }
         self.log.push(RoundLog { round: self.round, seats });
@@ -203,6 +216,7 @@ impl Game for Rules {
             id: "dice-prediction",
             kind: "prison",
             difficulty: "medium",
+            tags: &["dice", "logic"],
             min_players: 2,
             max_players: 6,
             name: "Dice Prediction",
@@ -218,7 +232,15 @@ impl Game for Rules {
             .iter()
             .map(|id| Seat { id: id.clone(), dice: [1; 3], built: false, rerolled: false, prediction: None, score: 0 })
             .collect();
-        let mut s = DpState { seats, rng: Rng::new(seed), phase: Phase::Build, round: 0, time_left_ms: 0, log: Vec::new() };
+        let mut s = DpState {
+            seats,
+            rng: Rng::new(seed),
+            phase: Phase::Build,
+            round: 0,
+            time_left_ms: 0,
+            log: Vec::new(),
+            moments: Moments::default(),
+        };
         s.start_round();
         Ok(s)
     }
@@ -361,6 +383,10 @@ impl Game for Rules {
         let rank = (1..=n).max_by_key(|&r| counts[r]).unwrap_or(1);
         DpMove::Predict { rank }
     }
+
+    fn moments(s: &DpState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 /// Ranks by `key` (higher is better), then 1000 points for the first down to 100 for the last.
@@ -418,6 +444,42 @@ mod tests {
         // p1 exact + best hand, p2 off by one, p3 defaulted to 2 (rank 3): off by one.
         assert_eq!(s.seats.iter().map(|x| x.score).collect::<Vec<_>>(), vec![4, 1, 1]);
         assert_eq!(s.phase, Phase::Result);
+    }
+
+    /// Plays one round with these dice and predictions (everyone keeps).
+    fn round(s: &mut DpState, dice: &[[u8; 3]], predict: &[usize]) {
+        for (i, d) in dice.iter().enumerate() {
+            s.seats[i].dice = *d;
+            Rules::apply_move(s, &format!("p{}", i + 1), DpMove::Keep).unwrap();
+        }
+        for (i, &rank) in predict.iter().enumerate() {
+            Rules::apply_move(s, &format!("p{}", i + 1), DpMove::Predict { rank }).unwrap();
+        }
+        Rules::tick(s, RESULT_MS as u64);
+    }
+
+    #[test]
+    fn a_called_triple_and_a_streak_of_exact_calls_are_replay_moments() {
+        let mut s = Rules::setup(&ids(3), 2).unwrap();
+        // p1 calls its triple; p2's triple is called wrong, no moment.
+        round(&mut s, &[[5, 5, 5], [2, 2, 2], [1, 3, 6]], &[1, 1, 3]);
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Triple 5s, rank 1 called"));
+        // p3 calls rank 3 four times in a row: the fourth is a moment.
+        for _ in 0..3 {
+            round(&mut s, &[[6, 6, 1], [1, 2, 3], [1, 3, 6]], &[3, 3, 3]);
+        }
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p3", "4 exact rank calls in a row"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 
     #[test]

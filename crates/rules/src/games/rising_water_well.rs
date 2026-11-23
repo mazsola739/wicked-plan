@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const TOTAL_MS: i64 = 10 * 60_000;
@@ -40,14 +40,28 @@ pub struct SymbolSum {
 #[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum Riddle {
     /// How many stones of `shape` (and `colour`, when given)?
-    Stones { stones: Vec<Stone>, shape: u8, colour: Option<u8> },
+    Stones {
+        stones: Vec<Stone>,
+        shape: u8,
+        colour: Option<u8>,
+    },
     /// Four groups of marks; how many come next?
-    Scratches { groups: Vec<i64> },
+    Scratches {
+        groups: Vec<i64>,
+    },
     /// `circles` circles = 1 square; 1 triangle = 1 square + `extra` circles.
-    Scales { circles: i64, extra: i64 },
-    Symbols { sums: Vec<SymbolSum> },
+    Scales {
+        circles: i64,
+        extra: i64,
+    },
+    Symbols {
+        sums: Vec<SymbolSum>,
+    },
     /// Angles (degrees clockwise from the top) as seen in the water.
-    Reflection { hour_angle: i64, minute_angle: i64 },
+    Reflection {
+        hour_angle: i64,
+        minute_angle: i64,
+    },
 }
 
 /// One riddle of the given kind (0–4) and its answer.
@@ -130,6 +144,14 @@ pub struct WellState {
     pub time_left_ms: i64,
     pub escaped: bool,
     pub over: bool,
+    /// Replay moments: an escape without a wrong answer, or one in the last minute.
+    pub moments: Moments,
+}
+
+/// `ms` as m:ss.
+fn clock(ms: i64) -> String {
+    let secs = ms.max(0) / 1000;
+    format!("{}:{:02}", secs / 60, secs % 60)
 }
 
 #[derive(Deserialize)]
@@ -167,6 +189,7 @@ impl Game for Rules {
             id: "rising-water-well",
             kind: "hidden",
             difficulty: "hard",
+            tags: &["numbers", "logic"],
             min_players: 1,
             max_players: 1,
             name: "Rising Water Well",
@@ -189,6 +212,7 @@ impl Game for Rules {
             time_left_ms: TOTAL_MS,
             escaped: false,
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -212,6 +236,13 @@ impl Game for Rules {
                         s.escaped = true;
                         s.over = true;
                         s.score += ESCAPE_POINTS + s.time_left_ms / 2000;
+                        // Replay moment: a flawless escape, or one with the water at the top.
+                        let left = clock(s.time_left_ms);
+                        if s.wrong_tries == 0 {
+                            s.moments.push(&s.player.clone(), format!("Flawless escape, {left} to spare"));
+                        } else if s.time_left_ms < 60_000 {
+                            s.moments.push(&s.player.clone(), format!("Out of the well with {left} left"));
+                        }
                     }
                 } else {
                     s.wrong_tries += 1;
@@ -257,6 +288,10 @@ impl Game for Rules {
 
     fn results(s: &WellState) -> Vec<PlayerResult> {
         vec![PlayerResult { player_id: s.player.clone(), rank: 1, points: s.score }]
+    }
+
+    fn moments(s: &WellState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &WellState, _player: &str, seed: u64) -> WellMove {
@@ -341,5 +376,40 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games::<Rules>(1000, 2000);
+    }
+
+    #[test]
+    fn a_flawless_or_last_minute_escape_is_a_replay_moment() {
+        let solve = |s: &mut WellState| {
+            for i in 0..RIDDLES {
+                let v = s.riddles[i].1;
+                Rules::apply_move(s, P, WellMove::Answer { value: v }).unwrap();
+            }
+        };
+        let mut s = Rules::setup(&[P.into()], 7).unwrap();
+        Rules::tick(&mut s, 75_000);
+        solve(&mut s);
+        let m = Rules::moments(&s, P);
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), (P, "Flawless escape, 8:45 to spare"));
+        // One wrong answer and the water near the top.
+        let mut s = Rules::setup(&[P.into()], 7).unwrap();
+        let wrong = (s.riddles[0].1 + 1) % 100;
+        Rules::apply_move(&mut s, P, WellMove::Answer { value: wrong }).unwrap();
+        Rules::tick(&mut s, (TOTAL_MS - WRONG_MS - 42_000) as u64);
+        solve(&mut s);
+        assert_eq!(Rules::moments(&s, P)[0].text, "Out of the well with 0:42 left");
+        // A plain escape is no moment.
+        let mut s = Rules::setup(&[P.into()], 7).unwrap();
+        Rules::apply_move(&mut s, P, WellMove::Answer { value: wrong }).unwrap();
+        solve(&mut s);
+        assert!(s.escaped && Rules::moments(&s, P).is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 1, 2000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 1, "one escape per game: {stats:?}");
     }
 }

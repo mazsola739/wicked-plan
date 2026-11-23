@@ -40,3 +40,6 @@ screen: `apps/web/src/games/WallTerritory.tsx`.
 - Bot: tries every move and wall and keeps the one with the best territory estimate: each square belongs
   to the player with the strictly nearest piece (walking around walls), plus a bonus for area already
   sealed; it compares its own share with the best opponent's.
+- **Replay moments:** a turn whose wall adds 15 squares or more to the mover's secured area ("Wall
+  seals off 21 squares"), and a turn that leaves a rival sealed in with 4 squares or fewer ("{bot-2}
+  shut in with only 2 squares"). Public: the board is open to all.

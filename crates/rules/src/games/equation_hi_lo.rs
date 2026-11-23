@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const HANDS: usize = 3;
@@ -19,6 +19,10 @@ pub const BUILD_MS: i64 = 60_000;
 pub const LOW: f64 = 1.0;
 pub const HIGH: f64 = 20.0;
 pub const SYMBOLS: [char; 4] = ['+', '-', '*', '/'];
+/// Replay moments: an exact 1 or 20 alone on its side winning this many chips or more,
+/// and a pot of this size or more taken without a showdown.
+const EXACT_MOMENT_CHIPS: i64 = 18;
+const FOLD_MOMENT_POT: i64 = 10;
 
 /// Value of a op b op c op d with × ÷ before + −; None when dividing by 0.
 pub fn evaluate(nums: &[i64; 4], ops: &[char; 3]) -> Option<f64> {
@@ -159,6 +163,8 @@ pub struct HiLoState {
     pub log: Vec<String>,
     pub last: Option<Showdown>,
     pub over: bool,
+    /// Replay moments: an exact 1 or 20 that wins a big share alone, a big pot won without a showdown.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -325,6 +331,10 @@ impl HiLoState {
         if live.len() == 1 {
             gains[live[0]] = self.pot;
             self.log.push(format!("{} takes the pot of {}.", self.players[live[0]], self.pot));
+            // A replay moment: everyone else folded on a big pot (no card is revealed).
+            if self.pot >= FOLD_MOMENT_POT {
+                self.moments.push(&self.players[live[0]], format!("Pot of {} taken without a showdown", self.pot));
+            }
         } else {
             for &s in &live {
                 if self.builds[s].is_none() {
@@ -362,6 +372,20 @@ impl HiLoState {
             share(&highs, high_share);
             if lows.is_empty() && highs.is_empty() {
                 share(&live, self.pot);
+            }
+            // A replay moment: an exact 1 or 20, alone on its side, winning a big share (every equation is shown now).
+            for (winners, target) in [(&lows, LOW), (&highs, HIGH)] {
+                if let [w] = winners[..] {
+                    let b = self.builds[w].as_ref().expect("built");
+                    if b.value.is_some_and(|v| (v - target).abs() < 1e-9) && gains[w] >= EXACT_MOMENT_CHIPS {
+                        let won = if gains[w] == self.pot {
+                            format!("sweeps the pot of {}", self.pot)
+                        } else {
+                            format!("takes {} chips", gains[w])
+                        };
+                        self.moments.push(&self.players[w], format!("Exactly {target} {won}: {}", b.text));
+                    }
+                }
             }
             self.log.push(format!("Showdown: pot {} shared.", self.pot));
         }
@@ -411,6 +435,7 @@ impl Game for Rules {
             id: "equation-hi-lo",
             kind: "main",
             difficulty: "medium",
+            tags: &["numbers", "cards", "bluff"],
             min_players: 3,
             max_players: 6,
             name: "Equation Hi-Lo",
@@ -447,6 +472,7 @@ impl Game for Rules {
             log: Vec::new(),
             last: None,
             over: false,
+            moments: Moments::default(),
         };
         s.start_hand();
         Ok(s)
@@ -581,6 +607,10 @@ impl Game for Rules {
             HiLoMove::Fold
         }
     }
+
+    fn moments(s: &HiLoState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -705,5 +735,79 @@ mod tests {
             bot_games_with::<Rules>(300, n, 4000);
         }
         bot_games_with::<Rules>(400, 4, 4000);
+    }
+
+    #[test]
+    fn exact_hits_on_a_big_pot_and_a_big_pot_without_showdown_are_replay_moments() {
+        let build = |s: &mut HiLoState, p: &str, ops: [char; 3], side: Side| {
+            Rules::apply_move(s, p, HiLoMove::Build { order: [0, 1, 2, 3], ops, side }).unwrap();
+        };
+        // Bets as (seat, 'r'aise / 'c'all / 'f'old).
+        let bet = |s: &mut HiLoState, moves: &[(&str, char)]| {
+            for &(p, m) in moves {
+                let mv = match m {
+                    'r' => HiLoMove::Raise,
+                    'f' => HiLoMove::Fold,
+                    _ => HiLoMove::Call,
+                };
+                Rules::apply_move(s, p, mv).unwrap();
+            }
+        };
+        // A small pot taken without a showdown is no moment.
+        let mut s = Rules::setup(&ids(3), 4).unwrap();
+        bet(&mut s, &[("p2", 'r'), ("p3", 'f'), ("p1", 'f')]);
+        assert!(Rules::moments(&s, "p1").is_empty());
+        // Four seats, two raises in both rounds: a pot of 36, split 18 / 18.
+        let mut s = Rules::setup(&ids(4), 3).unwrap();
+        s.cards = vec![[10, 10, 0, 3], [1, 1, 1, 1], [2, 2, 2, 2], [2, 2, 2, 2]];
+        let round = [("p2", 'r'), ("p3", 'r'), ("p4", 'c'), ("p1", 'c'), ("p2", 'c')];
+        bet(&mut s, &round);
+        build(&mut s, "p1", ['+', '-', '/'], Side::High); // 10 + 10 − 0 ÷ 3 = 20
+        build(&mut s, "p2", ['*', '+', '-'], Side::Low); // 1 × 1 + 1 − 1 = 1
+        build(&mut s, "p3", ['+', '-', '/'], Side::High); // 3
+        build(&mut s, "p4", ['+', '-', '/'], Side::Low); // 3
+        bet(&mut s, &round);
+        assert_eq!(s.last.as_ref().unwrap().pot, 36);
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Exactly 1 takes 18 chips: 1 × 1 + 1 − 1"));
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p1", "Exactly 20 takes 18 chips: 10 + 10 − 0 ÷ 3"));
+        // Hand 2: a pot of 20 after the build; p3 raises again and everyone else folds.
+        bet(&mut s, &[("p3", 'r'), ("p4", 'r'), ("p1", 'c'), ("p2", 'c'), ("p3", 'c')]);
+        for p in ["p1", "p2", "p3", "p4"] {
+            build(&mut s, p, ['+', '-', '*'], Side::High);
+        }
+        bet(&mut s, &[("p3", 'r'), ("p4", 'f'), ("p1", 'f'), ("p2", 'f')]);
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 3);
+        assert_eq!((m[2].by.as_str(), m[2].text.as_str()), ("p3", "Pot of 22 taken without a showdown"));
+    }
+
+    #[test]
+    fn an_exact_hit_alone_on_a_big_pot_sweeps_it() {
+        let mut s = Rules::setup(&ids(4), 3).unwrap();
+        s.cards = vec![[10, 10, 0, 3], [1, 1, 1, 1], [2, 2, 2, 2], [2, 2, 2, 2]];
+        // Everyone goes High: p1's exact 20 wins it all, nobody is Low.
+        for _ in 0..2 {
+            for (p, raise) in [("p2", true), ("p3", true), ("p4", false), ("p1", false), ("p2", false)] {
+                Rules::apply_move(&mut s, p, if raise { HiLoMove::Raise } else { HiLoMove::Call }).unwrap();
+            }
+            if s.phase == Phase::Build {
+                for (p, ops) in [("p1", ['+', '-', '/']), ("p2", ['*', '+', '-']), ("p3", ['+', '-', '/']), ("p4", ['+', '-', '/'])] {
+                    Rules::apply_move(&mut s, p, HiLoMove::Build { order: [0, 1, 2, 3], ops, side: Side::High }).unwrap();
+                }
+            }
+        }
+        let m = Rules::moments(&s, "p4");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Exactly 20 sweeps the pot of 36: 10 + 10 − 0 ÷ 3"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 4_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

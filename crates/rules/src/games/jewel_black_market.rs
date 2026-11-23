@@ -6,12 +6,14 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 3;
 pub const TURN_MS: i64 = 20_000;
 pub const BUYER: usize = 3;
+/// A card scoring this much or more at a reveal is a replay moment.
+const BIG_SCORE: i64 = 6;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -82,6 +84,8 @@ pub struct JewelState {
     pub logs: Vec<Vec<String>>,
     pub last: Option<Reveal>,
     pub over: bool,
+    /// Replay moments: a card that scores 6 or more, the lead stolen in the last round.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -187,8 +191,24 @@ impl JewelState {
             return;
         }
         let points: Vec<i64> = self.hands.iter().map(|&c| card_points(c, &self.buyer)).collect();
+        let top_before = self.scores.iter().copied().max().unwrap_or(0);
         for (s, p) in self.scores.iter_mut().zip(&points) {
             *s += p;
+        }
+        // Replay moments (every card is revealed now).
+        for (seat, &p) in points.iter().enumerate() {
+            if p >= BIG_SCORE {
+                let card = self.hands[seat];
+                let matches = self.buyer.iter().filter(|b| b.kind == card.kind).count();
+                self.moments.push(&self.players[seat], format!("{} × {matches} in the buyer's space (+{p})", card.name()));
+            }
+        }
+        let top = self.scores.iter().copied().max().unwrap_or(0);
+        if let [leader] = (0..self.scores.len()).filter(|&i| self.scores[i] == top).collect::<Vec<_>>()[..]
+            && self.round + 1 == ROUNDS
+            && top - points[leader] < top_before
+        {
+            self.moments.push(&self.players[leader], "Lead stolen in the very last round");
         }
         self.last = Some(Reveal { round: self.round + 1, cards: self.hands.clone(), buyer: self.buyer.clone(), discard: self.discard, points });
         self.round += 1;
@@ -225,6 +245,7 @@ impl Game for Rules {
             id: "jewel-black-market",
             kind: "main",
             difficulty: "medium",
+            tags: &["cards", "memory"],
             min_players: 4,
             max_players: 8,
             name: "Jewel Black Market",
@@ -251,6 +272,7 @@ impl Game for Rules {
             logs: Vec::new(),
             last: None,
             over: false,
+            moments: Moments::default(),
         };
         s.deal();
         Ok(s)
@@ -340,6 +362,10 @@ impl Game for Rules {
         } else {
             JewelMove::SwapDiscard
         }
+    }
+
+    fn moments(s: &JewelState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -431,5 +457,37 @@ mod tests {
         for n in [4, 8] {
             bot_games_with::<Rules>(500, n, 2000);
         }
+    }
+
+    #[test]
+    fn a_big_card_and_a_last_round_steal_are_replay_moments() {
+        let mut s = Rules::setup(&ids(4), 4).unwrap();
+        // Round 1: p1's Silver 4 meets two silvers (+8); p3's Silver 2 (+4) is no moment.
+        s.hands = vec![card(Kind::Silver, 4), card(Kind::Bomb, -6), card(Kind::Silver, 2), card(Kind::Bronze, 1)];
+        s.buyer = vec![card(Kind::Gold, 4), card(Kind::Silver, 3), card(Kind::Silver, 3)];
+        s.pos = s.queue.len() - 1;
+        s.advance();
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Silver 4 × 2 in the buyer's space (+8)"));
+        // The last round: p4 trails p1 by 3 and scores 5.
+        s.round = ROUNDS - 1;
+        s.scores = vec![8, 0, 0, 5];
+        s.hands = vec![card(Kind::Bronze, 1), card(Kind::Bronze, 2), card(Kind::Silver, 2), card(Kind::Gold, 5)];
+        s.buyer = vec![card(Kind::Gold, 4), card(Kind::Diamond, 5), card(Kind::Silver, 3)];
+        s.pos = s.queue.len() - 1;
+        s.advance();
+        assert!(s.over);
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p4", "Lead stolen in the very last round"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 2_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 3, "too many in one game: {stats:?}");
     }
 }

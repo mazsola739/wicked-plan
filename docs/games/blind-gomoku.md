@@ -31,3 +31,6 @@ Hidden game, solo against the house bot (1 seat). Code: `crates/rules/src/games/
 - View: the board (`null` empty, `"down"`, `"dark"`, `"light"`), the newest tile, whose turn, peeks left,
   whether a peek is showing, the result and the winning line at the end (then every tile is shown).
 - Desktop: arrows move the cursor, Enter or Space places, P peeks.
+- **Replay moments:** your winning line, named by its length: "Five in a row without a peek" when
+  no peek was used, else "Five in a row on a blind board" ("Six in a row…" for a longer one).
+  Public: the game ends there and every tile is shown. The house bot's win is no moment.

@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 6;
@@ -96,6 +96,9 @@ pub struct PbState {
     pub accepted: u32,
     pub time_left_ms: i64,
     pub log: Vec<Opening>,
+    /// Replay moments: a right claim that two or more doubters pay for; a lone doubter
+    /// catching a lie in a bank of 6+ coins.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -233,6 +236,16 @@ impl PbState {
         for &l in &losers {
             self.seats[l].score -= 1;
         }
+        // Replay moments (the opened bank, the doubters and the losers are public): a right claim
+        // that two or more doubters pay for, or a lone doubter catching a lie in a bank of 6+ coins.
+        let colour = if self.colour == Colour::White { "white" } else { "black" };
+        if claim == truth && doubters.len() >= 2 {
+            self.moments.push(&self.seats[claimer].id.clone(), format!("Claim of {claim} {colour} holds: {} doubters pay", doubters.len()));
+        } else if claim != truth && doubters.len() == 1 && self.coins() >= 6 {
+            let by = self.seats[doubters[0]].id.clone();
+            let liar = self.seats[claimer].id.clone();
+            self.moments.push(&by, format!("Lone doubt: {{{liar}}} claimed {claim} {colour}, there were {truth}"));
+        }
         let ids = |v: &[usize]| v.iter().map(|&j| self.seats[j].id.clone()).collect::<Vec<_>>();
         self.log.push(Opening {
             round: self.round,
@@ -288,6 +301,7 @@ impl Game for Rules {
             id: "piggy-bank",
             kind: "prison",
             difficulty: "medium",
+            tags: &["bluff", "numbers"],
             min_players: 3,
             max_players: 6,
             name: "Piggy Bank",
@@ -314,6 +328,7 @@ impl Game for Rules {
             accepted: 0,
             time_left_ms: 0,
             log: Vec::new(),
+            moments: Moments::default(),
         };
         s.start_round(starter);
         Ok(s)
@@ -432,6 +447,10 @@ impl Game for Rules {
             }
             _ => Vec::new(),
         }
+    }
+
+    fn moments(s: &PbState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &PbState, player: &str, seed: u64) -> PbMove {
@@ -564,5 +583,57 @@ mod tests {
         bot_games_with::<Rules>(400, 4, 5_000);
         bot_games_with::<Rules>(300, 3, 5_000);
         bot_games_with::<Rules>(300, 6, 5_000);
+    }
+
+    #[test]
+    fn a_right_claim_two_doubters_pay_for_is_a_replay_moment() {
+        let mut s = table();
+        Rules::apply_move(&mut s, "p1", PbMove::Drop { white: 2, black: 0 }).unwrap();
+        Rules::apply_move(&mut s, "p2", PbMove::Claim { count: 2 }).unwrap();
+        Rules::apply_move(&mut s, "p1", PbMove::Doubt).unwrap();
+        Rules::apply_move(&mut s, "p3", PbMove::Doubt).unwrap();
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].by, "p2");
+        assert_eq!(m[0].text, "Claim of 2 white holds: 2 doubters pay");
+        // One doubter paying is no moment.
+        let mut s = table();
+        Rules::apply_move(&mut s, "p1", PbMove::Drop { white: 2, black: 0 }).unwrap();
+        Rules::apply_move(&mut s, "p2", PbMove::Claim { count: 2 }).unwrap();
+        Rules::apply_move(&mut s, "p1", PbMove::Doubt).unwrap();
+        Rules::apply_move(&mut s, "p3", PbMove::Trust).unwrap();
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn a_lone_doubt_catching_a_lie_in_a_big_bank_is_a_replay_moment() {
+        let mut s = table();
+        s.drops = vec![Drop { seat: 2, white: 2, black: 3 }];
+        s.accepted = 2;
+        s.holder = 2;
+        Rules::apply_move(&mut s, "p3", PbMove::Drop { white: 1, black: 0 }).unwrap();
+        // Six coins, three white; p1 claims four.
+        Rules::apply_move(&mut s, "p1", PbMove::Claim { count: 4 }).unwrap();
+        Rules::apply_move(&mut s, "p2", PbMove::Doubt).unwrap();
+        Rules::apply_move(&mut s, "p3", PbMove::Trust).unwrap();
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].by, "p2");
+        assert_eq!(m[0].text, "Lone doubt: {p1} claimed 4 white, there were 3");
+        // The same catch in a small bank is no moment.
+        let mut s = table();
+        Rules::apply_move(&mut s, "p1", PbMove::Drop { white: 1, black: 1 }).unwrap();
+        Rules::apply_move(&mut s, "p2", PbMove::Claim { count: 2 }).unwrap();
+        Rules::apply_move(&mut s, "p1", PbMove::Doubt).unwrap();
+        Rules::apply_move(&mut s, "p3", PbMove::Trust).unwrap();
+        assert_eq!(s.seats[1].score, -1);
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

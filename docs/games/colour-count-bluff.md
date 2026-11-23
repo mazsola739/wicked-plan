@@ -31,3 +31,7 @@ Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/c
 - Bot: counts its own cards plus a quarter of the cards it cannot see; calls a bet well above that
   estimate, otherwise makes the safest raise.
 - Desktop: R/B/G/Y choose a colour, + and − change the count, Enter bets, C calls.
+- **Replay moments:** at a call, a bet at least 2 above the table's average (cards in play ÷ 4)
+  that holds exactly, for the bettor ("Exactly 6 red: {bot-2}'s call fails"); or a bet 3 or more
+  above what is there, for the caller ("{bot-1}'s 6 green caught: only 3 there"). Public: every
+  hand is shown at the call.

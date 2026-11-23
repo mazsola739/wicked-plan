@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const SIZE: i32 = 5;
@@ -20,6 +20,8 @@ pub const BID_MS: i64 = 15_000;
 pub const PLACE_MS: i64 = 15_000;
 pub const FULL: i64 = 25;
 pub const PER_MATCH: i64 = 5;
+/// The smallest all-in winning bid that is a replay moment.
+pub const ALL_IN: i64 = 5;
 
 /// One cell of a pattern: offset and animal.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -152,6 +154,9 @@ pub struct TileState {
     pub time_left_ms: i64,
     pub log: Vec<String>,
     pub over: bool,
+    /// Replay moments: a tile won with every chip (public), a placement that completes the
+    /// placer's own secret pattern (only the placer sees it).
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -220,6 +225,10 @@ impl TileState {
         let animal = ANIMALS[self.tile()];
         if best.len() == 1 {
             let w = best[0];
+            // A replay moment: every chip (5 or more) on one tile; winning bids are public.
+            if top >= ALL_IN && top == self.chips[w] {
+                self.moments.push(&self.players[w].clone(), format!("All {top} chips on the {animal}"));
+            }
             self.chips[w] -= top;
             self.log.push(format!("{} wins the {animal} for {top}.", self.players[w]));
             self.phase = Phase::Place(w);
@@ -234,7 +243,18 @@ impl TileState {
         if cell >= CELLS || self.grid[cell].is_some() {
             return Err("Pick an empty cell".into());
         }
+        let before = matches_in(&self.grid, &self.places[seat]).0;
         self.grid[cell] = Some(self.tile());
+        // A replay moment: the placer completes its own secret pattern; only it may know.
+        let done = matches_in(&self.grid, &self.places[seat]).0.saturating_sub(before);
+        if done > 0 {
+            let text = match done {
+                1 => format!("Secret pattern completed (+{FULL})"),
+                n => format!("Secret pattern completed {n} times (+{})", FULL * n as i64),
+            };
+            let me = self.players[seat].clone();
+            self.moments.push_for(&me, text, &[&me]);
+        }
         self.log.push(format!("{} places the {} at {}.", self.players[seat], ANIMALS[self.tile()], cell_name(cell)));
         self.next_auction();
         Ok(())
@@ -270,6 +290,7 @@ impl Game for Rules {
             id: "animal-tile-auction",
             kind: "main",
             difficulty: "medium",
+            tags: &["bidding", "board"],
             min_players: 3,
             max_players: 6,
             name: "Animal Tile Auction",
@@ -312,6 +333,7 @@ impl Game for Rules {
             time_left_ms: BID_MS,
             log: Vec::new(),
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -422,6 +444,10 @@ impl Game for Rules {
         let pace = chips as f64 / left * 2.0;
         let want = (gain / 5.0).min(pace + 1.0) * (0.7 + 0.6 * rng.next_f64());
         TileMove::Bid { chips: (want.round() as i64).clamp(0, chips) }
+    }
+
+    fn moments(s: &TileState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -544,5 +570,41 @@ mod tests {
         // Measured: about 1.3 full patterns and 7 chips left per bot.
         assert!(full as f64 / games as f64 > 0.8);
         assert!(chips as f64 / games as f64 > 2.0, "bots pace their chips");
+    }
+
+    #[test]
+    fn an_all_in_win_and_a_completed_pattern_are_replay_moments() {
+        let mut s = Rules::setup(&ids(3), 1).unwrap();
+        s.deck[0] = 0;
+        s.chips[0] = 6;
+        Rules::apply_move(&mut s, "p1", TileMove::Bid { chips: 6 }).unwrap();
+        Rules::apply_move(&mut s, "p2", TileMove::Bid { chips: 1 }).unwrap();
+        Rules::apply_move(&mut s, "p3", TileMove::Bid { chips: 0 }).unwrap();
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "All 6 chips on the fox"));
+        // p1 places the fox to finish its secret fox–owl–frog line: only p1 sees that moment.
+        s.patterns[0] = line(1, 2, 0);
+        s.places[0] = placements(&s.patterns[0]);
+        s.grid = vec![None; CELLS];
+        (s.grid[0], s.grid[1]) = (Some(1), Some(2));
+        Rules::apply_move(&mut s, "p1", TileMove::Place { cell: 2 }).unwrap();
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p1", "Secret pattern completed (+25)"));
+        assert_eq!(Rules::moments(&s, "p2").len(), 1);
+        // A cheap win is no moment.
+        let mut s = Rules::setup(&ids(3), 1).unwrap();
+        Rules::apply_move(&mut s, "p1", TileMove::Bid { chips: 4 }).unwrap();
+        Rules::apply_move(&mut s, "p2", TileMove::Bid { chips: 0 }).unwrap();
+        Rules::apply_move(&mut s, "p3", TileMove::Bid { chips: 0 }).unwrap();
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

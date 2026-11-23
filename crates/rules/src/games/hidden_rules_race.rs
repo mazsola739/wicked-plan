@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const SIZE: i32 = 7;
@@ -35,6 +35,14 @@ impl Dir {
             Dir::Right => (1, 0),
             Dir::Down => (0, 1),
             Dir::Left => (-1, 0),
+        }
+    }
+    fn name(self) -> &'static str {
+        match self {
+            Dir::Up => "up",
+            Dir::Right => "right",
+            Dir::Down => "down",
+            Dir::Left => "left",
         }
     }
     fn turned(self, quarters: usize) -> Dir {
@@ -120,6 +128,8 @@ pub struct HrrState {
     pub revealed: Vec<usize>,
     pub history: Vec<Vec<Step>>,
     pub rng: Rng,
+    /// Replay moments: a hidden rule used to turn onto the goal, a two-square finish past a closer piece.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -194,6 +204,19 @@ impl HrrState {
             self.pieces[i].choice = None;
             steps.push(Step { player: self.pieces[i].id.clone(), colour, dir, from, to });
         }
+        // Replay moments for pieces that reach the goal (each step is in the public log anyway).
+        for st in steps.iter().filter(|st| st.to == GOAL && st.from != GOAL) {
+            let Some(d) = st.dir else { continue };
+            let (dx, dy) = d.delta();
+            let (mx, my) = ((st.to.0 - st.from.0).signum(), (st.to.1 - st.from.1).signum());
+            if (mx, my) == (-dx, -dy) {
+                self.moments.push(&st.player, format!("Pointed {}, backed onto the goal", d.name()));
+            } else if (mx, my) != (dx, dy) {
+                self.moments.push(&st.player, format!("Pointed {}, turned onto the goal", d.name()));
+            } else if let Some(closer) = steps.iter().find(|o| distance(o.from) < distance(st.from)) {
+                self.moments.push(&st.player, format!("Two squares onto the goal, past {{{}}}", closer.player));
+            }
+        }
         self.history.push(steps);
         if CLUE_ROUNDS.contains(&self.round) {
             let hidden: Vec<usize> = (0..5).filter(|c| !self.revealed.contains(c)).collect();
@@ -259,6 +282,7 @@ impl Game for Rules {
             id: "hidden-rules-race",
             kind: "main",
             difficulty: "hard",
+            tags: &["logic", "board"],
             min_players: 4,
             max_players: 8,
             name: "Hidden Rules Race",
@@ -286,6 +310,7 @@ impl Game for Rules {
             revealed: Vec::new(),
             history: Vec::new(),
             rng,
+            moments: Moments::default(),
         })
     }
 
@@ -393,6 +418,10 @@ impl Game for Rules {
         let good: Vec<Dir> = Dir::ALL.into_iter().filter(|&d| expected(d) <= best + 1e-9).collect();
         HrrMove::Go { dir: *rng.pick(&good) }
     }
+
+    fn moments(s: &HrrState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -471,5 +500,40 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<Rules>(1000, 4, 3000);
         bot_games_with::<Rules>(200, 8, 6000);
+    }
+
+    #[test]
+    fn turning_onto_the_goal_and_a_two_square_finish_are_replay_moments() {
+        let mut s = Rules::setup(&players(4), 3).unwrap();
+        // Every square red, red turns right: p1 points up from (2, 3) and lands on (3, 3).
+        s.board = vec![0; (SIZE * SIZE) as usize];
+        s.rules = [Effect::TurnRight, Effect::StepOne, Effect::StepTwo, Effect::Backwards, Effect::TurnLeft];
+        s.pieces[0].pos = (2, 3);
+        for p in players(4) {
+            Rules::apply_move(&mut s, &p, HrrMove::Go { dir: Dir::Up }).unwrap();
+        }
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Pointed up, turned onto the goal"));
+        // Red steps two now: p2 jumps from (3, 1) past p3 at (3, 2), which points away.
+        let mut s = Rules::setup(&players(4), 3).unwrap();
+        s.board = vec![0; (SIZE * SIZE) as usize];
+        s.rules = [Effect::StepTwo, Effect::StepOne, Effect::TurnRight, Effect::Backwards, Effect::TurnLeft];
+        s.pieces[1].pos = (3, 1);
+        s.pieces[2].pos = (3, 2);
+        for (p, dir) in [("p1", Dir::Up), ("p2", Dir::Down), ("p3", Dir::Up), ("p4", Dir::Up)] {
+            Rules::apply_move(&mut s, p, HrrMove::Go { dir }).unwrap();
+        }
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Two squares onto the goal, past {p3}"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

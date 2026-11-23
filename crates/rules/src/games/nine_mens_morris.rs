@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const PIECES: u8 = 9;
@@ -268,6 +268,8 @@ pub struct MorrisState {
     time_left_ms: i64,
     over: bool,
     winner: Option<usize>,
+    /// Replay moments: the winning move, two mills closed with one piece.
+    moments: Moments,
 }
 
 impl MorrisState {
@@ -283,6 +285,14 @@ impl MorrisState {
         if self.pos.lost(self.turn) {
             self.over = true;
             self.winner = Some(1 - self.turn);
+            // A replay moment: the winning move (the board is open to both).
+            let loser = &self.players[self.turn];
+            let text = if self.pos.pieces(self.turn) < 3 {
+                format!("Mill closed: {{{loser}}} is down to 2 pieces")
+            } else {
+                format!("{{{loser}}} blocked in, not a move left")
+            };
+            self.moments.push(&self.players[1 - self.turn], text);
         } else if self.plies >= MAX_PLIES || self.quiet >= QUIET_PLIES {
             self.over = true;
         }
@@ -333,6 +343,7 @@ impl Game for NineMensMorris {
             id: "nine-mens-morris",
             kind: "final-duel",
             difficulty: "medium",
+            tags: &["board"],
             min_players: 2,
             max_players: 2,
             name: "Nine Men's Morris",
@@ -354,6 +365,7 @@ impl Game for NineMensMorris {
             time_left_ms: TURN_MS,
             over: false,
             winner: None,
+            moments: Moments::default(),
         })
     }
 
@@ -390,6 +402,9 @@ impl Game for NineMensMorris {
         if s.pos.step(p, from, to) {
             s.pending_remove = true;
             s.time_left_ms = TURN_MS;
+            if POINT_MILLS[to].iter().all(|&m| MILLS[m].iter().all(|&j| s.pos.board[j] == p as i8)) {
+                s.moments.push(player, "Two mills closed with one piece");
+            }
         } else {
             s.end_turn(false);
         }
@@ -472,6 +487,10 @@ impl Game for NineMensMorris {
 
     fn to_move(s: &MorrisState) -> Vec<String> {
         if s.over { Vec::new() } else { vec![s.players[s.turn].clone()] }
+    }
+
+    fn moments(s: &MorrisState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &MorrisState, player: &str, seed: u64) -> MorrisMove {
@@ -605,5 +624,57 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games_with::<NineMensMorris>(1000, 2, 2000);
+    }
+
+    /// A game where "a" (to move) has pieces on `a` and "b" on `b`, with these hands.
+    fn position(a: &[usize], b: &[usize], hand: u8) -> MorrisState {
+        let mut s = new();
+        s.pos = Pos { board: [EMPTY; 24], hand: [hand; 2] };
+        for &i in a {
+            s.pos.board[i] = 0;
+        }
+        for &i in b {
+            s.pos.board[i] = 1;
+        }
+        s
+    }
+
+    #[test]
+    fn the_winning_move_is_a_replay_moment() {
+        // A mill that takes "b" down to 2 pieces.
+        let mut s = position(&[0, 1, 3, 20], &[10, 12, 14], 0);
+        go(&mut s, "a", MorrisMove::Move { from: 3, to: 2 });
+        assert!(NineMensMorris::moments(&s, "b").is_empty());
+        go(&mut s, "a", MorrisMove::Remove { at: 10 });
+        let m = NineMensMorris::moments(&s, "b");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("a", "Mill closed: {b} is down to 2 pieces"));
+        // A slide that leaves "b" no move.
+        let mut s = position(&[1, 3, 5, 15], &[0, 2, 4, 6], 0);
+        go(&mut s, "a", MorrisMove::Move { from: 15, to: 7 });
+        assert_eq!(s.winner, Some(0));
+        let m = NineMensMorris::moments(&s, "a");
+        assert_eq!((m.len(), m[0].text.as_str()), (1, "{b} blocked in, not a move left"));
+    }
+
+    #[test]
+    fn two_mills_with_one_piece_is_a_replay_moment() {
+        let mut s = position(&[0, 2, 9, 17], &[10, 12, 14, 20], 5);
+        go(&mut s, "a", MorrisMove::Place { to: 1 });
+        let m = NineMensMorris::moments(&s, "b");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("a", "Two mills closed with one piece"));
+        // Still one removal, and the game goes on.
+        go(&mut s, "a", MorrisMove::Remove { at: 10 });
+        assert!(!s.over);
+        assert_eq!(NineMensMorris::moments(&s, "a").len(), 1);
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<NineMensMorris>(300, 2, 2000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 8, "too common: {stats:?}");
+        assert!(stats.most <= 3, "too many in one game: {stats:?}");
     }
 }

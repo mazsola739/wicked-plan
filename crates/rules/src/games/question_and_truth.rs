@@ -7,7 +7,7 @@ use std::sync::OnceLock;
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const CARDS: usize = 8;
@@ -139,6 +139,8 @@ pub struct TruthState {
     seats: [Seat; 2],
     turn: usize,
     time_left_ms: i64,
+    /// Replay moments: a row cracked with tokens to spare; a lucky whole-row guess.
+    pub moments: Moments,
 }
 
 impl TruthState {
@@ -253,6 +255,7 @@ impl Game for QuestionAndTruth {
             id: "question-and-truth",
             kind: "final-duel",
             difficulty: "hard",
+            tags: &["logic"],
             min_players: 2,
             max_players: 2,
             name: "Question and Truth",
@@ -269,7 +272,7 @@ impl Game for QuestionAndTruth {
             Seat { id: id.clone(), row, tokens: TOKENS, log: Vec::new(), guess: None, candidates: all_rows().to_vec() }
         };
         let seats = [seat(a), seat(b)];
-        Ok(TruthState { seats, turn: 0, time_left_ms: TURN_MS })
+        Ok(TruthState { seats, turn: 0, time_left_ms: TURN_MS, moments: Moments::default() })
     }
 
     fn apply_move(s: &mut TruthState, player: &str, mv: TruthMove) -> Result<(), String> {
@@ -293,6 +296,13 @@ impl Game for QuestionAndTruth {
                 me.tokens -= question.cost();
                 me.log.push((question, answer));
                 me.candidates.retain(|r| question.answer(r) == answer);
+                // Replay moment: only one row fits the answers and tokens are left. Every answer is
+                // public, so anyone could see it; the row itself stays secret.
+                if me.candidates.len() == 1 && me.tokens > 0 {
+                    let (by, tokens) = (me.id.clone(), me.tokens);
+                    let plural = if tokens == 1 { "" } else { "s" };
+                    s.moments.push(&by, format!("Row cracked with {tokens} token{plural} to spare"));
+                }
             }
             TruthMove::Guess { order } => {
                 let mut sorted = order.clone();
@@ -301,6 +311,17 @@ impl Game for QuestionAndTruth {
                     return Err("Put each card 1–8 in the row once".into());
                 }
                 s.seats[i].guess = Some(order.try_into().expect("8 cards"));
+                // Replay moment, once both rows are open at the end: a whole row guessed right while
+                // two or more rows still fitted the answers.
+                if s.over() {
+                    for k in 0..2 {
+                        let left = s.seats[k].candidates.len();
+                        if s.right(k) == CARDS && left > 1 {
+                            let by = s.seats[k].id.clone();
+                            s.moments.push(&by, format!("Lucky guess: the right row of {left} left"));
+                        }
+                    }
+                }
             }
         }
         s.next_turn();
@@ -358,6 +379,10 @@ impl Game for QuestionAndTruth {
 
     fn to_move(s: &TruthState) -> Vec<String> {
         if s.over() { Vec::new() } else { vec![s.seats[s.turn].id.clone()] }
+    }
+
+    fn moments(s: &TruthState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &TruthState, player: &str, seed: u64) -> TruthMove {
@@ -489,5 +514,31 @@ mod tests {
         }
         assert!(right >= 40 * 6, "bots find most positions: {right}");
         assert!(full < 40, "not every row is found");
+    }
+
+    #[test]
+    fn a_row_cracked_with_tokens_left_and_a_lucky_guess_are_replay_moments() {
+        let mut s = new();
+        let other = [6, 8, 4, 2, 1, 3, 5, 7];
+        s.seats[0].candidates = vec![[8, 6, 4, 2, 1, 3, 5, 7], other];
+        ask(&mut s, "a", Question::CardAt { pos: 1 }).unwrap();
+        let m = QuestionAndTruth::moments(&s, "b");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("a", "Row cracked with 7 tokens to spare"));
+        // b guesses its way to the right row while two rows still fit: lucky, shown once the game ends.
+        s.seats[1].candidates = vec![[1, 2, 3, 4, 5, 6, 7, 8], [2, 1, 3, 4, 5, 6, 7, 8]];
+        QuestionAndTruth::apply_move(&mut s, "b", TruthMove::Guess { order: vec![1, 2, 3, 4, 5, 6, 7, 8] }).unwrap();
+        assert_eq!(QuestionAndTruth::moments(&s, "a").len(), 1, "nothing before the end");
+        QuestionAndTruth::apply_move(&mut s, "a", TruthMove::Guess { order: vec![8, 6, 4, 2, 1, 3, 5, 7] }).unwrap();
+        let m = QuestionAndTruth::moments(&s, "a");
+        assert_eq!(m.len(), 2, "a's right guess from one row left is no luck");
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("b", "Lucky guess: the right row of 2 left"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<QuestionAndTruth>(300, 2, 500);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 2, "too many in one game: {stats:?}");
     }
 }

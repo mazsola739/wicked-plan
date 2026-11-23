@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 7;
@@ -79,6 +79,8 @@ pub struct State {
     pub turn_left_ms: i64,
     pub last: Vec<Cell>,
     pub over: bool,
+    /// Replay moments: the first 3×3 square on the field, any 4×4 square.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -227,6 +229,7 @@ impl Game for LayTheGrass {
             id: "lay-the-grass",
             kind: "mini-solo",
             difficulty: "medium",
+            tags: &["board"],
             min_players: 1,
             max_players: 4,
             name: "Lay the Grass",
@@ -261,6 +264,7 @@ impl Game for LayTheGrass {
             turn_left_ms: TURN_MS,
             last: Vec::new(),
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -282,9 +286,17 @@ impl Game for LayTheGrass {
         if unique.len() != cells.len() || !orientations(&s.pieces[s.round]).contains(&normalize(&cells)) {
             return Err("That is not this round's piece".into());
         }
+        let before = s.scores();
         for &c in &cells {
             let i = s.idx(c).expect("checked");
             s.cells[i] = seat as i8;
+        }
+        // Replay moments: a 4×4 square, or the first 3×3 square anyone lays (the field is public).
+        let square = tally(&s.cells, s.size, seat as i8).square;
+        if square >= 4 && before[seat].square < 4 {
+            s.moments.push(player, format!("A {square}×{square} square of grass: {} bonus", 20 * square * square));
+        } else if square >= 3 && before.iter().all(|t| t.square < 3) {
+            s.moments.push(player, "First 3×3 square of grass on the field");
         }
         s.last = cells;
         s.advance();
@@ -332,6 +344,10 @@ impl Game for LayTheGrass {
 
     fn to_move(s: &State) -> Vec<String> {
         if s.over { Vec::new() } else { vec![s.players[s.seat_to_move()].clone()] }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &State, _player: &str, seed: u64) -> Move {
@@ -440,5 +456,45 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<LayTheGrass>(1000, 1, 200);
         bot_games_with::<LayTheGrass>(150, 4, 400);
+    }
+
+    #[test]
+    fn the_first_3x3_and_any_4x4_square_are_replay_moments() {
+        let mut s = LayTheGrass::setup(&players(2), 1).unwrap();
+        s.cells.iter_mut().for_each(|c| *c = EMPTY);
+        let mut grass = |cells: &[Cell], seat: i8| {
+            for &(x, y) in cells {
+                s.cells[(y * s.size + x) as usize] = seat;
+            }
+        };
+        // p1 has a 3×2 block (columns 0–2, rows 1–2); p2 a 2×3 block (columns 6–7, rows 0–2).
+        grass(&[(0, 1), (1, 1), (2, 1), (0, 2), (1, 2), (2, 2)], 0);
+        grass(&[(6, 0), (7, 0), (6, 1), (7, 1), (6, 2), (7, 2)], 1);
+        s.pieces[0] = vec![(0, 0), (1, 0), (2, 0)];
+        s.pieces[1] = vec![(0, 0), (1, 0), (2, 0), (3, 0)];
+        // p1 lays row 0 and makes the first 3×3 on the field.
+        LayTheGrass::apply_move(&mut s, "p1", Move::Place { cells: vec![(0, 0), (1, 0), (2, 0)] }).unwrap();
+        // p2 makes a 3×3 too: not the first one, no moment.
+        LayTheGrass::apply_move(&mut s, "p2", Move::Place { cells: vec![(5, 0), (5, 1), (5, 2)] }).unwrap();
+        let m = LayTheGrass::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "First 3×3 square of grass on the field"));
+        // Round 2 starts with p2; then p1, with row 3 already grown, completes a 4×4 with column 3.
+        LayTheGrass::apply_move(&mut s, "p2", Move::Place { cells: vec![(0, 7), (1, 7), (2, 7), (3, 7)] }).unwrap();
+        for x in 0..3 {
+            s.cells[(3 * s.size + x) as usize] = 0;
+        }
+        LayTheGrass::apply_move(&mut s, "p1", Move::Place { cells: vec![(3, 0), (3, 1), (3, 2), (3, 3)] }).unwrap();
+        let m = LayTheGrass::moments(&s, "p2");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p1", "A 4×4 square of grass: 320 bonus"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<LayTheGrass>(300, 4, 400);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 9, "too common: {stats:?}");
+        assert!(stats.most <= 3, "too many in one game: {stats:?}");
     }
 }

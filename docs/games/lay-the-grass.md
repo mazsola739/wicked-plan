@@ -29,3 +29,5 @@ Mini game, 1–4 seats (the page: you + 3 bots). Code: `crates/rules/src/games/l
 - Bot: tries every turn and spot next to its own grass (anywhere for its first piece) and keeps the one
   that raises its score most, preferring spots that touch more of its grass.
 - Desktop: R turns, F flips, arrows move the piece, Enter places.
+- **Replay moments:** the first 3×3 square of grass anyone lays ("First 3×3 square of grass on the
+  field"), and any 4×4 square ("A 4×4 square of grass: 320 bonus"). Public: the field is open to all.

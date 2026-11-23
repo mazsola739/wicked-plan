@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 3;
@@ -101,6 +101,8 @@ pub struct State {
     pub order: Vec<usize>,
     pub pick: usize,
     pub over: bool,
+    /// Replay moments: a straight or better at the showdown.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -202,6 +204,10 @@ impl State {
             let s = &mut self.seats[i];
             s.round_points = HAND_POINTS[h.0] + if Some(h) == best.as_ref() { BEST_BONUS } else { 0 };
             s.points += s.round_points;
+            // A replay moment: a straight or better (every hand is shown at the showdown).
+            if h.0 >= 4 {
+                self.moments.push(&s.id, format!("{} from memory (+{})", HAND_NAMES[h.0], s.round_points));
+            }
         }
         self.phase = Phase::Show;
         self.time_left_ms = SHOW_MS;
@@ -233,6 +239,7 @@ impl Game for MemoryPoker {
             id: "memory-poker",
             kind: "mini-solo",
             difficulty: "medium",
+            tags: &["memory", "cards"],
             min_players: 1,
             max_players: 4,
             name: "Memory Poker",
@@ -258,6 +265,7 @@ impl Game for MemoryPoker {
             order: Vec::new(),
             pick: 0,
             over: false,
+            moments: Moments::default(),
         };
         s.start_round();
         Ok(s)
@@ -369,6 +377,10 @@ impl Game for MemoryPoker {
             (_, Phase::Study) => s.seats.iter().filter(|x| !x.ready).map(|x| x.id.clone()).collect(),
             (_, Phase::Pick) => vec![s.seats[s.order[s.pick]].id.clone()],
         }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &State, player: &str, seed: u64) -> Move {
@@ -509,5 +521,31 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<MemoryPoker>(1000, 1, 300);
         bot_games_with::<MemoryPoker>(300, 4, 600);
+    }
+
+    #[test]
+    fn a_straight_or_better_at_the_showdown_is_a_replay_moment() {
+        let mut s = MemoryPoker::setup(&players(2), 4).unwrap();
+        s.shared = vec![c(10, 0), c(11, 0), c(12, 1)];
+        s.grid[..4].copy_from_slice(&[c(13, 2), c(2, 3), c(7, 2), c(14, 3)]);
+        MemoryPoker::tick(&mut s, STUDY_MS as u64);
+        for (p, cell) in [("p1", 0), ("p2", 1), ("p2", 2)] {
+            MemoryPoker::apply_move(&mut s, p, Move::Pick { cell }).unwrap();
+        }
+        // Picks are secret until the showdown: no moment yet.
+        assert!(MemoryPoker::moments(&s, "p2").is_empty());
+        MemoryPoker::apply_move(&mut s, "p1", Move::Pick { cell: 3 }).unwrap();
+        // p1: 10-J-Q-K-A straight, the best hand: 180 + 60. p2's high card is no moment.
+        let m = MemoryPoker::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Straight from memory (+240)"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<MemoryPoker>(300, 4, 600);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 8, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

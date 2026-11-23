@@ -40,3 +40,8 @@ Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/e
 - Bot: tries every equation of its own cards and picks the closer target; bets on how close it is.
 - Desktop: C calls, R raises, F folds; in the build, 1–4 place cards, + − * / place symbols,
   L / H choose the side, Backspace undoes, Enter submits.
+- **Replay moments:** an exact 1 or 20 that wins its side alone (no tie) and takes 18 chips or more
+  ("Exactly 20 takes 18 chips: 10 + 10 − 0 ÷ 3", or "Exactly 20 sweeps the pot of 36: …" when nobody
+  won the other side), and a pot of 10 or more taken because everyone else folded ("Pot of 22 taken
+  without a showdown"). Public: showdown equations are revealed to everyone, and the fold moment shows
+  no card.

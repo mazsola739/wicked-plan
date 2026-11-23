@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 7;
@@ -54,6 +54,9 @@ pub struct TaState {
     pub log: Vec<RoundLog>,
     /// Each seat's hold time in the last round (each seat sees only its own).
     pub last_held: Vec<i64>,
+    /// Replay moments: a third token in a row; a token in the last two rounds taking the sole
+    /// lead; a token won with a hold under 3 s (only its winner sees that one).
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -138,6 +141,9 @@ impl TaState {
             self.seats[w].tokens += 1;
         }
         self.log.push(RoundLog { round: self.round, winner: winner.map(|w| self.seats[w].id.clone()), bidders });
+        if let Some(w) = winner {
+            self.note_win(w, best);
+        }
         self.last_held = self.seats.iter().map(|s| s.held_ms).collect();
         for s in &mut self.seats {
             s.holding = false;
@@ -145,6 +151,30 @@ impl TaState {
         }
         self.phase = Phase::Result;
         self.time_left_ms = RESULT_MS;
+    }
+
+    /// Replay moments for seat `w`, who just won a token with a hold of `held` ms. Winners and
+    /// tokens are public; the hold time is the winner's own secret, so only the winner sees it.
+    fn note_win(&mut self, w: usize, held: i64) {
+        let id = self.seats[w].id.clone();
+        let streak = self.log.iter().rev().take_while(|l| l.winner.as_deref() == Some(id.as_str())).count();
+        if streak == 3 {
+            self.moments.push(&id, "Third token in a row");
+        }
+        let tokens = self.seats[w].tokens;
+        let rival = (0..self.seats.len()).filter(|&o| o != w).map(|o| self.seats[o].tokens).max().unwrap_or(0);
+        if self.round + 1 >= ROUNDS && tokens > rival && tokens - 1 <= rival {
+            let text = if self.round == ROUNDS {
+                "Last token of the game takes the sole lead".to_string()
+            } else {
+                format!("Sole lead taken in round {} of {ROUNDS}", self.round)
+            };
+            self.moments.push(&id, text);
+        }
+        if held < 3_000 {
+            let text = format!("Token won with a hold of just {}.{} s", held / 1000, held % 1000 / 100);
+            self.moments.push_for(&id, text, &[id.as_str()]);
+        }
     }
 
     fn all_ready(&self) -> bool {
@@ -180,6 +210,7 @@ impl Game for Rules {
             id: "time-auction",
             kind: "prison",
             difficulty: "easy",
+            tags: &["bidding"],
             min_players: 2,
             max_players: 6,
             name: "Time Auction",
@@ -203,6 +234,7 @@ impl Game for Rules {
             time_left_ms: 0,
             log: Vec::new(),
             last_held: vec![0; players.len()],
+            moments: Moments::default(),
         };
         s.start_round();
         Ok(s)
@@ -335,6 +367,10 @@ impl Game for Rules {
             _ => TaMove::Wait,
         }
     }
+
+    fn moments(s: &TaState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 /// Ranks by `key` (higher is better), then 1000 points for the first down to 100 for the last.
@@ -426,5 +462,74 @@ mod tests {
         bot_games_with::<Rules>(400, 4, 20_000);
         bot_games_with::<Rules>(300, 2, 20_000);
         bot_games_with::<Rules>(300, 6, 20_000);
+    }
+
+    /// One round from Ready: every seat holds; `None` passes in the countdown, `Some(ms)` lets go
+    /// after holding that long (all different).
+    fn round(s: &mut TaState, holds: &[Option<i64>]) {
+        press_all(s);
+        let mut order = Vec::new();
+        for (i, h) in holds.iter().enumerate() {
+            match h {
+                None => Rules::apply_move(s, &format!("p{}", i + 1), TaMove::Release).unwrap(),
+                Some(ms) => order.push((*ms, i)),
+            }
+        }
+        Rules::tick(s, COUNTDOWN_MS as u64);
+        order.sort_unstable();
+        let mut t = 0;
+        for (ms, i) in order {
+            Rules::tick(s, (ms - t) as u64);
+            t = ms;
+            Rules::apply_move(s, &format!("p{}", i + 1), TaMove::Release).unwrap();
+        }
+        assert_eq!(s.phase, Phase::Result);
+        Rules::tick(s, RESULT_MS as u64);
+    }
+
+    #[test]
+    fn a_cheap_token_and_three_in_a_row_are_replay_moments() {
+        let mut s = Rules::setup(&ids(3), 5).unwrap();
+        round(&mut s, &[Some(1_200), None, None]);
+        // The hold time is p1's secret: only p1 sees that moment.
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Token won with a hold of just 1.2 s"));
+        assert!(Rules::moments(&s, "p2").is_empty());
+        round(&mut s, &[Some(5_000), Some(2_000), None]);
+        round(&mut s, &[Some(5_000), Some(2_000), None]);
+        // A fourth in a row is no new moment.
+        round(&mut s, &[Some(5_000), Some(2_000), None]);
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Third token in a row"));
+        assert_eq!(Rules::moments(&s, "p1").len(), 2);
+    }
+
+    #[test]
+    fn the_last_token_taking_the_sole_lead_is_a_replay_moment() {
+        let mut s = Rules::setup(&ids(3), 6).unwrap();
+        s.round = ROUNDS;
+        s.seats[0].tokens = 2;
+        s.seats[1].tokens = 2;
+        round(&mut s, &[Some(4_000), Some(6_000), None]);
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Last token of the game takes the sole lead"));
+        // A leader who only adds to the lead is no moment.
+        let mut s = Rules::setup(&ids(3), 6).unwrap();
+        s.round = ROUNDS;
+        s.seats[0].tokens = 3;
+        s.seats[1].tokens = 2;
+        round(&mut s, &[Some(6_000), Some(4_000), None]);
+        assert!(s.moments.is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 20_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

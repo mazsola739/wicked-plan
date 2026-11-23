@@ -37,3 +37,6 @@ wall. Each answer opens one lock of the grate above; open all four to climb out 
   `riddles` (4), `solved`, `wrongTries`, `lastWrong`, `score`, `timeLeftMs`, `totalMs`, `escaped`, `over`.
 - Bot: answers right four times out of five, otherwise one too many.
 - Desktop: type the number and press Enter.
+- **Replay moments:** an escape without a single wrong answer ("Flawless escape, 8:45 to spare"), or
+  else an escape with less than a minute left ("Out of the well with 0:42 left"). Solo: only the player
+  sees them, and they tell nothing the screen does not.

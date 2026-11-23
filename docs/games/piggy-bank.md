@@ -44,3 +44,7 @@ Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
   it believed at its own claim), or falls below the last accepted claim, and rarely otherwise.
 - Desktop: W / B add a white / black coin, Backspace removes, Enter drops; digits and Enter claim;
   D doubt, T trust.
+- **Replay moments:** a right claim that two or more doubters pay for ("Claim of 2 white holds: 2
+  doubters pay"), by the claimer; a lone doubter catching a wrong claim in a bank of 6 coins or more
+  ("Lone doubt: {bot-2} claimed 4 white, there were 3"), by the doubter. Public: the opened bank, the
+  doubters and who lost a point are shown to everyone anyway.

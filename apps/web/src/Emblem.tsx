@@ -1,7 +1,9 @@
-// The Observer: Wicked Plan's emblem (docs/design.md, Visual identity). The emblem is the user's
-// own artwork (assets/observer.png); the small crown mark is drawn here in SVG.
+// The Observer: Wicked Plan's emblem (docs/design.md, Visual identity). The art is the user's own:
+// assets/observer.png (the emblem with crown and ring), assets/hood.webp (the hooded Observer from
+// the poster) and assets/face.webp (its LED eyes and grin alone). The small crown mark is SVG.
 
 import { useEffect, useState } from 'react';
+import face from './assets/face.webp';
 import observer from './assets/observer.png';
 import './Emblem.css';
 
@@ -13,15 +15,18 @@ export function reducedMotion(): boolean {
 }
 
 /**
- * The hooded Observer with its crown and ring. With `watching`, its signal glitches now and then
- * (every 7–16 s: a cyan/violet split and a flash), as if it were watching you on a live feed.
+ * The hooded Observer: by default the emblem with its crown and ring, or other art of it (`src`).
+ * With `watching`, its signal glitches now and then (every 7–16 s: a cyan/violet split and a
+ * flash), as if it were watching you on a live feed.
  */
 export function Emblem({
   className = '',
+  src = observer,
   watching = false,
   decorative = false,
 }: {
   className?: string;
+  src?: string;
   watching?: boolean;
   /** Pure decoration (the game bar, the transmission monitor): hidden from screen readers. */
   decorative?: boolean;
@@ -46,16 +51,48 @@ export function Emblem({
     return () => window.clearTimeout(timer);
   }, [watching]);
 
-  if (!watching) return <img className={`emblem ${className}`} src={observer} alt={decorative ? '' : ALT} />;
+  if (!watching) return <img className={`emblem ${className}`} src={src} alt={decorative ? '' : ALT} />;
   const label = decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': ALT };
   return (
     <span className={`emblem-watch ${className}${glitch ? ' glitch' : ''}`} {...label}>
-      <img className="emblem" src={observer} alt="" />
-      <img className="emblem em-ghost em-cyan" src={observer} alt="" />
-      <img className="emblem em-ghost em-violet" src={observer} alt="" />
+      <img className="emblem" src={src} alt="" />
+      <img className="emblem em-ghost em-cyan" src={src} alt="" />
+      <img className="emblem em-ghost em-violet" src={src} alt="" />
     </span>
   );
 }
+
+/**
+ * Only the Observer's face, without the hood, peeking at you during a game (docs/design.md,
+ * Broadcast feel): its LED eyes and grin (assets/face.webp). Mostly invisible; every 9–20 s its
+ * gaze shines through the dark: it surfaces blurred, sharpens, flickers, glances aside and fades.
+ * Nothing shows with reduced motion.
+ */
+export function Peeker({ className = '' }: { className?: string }) {
+  const [peek, setPeek] = useState(false);
+  useEffect(() => {
+    if (reducedMotion()) return;
+    let timer = 0;
+    const schedule = (wait: number) => {
+      timer = window.setTimeout(() => {
+        setPeek(true);
+        timer = window.setTimeout(() => {
+          setPeek(false);
+          schedule(9000 + Math.random() * 11000);
+        }, PEEK_MS);
+      }, wait);
+    };
+    schedule(2500 + Math.random() * 3000);
+    return () => window.clearTimeout(timer);
+  }, []);
+  return (
+    <span className={`peeker ${className}${peek ? ' peek' : ''}`} aria-hidden="true">
+      <img src={face} alt="" />
+    </span>
+  );
+}
+
+const PEEK_MS = 3400;
 
 /** The crown alone: the small brand mark. */
 export function Crown({ className = '' }: { className?: string }) {

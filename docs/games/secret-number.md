@@ -34,3 +34,8 @@ Main game, 4–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/s
 - Bot: keeps the list of numbers each player can still have; trades with the player it knows least
   about, guesses when a list is short (halving it when it is medium), more boldly in the last round.
 - Desktop: A–H pick a player, S skips / P passes, digits + Enter guess.
+- **Replay moments:** a number cracked in round 1 or 2 ("{bot-2}'s number 47 cracked in round 1"),
+  by the first seat that guessed it right; later, a long shot: a right guess while 10 or more numbers
+  were still possible as far as the guesser knew ("Long shot: {bot-2}'s 47 out of 23 possible"). The
+  crack is public (a right guess exposes the number to everyone); the long shot is shown only to the
+  guesser, because how much it knew comes from its private clues.

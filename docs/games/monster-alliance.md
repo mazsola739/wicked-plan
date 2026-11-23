@@ -18,6 +18,10 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 Six monsters attack one by one. Bid points for extra weapons, form alliances of up to three, and
 throw weapon cards at the monster. The strongest alliance that beats it shares the reward.
 
+- **Replay moments:** a player fighting alone is the only one to beat the monster and takes the whole
+  reward ("Beat Rustjaw alone: all 27 points"). Public: the alliances and every played card are shown
+  after the attack.
+
 ## Setup
 
 - Everyone starts with **20 points** and **8 weapon cards** (strength 1–6 each, random). Hands are

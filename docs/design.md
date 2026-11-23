@@ -24,6 +24,8 @@ The earlier base-building mobile game was dropped on 2026-11-22.
   hood seen from the front, a black void for a face drawn by glowing LED features (a cyan
   nested-diamond eye, a violet slash eye, a zigzag grin), a W crown above and ring arcs around it.
   The crown alone is the small mark (top bar, footer, favicon), drawn in SVG in `Emblem.tsx`.
+  From the user's poster (2026-11-23): `hood.webp`, the hooded Observer large and without crown or
+  rings (the landing page), and `face.webp`, its LED eyes and grin alone on transparent (the game bar).
 - **Palette:** near-black background, dark violet-grey surfaces, **cyan** for highlights and the main
   action, **violet** for fills and the second action, **silver** for the title and line art.
   Difficulty keeps green / yellow / red.
@@ -53,12 +55,21 @@ The earlier base-building mobile game was dropped on 2026-11-22.
     LIVE dot (it blinks a few times, then stays) and a channel tag (CH and the game's catalogue
     number; nothing counts up, the game waits). The Goal line types itself out, the bullets follow;
     a tap or any key shows everything at once.
-  - **The Observer watches**: small in the game bar (and large on the landing page); every 7–16 s its
-    signal glitches for a moment: one soft pulse and a cyan/violet split, under three flashes per
-    second (WCAG 2.3.1).
+  - **The Observer watches**: on the landing page the hooded Observer's signal glitches every 7–16 s
+    (one soft pulse and a cyan/violet split, under three flashes per second, WCAG 2.3.1). During a
+    game only its **face** is in the bar (`face.webp`), without the hood, and mostly not at all:
+    every 9–20 s its piercing gaze shines through the dark: the face surfaces blurred and dim,
+    sharpens and glows, flickers like a faulty light, glances aside and fades away, as if peeking
+    at you.
+  - **Replays** (decided 2026-11-23): when anyone (you or a bot) makes a big move, the game freezes
+    on that moment for about 3 s under a TV-style REPLAY banner: whose move it was and one line
+    on what happened. The game clock stands still meanwhile (no ticks, bots wait); a tap or any key
+    skips it. Each game names its own big moments in its rules (a capture, a sniped hand, a pot won
+    with the lowest card, a perfect bid, a winning line...), rare enough to stay special, and its
+    rules page lists them under "Replay moments". A replay never shows what that seat could not see.
   - With `prefers-reduced-motion` none of this moves: no flash, no typing, no glitches.
-- **Landing:** the emblem and the title on top, a short "How it works", then the catalogue with
-  filters (type, difficulty, solo or with bots). No sign-in, lobby or leaderboard until rooms exist.
+- **Landing:** the hooded Observer and the title on top, a short "How it works", then the catalogue
+  with a search field and filters (type, category, difficulty, solo or with bots). No sign-in, lobby or leaderboard until rooms exist.
 
 ## Open questions (the user decides)
 

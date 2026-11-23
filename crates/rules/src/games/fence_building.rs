@@ -8,7 +8,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::piece_puzzle::{Race, RaceView};
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const SIZES: [usize; 3] = [5, 6, 7];
@@ -17,6 +17,8 @@ pub const SHOWN: [usize; 3] = [45, 38, 34];
 /// Work limit of one solver run while making a field.
 const SOLVER_BUDGET: u64 = 200_000;
 pub const ROUND_MS: [i64; 3] = [2 * 60_000, 3 * 60_000, 5 * 60_000];
+/// Finishing first by less than this is a photo finish (a replay moment); by a third of the round, a runaway.
+const PHOTO_FINISH_MS: i64 = 5_000;
 
 /// Number of edges: horizontal ones first ((n+1)·n), then vertical ones (n·(n+1)).
 pub fn edge_count(n: usize) -> usize {
@@ -407,9 +409,37 @@ pub struct FenceState {
     /// 0 empty, 1 fence, 2 cross.
     pub edges: Vec<u8>,
     seed: u64,
+    /// Rounds the solver finished first.
+    firsts: usize,
+    /// Replay moments: a round won by a hair or by a mile, and first in every round.
+    pub moments: Moments,
 }
 
 impl FenceState {
+    /// Replay moments once the solver has closed the fence (every finish time is in the round result).
+    fn solved_moments(&mut self) {
+        let Some(last) = self.race.last.clone() else { return };
+        let (Some(t), Some(1)) = (last[0].time_ms, last[0].place) else { return };
+        let me = last[0].id.as_str();
+        let limit = ROUND_MS[self.race.round - 1];
+        self.firsts += 1;
+        let next = last[1..].iter().filter_map(|f| f.time_ms.map(|o| (o, f.id.as_str()))).min();
+        match next {
+            Some((o, who)) if o - t < PHOTO_FINISH_MS => {
+                self.moments.push(me, format!("Fence closed {:.1} s ahead of {{{who}}}", (o - t) as f64 / 1000.0));
+            }
+            _ => {
+                let lead = next.map_or(limit, |(o, _)| o) - t;
+                if lead >= limit / 3 {
+                    self.moments.push(me, format!("Fence closed {} s ahead of the field", lead / 1000));
+                }
+            }
+        }
+        if self.firsts == ROUND_MS.len() {
+            self.moments.push(me, "First in all three rounds");
+        }
+    }
+
     fn load(&mut self) {
         if !self.race.over {
             self.field = pick(self.race.round, &mut Rng::new(self.seed.wrapping_add(self.race.round as u64 * 1_000_003)));
@@ -454,6 +484,7 @@ impl Game for Rules {
             id: "fence-building",
             kind: "exile",
             difficulty: "medium",
+            tags: &["logic", "speed"],
             min_players: 1,
             max_players: 4,
             name: "Fence Building",
@@ -463,7 +494,14 @@ impl Game for Rules {
 
     fn setup(players: &[String], seed: u64) -> Result<FenceState, String> {
         let race = Race::new(players, seed, &ROUND_MS)?;
-        let mut s = FenceState { race, field: Field { size: 0, inside: Vec::new(), clues: Vec::new() }, edges: Vec::new(), seed };
+        let mut s = FenceState {
+            race,
+            field: Field { size: 0, inside: Vec::new(), clues: Vec::new() },
+            edges: Vec::new(),
+            seed,
+            firsts: 0,
+            moments: Moments::default(),
+        };
         s.load();
         Ok(s)
     }
@@ -478,6 +516,7 @@ impl Game for Rules {
                 s.edges[edge] = mark;
                 if s.solved() {
                     s.race.solver_done(true);
+                    s.solved_moments();
                     s.load();
                 }
             }
@@ -531,6 +570,10 @@ impl Game for Rules {
             return FenceMove::Edge { edge: rng.index(s.edges.len()), mark: 1 };
         }
         FenceMove::Edge { edge, mark: u8::from(fence[edge]) }
+    }
+
+    fn moments(s: &FenceState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -795,5 +838,50 @@ mod tests {
     fn thousand_bot_games() {
         bot_games::<Rules>(1000, 5000);
         bot_games_with::<Rules>(1000, 4, 5000);
+    }
+
+    fn close_fence(s: &mut FenceState) {
+        let fence = fence_of(s.field.size, &s.field.inside);
+        for e in (0..fence.len()).filter(|&e| fence[e]) {
+            Rules::apply_move(s, "p1", FenceMove::Edge { edge: e, mark: 1 }).unwrap();
+        }
+    }
+
+    #[test]
+    fn photo_finish_runaway_and_clean_sweep_are_replay_moments() {
+        let ids: Vec<String> = (1..=4).map(|i| format!("p{i}")).collect();
+        // Seed 1, bots finish round 1 at 72.2 s (p2), 75.5 s and 94.1 s; round 2 at 78.8 s at the
+        // earliest (p4); round 3 at 94.1 s at the earliest.
+        let mut s = Rules::setup(&ids, 1).unwrap();
+        // Second place: no moment.
+        let mut late = s.clone();
+        Rules::tick(&mut late, 73_000);
+        close_fence(&mut late);
+        assert_eq!(late.race.last.as_ref().unwrap()[0].place, Some(2));
+        assert!(Rules::moments(&late, "p1").is_empty());
+        // Round 1 closed 1.5 s before p2; rounds 2 and 3 closed at once.
+        Rules::tick(&mut s, 72_229 - 1_500);
+        close_fence(&mut s);
+        close_fence(&mut s);
+        close_fence(&mut s);
+        let m = Rules::moments(&s, "p3");
+        let texts: Vec<(&str, &str)> = m.iter().map(|m| (m.by.as_str(), m.text.as_str())).collect();
+        assert_eq!(
+            texts,
+            [
+                ("p1", "Fence closed 1.5 s ahead of {p2}"),
+                // 78 s ahead of a 3-minute round; round 3's 94 s is under a third of 5 minutes.
+                ("p1", "Fence closed 78 s ahead of the field"),
+                ("p1", "First in all three rounds"),
+            ]
+        );
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

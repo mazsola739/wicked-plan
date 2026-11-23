@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const SIZE: usize = 5;
@@ -189,7 +189,13 @@ pub struct TigerState {
     moved: [bool; 2],
     step: u32,
     time_left_ms: i64,
+    /// Replay moments: every tiger trapped; a board held for all 100 turns; a fifth capture
+    /// once all 20 goats are on the board.
+    pub moments: Moments,
 }
+
+/// The boards' names on the page.
+const BOARD_NAMES: [&str; 2] = ["A", "B"];
 
 impl TigerState {
     fn seat(&self, player: &str) -> Option<usize> {
@@ -211,6 +217,23 @@ impl TigerState {
     }
     fn over(&self) -> bool {
         self.boards.iter().all(|b| b.ended)
+    }
+    /// Plays a legal move on board `b`. Replay moments (the boards are public): the goats trap
+    /// every tiger or hold out for all 100 turns; the tigers take the fifth goat after all 20
+    /// were placed. The tigers on board `b` are seat `b`, the goats seat `1 - b`.
+    fn play(&mut self, b: usize, from: Option<usize>, to: usize) {
+        let board = &mut self.boards[b];
+        board.play(from, to);
+        let name = BOARD_NAMES[b];
+        let (seat, text) = match board.winner {
+            Some(Side::Goat) => (1 - b, format!("Every tiger trapped: board {name} won")),
+            Some(Side::Tiger) if board.captured >= CAPTURES_TO_WIN && board.hand == 0 => {
+                (b, format!("Board {name} won: fifth goat taken after all 20 placed"))
+            }
+            None if board.ended => (1 - b, format!("Board {name} held for all {MAX_PLIES} turns")),
+            _ => return,
+        };
+        self.moments.push(&self.players[seat].clone(), text);
     }
     fn after_move(&mut self) {
         if (0..2).all(|b| !self.waiting(b)) {
@@ -277,6 +300,7 @@ impl Game for TigerAndGoat {
             id: "tiger-and-goat",
             kind: "final-duel",
             difficulty: "hard",
+            tags: &["board"],
             min_players: 2,
             max_players: 2,
             name: "Tiger and Goat",
@@ -292,6 +316,7 @@ impl Game for TigerAndGoat {
             moved: [false; 2],
             step: 0,
             time_left_ms: STEP_MS,
+            moments: Moments::default(),
         })
     }
 
@@ -310,7 +335,7 @@ impl Game for TigerAndGoat {
         if !s.boards[b].moves().contains(&(from, to)) {
             return Err("That move is not allowed".into());
         }
-        s.boards[b].play(from, to);
+        s.play(b, from, to);
         s.moved[b] = true;
         s.after_move();
         Ok(())
@@ -326,7 +351,7 @@ impl Game for TigerAndGoat {
                 if s.waiting(b) {
                     let mut rng = Rng::new(u64::from(s.step) * 2 + b as u64 + 1);
                     match best_move(&s.boards[b], &mut rng) {
-                        Some((f, t)) => s.boards[b].play(f, t),
+                        Some((f, t)) => s.play(b, f, t),
                         None => s.boards[b].ended = true,
                     }
                     s.moved[b] = true;
@@ -397,6 +422,10 @@ impl Game for TigerAndGoat {
             Some((Some(from), to)) => TigerMove::Move { board: b, from, to },
             None => TigerMove::Place { board: b, to: 0 },
         }
+    }
+
+    fn moments(s: &TigerState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -515,5 +544,52 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games_with::<TigerAndGoat>(1000, 2, 3000);
+    }
+
+    #[test]
+    fn a_trap_a_hold_out_and_a_late_fifth_capture_are_replay_moments() {
+        // Board B: the goats (seat a) shut in the last tiger.
+        let mut s = new();
+        s.boards[1].cells = [EMPTY; 25];
+        s.boards[1].cells[0] = TIGER;
+        for i in [1, 2, 5, 10, 6, 12] {
+            s.boards[1].cells[i] = GOAT;
+        }
+        s.boards[1].hand = 1;
+        s.play(1, None, 24);
+        // Board A: the tigers (seat a) take the fifth goat with all 20 placed.
+        s.boards[0].cells[1] = GOAT;
+        s.boards[0].hand = 0;
+        s.boards[0].plies = 41;
+        s.boards[0].captured = 4;
+        s.play(0, Some(0), 2);
+        let m = TigerAndGoat::moments(&s, "b");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("a", "Every tiger trapped: board B won"));
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("a", "Board A won: fifth goat taken after all 20 placed"));
+        // Board A again: the goats (seat b) last all 100 turns.
+        let mut s = new();
+        s.boards[0].plies = MAX_PLIES - 1;
+        s.boards[0].captured = 2;
+        s.play(0, Some(0), 1);
+        let m = TigerAndGoat::moments(&s, "a");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("b", "Board A held for all 100 turns"));
+        // A fifth capture while goats are still being placed is no moment.
+        let mut s = new();
+        s.boards[0].cells[1] = GOAT;
+        s.boards[0].hand = 10;
+        s.boards[0].plies = 21;
+        s.boards[0].captured = 4;
+        s.play(0, Some(0), 2);
+        assert!(s.boards[0].ended && s.moments.is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<TigerAndGoat>(300, 2, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 2, "too many in one game: {stats:?}");
     }
 }

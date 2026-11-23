@@ -42,3 +42,6 @@ missing. Paint the missing cells so the figure becomes symmetric.
 - Bot (seat 0 in tests): paints the next wrong cell right.
 - Screen: pick a colour (or the eraser), tap cells. Tapping a cell in the picked colour clears it.
   Keys: 1–3 pick a colour, 0 the eraser.
+- **Replay moments:** the solver finishing first less than 2 s ahead of the next racer ("Photo
+  finish: {bot-2} beaten by 1.5 s"), and finishing first in all three rounds ("Clean sweep: first in
+  all three rounds"). Public: every finish time is shown in the round results anyway.

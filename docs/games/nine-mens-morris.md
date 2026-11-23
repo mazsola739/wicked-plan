@@ -34,3 +34,6 @@ The classic mill game on 24 points (three nested squares joined at the middles o
   (`place`, `move`, `fly`, `remove`, `wait`), your legal moves and removable pieces, the last move, the timer.
 - Bot: a two-ply search (its turn and the reply, removals included) on pieces, open twos (two in a line with
   the third point empty) and mobility.
+- **Replay moments:** the winning move, by a mill ("Mill closed: {opponent} is down to 2 pieces") or by a
+  blockade ("{opponent} blocked in, not a move left"), and one piece closing two mills at once ("Two mills
+  closed with one piece"). Public: the board is open to both players.

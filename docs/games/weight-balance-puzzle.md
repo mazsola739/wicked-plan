@@ -34,3 +34,6 @@ Team mini game, 1–2 players (on the page: you + 1 bot teammate). Code:
   result leaves the fewest; calls "Answer now" as soon as only one set fits, and answers with a set that fits.
 - **Screen:** the scale drawn in SVG; tap blocks to cycle them between off / left pan / right pan, steppers
   for the counterweights. Desktop keys: A–E cycle a block, Enter weighs.
+- **Replay moments:** at the end, all five weights right for everyone with 3 or more weighings unused,
+  credited to whoever made the last weighing ("All five weights right, 3 weighings to spare"). Public:
+  the weights and every answer are shown at the end.

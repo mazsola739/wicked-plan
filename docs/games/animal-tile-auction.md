@@ -33,3 +33,7 @@ Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/a
 - Bot: values the tile by how much it could grow its own pattern on the grid, paces its chips,
   and places the tile where it helps its pattern most.
 - Desktop: digits + Enter bid; arrow keys move a cursor on the grid and Enter places.
+- **Replay moments:** a tile won with every chip left, 5 or more ("All 6 chips on the fox"), and a
+  placement that completes a copy of the placer's own pattern ("Secret pattern completed (+25)").
+  The all-in win is public (winning bids and chips are shown to the table); the completed pattern
+  only the placer sees, since patterns stay secret until the end.

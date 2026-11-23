@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const SIZES: [usize; 3] = [3, 4, 5];
@@ -91,6 +91,8 @@ pub struct MagicState {
     pub score: i64,
     pub time_left_ms: i64,
     pub over: bool,
+    /// Replay moments: the 5×5 solved with three quarters of its clock left.
+    pub moments: Moments,
     seed: u64,
 }
 
@@ -153,6 +155,10 @@ impl MagicState {
     fn next_board(&mut self, solved: bool) {
         if solved {
             self.score += BOARD_POINTS[self.board] + self.time_left_ms / 1000;
+            if self.size() == 5 && self.time_left_ms * 4 >= BOARD_MS[self.board] * 3 {
+                let secs = self.time_left_ms / 1000;
+                self.moments.push(&self.player.clone(), format!("5×5 square solved, {}:{:02} still on the clock", secs / 60, secs % 60));
+            }
         }
         self.solved.push(solved);
         self.board += 1;
@@ -177,6 +183,7 @@ impl Game for MagicSquare {
             id: "magic-square",
             kind: "hidden",
             difficulty: "hard",
+            tags: &["numbers", "logic"],
             min_players: 1,
             max_players: 1,
             name: "Magic Square",
@@ -197,6 +204,7 @@ impl Game for MagicSquare {
             score: 0,
             time_left_ms: 0,
             over: false,
+            moments: Moments::default(),
             seed,
         };
         s.load_board();
@@ -265,6 +273,10 @@ impl Game for MagicSquare {
 
     fn results(s: &MagicState) -> Vec<PlayerResult> {
         vec![PlayerResult { player_id: s.player.clone(), rank: 1, points: s.score }]
+    }
+
+    fn moments(s: &MagicState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &MagicState, _player: &str, seed: u64) -> MagicMove {
@@ -346,5 +358,45 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games::<MagicSquare>(1000, 5000);
+    }
+
+    fn solve(s: &mut MagicState) {
+        for i in 0..s.cells.len() {
+            if !s.given[i] {
+                let v = s.solution[i];
+                MagicSquare::apply_move(s, P, MagicMove::Set { cell: i, value: v }).unwrap();
+            }
+        }
+        MagicSquare::apply_move(s, P, MagicMove::Submit).unwrap();
+    }
+
+    #[test]
+    fn a_fast_5x5_is_a_replay_moment() {
+        let mut s = MagicSquare::setup(&[P.into()], 3).unwrap();
+        // Fast small boards are no moment.
+        solve(&mut s);
+        solve(&mut s);
+        assert!(MagicSquare::moments(&s, P).is_empty());
+        MagicSquare::tick(&mut s, 128_000);
+        solve(&mut s);
+        let m = MagicSquare::moments(&s, P);
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), (P, "5×5 square solved, 7:52 still on the clock"));
+        // With less than 7:30 left it is no moment.
+        let mut s = MagicSquare::setup(&[P.into()], 3).unwrap();
+        MagicSquare::apply_move(&mut s, P, MagicMove::Skip).unwrap();
+        MagicSquare::apply_move(&mut s, P, MagicMove::Skip).unwrap();
+        MagicSquare::tick(&mut s, 151_000);
+        solve(&mut s);
+        assert_eq!(s.solved, vec![false, false, true]);
+        assert!(MagicSquare::moments(&s, P).is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<MagicSquare>(300, 1, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 8, "too common: {stats:?}");
+        assert!(stats.most <= 1, "too many in one game: {stats:?}");
     }
 }

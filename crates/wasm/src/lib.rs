@@ -49,6 +49,11 @@ impl LocalGame {
     pub fn results(&self) -> String {
         serde_json::to_string(&self.session.results()).unwrap_or_else(|_| "[]".into())
     }
+
+    /// The big moments you may see, oldest first, as JSON (`Moment[]`); the page replays new ones.
+    pub fn moments(&self) -> String {
+        serde_json::to_string(&self.session.moments(YOU)).unwrap_or_else(|_| "[]".into())
+    }
 }
 
 #[cfg(test)]

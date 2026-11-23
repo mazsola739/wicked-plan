@@ -3,22 +3,29 @@
 // in seat "you", bots fill the other seats and move by themselves on tick.
 
 import { useSyncExternalStore } from 'react';
-import type { GameInfo, PlayerResult } from './types';
+import type { GameInfo, Moment, PlayerResult } from './types';
 import init, { catalogue, LocalGame } from './wasm/wp_wasm.js';
 
 const TICK_MS = 250;
+/** How long a replay stays up unless it is skipped. */
+const REPLAY_MS = 3200;
 
 export interface PlayState {
   ready: boolean;
   games: GameInfo[];
   current: { gameId: string; view: unknown; results: PlayerResult[] | null } | null;
+  /** A big moment being replayed: the game is frozen until it ends (docs/design.md, Replays). */
+  replay: Moment | null;
   error: string | null;
 }
 
-let state: PlayState = { ready: false, games: [], current: null, error: null };
+let state: PlayState = { ready: false, games: [], current: null, replay: null, error: null };
 let game: LocalGame | null = null;
 let timer: ReturnType<typeof setInterval> | undefined;
 let paused = false;
+let lastSeq = 0;
+let queue: Moment[] = [];
+let replayTimer: ReturnType<typeof setTimeout> | undefined;
 const listeners = new Set<() => void>();
 
 function set(patch: Partial<PlayState>): void {
@@ -32,6 +39,29 @@ function refresh(): void {
   const results = over ? (JSON.parse(game.results()) as PlayerResult[]) : null;
   if (over) clearInterval(timer);
   set({ current: { ...state.current, view: JSON.parse(game.view()), results } });
+  // New big moments are replayed once each; at most two wait, so a burst does not drag on.
+  const fresh = (JSON.parse(game.moments()) as Moment[]).filter((m) => m.seq > lastSeq);
+  if (fresh.length) {
+    lastSeq = fresh[fresh.length - 1]?.seq ?? lastSeq;
+    queue = [...queue, ...fresh].slice(-2);
+    nextReplay();
+  }
+}
+
+function nextReplay(): void {
+  if (state.replay) return;
+  const m = queue.shift();
+  if (!m) return;
+  set({ replay: m });
+  replayTimer = setTimeout(endReplay, REPLAY_MS);
+}
+
+/** Ends the replay on screen (a tap or a key skips it); the game goes on, or the next one shows. */
+export function endReplay(): void {
+  clearTimeout(replayTimer);
+  if (!state.replay) return;
+  set({ replay: null });
+  nextReplay();
 }
 
 export function start(gameId: string): void {
@@ -49,8 +79,8 @@ export function start(gameId: string): void {
     const now = performance.now();
     const ms = Math.round(now - last);
     last = now;
-    // While paused no time passes, so the view cannot change: skip the redraw too.
-    if (paused) return;
+    // While paused (rules open) or replaying, no time passes, so the view cannot change.
+    if (paused || state.replay) return;
     game?.tick(ms);
     refresh();
   }, TICK_MS);
@@ -58,9 +88,12 @@ export function start(gameId: string): void {
 
 export function stop(): void {
   clearInterval(timer);
+  clearTimeout(replayTimer);
   game?.free();
   game = null;
-  set({ current: null });
+  lastSeq = 0;
+  queue = [];
+  set({ current: null, replay: null });
 }
 
 const previews = new Map<string, unknown>();
@@ -85,7 +118,7 @@ export function setPaused(p: boolean): void {
 
 /** Sends one of your moves; a refused move shows its reason for a moment. */
 export function move(m: unknown): void {
-  if (!game) return;
+  if (!game || state.replay) return;
   try {
     game.apply(JSON.stringify(m));
   } catch (e) {

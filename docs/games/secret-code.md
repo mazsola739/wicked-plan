@@ -31,3 +31,7 @@ Exile game, a race: 1–4 seats (the page: you + 3 bots). Code: `crates/rules/sr
   then one every 5–12 s; 3 in 4 guesses fit every answer so far (and the total), the rest are hunches.
 - Bot (for the first seat in tests): a random code that fits every answer and the total.
 - Desktop: keys 1–6 add a die, Backspace removes, Enter guesses.
+- **Replay moments:** when a code is scored, a seat that cracked it in one guess ("Code cracked in one
+  guess"), or in two as the fastest solver ("Cracked in 2 guesses, fastest at the table"). Public: they
+  come with the reveal, when the code is shown and every seat's number of guesses and solve are seen anyway;
+  never a rival's guesses.

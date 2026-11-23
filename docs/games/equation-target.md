@@ -23,3 +23,5 @@ Prison game, played solo here. Code: `crates/rules/src/games/equation_target.rs`
 - Move: `{type:"answer", value:{picks:[i,j,k], ops:["+","*"]}}` (card indices 0–9).
 - Bot: right 70% of the time, otherwise the right cards with random operators.
 - Desktop: keys 1–9 and 0 pick the cards in order, + − * set the operators, Backspace undoes, Enter submits.
+- **Replay moments:** the last (biggest) target hit within 10 seconds ("Target 84 hit with 37 s to
+  spare"), and a perfect run with every round right ("All five targets hit"). Public: a solo game.

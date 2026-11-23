@@ -6,13 +6,15 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const PITS: usize = 5;
 pub const STONES_PER_PIT: u32 = 4;
 pub const TURN_MS: i64 = 20_000;
 pub const MAX_TURNS_EACH: u32 = 40;
+/// The smallest capture that is a replay moment.
+pub const BIG_CAPTURE: u32 = 10;
 /// Holes per player: the pits plus the store.
 const W: usize = PITS + 1;
 
@@ -57,6 +59,8 @@ pub struct State {
     pub time_left_ms: i64,
     pub last: Option<LastMove>,
     pub over: bool,
+    /// Replay moments: a capture of 10 or more stones.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -152,6 +156,11 @@ impl State {
 
     fn play(&mut self, seat: usize, pit: usize, first: usize) -> Result<(), String> {
         let last = sow(&mut self.holes, seat, pit, first)?;
+        // A replay moment: a big capture (the board is public).
+        if last.captured >= BIG_CAPTURE {
+            let victim = &self.players[(seat + 1) % self.players.len()];
+            self.moments.push(&self.players[seat], format!("{} stones captured from {{{victim}}}", last.captured));
+        }
         let extra = last.extra;
         self.last = Some(last);
         self.turns += 1;
@@ -199,6 +208,7 @@ impl Game for ColourMancala {
             id: "colour-mancala",
             kind: "main",
             difficulty: "hard",
+            tags: &["board", "numbers"],
             min_players: 2,
             max_players: 4,
             name: "Colour Mancala",
@@ -234,6 +244,7 @@ impl Game for ColourMancala {
             time_left_ms: TURN_MS,
             last: None,
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -297,6 +308,10 @@ impl Game for ColourMancala {
         let seat = s.seat(player).unwrap_or(0);
         let (pit, first) = best_move(&s.holes, seat, seed);
         Move::Sow { pit, first }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -365,6 +380,34 @@ mod tests {
         assert_eq!(h[5], [1, 2, 1]);
         assert_eq!(h[1], [0; 3]);
         assert_eq!(h[9], [0; 3]);
+    }
+
+    #[test]
+    fn a_big_capture_is_a_replay_moment() {
+        let mut s = ColourMancala::setup(&players(3), 1).unwrap();
+        s.holes = empty(3);
+        s.holes[0] = [1, 0, 0];
+        s.holes[W] = [0, 1, 0];
+        // Pit 1 of p1 faces pit 3 of p2.
+        s.holes[W + 3] = [4, 3, 2];
+        ColourMancala::apply_move(&mut s, "p1", Move::Sow { pit: 0, first: 0 }).unwrap();
+        let m = ColourMancala::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "10 stones captured from {p2}"));
+        // A smaller capture is no moment.
+        s.holes[2 * W] = [1, 0, 0];
+        s.holes[3] = [3, 3, 2];
+        ColourMancala::apply_move(&mut s, "p2", Move::Sow { pit: 0, first: 0 }).unwrap();
+        ColourMancala::apply_move(&mut s, "p3", Move::Sow { pit: 0, first: 0 }).unwrap();
+        assert_eq!(s.last.as_ref().unwrap().captured, 9);
+        assert_eq!(ColourMancala::moments(&s, "p1").len(), 1);
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<ColourMancala>(300, 4, 5000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 
     #[test]

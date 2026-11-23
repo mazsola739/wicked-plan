@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::games::polyomino_territory::{Cell, SHAPES, normalize, orientations};
 use crate::rng::Rng;
 
@@ -100,7 +100,8 @@ fn touches(a: &[Cell], b: &[Cell]) -> bool {
 /// A silhouette glued from three random pieces, centred on the grid, plus a decoy in the tray.
 pub fn generate(rng: &mut Rng) -> Puzzle {
     'again: loop {
-        let mut shapes: Vec<usize> = (0..PIECES_PER_PUZZLE).map(|_| rng.int(FIRST_SHAPE as i64, SHAPES.len() as i64 - 1) as usize).collect();
+        let mut shapes: Vec<usize> =
+            (0..PIECES_PER_PUZZLE).map(|_| rng.int(FIRST_SHAPE as i64, SHAPES.len() as i64 - 1) as usize).collect();
         let mut occ: Vec<Cell> = Vec::new();
         for (i, &sh) in shapes.iter().enumerate() {
             let os = orientations(SHAPES[sh]);
@@ -146,6 +147,8 @@ pub struct State {
     pub time_left_ms: i64,
     pub last: Option<String>,
     pub over: bool,
+    /// Replay moments: the wheel finished with 15 or more turns to spare.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -206,6 +209,18 @@ impl State {
     fn spin(&mut self, what: String) {
         self.last = Some(format!("{}: {what}", self.players[self.seat]));
         self.turns += 1;
+        // Replay moment (everything is public): the piece that finishes the wheel with 15 or more
+        // turns to spare, by the player who placed it.
+        let spare = MAX_TURNS - self.turns;
+        if self.done() == PUZZLES && spare >= 15 {
+            let by = self.players[self.seat].clone();
+            let min = (PUZZLES * PIECES_PER_PUZZLE) as u32;
+            if self.turns == min {
+                self.moments.push(&by, format!("Perfect wheel: all six in {min} turns"));
+            } else {
+                self.moments.push(&by, format!("All six shapes done, {spare} turns to spare"));
+            }
+        }
         if self.done() == PUZZLES || self.turns >= MAX_TURNS {
             self.over = true;
             self.time_left_ms = 0;
@@ -229,6 +244,7 @@ impl Game for SpinningPuzzleWheel {
             id: "spinning-puzzle-wheel",
             kind: "mini-team",
             difficulty: "medium",
+            tags: &["logic", "alliance"],
             min_players: 1,
             max_players: 4,
             name: "Spinning Puzzle Wheel",
@@ -250,6 +266,7 @@ impl Game for SpinningPuzzleWheel {
             time_left_ms: TURN_MS,
             last: None,
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -339,6 +356,10 @@ impl Game for SpinningPuzzleWheel {
 
     fn to_move(s: &State) -> Vec<String> {
         if s.over { Vec::new() } else { vec![s.players[s.seat].clone()] }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &State, _player: &str, seed: u64) -> Move {
@@ -441,5 +462,31 @@ mod tests {
         for seats in 1..=4 {
             bot_games_with::<SpinningPuzzleWheel>(1000, seats, 3000);
         }
+    }
+
+    #[test]
+    fn a_fast_finished_wheel_is_a_replay_moment() {
+        // Solves the wheel solo after `passes` wasted turns.
+        let play = |passes: u32| {
+            let mut s = SpinningPuzzleWheel::setup(&team(1), 2).unwrap();
+            for _ in 0..passes {
+                SpinningPuzzleWheel::apply_move(&mut s, "p1", Move::Pass).unwrap();
+            }
+            while !s.over {
+                let (piece, cells) = s.puzzles[s.current].solve().unwrap()[0].clone();
+                SpinningPuzzleWheel::apply_move(&mut s, "p1", Move::Place { piece, cells }).unwrap();
+            }
+            SpinningPuzzleWheel::moments(&s, "p1").into_iter().map(|m| (m.by, m.text)).collect::<Vec<_>>()
+        };
+        assert_eq!(play(0), vec![("p1".to_string(), "Perfect wheel: all six in 18 turns".to_string())]);
+        assert_eq!(play(1), vec![("p1".to_string(), "All six shapes done, 17 turns to spare".to_string())]);
+        assert!(play(4).is_empty(), "14 turns to spare is no moment");
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<SpinningPuzzleWheel>(300, 4, 3000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 1, "one finish per game: {stats:?}");
     }
 }

@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 6;
@@ -67,6 +67,8 @@ pub struct MaState {
     pub groups: Vec<Vec<usize>>,
     pub last: Vec<Outcome>,
     pub log: Vec<String>,
+    /// Replay moments: a monster beaten alone, the whole reward to one player.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -263,6 +265,11 @@ impl MaState {
                 let rest = reward - o.shares.iter().sum::<i64>();
                 let lead = (0..o.members.len()).max_by_key(|&m| (o.played[m].iter().sum::<i64>(), std::cmp::Reverse(m))).unwrap_or(0);
                 o.shares[lead] += rest;
+                // A replay moment: one player alone beats the monster (played cards are shown to all).
+                if let [solo] = o.members[..] {
+                    let by = self.fighters[solo].id.clone();
+                    self.moments.push(&by, format!("Beat {name} alone: all {reward} points"));
+                }
             } else {
                 let members: i64 = top.iter().map(|&k| outcomes[k].members.len() as i64).sum();
                 for &k in &top {
@@ -309,6 +316,7 @@ impl Game for Rules {
             id: "monster-alliance",
             kind: "main",
             difficulty: "hard",
+            tags: &["alliance", "bidding", "cards"],
             min_players: 4,
             max_players: 8,
             name: "Monster Alliance",
@@ -350,6 +358,7 @@ impl Game for Rules {
             groups: Vec::new(),
             last: Vec::new(),
             log: vec!["A monster approaches. Bid for the extra weapon.".into()],
+            moments: Moments::default(),
         })
     }
 
@@ -483,6 +492,10 @@ impl Game for Rules {
             .collect()
     }
 
+    fn moments(s: &MaState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
+
     fn bot_move(s: &MaState, player: &str, seed: u64) -> MaMove {
         let mut rng = Rng::new(seed);
         let Some(i) = s.fighters.iter().position(|f| f.id == player) else { return MaMove::Bid { amount: 0 } };
@@ -589,5 +602,42 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<Rules>(1000, 4, 3000);
         bot_games_with::<Rules>(200, 8, 6000);
+    }
+
+    fn attack(groups: Vec<Vec<usize>>, plays: [Vec<usize>; 4]) -> MaState {
+        let mut s = Rules::setup(&players(4), 1).unwrap();
+        s.monsters[0] = Monster { name: "Rustjaw", strength: 10, reward: 15, bonus: 5 };
+        for f in &mut s.fighters {
+            f.hand = vec![6, 4, 2, 1];
+        }
+        s.phase = Phase::Attack;
+        s.groups = groups;
+        for (p, cards) in players(4).iter().zip(plays) {
+            Rules::apply_move(&mut s, p, MaMove::Attack { cards }).unwrap();
+        }
+        s
+    }
+
+    #[test]
+    fn a_monster_beaten_alone_is_a_replay_moment() {
+        // p1 alone plays 6 + 4; the pair p3 + p4 only reaches 8.
+        let s = attack(vec![vec![0], vec![1], vec![2, 3]], [vec![0, 1], vec![], vec![0], vec![2]]);
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Beat Rustjaw alone: all 15 points"));
+        // An alliance win is no moment, nor a lone win tied with an alliance.
+        let s = attack(vec![vec![0, 1], vec![2], vec![3]], [vec![0, 1], vec![2], vec![0, 1], vec![]]);
+        assert!(Rules::moments(&s, "p1").is_empty());
+        let s = attack(vec![vec![0], vec![1], vec![2, 3]], [vec![0, 1], vec![], vec![0], vec![1]]);
+        assert!(s.last.iter().filter(|o| o.won).count() == 2);
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 10 <= stats.games * 8, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

@@ -37,3 +37,5 @@ Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/ga
   (an extra turn and a capture count extra), with a little noise.
 - **Screen:** the ring drawn in SVG (your row at the bottom); below it the colour toggle and your five pits
   as big buttons. Desktop keys: 1–5 sow from a pit, R / G / B pick the first colour.
+- **Replay moments:** a capture of 10 or more stones, counting the capturing stone
+  ("12 stones captured from {bot-1}"). Public: the whole board is open.

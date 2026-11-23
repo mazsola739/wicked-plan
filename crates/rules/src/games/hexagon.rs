@@ -7,12 +7,14 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, speed_points};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, speed_points};
 use crate::rng::Rng;
 
 pub const STUDY_MS: i64 = 30_000;
 pub const ROUND_MS: i64 = 25_000;
 pub const ROUNDS: usize = 5;
+/// A right answer in the last round with at least this much time left is a replay moment.
+pub const FAST_MS: i64 = 15_000;
 
 /// Axial coordinates (q, r) of the 19 cells, top row first, left to right.
 pub fn cells() -> Vec<(i32, i32)> {
@@ -60,6 +62,8 @@ pub struct HexState {
     pub current: usize,
     pub time_left_ms: i64,
     pub over: bool,
+    /// Replay moments: the last line found fast, and all five lines right.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -134,6 +138,7 @@ impl Game for Hexagon {
             id: "hexagon",
             kind: "final-duel",
             difficulty: "medium",
+            tags: &["memory", "numbers"],
             min_players: 1,
             max_players: 1,
             name: "Hexagon",
@@ -161,7 +166,16 @@ impl Game for Hexagon {
             let target = line.iter().map(|&i| numbers[i]).sum();
             rounds.push(HexRound { target, line, given: None, correct: false, points: 0 });
         }
-        Ok(HexState { player: player.clone(), numbers, studying: true, rounds, current: 0, time_left_ms: STUDY_MS, over: false })
+        Ok(HexState {
+            player: player.clone(),
+            numbers,
+            studying: true,
+            rounds,
+            current: 0,
+            time_left_ms: STUDY_MS,
+            over: false,
+            moments: Moments::default(),
+        })
     }
 
     fn apply_move(s: &mut HexState, player: &str, mv: HexMove) -> Result<(), String> {
@@ -181,7 +195,18 @@ impl Game for Hexagon {
                 if given.iter().any(|&i| i >= s.numbers.len()) || given[0] == given[1] || given[1] == given[2] || given[0] == given[2] {
                     return Err("Pick three different cells".into());
                 }
+                let left = s.time_left_ms;
                 s.finish_round(Some(given));
+                // Replay moments, after the last round (a timeout is never right, so only an answer can make one).
+                let last = &s.rounds[ROUNDS - 1];
+                if s.over && last.correct {
+                    if left >= FAST_MS {
+                        s.moments.push(&s.player, format!("Line for {} found with {} s to spare", last.target, left / 1000));
+                    }
+                    if s.rounds.iter().all(|r| r.correct) {
+                        s.moments.push(&s.player, "All five lines from memory");
+                    }
+                }
                 Ok(())
             }
             _ => Err("Not now".into()),
@@ -243,6 +268,10 @@ impl Game for Hexagon {
         // Remembers the board 60% of the time, otherwise guesses a line.
         if rng.next_f64() < 0.6 { HexMove::Answer { cells: line } } else { HexMove::Answer { cells: *rng.pick(&lines()) } }
     }
+
+    fn moments(s: &HexState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -297,5 +326,47 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games::<Hexagon>(1000, 200);
+    }
+
+    #[test]
+    fn a_fast_last_line_and_a_perfect_run_are_replay_moments() {
+        let right = |s: &mut HexState| {
+            let line = s.rounds[s.current].line;
+            Hexagon::apply_move(s, P, HexMove::Answer { cells: line }).unwrap();
+        };
+        // Five right answers, the last one with 18.5 s left.
+        let mut s = Hexagon::setup(&[P.into()], 4).unwrap();
+        Hexagon::apply_move(&mut s, P, HexMove::Ready).unwrap();
+        for _ in 0..4 {
+            Hexagon::tick(&mut s, 20_000);
+            right(&mut s);
+            assert!(Hexagon::moments(&s, P).is_empty(), "only the end makes moments");
+        }
+        Hexagon::tick(&mut s, 6_500);
+        right(&mut s);
+        let target = s.rounds[4].target;
+        let m = Hexagon::moments(&s, P);
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[0].by.as_str(), m[0].text.clone()), (P, format!("Line for {target} found with 18 s to spare")));
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), (P, "All five lines from memory"));
+        // A missed round and a slow last answer: nothing.
+        let mut s = Hexagon::setup(&[P.into()], 4).unwrap();
+        Hexagon::apply_move(&mut s, P, HexMove::Ready).unwrap();
+        Hexagon::tick(&mut s, ROUND_MS as u64);
+        for _ in 0..3 {
+            right(&mut s);
+        }
+        Hexagon::tick(&mut s, 12_000);
+        right(&mut s);
+        assert!(s.over);
+        assert!(Hexagon::moments(&s, P).is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Hexagon>(300, 1, 200);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 2, "too many in one game: {stats:?}");
     }
 }

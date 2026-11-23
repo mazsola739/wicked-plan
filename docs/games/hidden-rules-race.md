@@ -19,6 +19,12 @@ Everyone races a cube piece over a 7×7 board of coloured squares to the **goal 
 a piece moves depends on the colour of the square it stands on, and those **movement rules are secret**:
 you work them out from what happens to everyone's pieces.
 
+- **Replay moments:** a piece that reaches the goal although its chosen direction pointed elsewhere, so
+  its square's rule was used on purpose ("Pointed up, turned onto the goal", or "Pointed down, backed
+  onto the goal"), and a piece that jumps two squares straight onto the goal past a piece that was
+  closer ("Two squares onto the goal, past {bot-2}"). Public: every direction and move is in the round
+  log anyway; no rule is named.
+
 ## Board and rules
 
 - 7×7 squares in five colours (red, blue, green, yellow, purple), random each game; the centre square

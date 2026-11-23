@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const BLOCKS: usize = 5;
@@ -17,6 +17,8 @@ pub const TURN_MS: i64 = 40_000;
 pub const ANSWER_MS: i64 = 120_000;
 pub const BLOCK_POINTS: i64 = 150;
 pub const SPARE_POINTS: i64 = 50;
+/// All five right with at least this many weighings unused is a replay moment.
+pub const MOMENT_SPARE: u32 = 3;
 /// The bot judges a weighing on at most this many of the weight sets still possible.
 const SAMPLE: usize = 120;
 /// … and tries this many of its candidate weighings (cheap enough for slow phones).
@@ -99,6 +101,8 @@ pub struct State {
     pub time_left_ms: i64,
     /// Every weight set that fits the log so far (public knowledge, kept for the bot).
     pub possible: Vec<Weights>,
+    /// Replay moments: all five right with 3 or more weighings to spare.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -248,6 +252,13 @@ impl State {
     fn end(&mut self) {
         self.phase = Phase::Over;
         self.time_left_ms = 0;
+        // A replay moment (everything is shown at the end): a full solve with weighings to spare,
+        // credited to whoever made the last weighing, the one that cracked it.
+        let spare = self.weighings_left();
+        if self.score() >= BLOCKS as i64 * BLOCK_POINTS && spare >= MOMENT_SPARE {
+            let seat = self.log.iter().rev().find(|w| w.load.is_some()).map_or(0, |w| w.seat);
+            self.moments.push(&self.players[seat].clone(), format!("All five weights right, {spare} weighings to spare"));
+        }
     }
 
     pub fn score(&self) -> i64 {
@@ -275,6 +286,7 @@ impl Game for WeightBalancePuzzle {
             id: "weight-balance-puzzle",
             kind: "mini-team",
             difficulty: "hard",
+            tags: &["logic", "numbers", "alliance"],
             min_players: 1,
             max_players: 2,
             name: "Weight Balance Puzzle",
@@ -299,6 +311,7 @@ impl Game for WeightBalancePuzzle {
             answers: vec![None; players.len()],
             time_left_ms: TURN_MS,
             possible: ALL_SETS.get_or_init(all_weight_sets).clone(),
+            moments: Moments::default(),
         })
     }
 
@@ -401,6 +414,10 @@ impl Game for WeightBalancePuzzle {
                 Move::Submit { weights }
             }
         }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -508,5 +525,40 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<WeightBalancePuzzle>(1000, 1, 3000);
         bot_games_with::<WeightBalancePuzzle>(1000, 2, 3000);
+    }
+
+    /// p1 and p2 weigh one block each against counterweights, then both answer `answer`.
+    fn finish(weighings: usize, answer: impl Fn(Weights) -> Weights) -> State {
+        let mut s = WeightBalancePuzzle::setup(&duo(), 5).unwrap();
+        for k in 0..weighings {
+            let load = Load { left: vec![k % BLOCKS], right: vec![], left_extra: 0, right_extra: 5 };
+            WeightBalancePuzzle::apply_move(&mut s, &duo()[k % 2], Move::Weigh { load }).unwrap();
+        }
+        WeightBalancePuzzle::apply_move(&mut s, &duo()[weighings % 2], Move::Answer).unwrap();
+        let weights = answer(s.weights);
+        for p in duo() {
+            WeightBalancePuzzle::apply_move(&mut s, &p, Move::Submit { weights }).unwrap();
+        }
+        s
+    }
+
+    #[test]
+    fn a_full_solve_with_weighings_to_spare_is_a_replay_moment() {
+        // Nine weighings, the last by p1: three to spare.
+        let s = finish(9, |w| w);
+        let m = WeightBalancePuzzle::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "All five weights right, 3 weighings to spare"));
+        // Only two to spare, or a block wrong: no moment.
+        assert!(finish(10, |w| w).moments.is_empty());
+        assert!(finish(2, |w| [w[1], w[0], w[2], w[3], w[4]]).moments.is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<WeightBalancePuzzle>(300, 2, 3_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 1, "too many in one game: {stats:?}");
     }
 }

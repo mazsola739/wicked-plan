@@ -18,6 +18,11 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 Thieves sneak around a metro map collecting hidden pieces; the police hunt them. One police officer
 is secretly **corrupt** and works for the thieves.
 
+- **Replay moments:** an honest officer catching a thief ("{bot-2} caught at Central: 2 pieces
+  lost"), and a thief taking the piece that wins it for the thieves in round 11 or 12 ("Winning piece
+  taken at Market in round 11"). Public: every catch is announced, and where a piece was taken (and so
+  by which thief) is shown to all.
+
 ## Map and roles
 
 - 17 stations on five lines (a ring line and four crossing lines). Moving one stop along a line is one move.

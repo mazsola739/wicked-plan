@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const SIZE: i32 = 9;
@@ -60,6 +60,8 @@ pub struct State {
     pub history: Vec<Auction>,
     pub digs: Vec<Option<Square>>,
     pub time_left_ms: i64,
+    /// Replay moments: a dig right on the treasure with only the private clue, or as the only one.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -172,6 +174,18 @@ impl State {
         }
         self.phase = Phase::Over;
         self.time_left_ms = 0;
+        // Replay moments: everything is shown at the end, so they are public.
+        let exact: Vec<usize> = (0..self.players.len()).filter(|&k| self.digs[k] == Some(self.treasure)).collect();
+        for &k in &exact {
+            let text = if self.known(k).len() == 1 {
+                "Treasure dug up with just the private clue (+500)"
+            } else if exact.len() == 1 {
+                "The only dig right on the treasure (+500)"
+            } else {
+                continue;
+            };
+            self.moments.push(&self.players[k].clone(), text);
+        }
     }
 }
 
@@ -229,6 +243,7 @@ impl Game for TreasureIsland {
             id: "treasure-island",
             kind: "main",
             difficulty: "hard",
+            tags: &["bidding", "logic"],
             min_players: 3,
             max_players: 6,
             name: "Treasure Island",
@@ -259,6 +274,7 @@ impl Game for TreasureIsland {
             history: Vec::new(),
             digs: vec![None; n],
             time_left_ms: BID_MS,
+            moments: Moments::default(),
         })
     }
 
@@ -380,6 +396,10 @@ impl Game for TreasureIsland {
         let amount = (clue_value(&possible, b) * (0.25 + 0.25 * rng.next_f64())).min(cap).round() as i64;
         Move::Bid { amount: amount.clamp(0, s.coins[seat]) }
     }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -483,5 +503,46 @@ mod tests {
         for seats in 3..=6 {
             bot_games_with::<TreasureIsland>(1000, seats, 3000);
         }
+    }
+
+    /// Every auction ends with `bids`; then the seats dig at `digs`.
+    fn play(bids: [[i64; 3]; AUCTIONS], digs: impl Fn(&State) -> [Square; 3]) -> State {
+        let mut s = TreasureIsland::setup(&players(3), 3).unwrap();
+        for round in bids {
+            for (k, amount) in round.into_iter().enumerate() {
+                TreasureIsland::apply_move(&mut s, &format!("p{}", k + 1), Move::Bid { amount }).unwrap();
+            }
+        }
+        for (k, (x, y)) in digs(&s).into_iter().enumerate() {
+            TreasureIsland::apply_move(&mut s, &format!("p{}", k + 1), Move::Dig { x, y }).unwrap();
+        }
+        assert_eq!(s.phase, Phase::Over);
+        s
+    }
+
+    #[test]
+    fn digging_right_on_the_treasure_can_be_a_replay_moment() {
+        let away = |s: &State| ((s.treasure.0 + 4) % SIZE, s.treasure.1);
+        // p1 wins every box and is the only one on the treasure.
+        let s = play([[5, 0, 0]; AUCTIONS], |s| [s.treasure, away(s), away(s)]);
+        let m = TreasureIsland::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "The only dig right on the treasure (+500)"));
+        // p1 and p3 both hit it, so only p3, who never won a box, gets a moment.
+        let s = play([[5, 0, 0]; AUCTIONS], |s| [s.treasure, away(s), s.treasure]);
+        let m = TreasureIsland::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p3", "Treasure dug up with just the private clue (+500)"));
+        // Two hits with boxes bought: no moment.
+        let s = play([[5, 5, 0]; AUCTIONS], |s| [s.treasure, s.treasure, away(s)]);
+        assert!(s.moments.is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<TreasureIsland>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

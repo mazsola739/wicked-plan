@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const CHAMBERS: usize = 6;
@@ -67,6 +67,8 @@ pub struct RrState {
     pub phase: Phase,
     pub time_left_ms: i64,
     pub log: Vec<LogEntry>,
+    /// Replay moments: a click on the last life against bad odds; the hit that leaves one standing.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -170,6 +172,17 @@ impl RrState {
     fn pull(&mut self, i: usize) {
         let hit = self.chambers[self.pointer];
         let id = self.seats[i].id.clone();
+        // Replay moments, from what the table sees (the odds shown in every view; never a peek or a
+        // tamper): a click on the last life with 2 charges in 3 chambers or worse, and the hit that
+        // leaves one player standing.
+        let (charges, chambers) = (self.charges_left as usize, CHAMBERS.saturating_sub(self.pulls_since_mix));
+        if !hit && self.seats[i].lives == 1 && chambers >= 2 && 3 * charges >= 2 * chambers {
+            self.moments.push(&id, format!("Last life, {charges} charges in {chambers} chambers: click"));
+        }
+        if hit && self.seats[i].lives == 1 && self.alive() == 2 {
+            let last = self.seats.iter().find(|s| s.lives > 0 && s.id != id).map(|s| s.id.clone()).unwrap_or_default();
+            self.moments.push(&id, format!("Out: {{{last}}} is the last one standing"));
+        }
         if hit {
             self.chambers[self.pointer] = false;
             self.charges_left -= 1;
@@ -213,6 +226,7 @@ impl Game for Rules {
             id: "russian-roulette",
             kind: "prison",
             difficulty: "hard",
+            tags: &["numbers"],
             min_players: 3,
             max_players: 6,
             name: "Russian Roulette",
@@ -240,6 +254,7 @@ impl Game for Rules {
             phase: Phase::Turn,
             time_left_ms: TURN_MS,
             log: Vec::new(),
+            moments: Moments::default(),
         };
         s.reload();
         Ok(s)
@@ -311,6 +326,10 @@ impl Game for Rules {
 
     fn to_move(s: &RrState) -> Vec<String> {
         if s.phase == Phase::Turn { vec![s.seats[s.actor].id.clone()] } else { Vec::new() }
+    }
+
+    fn moments(s: &RrState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &RrState, player: &str, seed: u64) -> RrMove {
@@ -439,5 +458,38 @@ mod tests {
         bot_games_with::<Rules>(400, 4, 5_000);
         bot_games_with::<Rules>(300, 3, 5_000);
         bot_games_with::<Rules>(300, 6, 5_000);
+    }
+
+    #[test]
+    fn a_last_life_click_against_the_odds_and_the_final_hit_are_replay_moments() {
+        let mut s = Rules::setup(&ids(3), 6).unwrap();
+        rig(&mut s, [false, false, false, false, true, true], 3);
+        s.seats[0].lives = 1;
+        s.pulls_since_mix = 3;
+        Rules::apply_move(&mut s, "p1", RrMove::Pull).unwrap();
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Last life, 2 charges in 3 chambers: click"));
+        // p2 is out, p1 is hit on its last life: p3 is the last one standing.
+        let mut s = Rules::setup(&ids(3), 6).unwrap();
+        rig(&mut s, [true, false, false, false, false, true], 0);
+        s.seats[0].lives = 1;
+        s.seats[1].lives = 0;
+        Rules::apply_move(&mut s, "p1", RrMove::Pull).unwrap();
+        let m = Rules::moments(&s, "p3");
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Out: {p3} is the last one standing"));
+        // A last-life click at 2 charges in 6 is no moment.
+        let mut s = Rules::setup(&ids(3), 6).unwrap();
+        rig(&mut s, [false, true, true, false, false, false], 0);
+        s.seats[0].lives = 1;
+        Rules::apply_move(&mut s, "p1", RrMove::Pull).unwrap();
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const N: usize = 7;
@@ -121,6 +121,8 @@ pub struct HiddenState {
     time_left_ms: i64,
     shadow_won: bool,
     over: bool,
+    /// Replay moments: two lines with one stone, a stone that blocks the Shadow and makes a line.
+    pub moments: Moments,
 }
 
 impl HiddenState {
@@ -206,6 +208,7 @@ impl Game for HiddenFourthPlayer {
             id: "hidden-fourth-player",
             kind: "mini-team",
             difficulty: "hard",
+            tags: &["board", "alliance"],
             min_players: 3,
             max_players: 3,
             name: "Hidden Fourth Player",
@@ -230,6 +233,7 @@ impl Game for HiddenFourthPlayer {
             time_left_ms: TURN_MS,
             shadow_won: false,
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -245,7 +249,17 @@ impl Game for HiddenFourthPlayer {
         if x >= N || y >= N || s.board[y * N + x] != EMPTY {
             return Err("That square is taken".into());
         }
-        s.place(seat as u8 + 1, y * N + x);
+        let (c, me) = (y * N + x, seat as u8 + 1);
+        let lines_before = lines(&s.board, me);
+        let blocks = windows_at(c).any(|w| count(&s.board, w, SHADOW) == 2);
+        s.place(me, c);
+        // Replay moments (the board is public).
+        let made = lines(&s.board, me) - lines_before;
+        if made >= 2 {
+            s.moments.push(player, format!("{made} lines with one stone"));
+        } else if made == 1 && blocks {
+            s.moments.push(player, "One stone: Shadow blocked, line made");
+        }
         s.after_player();
         Ok(())
     }
@@ -305,6 +319,10 @@ impl Game for HiddenFourthPlayer {
         let threats = completing(&s.board, SHADOW);
         let c = empty.into_iter().max_by_key(|&c| square_value(&s.board, seat, c, &threats)).unwrap_or(0);
         HiddenMove::Place { x: c % N, y: c / N }
+    }
+
+    fn moments(s: &HiddenState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -414,5 +432,37 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games_with::<HiddenFourthPlayer>(1000, 3, 1500);
+    }
+
+    #[test]
+    fn two_lines_at_once_and_a_blocking_line_are_replay_moments() {
+        let mut s = new();
+        // a: (0,0) (1,0) _ (3,0) (4,0): the gap at (2,0) makes 3 lines at once (x 0–2, 1–3, 2–4).
+        for x in [0, 1, 3, 4] {
+            s.board[at(x, 0)] = 1;
+        }
+        HiddenFourthPlayer::apply_move(&mut s, "a", HiddenMove::Place { x: 2, y: 0 }).unwrap();
+        let m = HiddenFourthPlayer::moments(&s, "b");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("a", "3 lines with one stone"));
+        // b: (5,6) closes its own line down column 5 and blocks the Shadow's (3,6) (4,6).
+        s.board[at(5, 4)] = 2;
+        s.board[at(5, 5)] = 2;
+        s.board[at(3, 6)] = SHADOW;
+        s.board[at(4, 6)] = SHADOW;
+        HiddenFourthPlayer::apply_move(&mut s, "b", HiddenMove::Place { x: 5, y: 6 }).unwrap();
+        // c: a plain stone is no moment.
+        HiddenFourthPlayer::apply_move(&mut s, "c", HiddenMove::Place { x: 0, y: 3 }).unwrap();
+        let m = HiddenFourthPlayer::moments(&s, "a");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("b", "One stone: Shadow blocked, line made"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<HiddenFourthPlayer>(300, 3, 1_500);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

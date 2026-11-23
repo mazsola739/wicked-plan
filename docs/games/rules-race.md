@@ -18,6 +18,11 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 A race along a track of squares 0–18. Everyone writes one secret **personal rule** at the start; the
 **group rules** can be changed by vote. The first piece on square 18 wins.
 
+- **Replay moments:** a personal rule that pushes a piece back off square 18 ("Rule pushes {bot-2}
+  back off the goal"); a swap of 6 squares or more ("Swap with {bot-2}: from 3 to 12"); a rule that
+  carries its owner onto square 18 on another player's roll ("Reaches the goal on {bot-2}'s roll"). The
+  moment is the rule's owner's. Public: a rule that fires is shown to everyone anyway.
+
 ## Setup
 
 - All pieces start on square 0.

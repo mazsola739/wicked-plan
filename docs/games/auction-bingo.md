@@ -34,3 +34,6 @@ Main game, 3–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/a
 - Bot: picks the cell that builds the most lines; bids little when it is alone on its shape,
   more when others want it too, pacing its coins over the rounds left.
 - Desktop: 1–9 pick a cell, digits + Enter bid.
+- **Replay moments:** a won cell that completes a line (or two at once) while at least one rival
+  picked the same shape ("Bingo: 2 rivals outbid (+5)"). Only the winner sees it: who won and
+  every board stay secret until the end; the number of rivals per shape is public.

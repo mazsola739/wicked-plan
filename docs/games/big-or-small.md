@@ -35,3 +35,7 @@ Final duel, 2 players. Code: `crates/rules/src/games/big_or_small.rs`, screen: `
 - Bot: counts the opponent's remaining cards and bets on the outcome with the best expected value, staking
   more when it is sure. It plays a card whose relation to the dealer's card is the rarest in its own hand,
   so the opponent's likeliest guess is wrong.
+- **Replay moments:** a right "equal" call with chips at stake ("Called {bot-1}'s 7 exactly (+6)"),
+  a right 3-chip bet while the opponent's 3-chip bet fails ("Six-chip swing against {bot-1}"), and
+  going from behind to ahead in round 9 ("Lead stolen in the last round (12–9)"). Public: both
+  cards, bets and chips are shown once both have chosen.

@@ -102,6 +102,25 @@ these rows are sketches from the names.
 | ✅ Tiger and Goat | hard | 2 | Play two boards at once: tigers on one, goats on the other. |
 | ✅ Question and Truth | hard | 2 | Spend tokens on questions to work out the opponent's secret order of 8 cards. |
 
+## Categories
+
+Every game has 1 to 3 categories (in its `GameInfo` as `tags`); the page filters by them and the search finds them.
+
+| Category | Means | Games |
+|---|---|---|
+| **Cards** (`cards`) | played with cards | Big or Small, Colour Count Bluff, Equation Hi-Lo, Heavy 13, Jewel Black Market, Memory Poker, Minus One, Monster Alliance, Sniper Hold'em |
+| **Bluff** (`bluff`) | lying, bluffing or reading bluffs is central | Colour Count Bluff, Equation Hi-Lo, Minus One, Piggy Bank, Sniper Hold'em, Virus Game |
+| **Secret role** (`secret-role`) | hidden identities, roles or powers | Rules Race, Thieves and Cops, Virus Game |
+| **Bidding** (`bidding`) | auctions and bids | Animal Tile Auction, Auction Bingo, Monster Alliance, Time Auction, Treasure Island |
+| **Memory** (`memory`) | remembering what you saw | Blind Gomoku, Duplicate Picture Buzzer, Hexagon, Jewel Black Market, Memory Poker, Memory Scene Quiz |
+| **Logic** (`logic`) | a puzzle or deduction with one right answer | Dice Prediction, Fence Building, Hidden Rules Race, Knight's Tour, Magic Square, Metal Cast Puzzle, Mystery Stock Market, Piece Puzzle, Question and Truth, Rising Water Well, Secret Code, Secret Number, Spinning Puzzle Wheel, Symmetry Puzzle, Treasure Island, Unknown Language, Weight Balance Puzzle |
+| **Numbers** (`numbers`) | arithmetic, counting, number sense | Big or Small, Colour Mancala, Count the Cubes, Count the Rectangles, Equation Hi-Lo, Equation Target, Heavy 13, Hexagon, Magic Square, Mystery Stock Market, Piggy Bank, Rising Water Well, Russian Roulette, Secret Number, Weight Balance Puzzle |
+| **Board** (`board`) | placing or moving pieces on a board or map | Animal Tile Auction, Blind Gomoku, Colour Mancala, Hidden Fourth Player, Hidden Rules Race, Knight's Tour, Lay the Grass, Nine Men's Morris, Polyomino Territory, Thieves and Cops, Tiger and Goat, Wall Territory |
+| **Dice** (`dice`) | dice are central | Dice Prediction, Rules Race, Secret Code |
+| **Words** (`words`) | words, letters or language | Either Or, Unknown Language, Word Block Tower |
+| **Speed** (`speed`) | speed or reflexes decide | Count the Cubes, Count the Rectangles, Duplicate Picture Buzzer, Equation Target, Fence Building, Find the Differences, Piece Puzzle, Symmetry Puzzle |
+| **Alliance** (`alliance`) | teams, cooperation, negotiation | Either Or, Hidden Fourth Player, Memory Scene Quiz, Monster Alliance, Spinning Puzzle Wheel, Thieves and Cops, Virus Game, Weight Balance Puzzle, Word Block Tower |
+
 ## Still missing
 
 - Season 3, days 5–7: not out yet (the NamuWiki pages are empty).

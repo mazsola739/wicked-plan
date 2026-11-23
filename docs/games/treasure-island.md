@@ -37,3 +37,7 @@ Main game, 3–6 players (on the page: you + 3 bots). Code: `crates/rules/src/ga
   would add on average, and bids 25–50% of that (at most 1.5 × its coins / auctions left); digs where its expected dig points are highest.
 - **Screen:** the island in SVG (squares that still fit your arrows are lit); bid with a stepper and quick
   amounts; tap a square to dig. Desktop keys: ↑/↓ change the bid by 1, PgUp/PgDn by 10, Enter bids; when digging the arrows move the spade.
+- **Replay moments:** at the end, a dig right on the treasure by a player who never won a box
+  ("Treasure dug up with just the private clue (+500)"), or by the only player who hit it ("The only
+  dig right on the treasure (+500)"). Public: the treasure, every dig and every auction's winners are
+  shown to all at the end.

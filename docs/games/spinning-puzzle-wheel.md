@@ -36,3 +36,6 @@ Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 - **Screen:** the wheel with the six puzzles in SVG, the current puzzle large; pick a tray piece, turn ↻ /
   flip ⇋ it, tap the grid to put the ghost there, then Place. Desktop keys: 1–4 pick, R turns, F flips,
   arrows move, Enter places, P passes.
+- **Replay moments:** the piece that finishes all six puzzles with 15 or more turns to spare, by the
+  player who placed it ("All six shapes done, 17 turns to spare"; in the fewest turns possible, 18:
+  "Perfect wheel: all six in 18 turns"). Public: everything in this game is.

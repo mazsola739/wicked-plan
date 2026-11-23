@@ -36,3 +36,6 @@ Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
   word list); if no such word exists it takes back the previous word.
 - **Screen:** blocks as tiles; tap tiles to spell, ⌫ and Clear, Build. Desktop keys: type letters,
   Backspace, Enter builds.
+- **Replay moments:** a seven-letter word, the longest there is ("Seven letters in one word:
+  TORNADO"), and a round's last word built with 3 seconds or less on the turn timer, not by a timed-out
+  turn ("Pile emptied with 2 s left"). Public: built words and the timer are shown to the whole team.

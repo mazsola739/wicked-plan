@@ -112,3 +112,78 @@
     animation: none;
   }
 }
+
+/* The peeking face: the LED eyes and grin alone (transparent around them); invisible until it peeks. */
+.peeker {
+  display: block;
+  width: 80px;
+  aspect-ratio: 264 / 174;
+  opacity: 0;
+}
+
+.peeker img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.peeker.peek {
+  animation: px-peek 3.4s ease-in-out;
+}
+
+.peeker.peek img {
+  animation: px-glance 3.4s ease-in-out;
+}
+
+/* Surfaces blurred and dim, the gaze sharpens, two soft flickers (well under three a second), fades. */
+@keyframes px-peek {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  14% {
+    opacity: 0.35;
+    filter: blur(2px);
+  }
+  19% {
+    opacity: 0.12;
+  }
+  27% {
+    opacity: 0.9;
+    filter: blur(0);
+  }
+  70% {
+    opacity: 0.9;
+    filter: blur(0);
+  }
+  77% {
+    opacity: 0.3;
+  }
+  83% {
+    opacity: 0.65;
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+@keyframes px-glance {
+  0% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(0);
+  }
+  62%,
+  100% {
+    transform: translateX(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peeker {
+    display: none;
+  }
+}

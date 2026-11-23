@@ -48,3 +48,7 @@ four sides carry fence.
 - Bot (seat 0 in tests): fences the solution edge by edge, with a slip now and then.
 - Screen: tap near a side of a plot: empty → fence → cross → empty. A number above 0 turns green when its
   count is met and red when it is over.
+- **Replay moments** (all by the solver, seat 0): first to finish a round by less than 5 seconds ("Fence
+  closed 1.5 s ahead of {bot-1}"), first by a third of the round time or more ("Fence closed 78 s ahead
+  of the field"; nobody else finishing counts as finishing at the time limit), and first in all three
+  rounds ("First in all three rounds"). Public: every finish time is in the round result anyway.

@@ -1,0 +1,121 @@
+/* The replay overlay: the frozen game shows through scan lines; a broadcast band near the top. */
+.replay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: max(18vh, 90px) 16px 16px;
+  cursor: pointer;
+  background:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.28) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, rgb(8 8 12 / 0.15), rgb(8 8 12 / 0.75));
+  animation: replay-in 0.25s ease-out;
+}
+
+.replay-band {
+  position: relative;
+  width: min(100%, 560px);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 14px;
+  padding: 14px 18px 18px;
+  background: linear-gradient(100deg, rgb(18 17 26 / 0.96), rgb(27 25 38 / 0.92));
+  border: 1px solid color-mix(in srgb, var(--violet) 45%, var(--line));
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
+  animation: replay-band 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.replay-tag {
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--g-red);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  animation: replay-flicker 0.6s steps(1, end) 1;
+}
+
+.replay-tag svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.replay-who {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  color: var(--silver);
+  letter-spacing: 0.04em;
+}
+
+.replay-text {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* The time left, as a thin line running out along the bottom of the band. */
+.replay-time {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  transform-origin: left;
+  animation: replay-time 3.2s linear forwards;
+}
+
+.replay-skip {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@keyframes replay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes replay-band {
+  from {
+    transform: translateX(-40px) skewX(-8deg);
+    opacity: 0;
+  }
+}
+
+@keyframes replay-flicker {
+  30% {
+    opacity: 0.4;
+  }
+  60% {
+    opacity: 1;
+  }
+}
+
+@keyframes replay-time {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .replay,
+  .replay-band,
+  .replay-tag,
+  .replay-time {
+    animation: none;
+  }
+}

@@ -19,6 +19,10 @@ Exile game, solo. Code: `crates/rules/src/games/unknown_language.rs`.
 The walls of the hidden place are covered in a picture script nobody can read. Some carvings come with a
 translation. Work out the script from those examples, then read and write it.
 
+- **Replay moments:** at the end, all nine answers right ("Perfect run: all 9 carvings read right"),
+  or else all three of stage 3, the new marks, right ("Stage 3 cracked without a miss"). Solo, so only
+  the player sees them.
+
 ## The script (made from the seed)
 
 - Every word is a **root glyph** (three strokes on a 3 × 3 grid of points) plus a **mark** that says the word

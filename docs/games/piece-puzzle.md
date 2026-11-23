@@ -45,3 +45,6 @@ Fill a target shape exactly with a given set of flat pieces, like a tangram on a
   the way. The solver (tests) checks every puzzle by backtracking.
 - Screen: pick a piece in the tray, turn ⟳ / flip ⇋ it, tap the board where its marked cell should go;
   tap a placed piece to pick it up again. Keys: 1–7 pick a piece, R turns, F flips, Esc drops it.
+- **Replay moments:** the solver finishing first with the next racer less than a tenth of the round time
+  behind ("Beat {bot-2} to the finish by 5.0 s"), and finishing first in all three rounds ("First to
+  finish in all three rounds"). Public: every racer's time is shown when the round ends.

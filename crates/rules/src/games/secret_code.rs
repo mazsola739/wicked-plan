@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const LEN: usize = 4;
@@ -22,9 +22,7 @@ pub type Code = [u8; LEN];
 /// Exact (right face, right place) and near (right face, wrong place).
 pub fn answer(code: &Code, guess: &Code) -> (u8, u8) {
     let exact = (0..LEN).filter(|&i| code[i] == guess[i]).count() as u8;
-    let common: u8 = (1..=6u8)
-        .map(|f| code.iter().filter(|&&c| c == f).count().min(guess.iter().filter(|&&g| g == f).count()) as u8)
-        .sum();
+    let common: u8 = (1..=6u8).map(|f| code.iter().filter(|&&c| c == f).count().min(guess.iter().filter(|&&g| g == f).count()) as u8).sum();
     (exact, common - exact)
 }
 
@@ -47,10 +45,8 @@ pub fn pips(code: &Code) -> u32 {
 
 /// A random code that fits the total and every answer so far.
 fn consistent_guess(total: u32, guesses: &[Guess], rng: &mut Rng) -> Code {
-    let fits: Vec<Code> = all_codes()
-        .into_iter()
-        .filter(|c| pips(c) == total && guesses.iter().all(|g| answer(c, &g.code) == (g.exact, g.near)))
-        .collect();
+    let fits: Vec<Code> =
+        all_codes().into_iter().filter(|c| pips(c) == total && guesses.iter().all(|g| answer(c, &g.code) == (g.exact, g.near))).collect();
     if fits.is_empty() { [rng.int(1, 6) as u8, rng.int(1, 6) as u8, rng.int(1, 6) as u8, rng.int(1, 6) as u8] } else { *rng.pick(&fits) }
 }
 
@@ -101,6 +97,8 @@ pub struct State {
     pub reveal_left_ms: i64,
     pub rng: Rng,
     pub over: bool,
+    /// Replay moments: a code cracked in one guess, or in two by the fastest solver.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -191,6 +189,14 @@ impl State {
             if let Some((t, used)) = s.solved_at(now) {
                 s.round_points = code_points(used) + if Some(t) == best { FIRST_BONUS } else { 0 };
                 s.points += s.round_points;
+                // Replay moment (the code and every rival's guess count are shown in the reveal): a
+                // code cracked in one guess, or in two by the fastest solver.
+                let first = Some(t) == best;
+                if used == 1 {
+                    self.moments.push(&s.id, "Code cracked in one guess");
+                } else if used == 2 && first {
+                    self.moments.push(&s.id, "Cracked in 2 guesses, fastest at the table");
+                }
             }
         }
         self.revealing = true;
@@ -229,6 +235,7 @@ impl Game for SecretCode {
             id: "secret-code",
             kind: "exile",
             difficulty: "medium",
+            tags: &["logic", "dice"],
             min_players: 1,
             max_players: 4,
             name: "Secret Code",
@@ -243,7 +250,17 @@ impl Game for SecretCode {
         let mut rng = Rng::new(seed);
         let codes = (0..CODES).map(|_| [0; LEN].map(|_: u8| rng.int(1, 6) as u8)).collect();
         let seats = players.iter().map(|id| Seat { id: id.clone(), guesses: Vec::new(), points: 0, round_points: 0 }).collect();
-        let mut s = State { seats, codes, current: 0, elapsed_ms: 0, revealing: false, reveal_left_ms: 0, rng, over: false };
+        let mut s = State {
+            seats,
+            codes,
+            current: 0,
+            elapsed_ms: 0,
+            revealing: false,
+            reveal_left_ms: 0,
+            rng,
+            over: false,
+            moments: Moments::default(),
+        };
         s.start_code();
         Ok(s)
     }
@@ -327,6 +344,10 @@ impl Game for SecretCode {
 
     fn to_move(s: &State) -> Vec<String> {
         if s.over || s.seats[0].done(s.elapsed_ms) { Vec::new() } else { vec![s.seats[0].id.clone()] }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &State, _player: &str, seed: u64) -> Move {
@@ -426,5 +447,37 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<SecretCode>(1000, 1, 300);
         bot_games_with::<SecretCode>(300, 4, 300);
+    }
+
+    #[test]
+    fn a_one_or_fast_two_guess_crack_is_a_replay_moment() {
+        let mine =
+            |s: &State| -> Vec<String> { SecretCode::moments(s, "p2").into_iter().filter(|m| m.by == "p1").map(|m| m.text).collect() };
+        let mut s = SecretCode::setup(&players(2), 9).unwrap();
+        let code = s.codes[0];
+        SecretCode::apply_move(&mut s, "p1", Move::Guess { code }).unwrap();
+        assert_eq!(mine(&s), vec!["Code cracked in one guess"]);
+        // The next code: one miss, then the code, before the rival's first guess.
+        SecretCode::apply_move(&mut s, "p1", Move::Next).unwrap();
+        let code = s.codes[1];
+        let wrong = if code == [1, 1, 1, 1] { [2, 2, 2, 2] } else { [1, 1, 1, 1] };
+        SecretCode::apply_move(&mut s, "p1", Move::Guess { code: wrong }).unwrap();
+        SecretCode::apply_move(&mut s, "p1", Move::Guess { code }).unwrap();
+        assert_eq!(mine(&s), vec!["Code cracked in one guess", "Cracked in 2 guesses, fastest at the table"]);
+        // Three guesses is no moment.
+        SecretCode::apply_move(&mut s, "p1", Move::Next).unwrap();
+        let code = s.codes[2];
+        let wrong = if code == [1, 1, 1, 1] { [2, 2, 2, 2] } else { [1, 1, 1, 1] };
+        SecretCode::apply_move(&mut s, "p1", Move::Guess { code: wrong }).unwrap();
+        SecretCode::apply_move(&mut s, "p1", Move::Guess { code: wrong }).unwrap();
+        SecretCode::apply_move(&mut s, "p1", Move::Guess { code }).unwrap();
+        assert_eq!(mine(&s).len(), 2);
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<SecretCode>(300, 4, 300);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

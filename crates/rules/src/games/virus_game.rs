@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: u32 = 4;
@@ -118,6 +118,9 @@ pub struct VirusState {
     pub new_infections: Vec<u32>,
     pub log: Vec<String>,
     pub rng: Rng,
+    /// Replay moments: the last terrorist quarantined; more than half the city newly infected
+    /// in one round (only the terrorists see that one).
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -251,6 +254,16 @@ impl VirusState {
         }
         let count = newly.iter().filter(|&&x| x).count() as u32;
         self.new_infections.push(count);
+        // A replay moment for the terrorists only (crediting anyone would reveal a role): more
+        // than half the city newly infected in one round. Each terrorist sees it as its own, since
+        // whose contacts did it is secret even from a partner.
+        let city = self.agents.iter().filter(|a| a.role != Role::Terrorist).count() as u32;
+        if count * 2 > city {
+            for t in (0..n).filter(|&t| self.agents[t].role == Role::Terrorist) {
+                let id = self.agents[t].id.clone();
+                self.moments.push_for(&id, format!("{count} new infections in one round"), &[&id]);
+            }
+        }
         self.say(format!("Round {}: everyone has met someone. New infections: {count}.", self.round));
         for agent in &mut self.agents {
             agent.contact = None;
@@ -297,6 +310,16 @@ impl VirusState {
             self.revealed.push((q, terrorist));
             let line = format!("{} goes into quarantine and is {}.", self.num(q), if terrorist { "a TERRORIST" } else { "not a terrorist" });
             self.say(line);
+            // A replay moment: the last terrorist quarantined (reports, votes and the side are
+            // public). By the first player who accused them, or else the first who voted for them.
+            if terrorist && self.agents.iter().all(|a| a.role != Role::Terrorist || a.quarantined) {
+                let accuser = self.reports.iter().find(|r| r.target == q).map(|r| r.by);
+                let voter = self.votes.iter().find(|v| v.round == self.round && v.target == Some(q)).map(|v| v.by);
+                if let Some(by) = accuser.or(voter) {
+                    let text = format!("{{{}}} quarantined: the last terrorist caught", self.agents[q].id);
+                    self.moments.push(&self.agents[by].id.clone(), text);
+                }
+            }
         } else {
             self.say("Nobody goes into quarantine.".into());
         }
@@ -378,6 +401,7 @@ impl Game for Rules {
             id: "virus-game",
             kind: "main",
             difficulty: "hard",
+            tags: &["secret-role", "bluff", "alliance"],
             min_players: 6,
             max_players: 10,
             name: "Virus Game",
@@ -433,6 +457,7 @@ impl Game for Rules {
             new_infections: Vec::new(),
             log: vec!["Round 1: choose whom to meet.".into()],
             rng,
+            moments: Moments::default(),
         })
     }
 
@@ -648,6 +673,10 @@ impl Game for Rules {
             _ => VirusMove::Close,
         }
     }
+
+    fn moments(s: &VirusState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -751,5 +780,58 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<Rules>(1000, 6, 3000);
         bot_games_with::<Rules>(200, 10, 6000);
+    }
+
+    #[test]
+    fn the_last_terrorist_quarantined_is_a_public_replay_moment() {
+        let mut s = Rules::setup(&players(6), 4).unwrap();
+        let ts: Vec<usize> = (0..6).filter(|&k| s.agents[k].role == Role::Terrorist).collect();
+        s.agents[ts[0]].quarantined = true;
+        s.revealed.push((ts[0], true));
+        s.phase = Phase::Report;
+        let o = find(&s, Role::Officer);
+        for (k, p) in players(6).iter().enumerate() {
+            Rules::apply_move(&mut s, p, VirusMove::Report { target: (k == o).then_some(ts[1]) }).unwrap();
+        }
+        for (k, p) in players(6).iter().enumerate() {
+            Rules::apply_move(&mut s, p, VirusMove::Vote { target: (!ts.contains(&k)).then_some(ts[1]) }).unwrap();
+        }
+        assert!(s.agents[ts[1]].quarantined);
+        let c = find(&s, Role::Citizen);
+        let m = Rules::moments(&s, &s.agents[c].id);
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].by, s.agents[o].id);
+        assert_eq!(m[0].text, format!("{{{}}} quarantined: the last terrorist caught", s.agents[ts[1]].id));
+    }
+
+    #[test]
+    fn a_big_outbreak_is_a_replay_moment_for_the_terrorists_only() {
+        let mut s = Rules::setup(&players(6), 3).unwrap();
+        let ts: Vec<usize> = (0..6).filter(|&k| s.agents[k].role == Role::Terrorist).collect();
+        let (o, j, r, c) = (find(&s, Role::Officer), find(&s, Role::Journalist), find(&s, Role::Researcher), find(&s, Role::Citizen));
+        // ts[0] infects the officer and the citizen who meets it, ts[1] the journalist and the
+        // researcher who meets it: 4 of 4. Each terrorist sees it as its own moment, not its partner's.
+        for (a, b) in [(ts[0], o), (ts[1], j), (c, ts[0]), (r, ts[1]), (o, ts[0]), (j, ts[1])] {
+            s.agents[a].contact = Some(Some(b));
+        }
+        s.resolve_contacts();
+        assert_eq!(s.new_infections, vec![4]);
+        for t in &ts {
+            let m = Rules::moments(&s, &s.agents[*t].id);
+            assert_eq!(m.len(), 1);
+            assert_eq!(m[0].by, s.agents[*t].id);
+            assert_eq!(m[0].text, "4 new infections in one round");
+        }
+        for k in [o, j, r, c] {
+            assert!(Rules::moments(&s, &s.agents[k].id).is_empty());
+        }
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 6, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

@@ -1,9 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Crown, Emblem } from './Emblem';
-import { nameOf } from './games/common';
+import hood from './assets/hood.webp';
+import { Crown, Emblem, Peeker } from './Emblem';
+import { nameOf, useKeys } from './games/common';
 import { SCREENS } from './games/registry';
 import { HowToPlay } from './HowTo';
 import { setPaused, start, stop, usePlay } from './play';
+import { Replay } from './Replay';
 import { Snapshot } from './Snapshot';
 import type { GameInfo, PlayerResult } from './types';
 
@@ -27,7 +29,10 @@ export function App() {
       {!play.ready ? (
         <p className="muted center">Loading…</p>
       ) : current && info ? (
-        <GameView info={info} channel={play.games.indexOf(info) + 1} view={current.view} results={current.results} />
+        <>
+          <GameView info={info} channel={play.games.indexOf(info) + 1} view={current.view} results={current.results} />
+          {play.replay && <Replay moment={play.replay} />}
+        </>
       ) : (
         <Picker games={play.games} />
       )}
@@ -48,15 +53,36 @@ const STEPS: [string, string][] = [
   ['Outsmart the table', 'Solo puzzles race the clock. Everything else is you against bots that bluff back.'],
 ];
 
-type Filter = { kind: string; level: string; seats: string };
-const ANY: Filter = { kind: 'all', level: 'all', seats: 'all' };
+/** The categories (docs/games.md, Categories), in the order the filter shows them. */
+const CATEGORIES: [string, string][] = [
+  ['cards', 'Cards'],
+  ['bluff', 'Bluff'],
+  ['secret-role', 'Secret role'],
+  ['bidding', 'Bidding'],
+  ['memory', 'Memory'],
+  ['logic', 'Logic'],
+  ['numbers', 'Numbers'],
+  ['board', 'Board'],
+  ['dice', 'Dice'],
+  ['words', 'Words'],
+  ['speed', 'Speed'],
+  ['alliance', 'Alliance'],
+];
+const CATEGORY_NAME = Object.fromEntries(CATEGORIES);
+
+type Filter = { kind: string; tag: string; level: string; seats: string; query: string };
+const ANY: Filter = { kind: 'all', tag: 'all', level: 'all', seats: 'all', query: '' };
 
 function matches(g: GameInfo, f: Filter): boolean {
   const solo = g.maxPlayers === 1;
+  const words = f.query.toLowerCase().split(/\s+/).filter(Boolean);
+  const text = `${g.name} ${g.short} ${g.tags.map((t) => CATEGORY_NAME[t]).join(' ')}`.toLowerCase();
   return (
     (f.kind === 'all' || g.kind === f.kind) &&
+    (f.tag === 'all' || g.tags.includes(f.tag)) &&
     (f.level === 'all' || g.difficulty === f.level) &&
-    (f.seats === 'all' || (f.seats === 'solo') === solo)
+    (f.seats === 'all' || (f.seats === 'solo') === solo) &&
+    words.every((w) => text.includes(w))
   );
 }
 
@@ -81,7 +107,7 @@ function Picker({ games }: { games: GameInfo[] }) {
       </nav>
 
       <header className="hero" id="top">
-        <Emblem className="hero-emblem" watching />
+        <Emblem className="hero-emblem" src={hood} watching />
         <div className="hero-text">
           <p className="label tagline">A digital arena of strategy</p>
           <h1 className="title">Wicked Plan</h1>
@@ -121,6 +147,7 @@ function Picker({ games }: { games: GameInfo[] }) {
         <h2 className="section-title" id="games-title">
           Games
         </h2>
+        <Search value={filter.query} onChange={(query) => setFilter({ ...filter, query })} />
         <Filters filter={filter} onChange={setFilter} />
         <p className="muted small" aria-live="polite">
           {shown.length === games.length ? `${games.length} games` : `${shown.length} of ${games.length} games`}
@@ -170,6 +197,7 @@ function Picker({ games }: { games: GameInfo[] }) {
 
 const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }[] = [
   { key: 'kind', label: 'Type', options: [['all', 'All'], ...KINDS.map(([k, l]): [string, string] => [k, l.replace(/ games$/, '')])] },
+  { key: 'tag', label: 'Category', options: [['all', 'All'], ...CATEGORIES] },
   {
     key: 'level',
     label: 'Difficulty',
@@ -213,6 +241,33 @@ function Filters({ filter, onChange }: { filter: Filter; onChange: (f: Filter) =
         </fieldset>
       ))}
     </div>
+  );
+}
+
+/** Searches the names and short texts; "/" jumps to it on a keyboard. */
+function Search({ value, onChange }: { value: string; onChange: (q: string) => void }) {
+  const input = useRef<HTMLInputElement>(null);
+  useKeys((key) => {
+    if (key !== '/') return false;
+    input.current?.focus();
+    return true;
+  });
+  return (
+    <label className="search">
+      <svg className="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5" />
+        <path d="M15.5 15.5 L21 21" />
+      </svg>
+      <input
+        ref={input}
+        type="search"
+        value={value}
+        placeholder="Search games"
+        aria-label="Search games"
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <kbd className="key-hint search-key">/</kbd>
+    </label>
   );
 }
 
@@ -266,8 +321,8 @@ function GameView({ info, channel, view, results }: { info: GameInfo; channel: n
         <button type="button" className="btn small ghost" onClick={stop}>
           ← Games
         </button>
-        {/* While you play, the Observer watches from the bar (the transmission shows it otherwise). */}
-        {rules ? <span /> : <Emblem className="watcher" watching decorative />}
+        {/* While you play, the Observer's face peeks at you from the dark (the transmission shows it otherwise). */}
+        {rules ? <span /> : <Peeker />}
         {rules ? (
           <span />
         ) : (

@@ -37,3 +37,6 @@ Code: `crates/rules/src/games/duplicate_photo_buzzer.rs`.
   10% of the time.
 - Bot (for the first seat in tests): buzzes on the repeat 80% of the time.
 - Desktop: Space or B buzzes, Enter goes on after the reveal.
+- **Replay moments:** a right buzz within 0.75 s of the repeat showing ("Repeat buzzed in 0.6 s"),
+  or else a round 6 win that takes a seat from behind (or level) to the sole lead ("Lead taken in
+  the last round"). Public: the reveal shows who won, and the points are open.

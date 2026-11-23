@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 10;
@@ -15,6 +15,7 @@ pub const LIMIT: u32 = 13;
 pub const FULL_BONUS: i64 = 3;
 pub const ROUND_MS: i64 = 20_000;
 pub const RESULT_MS: i64 = 5_000;
+pub const COLOUR_NAMES: [&str; 4] = ["red", "blue", "green", "gold"];
 
 /// A card: colour * 6 + (value - 1).
 pub type Card = u8;
@@ -87,6 +88,8 @@ pub struct HvState {
     pub round: usize,
     pub time_left_ms: i64,
     pub log: Vec<RoundLog>,
+    /// Replay moments: a rainbow card that fills a stack to exactly 13, the lead stolen in the last round.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -157,6 +160,7 @@ impl HvState {
 
     fn resolve(&mut self) {
         let before = self.stacks;
+        let top_before = self.seats.iter().map(|s| s.score).max().unwrap_or(0);
         let mut added = [0u32; 4];
         for p in self.seats.iter().filter_map(|s| s.play) {
             if let Some(c) = p.card {
@@ -180,6 +184,24 @@ impl HvState {
             };
             self.stacks[k] = if outcome == Outcome::Stays { total } else { 0 };
             stacks.push(StackLog { before: before[k], added: added[k], outcome });
+            // A replay moment: the rainbow chip fills another colour's stack to exactly 13 (every play is shown now).
+            if outcome == Outcome::Full {
+                for s in &self.seats {
+                    if let Some(Play { card: Some(c), rainbow: true, .. }) = s.play.filter(|p| p.stack as usize == k) {
+                        self.moments.push(&s.id, format!("Rainbow {} fills {} to exactly 13", value(c), COLOUR_NAMES[k]));
+                    }
+                }
+            }
+        }
+        // A replay moment: behind before the last round, alone in the lead after it.
+        if self.round == ROUNDS {
+            let top = self.seats.iter().map(|s| s.score).max().unwrap_or(0);
+            if let [leader] = self.seats.iter().filter(|s| s.score == top).collect::<Vec<_>>()[..] {
+                let gain = plays.iter().find(|p| p.0 == leader.id).map_or(0, |p| p.2);
+                if top - gain < top_before {
+                    self.moments.push(&leader.id, "Lead stolen in the very last round");
+                }
+            }
         }
         self.log.push(RoundLog { round: self.round, plays, stacks });
         self.phase = Phase::Result;
@@ -235,6 +257,7 @@ impl Game for Rules {
             id: "heavy-13",
             kind: "prison",
             difficulty: "hard",
+            tags: &["cards", "numbers"],
             min_players: 3,
             max_players: 6,
             name: "Heavy 13",
@@ -257,7 +280,8 @@ impl Game for Rules {
                 Seat { id: id.clone(), hand, rainbow: true, passes: PASSES, play: None, score: 0 }
             })
             .collect();
-        let mut s = HvState { seats, stacks: [0; 4], phase: Phase::Play, round: 0, time_left_ms: 0, log: Vec::new() };
+        let mut s =
+            HvState { seats, stacks: [0; 4], phase: Phase::Play, round: 0, time_left_ms: 0, log: Vec::new(), moments: Moments::default() };
         s.start_round();
         Ok(s)
     }
@@ -400,6 +424,10 @@ impl Game for Rules {
         }
         best.map_or(HvMove::Pass, |b| b.1)
     }
+
+    fn moments(s: &HvState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 /// Ranks by `key` (higher is better), then 1000 points for the first down to 100 for the last.
@@ -496,5 +524,40 @@ mod tests {
         bot_games_with::<Rules>(400, 4, 5_000);
         bot_games_with::<Rules>(300, 3, 5_000);
         bot_games_with::<Rules>(300, 6, 5_000);
+    }
+
+    #[test]
+    fn a_rainbow_fill_and_a_last_round_steal_are_replay_moments() {
+        let mut s = Rules::setup(&ids(3), 5).unwrap();
+        give(&mut s, &[&[c(0, 4)], &[c(1, 3)], &[]]);
+        s.stacks = [0, 10, 0, 9];
+        // p1's red 4 on gold with the rainbow chip: 9 + 4 = 13. p2's blue 3 fills blue the normal way.
+        Rules::apply_move(&mut s, "p1", HvMove::Play { card: c(0, 4), stack: Some(3) }).unwrap();
+        Rules::apply_move(&mut s, "p2", HvMove::Play { card: c(1, 3), stack: None }).unwrap();
+        Rules::apply_move(&mut s, "p3", HvMove::Pass).unwrap();
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Rainbow 4 fills gold to exactly 13"));
+        // The last round: p1 trails p2 by 2 and plays a 6.
+        let mut s = Rules::setup(&ids(3), 5).unwrap();
+        s.round = ROUNDS;
+        give(&mut s, &[&[c(0, 6)], &[c(1, 1)], &[]]);
+        for (seat, score) in s.seats.iter_mut().zip([10, 12, 0]) {
+            seat.score = score;
+        }
+        Rules::apply_move(&mut s, "p1", HvMove::Play { card: c(0, 6), stack: None }).unwrap();
+        Rules::apply_move(&mut s, "p2", HvMove::Play { card: c(1, 1), stack: None }).unwrap();
+        Rules::apply_move(&mut s, "p3", HvMove::Pass).unwrap();
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Lead stolen in the very last round"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 3, "too many in one game: {stats:?}");
     }
 }

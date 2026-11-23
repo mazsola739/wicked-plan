@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 7;
@@ -55,6 +55,8 @@ pub struct BingoState {
     pub time_left_ms: i64,
     pub logs: Vec<Vec<String>>,
     pub over: bool,
+    /// Replay moments: a won cell that completes a line (only the winner sees it).
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -140,7 +142,18 @@ impl BingoState {
             public.push(format!("{name}: won for {top} coin{}.", if top == 1 { "" } else { "s" }));
             self.coins[w] -= top;
             let cell = self.picks[w].unwrap_or(0);
+            let before = self.boards[w].lines();
             self.boards[w].marked[cell] = true;
+            // A replay moment: the won cell completes a line against rivals (their number is public).
+            // Who won stays secret, so only the winner sees it.
+            let lines = self.boards[w].lines() - before;
+            let rivals = seats.len() - 1;
+            if lines > 0 && rivals > 0 {
+                let what = if lines == 1 { "Bingo".to_string() } else { format!("{lines} lines at once") };
+                let text = format!("{what}: {rivals} rival{} outbid (+{})", if rivals == 1 { "" } else { "s" }, 5 * lines);
+                let me = self.players[w].clone();
+                self.moments.push_for(&me, text, &[&me]);
+            }
             for &s in &seats {
                 self.logs[s].push(if s == w { format!("You won the {name} for {top}.") } else { format!("You did not win the {name}.") });
             }
@@ -203,6 +216,7 @@ impl Game for Rules {
             id: "auction-bingo",
             kind: "main",
             difficulty: "medium",
+            tags: &["bidding"],
             min_players: 3,
             max_players: 8,
             name: "Auction Bingo",
@@ -235,6 +249,7 @@ impl Game for Rules {
             time_left_ms: PICK_MS,
             logs: vec![Vec::new(); n],
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -363,6 +378,10 @@ impl Game for Rules {
         let want = pace * (1.0 + 0.5 * rivals) * (0.6 + 0.8 * rng.next_f64());
         BingoMove::Bid { coins: (want.round() as i64).clamp(0, coins) }
     }
+
+    fn moments(s: &BingoState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -445,5 +464,49 @@ mod tests {
         for n in [3, 8] {
             bot_games_with::<Rules>(500, n, 3000);
         }
+    }
+
+    #[test]
+    fn a_won_cell_that_completes_a_line_is_a_private_replay_moment() {
+        let mut s = Rules::setup(&ids(3), 2).unwrap();
+        // p1 has two cells of its top row marked; the third one's shape is on offer.
+        let shape = s.boards[0].shapes[2];
+        (s.boards[0].marked[0], s.boards[0].marked[1]) = (true, true);
+        Rules::apply_move(&mut s, "p1", BingoMove::Pick { cell: 2 }).unwrap();
+        for p in ["p2", "p3"] {
+            let i = if p == "p2" { 1 } else { 2 };
+            let cell = (0..9).find(|&c| s.boards[i].shapes[c] == shape).unwrap();
+            Rules::apply_move(&mut s, p, BingoMove::Pick { cell }).unwrap();
+        }
+        Rules::apply_move(&mut s, "p1", BingoMove::Bid { coins: 6 }).unwrap();
+        Rules::apply_move(&mut s, "p2", BingoMove::Bid { coins: 2 }).unwrap();
+        Rules::apply_move(&mut s, "p3", BingoMove::Bid { coins: 1 }).unwrap();
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Bingo: 2 rivals outbid (+5)"));
+        // Who won stays secret: the others see nothing.
+        assert!(Rules::moments(&s, "p2").is_empty());
+        assert!(Rules::moments(&s, "p3").is_empty());
+        // A line nobody fought for is no moment.
+        let mut s = Rules::setup(&ids(3), 2).unwrap();
+        let shape = s.boards[0].shapes[2];
+        (s.boards[0].marked[0], s.boards[0].marked[1]) = (true, true);
+        Rules::apply_move(&mut s, "p1", BingoMove::Pick { cell: 2 }).unwrap();
+        for (i, p) in [(1, "p2"), (2, "p3")] {
+            let cell = (0..9).find(|&c| s.boards[i].shapes[c] != shape).unwrap();
+            Rules::apply_move(&mut s, p, BingoMove::Pick { cell }).unwrap();
+        }
+        for p in ["p1", "p2", "p3"] {
+            Rules::apply_move(&mut s, p, BingoMove::Bid { coins: 1 }).unwrap();
+        }
+        assert!(s.boards[0].marked[2]);
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

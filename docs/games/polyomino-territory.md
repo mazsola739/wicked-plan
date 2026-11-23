@@ -38,3 +38,6 @@ Our short version of the 30 × 30 original: a **14 × 14** board.
 - **Screen:** board in SVG; pick a piece, turn ↻ / flip ⇋ it, tap the board to put the ghost there, then
   Place. Desktop keys: 1–3 pick a piece, R turns, F flips, arrows move the ghost, Enter places, L toggles the
   leap.
+- **Replay moments:** a piece placed with a leap that lands on a key square ("Leap grabs an encore
+  square", "Leap grabs another leap", "Leap grabs two key squares"). Public: the board, the key squares
+  and everyone's leaps are shown to everyone.

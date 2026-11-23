@@ -44,3 +44,8 @@ Final duel, 2 players. Code: `crates/rules/src/games/question_and_truth.rs`, scr
 - Bot: keeps every row (of the 40,320) that fits the answers so far, asks the question with the most
   expected information per token, and guesses as soon as one row is left (or the tokens run out, then the
   row that agrees most with the remaining ones).
+- **Replay moments:** an answer that leaves only one row possible while the asker still has tokens
+  ("Row cracked with 2 tokens to spare"); at the end, a whole row guessed right while two or more rows
+  still fitted the answers ("Lucky guess: the right row of 2 left"). Public: every question and answer is
+  seen by both, so the crack tells nothing new and never the row itself; the lucky guess is shown only once
+  the game is over and both rows are open.

@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 7;
@@ -48,6 +48,8 @@ pub struct MoState {
     pub round: usize,
     pub time_left_ms: i64,
     pub log: Vec<RoundLog>,
+    /// Replay moments: a 1 or a 2 that takes a pot of 20 or more.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -129,6 +131,11 @@ impl MoState {
         let winner = lowest_unique(&kept);
         if let Some(w) = winner {
             self.seats[w].score += pot;
+            // A replay moment: a 1 or a 2 snatching a pot of 20 or more (every kept card is public now).
+            let card = i64::from(kept[w]);
+            if card <= 2 && pot >= 20 {
+                self.moments.push(&self.seats[w].id.clone(), format!("A lone {card} takes the pot of {pot}"));
+            }
         }
         for (s, &k) in self.seats.iter_mut().zip(&kept) {
             if let Some(i) = s.hand.iter().position(|&c| c == k) {
@@ -181,6 +188,7 @@ impl Game for Rules {
             id: "minus-one",
             kind: "prison",
             difficulty: "easy",
+            tags: &["cards", "bluff"],
             min_players: 3,
             max_players: 6,
             name: "Minus One",
@@ -194,7 +202,7 @@ impl Game for Rules {
         }
         let seats =
             players.iter().map(|id| Seat { id: id.clone(), hand: (1..=10).collect(), pair: None, kept: None, score: 0 }).collect();
-        let mut s = MoState { seats, phase: Phase::Show, round: 0, time_left_ms: 0, log: Vec::new() };
+        let mut s = MoState { seats, phase: Phase::Show, round: 0, time_left_ms: 0, log: Vec::new(), moments: Moments::default() };
         s.start_round();
         Ok(s)
     }
@@ -317,6 +325,10 @@ impl Game for Rules {
         let value = |c: u8| keep_value(s, i, c) - if rounds_left > 0 { f64::from(11 - c) * 0.4 } else { 0.0 };
         MoMove::Keep { card: if value(a) >= value(b) { a } else { b } }
     }
+
+    fn moments(s: &MoState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 /// Expected pot won by keeping `card`, over every way the other seats may keep
@@ -411,5 +423,27 @@ mod tests {
         bot_games_with::<Rules>(400, 4, 5_000);
         bot_games_with::<Rules>(300, 3, 5_000);
         bot_games_with::<Rules>(300, 6, 5_000);
+    }
+
+    #[test]
+    fn a_low_card_taking_a_big_pot_is_a_replay_moment() {
+        let mut s = Rules::setup(&ids(4), 1).unwrap();
+        // Kept 1, 9, 8, 7: the lone 1 takes a pot of 25.
+        play(&mut s, &[[1, 5], [9, 10], [8, 6], [7, 4]], &[1, 9, 8, 7]);
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].by, "p1");
+        assert_eq!(m[0].text, "A lone 1 takes the pot of 25");
+        // A small pot is no moment.
+        let mut s = Rules::setup(&ids(4), 1).unwrap();
+        play(&mut s, &[[1, 5], [1, 2], [3, 4], [2, 7]], &[1, 1, 3, 2]);
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

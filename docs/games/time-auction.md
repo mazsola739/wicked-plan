@@ -36,3 +36,8 @@ Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
   low), otherwise hold for about its fair share of the bank (bank ÷ rounds left) times 0.4–2.2,
   a bit longer when it is behind on tokens.
 - Desktop: hold Space (or the button).
+- **Replay moments:** a third token in a row ("Third token in a row"); a token in round 6 or 7 that
+  takes the sole lead in tokens ("Last token of the game takes the sole lead", "Sole lead taken in
+  round 6 of 7"); a token won with a hold under 3 s ("Token won with a hold of just 1.2 s"). The first
+  two are public (winners and tokens are shown to all); the cheap token only its winner sees, since
+  hold times stay secret.

@@ -6,8 +6,11 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
+
+/// Finding the last difference with less than this left is a replay moment.
+const LAST_SECOND_MS: i64 = 5_000;
 
 pub const ROUNDS: usize = 3;
 pub const DIFFS: [usize; ROUNDS] = [5, 6, 7];
@@ -119,6 +122,8 @@ pub struct State {
     pub revealing: bool,
     pub reveal_left_ms: i64,
     pub over: bool,
+    /// Replay moments: a round found without a miss, and one finished in the last seconds.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -226,6 +231,17 @@ impl State {
         self.seats[0].finds.len() == self.spots.len()
     }
 
+    /// Replay moments when the first seat has just found every difference.
+    fn done_moments(&mut self) {
+        let (me, n, left) = (self.seats[0].id.clone(), self.spots.len(), ROUND_MS - self.elapsed_ms);
+        if self.seats[0].misses == 0 {
+            self.moments.push(&me, format!("All {n} found without a miss"));
+        }
+        if left < LAST_SECOND_MS {
+            self.moments.push(&me, format!("All {n} found with {} s left", (left + 999) / 1000));
+        }
+    }
+
     fn hit(&self, x: i32, y: i32) -> Option<usize> {
         // A tap on the right picture counts the same as on the left one.
         self.spots.iter().enumerate().find_map(|(k, sp)| {
@@ -248,6 +264,7 @@ impl Game for FindTheDifferences {
             id: "find-the-differences",
             kind: "exile",
             difficulty: "easy",
+            tags: &["speed"],
             min_players: 1,
             max_players: 4,
             name: "Find the Differences",
@@ -270,6 +287,7 @@ impl Game for FindTheDifferences {
             revealing: false,
             reveal_left_ms: 0,
             over: false,
+            moments: Moments::default(),
         };
         s.start_round();
         Ok(s)
@@ -292,6 +310,7 @@ impl Game for FindTheDifferences {
                         let at = s.elapsed_ms;
                         s.seats[0].finds.push((k, at));
                         if s.first_done() {
+                            s.done_moments();
                             s.end_round();
                         }
                     }
@@ -373,6 +392,10 @@ impl Game for FindTheDifferences {
             Move::Tap { x: rng.int(0, i64::from(SIZE)) as i32, y: rng.int(0, i64::from(SIZE)) as i32 }
         }
     }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -450,5 +473,48 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<FindTheDifferences>(1000, 1, 400);
         bot_games_with::<FindTheDifferences>(300, 4, 400);
+    }
+
+    fn tap(s: &mut State, sp: Spot) {
+        FindTheDifferences::apply_move(s, "p1", Move::Tap { x: sp.x, y: sp.y }).unwrap();
+    }
+
+    #[test]
+    fn a_clean_round_and_a_last_second_finish_are_replay_moments() {
+        let mut s = FindTheDifferences::setup(&players(4), 2).unwrap();
+        // Round 1: all five, no miss.
+        for sp in s.spots.clone() {
+            tap(&mut s, sp);
+        }
+        let m = FindTheDifferences::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "All 5 found without a miss"));
+        // Round 2: a miss, then the last one with 2.5 s left.
+        FindTheDifferences::apply_move(&mut s, "p1", Move::Next).unwrap();
+        let spots = s.spots.clone();
+        for &sp in &spots[1..] {
+            tap(&mut s, sp);
+        }
+        FindTheDifferences::apply_move(&mut s, "p1", Move::Tap { x: 0, y: 0 }).unwrap();
+        FindTheDifferences::tick(&mut s, (ROUND_MS - 2_500) as u64);
+        tap(&mut s, spots[0]);
+        let m = FindTheDifferences::moments(&s, "p1");
+        assert_eq!(m.len(), 2);
+        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p1", "All 6 found with 3 s left"));
+        // Round 3: found with a miss and time to spare: nothing new.
+        FindTheDifferences::apply_move(&mut s, "p1", Move::Next).unwrap();
+        FindTheDifferences::apply_move(&mut s, "p1", Move::Tap { x: 0, y: 0 }).unwrap();
+        for sp in s.spots.clone() {
+            tap(&mut s, sp);
+        }
+        assert_eq!(FindTheDifferences::moments(&s, "p1").len(), 2);
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<FindTheDifferences>(300, 4, 400);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 3, "too many in one game: {stats:?}");
     }
 }

@@ -38,3 +38,6 @@ Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
   every value its blind die may have). It predicts the rank that comes up most often when it deals its
   unknown dice (its own blind die, the others' secret dice) at random.
 - Desktop: K keep, R reroll, 1–6 predict.
+- **Replay moments:** a triple whose rank was predicted exactly ("Triple 5s, rank 1 called"), and
+  else a 4th (or later) exact prediction in a row ("4 exact rank calls in a row"). Public: they come
+  at the result, when every die and prediction is shown.

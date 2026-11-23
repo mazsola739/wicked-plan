@@ -30,6 +30,9 @@ controls: **the Shadow**, run by the rules. Its plan is unknown; all you see is 
 - **The Shadow's play:** complete a line if it can; otherwise the square that gives it the most open
   twos (two Shadow stones and an empty square in a 3-stretch), ties dealt by the seed.
 - Turn timer: **30 s**; when it runs out, the bot plays your stone.
+- **Replay moments:** a stone that makes two or more own lines at once ("2 lines with one stone"), and a
+  stone that blocks a Shadow line and makes an own line ("One stone: Shadow blocked, line made"). Public:
+  the whole board is open.
 
 ## Points (cooperation matters)
 

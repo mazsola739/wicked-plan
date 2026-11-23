@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const SIZE: i32 = 14;
@@ -133,6 +133,8 @@ pub struct State {
     pub time_left_ms: i64,
     pub last: Option<Placement>,
     pub over: bool,
+    /// Replay moments: a leap that lands on a key square.
+    pub moments: Moments,
     deck: Rng,
 }
 
@@ -285,6 +287,15 @@ impl State {
                 KeyKind::Leap => self.leaps[seat] += 1,
             }
         }
+        // Replay moment (the board, the key squares and the leaps are public): a leap that lands on a key square.
+        if leap && !got.is_empty() {
+            let text = match (got.contains(&KeyKind::Encore), got.contains(&KeyKind::Leap)) {
+                (true, true) => "Leap grabs two key squares",
+                (true, false) => "Leap grabs an encore square",
+                _ => "Leap grabs another leap",
+            };
+            self.moments.push(&self.players[seat].clone(), text);
+        }
         self.hands[seat].remove(piece);
         let next = self.deck.index(SHAPES.len());
         self.hands[seat].push(next);
@@ -369,6 +380,7 @@ impl Game for PolyominoTerritory {
             id: "polyomino-territory",
             kind: "main",
             difficulty: "hard",
+            tags: &["board"],
             min_players: 2,
             max_players: 4,
             name: "Polyomino Territory",
@@ -423,6 +435,7 @@ impl Game for PolyominoTerritory {
             time_left_ms: TURN_MS,
             last: None,
             over: false,
+            moments: Moments::default(),
             deck,
         })
     }
@@ -483,8 +496,7 @@ impl Game for PolyominoTerritory {
     }
 
     fn results(s: &State) -> Vec<PlayerResult> {
-        let scores: Vec<(String, i64)> =
-            s.players.iter().enumerate().map(|(k, p)| (p.clone(), s.squares(k) * POINTS_PER_SQUARE)).collect();
+        let scores: Vec<(String, i64)> = s.players.iter().enumerate().map(|(k, p)| (p.clone(), s.squares(k) * POINTS_PER_SQUARE)).collect();
         rank_by_score(&scores)
     }
 
@@ -498,6 +510,10 @@ impl Game for PolyominoTerritory {
             Some((piece, cells, leap)) => Move::Place { piece, cells, leap },
             None => Move::Place { piece: 0, cells: Vec::new(), leap: false },
         }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -607,5 +623,29 @@ mod tests {
         for seats in 2..=4 {
             bot_games_with::<PolyominoTerritory>(150, seats, 5000);
         }
+    }
+
+    #[test]
+    fn a_leap_onto_a_key_square_is_a_replay_moment() {
+        let mut s = PolyominoTerritory::setup(&players(2), 2).unwrap();
+        let encore = s.keys.iter().find(|k| k.kind == KeyKind::Encore).unwrap().clone();
+        s.hands[0] = vec![0, 0, 0];
+        // A plain placement next to the start is no moment.
+        PolyominoTerritory::apply_move(&mut s, "p1", Move::Place { piece: 0, cells: vec![(1, 0)], leap: false }).unwrap();
+        assert!(PolyominoTerritory::moments(&s, "p2").is_empty());
+        s.turn = 0;
+        s.leaps[0] = 1;
+        PolyominoTerritory::apply_move(&mut s, "p1", Move::Place { piece: 0, cells: vec![(encore.x, encore.y)], leap: true }).unwrap();
+        let m = PolyominoTerritory::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].by, "p1");
+        assert_eq!(m[0].text, "Leap grabs an encore square");
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<PolyominoTerritory>(150, 4, 5000);
+        assert!(stats.with_any * 3 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

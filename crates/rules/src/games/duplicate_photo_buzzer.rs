@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 6;
@@ -14,6 +14,8 @@ pub const REVEAL_MS: i64 = 2_500;
 pub const WIN_POINTS: i64 = 100;
 pub const SPEED_POINTS: i64 = 60;
 pub const WRONG_POINTS: i64 = -30;
+/// A right buzz this soon after the repeat shows is a replay moment.
+pub const FAST_BUZZ_MS: i64 = 750;
 
 /// How long a picture stays in round `round` (0-based).
 pub fn frame_ms(round: usize) -> i64 {
@@ -106,6 +108,8 @@ pub struct State {
     pub reveal_left_ms: i64,
     pub winner: Option<usize>,
     pub over: bool,
+    /// Replay moments: a lightning buzz, the lead taken in the last round.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -187,7 +191,16 @@ impl State {
     fn win(&mut self, seat: usize, at: i64) {
         let window = 2 * self.frame();
         let late = (at - self.window_start()).clamp(0, window);
+        let led = |s: &Self| s.seats.iter().enumerate().all(|(j, x)| j == seat || x.points < s.seats[seat].points);
+        let was_ahead = led(self);
         self.seats[seat].points += WIN_POINTS + SPEED_POINTS * (window - late) / window;
+        // Replay moments (everyone sees the reveal and the points): a lightning buzz, or the
+        // last round's win that takes the lead.
+        if late <= FAST_BUZZ_MS {
+            self.moments.push(&self.seats[seat].id, format!("Repeat buzzed in {}.{} s", late / 1000, late % 1000 / 100));
+        } else if self.round + 1 == ROUNDS && !was_ahead && led(self) {
+            self.moments.push(&self.seats[seat].id, "Lead taken in the last round");
+        }
         self.seats[seat].buzz = Some(true);
         self.winner = Some(seat);
         self.elapsed_ms = at;
@@ -235,6 +248,7 @@ impl Game for DuplicatePictureBuzzer {
             id: "duplicate-photo-buzzer",
             kind: "mini-team",
             difficulty: "easy",
+            tags: &["memory", "speed"],
             min_players: 1,
             max_players: 4,
             name: "Duplicate Picture Buzzer",
@@ -249,8 +263,18 @@ impl Game for DuplicatePictureBuzzer {
         let mut rng = Rng::new(seed);
         let stream = generate(&mut rng);
         let seats = players.iter().map(|id| Seat { id: id.clone(), points: 0, buzz: None, plan: None }).collect();
-        let mut s =
-            State { seats, rng, round: 0, stream, elapsed_ms: 0, revealing: false, reveal_left_ms: 0, winner: None, over: false };
+        let mut s = State {
+            seats,
+            rng,
+            round: 0,
+            stream,
+            elapsed_ms: 0,
+            revealing: false,
+            reveal_left_ms: 0,
+            winner: None,
+            over: false,
+            moments: Moments::default(),
+        };
         s.start_round();
         Ok(s)
     }
@@ -355,6 +379,10 @@ impl Game for DuplicatePictureBuzzer {
         let mut rng = Rng::new(seed);
         if !s.revealing && s.in_window(s.elapsed_ms) && rng.next_f64() < 0.8 { Move::Buzz } else { Move::Next }
     }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -425,6 +453,45 @@ mod tests {
             }
         }
         assert!(wins > 100, "rivals won {wins} of 200 rounds");
+    }
+
+    #[test]
+    fn a_lightning_buzz_and_a_last_round_lead_are_replay_moments() {
+        let mut s = DuplicatePictureBuzzer::setup(&players(1), 1).unwrap();
+        let start = s.window_start() as u64;
+        DuplicatePictureBuzzer::tick(&mut s, start + 600);
+        DuplicatePictureBuzzer::apply_move(&mut s, "p1", Move::Buzz).unwrap();
+        let m = DuplicatePictureBuzzer::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Repeat buzzed in 0.6 s"));
+        // The last round: p1 trails p2 and wins it slowly, taking the lead.
+        let mut s = DuplicatePictureBuzzer::setup(&players(2), 1).unwrap();
+        s.round = ROUNDS - 1;
+        s.start_round();
+        s.seats[1].plan = None;
+        (s.seats[0].points, s.seats[1].points) = (300, 380);
+        let start = s.window_start() as u64;
+        DuplicatePictureBuzzer::tick(&mut s, start + 1_000);
+        DuplicatePictureBuzzer::apply_move(&mut s, "p1", Move::Buzz).unwrap();
+        let m = DuplicatePictureBuzzer::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Lead taken in the last round"));
+        // A slow win that keeps someone else ahead is no moment.
+        let mut s = DuplicatePictureBuzzer::setup(&players(2), 1).unwrap();
+        s.seats[1].plan = None;
+        s.seats[1].points = 500;
+        let start = s.window_start() as u64;
+        DuplicatePictureBuzzer::tick(&mut s, start + 1_000);
+        DuplicatePictureBuzzer::apply_move(&mut s, "p1", Move::Buzz).unwrap();
+        assert_eq!(s.winner, Some(0));
+        assert!(DuplicatePictureBuzzer::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<DuplicatePictureBuzzer>(300, 4, 1500);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 
     #[test]

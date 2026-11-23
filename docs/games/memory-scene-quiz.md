@@ -34,3 +34,5 @@ Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 - **Moves:** `{type:"ready"}` while studying, `{type:"answer", choice}` (0–3) by the player whose turn it is.
 - **Bot:** taps Ready at once; answers right 95% of the time.
 - **Screen:** the scene in SVG; the four answers as big buttons. Desktop keys: 1–4 answer, Enter = Ready.
+- **Replay moments:** the tenth question answered right, for a perfect quiz, by whoever answered it
+  ("Question 10 right: a perfect 1000"). Public: every answer is shown to the whole team.

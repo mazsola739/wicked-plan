@@ -35,3 +35,5 @@ Ring 1 sits at the free end of the loop, the highest ring at the handle.
   from the start), `solved` per level, `score`, `timeLeftMs`, `levelTimeMs`, `over`.
 - Bot: follows the shortest path, with a wrong turn now and then.
 - Desktop: keys 1–6 slide that ring, Backspace resets.
+- **Replay moments:** level 2 or 3 (the mixed starts) solved in the fewest possible moves ("6 rings off
+  in 31 moves, the fewest possible"). Level 1 always starts the same, so it is no moment. Public: solo game.

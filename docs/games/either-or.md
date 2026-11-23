@@ -38,3 +38,6 @@ Main game, 3–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/e
 - Bot: every question has a hidden lean that most bots follow (so a majority forms); in Minority and
   Lone Wolf rounds bots go against the lean more often; it grabs now and then, points at the leader.
 - Desktop: 1 / 2 pick the left / right answer (1–5 for numbers, seat letters A–H for players).
+- **Replay moments:** the only grabber in Share or Grab ("Lone grab while the rest shared (+5)"), and a
+  player who was behind before the last round and ends it alone in the lead ("Lead stolen in the very
+  last round"). Public: every pick and score is shown after each round anyway.

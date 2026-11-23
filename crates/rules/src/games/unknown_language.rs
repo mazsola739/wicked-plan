@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, speed_points};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, speed_points};
 use crate::rng::Rng;
 
 /// Thing, action, quality of every root.
@@ -375,6 +375,8 @@ pub struct LangState {
     /// Right or wrong, per question answered.
     pub results: Vec<bool>,
     pub over: bool,
+    /// Replay moments: all nine right; else stage 3 (the new marks) without a miss.
+    pub moments: Moments,
 }
 
 impl LangState {
@@ -408,6 +410,14 @@ impl LangState {
         self.current += 1;
         self.over = self.current >= self.course.questions.len();
         self.time_left_ms = if self.over { 0 } else { QUESTION_MS };
+        if self.over {
+            let player = self.player.clone();
+            if self.results.iter().all(|&r| r) {
+                self.moments.push(&player, format!("Perfect run: all {} carvings read right", self.results.len()));
+            } else if self.results[(STAGES - 1) * PER_STAGE..].iter().all(|&r| r) {
+                self.moments.push(&player, "Stage 3 cracked without a miss");
+            }
+        }
     }
 }
 
@@ -445,6 +455,7 @@ impl Game for Rules {
             id: "unknown-language",
             kind: "exile",
             difficulty: "hard",
+            tags: &["words", "logic"],
             min_players: 1,
             max_players: 1,
             name: "Unknown Language",
@@ -463,6 +474,7 @@ impl Game for Rules {
             last: None,
             results: Vec::new(),
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -524,6 +536,10 @@ impl Game for Rules {
         let mut rng = Rng::new(seed);
         let solution = s.course.questions[s.current.min(s.course.questions.len() - 1)].1;
         LangMove::Answer { option: if rng.next_f64() < 0.75 { solution } else { rng.index(4) } }
+    }
+
+    fn moments(s: &LangState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -611,5 +627,35 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games::<Rules>(1000, 2000);
+    }
+
+    /// Answers every question, right where `right[i]` says so.
+    fn play(right: [bool; 9]) -> LangState {
+        let mut s = Rules::setup(&[P.into()], 4).unwrap();
+        for r in right {
+            let solution = s.course.questions[s.current].1;
+            Rules::apply_move(&mut s, P, LangMove::Answer { option: if r { solution } else { (solution + 1) % 4 } }).unwrap();
+        }
+        assert!(s.over);
+        s
+    }
+
+    #[test]
+    fn a_perfect_run_or_a_clean_stage_3_is_a_replay_moment() {
+        let m = Rules::moments(&play([true; 9]), P);
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), (P, "Perfect run: all 9 carvings read right"));
+        let m = Rules::moments(&play([false, true, true, true, true, true, true, true, true]), P);
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].text, "Stage 3 cracked without a miss");
+        assert!(Rules::moments(&play([true, true, true, true, true, true, true, true, false]), P).is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 1, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 1, "too many in one game: {stats:?}");
     }
 }

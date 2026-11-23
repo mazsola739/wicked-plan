@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const CARDS: u8 = 9;
@@ -70,6 +70,8 @@ pub struct BigState {
     history: Vec<RoundLog>,
     time_left_ms: i64,
     over: bool,
+    /// Replay moments: an exact "equal" call, a six-chip swing, the lead stolen in the last round.
+    pub moments: Moments,
 }
 
 impl BigState {
@@ -90,9 +92,30 @@ impl BigState {
             let change = if right { mine.stake * mine.guess.pays() } else { -mine.stake };
             SideLog { card: mine.card, guess: mine.guess, stake: mine.stake, right, change }
         });
+        let behind = [self.chips[0] < self.chips[1], self.chips[1] < self.chips[0]];
         for i in 0..2 {
             self.chips[i] += sides[i].change;
             self.hands[i].retain(|&c| c != picks[i].card);
+        }
+        // Replay moments (both cards are shown now): an exact call, a full-stake read while the
+        // other full-stake read fails, and the lead stolen at the end.
+        for i in 0..2 {
+            let (me, them) = (sides[i], sides[1 - i]);
+            let other = &self.players[1 - i];
+            let text = if me.right && me.guess == Guess::Equal && me.stake > 0 {
+                format!("Called {{{other}}}'s {} exactly (+{})", picks[1 - i].card, me.change)
+            } else if me.right && me.stake == MAX_STAKE && !them.right && them.stake == MAX_STAKE {
+                format!("Six-chip swing against {{{other}}}")
+            } else {
+                continue;
+            };
+            self.moments.push(&self.players[i], text);
+        }
+        for (i, was_behind) in behind.into_iter().enumerate() {
+            if self.round + 1 == CARDS as usize && was_behind && self.chips[i] > self.chips[1 - i] {
+                let text = format!("Lead stolen in the last round ({}–{})", self.chips[i], self.chips[1 - i]);
+                self.moments.push(&self.players[i], text);
+            }
         }
         self.history.push(RoundLog { dealer, sides });
         self.picks = [None, None];
@@ -150,6 +173,7 @@ impl Game for BigOrSmall {
             id: "big-or-small",
             kind: "final-duel",
             difficulty: "easy",
+            tags: &["cards", "numbers"],
             min_players: 2,
             max_players: 2,
             name: "Big or Small",
@@ -172,6 +196,7 @@ impl Game for BigOrSmall {
             history: Vec::new(),
             time_left_ms: TURN_MS,
             over: false,
+            moments: Moments::default(),
         })
     }
 
@@ -284,6 +309,10 @@ impl Game for BigOrSmall {
         let card = if options.is_empty() { 1 } else { *rng.pick(&options) };
         BigMove::Play { card, guess, stake }
     }
+
+    fn moments(s: &BigState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -362,5 +391,51 @@ mod tests {
     #[test]
     fn thousand_bot_games() {
         bot_games_with::<BigOrSmall>(1000, 2, 500);
+    }
+
+    #[test]
+    fn an_exact_call_a_swing_and_a_last_round_steal_are_replay_moments() {
+        let mut s = new();
+        let d = s.dealer_card();
+        let other = if d == 9 { 1 } else { 9 };
+        // b plays the dealer's card and a calls it equal; b's bigger/smaller bet is no moment.
+        BigOrSmall::apply_move(&mut s, "a", play(other, Guess::Equal, 3)).unwrap();
+        BigOrSmall::apply_move(&mut s, "b", play(d, Guess::Bigger, 1)).unwrap();
+        let m = BigOrSmall::moments(&s, "b");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.clone()), ("a", format!("Called {{b}}'s {d} exactly (+6)")));
+        // Both stake 3: b reads a's 1 right, a's 9-call on b's 2 fails.
+        let mut s = new();
+        s.dealer[0] = 5;
+        BigOrSmall::apply_move(&mut s, "a", play(1, Guess::Bigger, 3)).unwrap();
+        BigOrSmall::apply_move(&mut s, "b", play(2, Guess::Smaller, 3)).unwrap();
+        let m = BigOrSmall::moments(&s, "a");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("b", "Six-chip swing against {a}"));
+        // A small stake is no swing.
+        let mut s = new();
+        s.dealer[0] = 5;
+        BigOrSmall::apply_move(&mut s, "a", play(1, Guess::Bigger, 3)).unwrap();
+        BigOrSmall::apply_move(&mut s, "b", play(2, Guess::Smaller, 2)).unwrap();
+        assert!(BigOrSmall::moments(&s, "a").is_empty());
+        // The last round: b is behind 9 to 11 and wins 3 while a loses 2.
+        let mut s = new();
+        s.round = 8;
+        s.chips = [11, 9];
+        s.hands = [vec![2], vec![5]];
+        s.dealer[8] = 4;
+        BigOrSmall::apply_move(&mut s, "a", play(2, Guess::Smaller, 2)).unwrap();
+        BigOrSmall::apply_move(&mut s, "b", play(5, Guess::Smaller, 3)).unwrap();
+        assert!(s.over);
+        let m = BigOrSmall::moments(&s, "a");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("b", "Lead stolen in the last round (12–9)"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<BigOrSmall>(300, 2, 500);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

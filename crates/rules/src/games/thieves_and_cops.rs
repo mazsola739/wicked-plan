@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: u32 = 12;
@@ -137,6 +137,8 @@ pub struct TcState {
     pub unmasked: bool,
     pub log: Vec<String>,
     pub rng: Rng,
+    /// Replay moments: a catch; the piece that wins it for the thieves in round 11 or 12.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -226,6 +228,8 @@ impl TcState {
 
     fn resolve_moves(&mut self) {
         let n = self.agents.len();
+        let won_before = self.thieves_win();
+        let mut last_take = None;
         let from: Vec<usize> = self.agents.iter().map(|a| a.pos).collect();
         for a in &mut self.agents {
             if !a.caught
@@ -257,6 +261,14 @@ impl TcState {
                     if lost > 0 { format!(" ({lost} pieces lost)") } else { String::new() }
                 );
                 self.say(line);
+                // A replay moment: every catch (the log tells everyone anyway).
+                let lost = match lost {
+                    0 => String::new(),
+                    1 => ": 1 piece lost".into(),
+                    n => format!(": {n} pieces lost"),
+                };
+                let text = format!("{{{}}} caught at {}{lost}", self.agents[t].id, STATIONS[self.agents[t].pos].0);
+                self.moments.push(&self.agents[c].id.clone(), text);
                 continue;
             }
             let at = self.agents[t].pos;
@@ -267,7 +279,18 @@ impl TcState {
                 self.agents[t].seen = Some((self.round, at));
                 let line = format!("A piece was taken at {}.", STATIONS[at].0);
                 self.say(line);
+                last_take = Some((t, at));
             }
+        }
+        // A replay moment: the piece that wins it for the thieves at the last moment, in round 11
+        // or 12 (where a piece was taken, and by whom, is public).
+        if !won_before
+            && self.thieves_win()
+            && self.round + 1 >= ROUNDS
+            && let Some((t, at)) = last_take
+        {
+            let text = format!("Winning piece taken at {} in round {}", STATIONS[at].0, self.round);
+            self.moments.push(&self.agents[t].id.clone(), text);
         }
         for a in &mut self.agents {
             a.trail.push(a.pos);
@@ -357,6 +380,7 @@ impl Game for Rules {
             id: "thieves-and-cops",
             kind: "main",
             difficulty: "hard",
+            tags: &["board", "secret-role", "alliance"],
             min_players: 4,
             max_players: 8,
             name: "Thieves and Cops",
@@ -413,6 +437,7 @@ impl Game for Rules {
             unmasked: false,
             log: vec!["Round 1: everyone moves at once.".into()],
             rng,
+            moments: Moments::default(),
         })
     }
 
@@ -639,6 +664,10 @@ impl Game for Rules {
             _ => TcMove::Close,
         }
     }
+
+    fn moments(s: &TcState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
+    }
 }
 
 pub const READY: bool = true;
@@ -747,5 +776,79 @@ mod tests {
     fn thousand_bot_games() {
         bot_games_with::<Rules>(1000, 4, 3000);
         bot_games_with::<Rules>(200, 8, 6000);
+    }
+
+    #[test]
+    fn a_catch_is_a_replay_moment() {
+        let mut s = Rules::setup(&players(4), 2).unwrap();
+        let t = find(&s, Role::Thief);
+        let k = find(&s, Role::Corrupt);
+        let c = find(&s, Role::Cop);
+        // The corrupt officer lands on the thief: no catch, no moment.
+        s.loot = vec![16];
+        s.agents[t].pos = 1;
+        s.agents[t].kept = 2;
+        s.agents[k].pos = 0;
+        s.agents[c].pos = 3;
+        for a in 0..4 {
+            s.agents[a].choice = Some(if a == t { 0 } else { s.agents[a].pos });
+        }
+        s.resolve_moves();
+        assert!(s.moments.is_empty());
+        // An honest officer passes the thief on the line: caught at Market with 2 pieces.
+        s.agents[c].pos = 2;
+        s.agents[t].pos = 1;
+        for a in 0..4 {
+            s.agents[a].choice = Some(match a {
+                _ if a == c => 1,
+                _ if a == t => 2,
+                _ => s.agents[a].pos,
+            });
+        }
+        s.resolve_moves();
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].by, s.agents[c].id);
+        assert_eq!(m[0].text, format!("{{{}}} caught at Central: 2 pieces lost", s.agents[t].id));
+    }
+
+    /// The thief (4 pieces kept) steps from Harbour onto a piece at Market in `round`.
+    fn last_piece(round: u32) -> TcState {
+        let mut s = Rules::setup(&players(4), 2).unwrap();
+        let t = find(&s, Role::Thief);
+        s.round = round;
+        s.agents[t].pos = 0;
+        s.agents[t].kept = 4;
+        s.loot = vec![1, 16];
+        for a in 0..4 {
+            if a != t {
+                s.agents[a].pos = 13;
+            }
+            s.agents[a].choice = Some(if a == t { 1 } else { s.agents[a].pos });
+        }
+        s.resolve_moves();
+        assert!(s.thieves_win());
+        s
+    }
+
+    #[test]
+    fn a_last_minute_win_is_a_replay_moment() {
+        let s = last_piece(11);
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].by, s.agents[find(&s, Role::Thief)].id);
+        assert_eq!(m[0].text, "Winning piece taken at Market in round 11");
+        // An early win is no moment.
+        assert!(last_piece(6).moments.is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 8, 5_000);
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

@@ -41,3 +41,8 @@ No gore: the drum holds **paint charges**; a hit costs a life, and a player with
   (or spins when short of credits); with very bad odds and no peek money it spins. It keeps a few
   credits in reserve early on.
 - Desktop: P peek, S spin, T tamper, Space or Enter pull.
+- **Replay moments:** a pull on your last life that clicks while the table's odds show 2 charges in
+  3 chambers or worse ("Last life, 2 charges in 3 chambers: click"); the hit that leaves only one
+  player with lives ("Out: {bot-2} is the last one standing"), by the player hit. Public: they use only
+  what every view shows (lives, charges left, pulls since the last spin or reload, the outcome), never a
+  peek, credits or tampering.

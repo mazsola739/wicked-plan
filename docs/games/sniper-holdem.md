@@ -43,3 +43,6 @@ Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
   strong hand, calls with a fair one, folds a weak one against a bet, and bluffs a raise now and then.
   It snipes the rank that most often beats its own hand in those samples (never its own rank).
 - Desktop: C check/call, R raise, F fold; in the snipe step 1–9 pick a rank, 0 for none.
+- **Replay moments:** at the showdown, a winner who sniped the rank of the best hand at the table, for a
+  pot of 10 chips or more ("{bot-2}'s straight sniped (+12)"). Public: the showdown shows every hand
+  still in, its rank and every snipe anyway; folded hands never come into it.

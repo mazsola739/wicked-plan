@@ -18,6 +18,13 @@ Main game, 6–10 players (the page seats you and 5 bots). Code: `crates/rules/s
 Hidden roles. The **terrorists** spread a virus; the **city** (citizens, officer, journalist,
 researchers) tries to find and quarantine them before too many people are infected.
 
+- **Replay moments:** the last terrorist going into quarantine, credited to the first player who
+  accused them (or else the first who voted for them): "{bot-3} quarantined: the last terrorist
+  caught". Public: reports, votes and a quarantined player's side are shown to all. And more than half
+  of the city newly infected in one round: "3 new infections in one round". Only the terrorists see
+  that one, each as its own moment: crediting anyone would reveal a role, and who met whom is secret
+  even from a partner.
+
 ## Roles
 
 Every player gets a public number (#1, #2, …, shuffled) and a secret role:

@@ -7,7 +7,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::piece_puzzle::{Race, RaceView};
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -94,9 +94,29 @@ pub struct SymmetryState {
     pub figure: Figure,
     pub cells: Vec<u8>,
     seed: u64,
+    /// Rounds the solver finished in first place.
+    firsts: usize,
+    /// Replay moments: first by less than 2 s; first in every round.
+    pub moments: Moments,
 }
 
 impl SymmetryState {
+    /// Seat 0 just solved a round: its replay moments, if any (every finish time is public now).
+    fn note_solve(&mut self) {
+        let Some(last) = self.race.last.as_ref() else { return };
+        let (Some(t), Some(1)) = (last[0].time_ms, last[0].place) else { return };
+        let by = self.race.players[0].clone();
+        let next = last[1..].iter().filter_map(|f| f.time_ms.map(|o| (o - t, f.id.clone()))).filter(|(d, _)| *d > 0).min();
+        if let Some((d, other)) = next.filter(|(d, _)| *d < 2_000) {
+            let tenths = (d + 99) / 100;
+            self.moments.push(&by, format!("Photo finish: {{{other}}} beaten by {}.{} s", tenths / 10, tenths % 10));
+        }
+        self.firsts += 1;
+        if self.firsts == self.race.round_ms.len() {
+            self.moments.push(&by, "Clean sweep: first in all three rounds");
+        }
+    }
+
     fn load(&mut self) {
         if !self.race.over {
             self.figure = generate(self.race.round, &mut Rng::new(self.seed.wrapping_add(self.race.round as u64 * 1_000_003)));
@@ -138,6 +158,7 @@ impl Game for Rules {
             id: "symmetry-puzzle",
             kind: "exile",
             difficulty: "medium",
+            tags: &["logic", "speed"],
             min_players: 1,
             max_players: 4,
             name: "Symmetry Puzzle",
@@ -147,7 +168,8 @@ impl Game for Rules {
 
     fn setup(players: &[String], seed: u64) -> Result<SymmetryState, String> {
         let race = Race::new(players, seed, &ROUND_MS)?;
-        let mut s = SymmetryState { race, figure: generate(0, &mut Rng::new(seed)), cells: Vec::new(), seed };
+        let mut s =
+            SymmetryState { race, figure: generate(0, &mut Rng::new(seed)), cells: Vec::new(), seed, firsts: 0, moments: Moments::default() };
         s.load();
         Ok(s)
     }
@@ -165,6 +187,7 @@ impl Game for Rules {
                 s.cells[cell] = colour;
                 if s.cells == s.figure.solution {
                     s.race.solver_done(true);
+                    s.note_solve();
                     s.load();
                 }
             }
@@ -214,6 +237,10 @@ impl Game for Rules {
             Some(cell) => SymmetryMove::Paint { cell, colour: s.figure.solution[cell] },
             None => SymmetryMove::GiveUp,
         }
+    }
+
+    fn moments(s: &SymmetryState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -279,5 +306,58 @@ mod tests {
     fn thousand_bot_games() {
         bot_games::<Rules>(1000, 5000);
         bot_games_with::<Rules>(1000, 4, 5000);
+    }
+
+    fn solve(s: &mut SymmetryState) {
+        let round = s.race.round;
+        while s.race.round == round {
+            let cell = (0..s.cells.len()).find(|&i| s.cells[i] != s.figure.solution[i]).unwrap();
+            Rules::apply_move(s, "p1", SymmetryMove::Paint { cell, colour: s.figure.solution[cell] }).unwrap();
+        }
+    }
+
+    #[test]
+    fn a_photo_finish_and_a_clean_sweep_are_replay_moments() {
+        let players: Vec<String> = (1..=4).map(|i| format!("p{i}")).collect();
+        let mut s = Rules::setup(&players, 7).unwrap();
+        // Find when the first racer finishes (to 0.1 s), then solve 1.5 s before it.
+        let mut probe = s.clone();
+        while probe.race.view().racers.iter().all(|r| !r.done) {
+            Rules::tick(&mut probe, 100);
+        }
+        let first = probe.race.view().racers.iter().find(|r| r.done).unwrap().id.clone();
+        Rules::tick(&mut s, (probe.race.elapsed_ms - 1_500) as u64);
+        solve(&mut s);
+        let m = Rules::moments(&s, "p2");
+        assert_eq!(m.len(), 1);
+        assert_eq!(m[0].by, "p1");
+        assert_eq!(m[0].text, format!("Photo finish: {{{first}}} beaten by 1.5 s"));
+        // Solved at once: first again, with no racer close, so no moment until the sweep.
+        solve(&mut s);
+        assert_eq!(Rules::moments(&s, "p1").len(), 1);
+        solve(&mut s);
+        let m = Rules::moments(&s, "p1");
+        assert_eq!(m.len(), 2);
+        assert_eq!(m[1].text, "Clean sweep: first in all three rounds");
+    }
+
+    #[test]
+    fn a_second_place_is_no_sweep() {
+        let players: Vec<String> = (1..=4).map(|i| format!("p{i}")).collect();
+        let mut s = Rules::setup(&players, 7).unwrap();
+        Rules::tick(&mut s, 85_000);
+        solve(&mut s);
+        solve(&mut s);
+        solve(&mut s);
+        assert!(s.race.over);
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

@@ -37,7 +37,7 @@ When a rule or number changes, change it in the docs first, then the code.
 apps/web/src/
   play.ts               the game being played: LocalGame (wasm), tick every 250 ms, move()
   App.tsx               landing (hero, How it works, catalogue with filters), game view, result panel
-  Emblem.tsx            the Observer emblem (assets/observer.png, the user's art) and the SVG crown mark
+  Emblem.tsx            the Observer (the user's art in assets/: observer.png, hood.webp, face.webp), the peeking face, the SVG crown mark
   styles.css            theme tokens (:root) and shared styles; see "Visual identity" in docs/design.md
   games/registry.tsx    game id → screen component (every game is already listed)
   games/<Name>.tsx      one screen per game (default export, props: ScreenProps)
@@ -103,12 +103,16 @@ Every game already has its own files (stubs). Replace only these, never shared f
 
 1. `docs/games/<id>.md` — the rules page: first a `## How to play` section for players (a **Goal:** line
    and short bullets; only paragraphs, `- ` bullets and `**bold**`), shown in the game by `HowTo.tsx`;
-   then `## Rules in detail`, the spec: seats, rounds, timers, scoring, moves, view, bot.
+   then `## Rules in detail`, the spec: seats, rounds, timers, scoring, moves, view, bot, and a
+   **Replay moments** line (the game's big moments, rare, never revealing a secret).
 2. `crates/rules/src/games/<id_snake>.rs` — replace the `stub_game!` line with the real rules:
    `pub const READY: bool = true;`, `pub struct Rules;` implementing `Game` with the same `info()`
    id/kind/min/max as the stub (name and `short` may be improved). Several seats: implement `to_move`
    (whose move it is; for secret simultaneous bids, everyone who has not bid yet); results via
-   `rank_by_score`. Tests in the same file.
+   `rank_by_score`. `GameInfo` also needs a `difficulty` and 1-3 `tags` (docs/games.md,
+   Categories). Replay moments: a `moments: Moments` in the state, pushed where they happen, and
+   `fn moments` (see `minus_one.rs`), with a test that one fires and a `moment_stats` test that
+   they stay rare. Tests in the same file.
 3. `apps/web/src/games/<PascalName>.tsx` — the screen (default export, `ScreenProps`); cast
    `view` to a view type declared in the same file. Use `Play`/`GameTop`/`TimerBar` and `move()`
    from `common.tsx`, `nameOf(id)` for seat names ("you", "bot-1"…). Game-specific CSS goes in

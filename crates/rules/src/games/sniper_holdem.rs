@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult, rank_by_score};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const HANDS: usize = 6;
@@ -119,6 +119,21 @@ pub fn best(cards: &[Card]) -> (Rank, u32) {
         .expect("cards")
 }
 
+/// A rank in words, for replay captions.
+pub fn rank_name(r: Rank) -> &'static str {
+    match r {
+        Rank::HighCard => "high card",
+        Rank::Pair => "pair",
+        Rank::TwoPair => "two pair",
+        Rank::Trips => "three of a kind",
+        Rank::Straight => "straight",
+        Rank::Flush => "flush",
+        Rank::FullHouse => "full house",
+        Rank::Quads => "four of a kind",
+        Rank::StraightFlush => "straight flush",
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Phase {
@@ -188,6 +203,8 @@ pub struct ShState {
     pub cap: i64,
     pub time_left_ms: i64,
     pub log: Vec<HandLog>,
+    /// Replay moments: a winner who sniped the best hand at the table (pot of 10 or more).
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -355,15 +372,16 @@ impl ShState {
 
     fn showdown(&mut self) {
         let left = self.in_hand();
-        let snipes: Vec<(String, Option<Rank>)> =
-            left.iter().map(|&i| (self.seats[i].id.clone(), self.seats[i].snipe.flatten())).collect();
+        let snipes: Vec<(String, Option<Rank>)> = left.iter().map(|&i| (self.seats[i].id.clone(), self.seats[i].snipe.flatten())).collect();
         let named: Vec<Rank> = snipes.iter().filter_map(|s| s.1).collect();
         let mut shown = Vec::new();
         let mut alive: Vec<(usize, (Rank, u32))> = Vec::new();
+        let mut hands: Vec<(usize, (Rank, u32))> = Vec::new();
         for &i in &left {
             let mut all = self.seats[i].cards.clone();
             all.extend(&self.community);
             let strength = best(&all);
+            hands.push((i, strength));
             let sniped = named.contains(&strength.0);
             shown.push(ShownHand { id: self.seats[i].id.clone(), cards: self.seats[i].cards.clone(), rank: strength.0, sniped });
             if !sniped {
@@ -373,6 +391,22 @@ impl ShState {
         let top = alive.iter().map(|a| a.1).max();
         let winners: Vec<usize> = alive.iter().filter(|a| Some(a.1) == top).map(|a| a.0).collect();
         let carried = winners.is_empty();
+        // Replay moment (the showdown shows every hand still in, its rank and every snipe): a
+        // winner who sniped the rank of the best hand at the table, for a pot of 10 or more.
+        let favourite = hands.iter().max_by_key(|h| h.1).copied();
+        if let Some((fav, (rank, _))) = favourite
+            && self.pot >= 10
+            && !winners.contains(&fav)
+        {
+            let n = winners.len() as i64;
+            for (k, &w) in winners.iter().enumerate() {
+                if self.seats[w].snipe.flatten() == Some(rank) {
+                    let gain = self.pot / n + if k == 0 { self.pot % n } else { 0 };
+                    let text = format!("{{{}}}'s {} sniped (+{gain})", self.seats[fav].id, rank_name(rank));
+                    self.moments.push(&self.seats[w].id.clone(), text);
+                }
+            }
+        }
         self.finish(winners, snipes, shown, carried);
     }
 
@@ -413,6 +447,7 @@ impl Game for Rules {
             id: "sniper-holdem",
             kind: "prison",
             difficulty: "medium",
+            tags: &["cards", "bluff"],
             min_players: 2,
             max_players: 6,
             name: "Sniper Hold'em",
@@ -453,6 +488,7 @@ impl Game for Rules {
             cap: 0,
             time_left_ms: 0,
             log: Vec::new(),
+            moments: Moments::default(),
         };
         s.start_hand();
         Ok(s)
@@ -573,6 +609,10 @@ impl Game for Rules {
             Phase::Snipe => s.seats.iter().filter(|x| x.in_hand && x.snipe.is_none()).map(|x| x.id.clone()).collect(),
             _ => Vec::new(),
         }
+    }
+
+    fn moments(s: &ShState, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 
     fn bot_move(s: &ShState, player: &str, seed: u64) -> ShMove {
@@ -747,5 +787,38 @@ mod tests {
         bot_games_with::<Rules>(400, 4, 5_000);
         bot_games_with::<Rules>(300, 2, 5_000);
         bot_games_with::<Rules>(300, 6, 5_000);
+    }
+
+    #[test]
+    fn sniping_the_best_hand_for_a_big_pot_is_a_replay_moment() {
+        let showdown = |snipes: [Option<Rank>; 3]| {
+            let mut s = Rules::setup(&ids(3), 1).unwrap();
+            // p1 makes a straight, p2 a pair of 9s, p3 high card.
+            rig(&mut s, &[[c(0, 5), c(1, 6)], [c(2, 9), c(0, 1)], [c(3, 7), c(3, 8)]], [c(1, 2), c(2, 3), c(3, 4), c(0, 9)]);
+            s.pot += 9;
+            for _ in 0..3 {
+                let actor = s.seats[s.actor].id.clone();
+                Rules::apply_move(&mut s, &actor, ShMove::Call).unwrap();
+            }
+            for (p, rank) in ["p1", "p2", "p3"].into_iter().zip(snipes) {
+                Rules::apply_move(&mut s, p, ShMove::Snipe { rank }).unwrap();
+            }
+            s
+        };
+        let s = showdown([None, Some(Rank::Straight), None]);
+        let m = Rules::moments(&s, "p3");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "{p1}'s straight sniped (+12)"));
+        // p3's snipe knocks the straight out, but p2 wins: no moment.
+        let s = showdown([None, None, Some(Rank::Straight)]);
+        assert_eq!(s.log[0].winners, vec!["p2".to_string()]);
+        assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }

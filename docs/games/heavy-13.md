@@ -39,5 +39,8 @@ Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
 - **Bot:** imagines the others' plays (a pass now and then, otherwise a random card on a random stack)
   and picks the play with the best average outcome; passes and the rainbow chip count as worth a little,
   so it saves them for risky rounds.
+- **Replay moments:** a card played with the rainbow chip onto a stack that ends the round at exactly 13
+  ("Rainbow 4 fills gold to exactly 13"), and a player who was behind before the last round and ends
+  it alone in the lead ("Lead stolen in the very last round"). Public: every play is shown after the round.
 - Desktop: 1–8 pick a card, Q W E R choose the stack (the rainbow chip is used when the colour differs),
   Enter plays, P passes.

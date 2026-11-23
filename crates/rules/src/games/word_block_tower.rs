@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, PlayerResult};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 3;
@@ -149,6 +149,8 @@ pub struct State {
     pub results: Vec<RoundResult>,
     pub over: bool,
     seed: u64,
+    /// Replay moments: a seven-letter word; the last word of a round built with 3 s or less left.
+    pub moments: Moments,
 }
 
 #[derive(Deserialize)]
@@ -258,6 +260,15 @@ impl State {
     }
 
     fn build(&mut self, seat: usize, word: String) {
+        // Replay moments (built words and the turn timer are public): the longest words there
+        // are, and a pile emptied at the last second (not by a timed-out turn).
+        let id = self.players[seat].clone();
+        if word.len() == 7 {
+            self.moments.push(&id, format!("Seven letters in one word: {word}"));
+        }
+        if self.built + 1 == self.order.len() && (1..=3_000).contains(&self.time_left_ms) {
+            self.moments.push(&id, format!("Pile emptied with {} s left", (self.time_left_ms + 999) / 1000));
+        }
         for c in word.chars() {
             if let Some(b) = self.blocks.iter_mut().find(|b| b.used_by.is_none() && b.letter == c) {
                 b.used_by = Some(seat);
@@ -342,6 +353,7 @@ impl Game for WordBlockTower {
             id: "word-block-tower",
             kind: "mini-team",
             difficulty: "easy",
+            tags: &["words", "alliance"],
             min_players: 1,
             max_players: 4,
             name: "Word Block Tower",
@@ -372,6 +384,7 @@ impl Game for WordBlockTower {
             results: Vec::new(),
             over: false,
             seed,
+            moments: Moments::default(),
         };
         s.start_round();
         Ok(s)
@@ -454,6 +467,10 @@ impl Game for WordBlockTower {
 
     fn bot_move(s: &State, _player: &str, seed: u64) -> Move {
         if s.over { Move::TakeBack } else { s.bot_choice(seed) }
+    }
+
+    fn moments(s: &State, player: &str) -> Vec<Moment> {
+        s.moments.for_seat(player)
     }
 }
 
@@ -549,5 +566,38 @@ mod tests {
         for seats in 1..=4 {
             bot_games_with::<WordBlockTower>(1000, seats, 3000);
         }
+    }
+
+    #[test]
+    fn a_seven_letter_word_is_a_replay_moment() {
+        let mut s = (0..)
+            .map(|seed| WordBlockTower::setup(&team(1), seed).unwrap())
+            .find(|s| s.targets[0].len() == 7)
+            .unwrap();
+        let word = s.targets[0].clone();
+        WordBlockTower::apply_move(&mut s, "p1", Move::Word { word: word.clone() }).unwrap();
+        let m = WordBlockTower::moments(&s, "p1");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.clone()), ("p1", format!("Seven letters in one word: {word}")));
+    }
+
+    #[test]
+    fn emptying_the_pile_at_the_last_second_is_a_replay_moment() {
+        let mut s = WordBlockTower::setup(&team(2), 1).unwrap();
+        let (first, second) = (s.targets[0].clone(), s.targets[1].clone());
+        WordBlockTower::apply_move(&mut s, "p1", Move::Word { word: first }).unwrap();
+        WordBlockTower::tick(&mut s, (TURN_MS - 2_000) as u64);
+        WordBlockTower::apply_move(&mut s, "p2", Move::Word { word: second }).unwrap();
+        let m: Vec<Moment> = WordBlockTower::moments(&s, "p1").into_iter().filter(|m| m.text.starts_with("Pile")).collect();
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Pile emptied with 2 s left"));
+    }
+
+    #[test]
+    fn replay_moments_are_rare_but_happen() {
+        let stats = crate::game::testing::moment_stats::<WordBlockTower>(300, 4, 3_000);
+        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
+        assert!(stats.most <= 4, "too many in one game: {stats:?}");
     }
 }
