@@ -1,5 +1,7 @@
 .fb {
   max-height: 48dvh;
+  background: var(--board);
+  border: 1px solid var(--line);
 }
 
 .fb-post {
@@ -23,7 +25,7 @@
 }
 
 .fb-fence {
-  stroke: var(--accent-2);
+  stroke: var(--seat-0);
   stroke-width: 0.12;
   stroke-linecap: round;
 }
@@ -41,7 +43,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .fb-hit:hover {
-    fill: rgb(34 211 238 / 0.12);
+    fill: color-mix(in srgb, var(--cyan) 12%, transparent);
   }
 }
 

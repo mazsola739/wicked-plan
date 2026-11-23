@@ -7,8 +7,8 @@
   height: 64px;
   padding: 8px;
   border-radius: 12px;
-  background: #e3e7ef;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
 }
 
 .dice-prediction-die.small {
@@ -18,12 +18,20 @@
   border-radius: 7px;
 }
 
+/* The secret die is tinted blue, the blind die pink: glass with a coloured wash and edge. */
 .dice-prediction-die.secret {
-  background: #c3def7;
+  --tone: var(--g-blue);
 }
 
 .dice-prediction-die.blind {
-  background: #f3d3d8;
+  --tone: var(--g-pink);
+}
+
+.dice-prediction-die.secret,
+.dice-prediction-die.blind {
+  background:
+    linear-gradient(color-mix(in srgb, var(--tone) 18%, transparent), color-mix(in srgb, var(--tone) 18%, transparent)), var(--glass);
+  border-color: color-mix(in srgb, var(--tone) 70%, transparent);
 }
 
 .dice-prediction-die i {
@@ -33,12 +41,12 @@
 }
 
 .dice-prediction-die i.on {
-  background: #12111a;
+  background: var(--g-white);
 }
 
 .dice-prediction-die b {
   grid-area: 1 / 1 / 4 / 4;
-  color: #626880;
+  color: var(--silver);
   font-size: 1.6rem;
 }
 

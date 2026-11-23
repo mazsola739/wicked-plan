@@ -4,27 +4,29 @@
 }
 
 .rww-wall {
-  fill: #2e2c3c;
+  fill: var(--board);
 }
 
 .rww-mortar {
-  stroke: #191824;
-  stroke-width: 1.5;
+  stroke: var(--board-line);
+  stroke-width: 1;
   fill: none;
 }
 
 .rww-tablet {
-  fill: #4a4860;
-  stroke: #191824;
-  stroke-width: 3;
+  fill: var(--panel-2);
+  stroke: var(--glass-edge);
+  stroke-width: 1.5;
 }
 
 .rww-panel {
-  fill: #57556e;
+  fill: var(--board);
+  stroke: var(--board-line);
+  stroke-width: 1;
 }
 
 .rww-tally line {
-  stroke: #e3e7ef;
+  stroke: var(--silver);
   stroke-width: 2.5;
   stroke-linecap: round;
 }
@@ -40,42 +42,42 @@
 .rww-op {
   font-size: 24px;
   font-weight: 700;
-  fill: #e3e7ef;
+  fill: var(--text);
   text-anchor: middle;
   dominant-baseline: central;
 }
 
 .rww-sym {
-  fill: #e3e7ef;
+  fill: var(--silver);
 }
 
 .rww-metal {
-  stroke: #a7aec2;
+  stroke: var(--silver);
   stroke-width: 4;
   stroke-linecap: round;
   fill: none;
 }
 
 .rww-strings {
-  stroke: #a7aec2;
+  stroke: var(--glass-edge);
   stroke-width: 1.2;
   fill: none;
 }
 
 .rww-ripple {
-  stroke: #7fb6e0;
+  stroke: var(--cyan);
   stroke-width: 2;
   fill: none;
 }
 
 .rww-dial {
-  fill: #57556e;
-  stroke: #a7aec2;
-  stroke-width: 4;
+  fill: var(--board);
+  stroke: var(--silver);
+  stroke-width: 2;
 }
 
 .rww-tick {
-  stroke: #e3e7ef;
+  stroke: var(--silver);
   stroke-width: 3;
 }
 
@@ -84,7 +86,7 @@
 }
 
 .rww-hand {
-  stroke: #e3e7ef;
+  stroke: var(--text);
   stroke-width: 7;
   stroke-linecap: round;
 }
@@ -94,12 +96,12 @@
 }
 
 .rww-water {
-  fill: rgb(60 130 200 / 0.38);
+  fill: color-mix(in srgb, var(--cyan) 22%, transparent);
   transition: y 0.25s linear;
 }
 
 .rww-wave {
-  stroke: rgb(140 200 245 / 0.8);
+  stroke: var(--cyan);
   stroke-width: 2.5;
   fill: none;
 }
@@ -131,6 +133,10 @@
 
 .rww-lock.open .rww-body {
   fill: var(--accent-2);
+}
+
+.rww-lock.open {
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent-2) 45%, transparent));
 }
 
 @media (min-width: 720px) {

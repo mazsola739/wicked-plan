@@ -1,6 +1,6 @@
 // Auction Bingo. Rules page: docs/games/auction-bingo.md
 
-import { useState } from 'react';
+import { type CSSProperties, useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
 import './AuctionBingo.css';
 
@@ -157,7 +157,7 @@ export default function AuctionBingo({ view: raw }: ScreenProps) {
               <div className="label">Final boards</div>
               <div className="ab-finals">
                 {view.players.map((p, i) => (
-                  <div key={p} className="ab-final">
+                  <div key={p} className="ab-final" style={{ '--ab-own': `var(--seat-${i})` } as CSSProperties}>
                     <Grid board={view.result?.boards[i] as Board} />
                     <span>
                       {nameOf(p)}: <strong className="score">{view.result?.scores[i]}</strong>

@@ -24,7 +24,7 @@ interface WallView {
   over: boolean;
 }
 
-const COLOURS = ['#e3e7ef', '#e23b5a', '#3aa86b'];
+const COLOURS = ['var(--seat-0)', 'var(--seat-1)', 'var(--seat-2)'];
 const SIDES: { dir: Dir; label: string; key: string }[] = [
   { dir: 'n', label: 'Top', key: 'ArrowUp' },
   { dir: 'w', label: 'Left', key: 'ArrowLeft' },
@@ -117,7 +117,7 @@ export default function WallTerritory({ view: raw }: ScreenProps) {
                   height={0.92}
                   rx={0.08}
                   className={`wall-territory-cell${reach.has(c) ? ' can' : ''}${dest === c ? ' dest' : ''}`}
-                  style={owner >= 0 ? { fill: COLOURS[owner], fillOpacity: 0.22 } : undefined}
+                  style={owner >= 0 ? { fill: `color-mix(in srgb, ${COLOURS[owner]} 28%, var(--board))` } : undefined}
                   onClick={() => tap(c)}
                   role="button"
                   tabIndex={-1}
@@ -158,8 +158,8 @@ export default function WallTerritory({ view: raw }: ScreenProps) {
                 cx={(c % n) + 0.5}
                 cy={Math.floor(c / n) + 0.5}
                 r={0.3}
-                fill={COLOURS[p.seat]}
-                className={`wall-territory-piece${sel ? ' sel' : ''}`}
+                style={{ fill: COLOURS[p.seat] }}
+                className={`wall-territory-piece${p.seat === view.me ? ' mine' : ''}${sel ? ' sel' : ''}`}
               />
             );
           })}

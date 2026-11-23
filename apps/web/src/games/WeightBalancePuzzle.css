@@ -3,7 +3,7 @@
 }
 
 .wb-stand {
-  fill: #262336;
+  fill: var(--line);
 }
 
 .wb-beam {
@@ -20,14 +20,15 @@
 }
 
 .wb-pan {
-  fill: #3a3650;
+  fill: var(--panel-2);
   stroke: var(--muted);
   stroke-width: 2;
 }
 
+/* Blocks are dark glass with a silver edge and a light letter. */
 .wb-block {
-  fill: #e3e7ef;
-  stroke: #3a3650;
+  fill: color-mix(in srgb, var(--violet) 10%, var(--panel-2));
+  stroke: var(--glass-edge);
   stroke-width: 1.5;
 }
 
@@ -40,16 +41,16 @@
 }
 
 .wb-letter {
-  fill: #12111a;
+  fill: var(--g-white);
   font-size: 16px;
 }
 
 .wb-weight {
-  fill: #a7aec2;
+  fill: var(--silver);
 }
 
 .wb-grams {
-  fill: #12111a;
+  fill: var(--bg);
   font-size: 11px;
 }
 
@@ -82,8 +83,8 @@
 .wb-block-btn {
   min-height: 60px;
   border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -102,19 +103,21 @@
   text-transform: uppercase;
 }
 
+/* The two pans are two sides: left seat 0, right seat 1. */
 .wb-block-btn.left {
-  background: #3b2a4a;
-  border-color: var(--accent);
+  background: color-mix(in srgb, var(--seat-0) 18%, var(--panel));
+  border-color: var(--seat-0);
 }
 
 .wb-block-btn.right {
-  background: #2a3a4a;
-  border-color: #4f8fe6;
+  background: color-mix(in srgb, var(--seat-1) 18%, var(--panel));
+  border-color: var(--seat-1);
 }
 
 .wb-block-btn.sel {
   border-color: var(--accent-2);
-  background: #262336;
+  background: color-mix(in srgb, var(--cyan) 14%, var(--panel));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 45%, transparent);
 }
 
 .wb-block-btn .wb-val {

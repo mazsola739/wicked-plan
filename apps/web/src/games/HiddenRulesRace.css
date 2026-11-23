@@ -4,12 +4,15 @@
   width: 100%;
   max-width: min(100%, 52dvh);
   margin: 0 auto;
+  background: var(--board);
 }
 
 .hrr-sq {
   position: relative;
   aspect-ratio: 1;
   border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--c) 75%, transparent);
+  background: color-mix(in srgb, var(--c) 32%, var(--board));
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -17,35 +20,40 @@
   gap: 1px;
 }
 
+/* Each colour sets --c: a square is the dark board tinted with it, a swatch is the colour itself. */
 .hrr-red {
-  background: #b8323f;
+  --c: var(--g-red);
 }
 
 .hrr-blue {
-  background: #3d6fc4;
+  --c: var(--g-blue);
 }
 
 .hrr-green {
-  background: #3a9a5b;
+  --c: var(--g-green);
 }
 
 .hrr-yellow {
-  background: #d1a92c;
+  --c: var(--g-yellow);
 }
 
 .hrr-purple {
-  background: #8a4fc0;
+  --c: var(--g-purple);
 }
 
 .hrr-goal {
-  background: #e3e7ef;
+  --c: var(--silver);
+}
+
+.hrr-sq.hrr-goal {
+  background: color-mix(in srgb, var(--silver) 16%, var(--board));
 }
 
 .hrr-star {
   position: absolute;
-  color: var(--accent);
+  color: var(--violet);
   font-size: 1.4rem;
-  opacity: 0.5;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--violet) 45%, transparent);
 }
 
 .hrr-piece {
@@ -54,8 +62,7 @@
   aspect-ratio: 1;
   border-radius: 4px;
   border: 2px solid var(--panel);
-  background: #e3e7ef;
-  color: #12111a;
+  color: #08080c;
   font-size: 0.7rem;
   font-weight: 800;
   display: flex;
@@ -64,9 +71,9 @@
 }
 
 .hrr-piece.me {
-  background: var(--accent-2);
   color: #06232b;
-  border-color: #fff;
+  border-color: var(--g-white);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--seat-0) 45%, transparent);
 }
 
 .hrr-pad {
@@ -105,6 +112,7 @@
   height: 14px;
   border-radius: 3px;
   vertical-align: middle;
+  background: var(--c);
 }
 
 .hrr-notes .btn.small {

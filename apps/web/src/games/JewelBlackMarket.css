@@ -28,8 +28,9 @@
   width: 64px;
   height: 88px;
   border-radius: 8px;
-  border: 2px solid var(--line);
-  background: var(--panel-2);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
+  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -75,23 +76,23 @@
 }
 
 .jbm-diamond {
-  color: #8fd8ff;
-  border-color: #8fd8ff;
+  color: var(--g-cyan);
+  border-color: var(--g-cyan);
 }
 
 .jbm-gold {
-  color: #f0c94a;
-  border-color: #f0c94a;
+  color: var(--g-yellow);
+  border-color: var(--g-yellow);
 }
 
 .jbm-silver {
-  color: #cfd3da;
-  border-color: #cfd3da;
+  color: var(--silver);
+  border-color: var(--silver);
 }
 
 .jbm-bronze {
-  color: #d08a52;
-  border-color: #d08a52;
+  color: var(--g-orange);
+  border-color: var(--g-orange);
 }
 
 .jbm-bomb {
@@ -107,8 +108,9 @@
 
 .jbm-back {
   cursor: pointer;
-  background: repeating-linear-gradient(45deg, var(--panel-2), var(--panel-2) 6px, #262336 6px, #262336 12px);
-  color: var(--muted);
+  background: var(--card-back-plain);
+  box-shadow: var(--card-back-frame);
+  color: var(--silver);
 }
 
 .jbm-back:not(:disabled) {
@@ -166,7 +168,7 @@
 }
 
 .jbm-seat.me span {
-  color: var(--accent-2);
+  color: var(--seat-0);
 }
 
 .jbm-log {

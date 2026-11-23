@@ -4,7 +4,9 @@
 }
 
 .wall-territory-cell {
-  fill: #262336;
+  fill: var(--board);
+  stroke: var(--board-line);
+  stroke-width: 0.02;
   cursor: pointer;
 }
 
@@ -18,20 +20,25 @@
   stroke-width: 0.1;
 }
 
+/* Walls belong to nobody: silver line art, so cyan stays your colour. */
 .wall-territory-wall {
-  stroke: var(--accent-2);
+  stroke: var(--silver);
   stroke-width: 0.12;
   stroke-linecap: round;
 }
 
 .wall-territory-piece {
-  stroke: var(--panel);
+  stroke: var(--board);
   stroke-width: 0.05;
   pointer-events: none;
 }
 
+.wall-territory-piece.mine {
+  filter: drop-shadow(0 0 0.1px color-mix(in srgb, var(--seat-0) 45%, transparent));
+}
+
 .wall-territory-piece.sel {
-  stroke: var(--accent-2);
+  stroke: var(--text);
   stroke-width: 0.08;
 }
 

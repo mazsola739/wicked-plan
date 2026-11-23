@@ -5,7 +5,8 @@
   gap: 6px;
   padding: 10px;
   border-radius: 12px;
-  background: radial-gradient(ellipse at center, #1f4a36, #14301f);
+  background: var(--board);
+  border: 1px solid var(--line);
 }
 
 .sniper-holdem-row {
@@ -23,11 +24,12 @@
   height: 64px;
   padding: 4px 6px;
   border-radius: 7px;
-  background: #e3e7ef;
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
   font-weight: 800;
   font-size: 1.3rem;
   line-height: 1;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--bg) 60%, transparent);
 }
 
 .sniper-holdem-card.small {
@@ -55,19 +57,19 @@
 }
 
 .sniper-holdem-card.red {
-  color: #c42a3a;
+  color: var(--g-red);
 }
 
 .sniper-holdem-card.blue {
-  color: #2a5fc4;
+  color: var(--g-blue);
 }
 
 .sniper-holdem-card.green {
-  color: #22874c;
+  color: var(--g-green);
 }
 
 .sniper-holdem-card.gold {
-  color: #8a6510;
+  color: var(--g-yellow);
 }
 
 .sniper-holdem-card.gold i {
@@ -101,6 +103,10 @@
 .list li.sniper-holdem-turn,
 .list li.sniper-holdem-win {
   outline: 2px solid var(--accent-2);
+}
+
+.list li.sniper-holdem-win {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-2) 45%, transparent);
 }
 
 .list li.sniper-holdem-out {

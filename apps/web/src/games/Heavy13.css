@@ -5,13 +5,13 @@
 }
 
 .heavy-13-stack {
-  --c: #888;
+  --c: var(--muted);
   position: relative;
   height: 130px;
   border-radius: 12px;
   border: 2px solid var(--line);
   border-top: 8px solid var(--c);
-  background: var(--panel-2);
+  background: var(--board);
   color: var(--text);
   overflow: hidden;
   display: flex;
@@ -40,15 +40,14 @@
 .heavy-13-fill {
   position: absolute;
   inset: auto 0 0 0;
-  background: repeating-linear-gradient(0deg, var(--c) 0 14px, color-mix(in srgb, var(--c), #000 25%) 14px 16px);
-  opacity: 0.75;
+  background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--c) 35%, var(--board)) 0 14px, var(--c) 14px 16px);
   transition: height 0.3s;
 }
 
 .heavy-13-stack strong,
 .heavy-13-stack small {
   position: relative;
-  text-shadow: 0 1px 2px #000;
+  text-shadow: 0 1px 2px var(--bg);
 }
 
 .heavy-13-stack strong {
@@ -60,19 +59,19 @@
 }
 
 .heavy-13-red {
-  --c: #c42a3a;
+  --c: var(--g-red);
 }
 
 .heavy-13-blue {
-  --c: #3a6fd8;
+  --c: var(--g-blue);
 }
 
 .heavy-13-green {
-  --c: #279a57;
+  --c: var(--g-green);
 }
 
 .heavy-13-gold {
-  --c: #c4961a;
+  --c: var(--g-yellow);
 }
 
 .heavy-13-hand {
@@ -84,17 +83,17 @@
 .heavy-13-card {
   min-height: 56px;
   border-radius: 8px 8px 6px 6px;
-  border: 3px solid transparent;
-  background: var(--c);
-  color: #fff;
+  border: 1px solid var(--glass-edge);
+  background: linear-gradient(color-mix(in srgb, var(--c) 14%, transparent), color-mix(in srgb, var(--c) 14%, transparent)), var(--glass);
+  color: var(--c);
   font-size: 1.5rem;
   font-weight: 800;
-  text-shadow: 0 1px 2px #000;
   cursor: pointer;
 }
 
 .heavy-13-card.on {
   border-color: var(--text);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--c) 45%, transparent);
   transform: translateY(-4px);
 }
 

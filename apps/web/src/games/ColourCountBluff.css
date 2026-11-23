@@ -25,7 +25,7 @@
 }
 
 .ccb-seats li.me > span:first-child {
-  color: var(--accent-2);
+  color: var(--seat-0);
 }
 
 .ccb-lives {
@@ -70,9 +70,9 @@
   justify-content: center;
   font-weight: 800;
   font-size: 1.3rem;
-  color: #12111a;
-  border: 2px solid rgb(255 255 255 / 25%);
-  background: var(--c);
+  color: var(--c);
+  border: 2px solid var(--c);
+  background: var(--glass);
 }
 
 .ccb-hand.small {
@@ -84,22 +84,24 @@
   height: 22px;
   border-radius: 4px;
   border-width: 1px;
+  border-color: var(--glass-edge);
+  background: var(--c);
 }
 
 .ccb-c0 {
-  --c: #e2524f;
+  --c: var(--g-red);
 }
 
 .ccb-c1 {
-  --c: #4f8fe2;
+  --c: var(--g-blue);
 }
 
 .ccb-c2 {
-  --c: #4fbf6a;
+  --c: var(--g-green);
 }
 
 .ccb-c3 {
-  --c: #e8c43c;
+  --c: var(--g-yellow);
 }
 
 .ccb-word {
@@ -125,7 +127,7 @@
 
 .ccb-pick.on {
   --fill: var(--c);
-  color: #12111a;
+  color: var(--bg);
 }
 
 .ccb-count {

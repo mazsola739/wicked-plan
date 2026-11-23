@@ -42,7 +42,8 @@ interface TcView {
   score: number;
 }
 
-const LINE_COLOURS = ['#e0b53a', '#e23b5a', '#4a8fd9', '#3aa86b', '#a45bd6'];
+// Ring, red, blue, green and purple lines (crates/rules thieves_and_cops.rs).
+const LINE_COLOURS = ['var(--g-yellow)', 'var(--g-red)', 'var(--g-blue)', 'var(--g-green)', 'var(--g-purple)'];
 const ROLE_TEXT: Record<Role, string> = {
   thief: 'Thief: collect pieces with the other thieves and stay away from the police.',
   cop: 'Police: catch the thieves. One of your colleagues is corrupt.',
@@ -89,7 +90,7 @@ export default function ThievesAndCops({ view }: ScreenProps) {
             const p = v.stations[a];
             const q = v.stations[b];
             return p && q ? (
-              <line key={`${a}-${b}`} x1={p.x} y1={p.y} x2={q.x} y2={q.y} stroke={LINE_COLOURS[line]} className="tc-line" />
+              <line key={`${a}-${b}`} x1={p.x} y1={p.y} x2={q.x} y2={q.y} style={{ stroke: LINE_COLOURS[line] }} className="tc-line" />
             ) : null;
           })}
           {v.stations.map((s, i) => {

@@ -15,11 +15,11 @@
 }
 
 .race-chip.me {
-  border-color: var(--accent-2);
+  border-color: var(--seat-0);
 }
 
 .race-chip.done {
-  background: #23402f;
+  background: color-mix(in srgb, var(--ok) 18%, var(--panel));
   border-color: var(--ok);
 }
 
@@ -27,15 +27,20 @@
   max-height: 44dvh;
 }
 
+.drawing.pp-board {
+  background: var(--board);
+  border: 1px solid var(--line);
+}
+
 .pp-cell {
-  fill: #262336;
-  stroke: #3a3650;
+  fill: color-mix(in srgb, var(--violet) 14%, var(--board));
+  stroke: var(--board-line);
   stroke-width: 0.03;
   cursor: pointer;
 }
 
 .pp-cell.filled {
-  stroke: var(--panel);
+  stroke: var(--board);
   stroke-width: 0.06;
 }
 
@@ -50,14 +55,14 @@
   min-height: 56px;
   padding: 6px;
   border-radius: 12px;
-  border: 2px solid var(--line);
-  background: var(--panel);
+  border: 2px solid var(--glass-edge);
+  background: var(--glass);
   cursor: pointer;
 }
 
 .pp-piece.sel {
-  border-color: var(--accent-2);
-  background: var(--line);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 45%, transparent);
 }
 
 .pp-piece.placed {

@@ -84,7 +84,12 @@ export default function HiddenRulesRace({ view }: ScreenProps) {
               <div key={`${x},${y}`} className={`hrr-sq hrr-${goal ? 'goal' : v.colours[c]}`}>
                 {goal && <span className="hrr-star">★</span>}
                 {here.map((p) => (
-                  <span key={p.id} className={`hrr-piece${p.id === 'you' ? ' me' : ''}`} title={nameOf(p.id)}>
+                  <span
+                    key={p.id}
+                    className={`hrr-piece${p.id === 'you' ? ' me' : ''}`}
+                    style={{ background: `var(--seat-${v.pieces.indexOf(p)})` }}
+                    title={nameOf(p.id)}
+                  >
                     {nameOf(p.id)[0]}
                   </span>
                 ))}

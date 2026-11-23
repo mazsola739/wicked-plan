@@ -4,13 +4,13 @@
 }
 
 .rules-race-cell {
-  fill: var(--panel-2);
-  stroke: var(--line);
-  stroke-width: 2;
+  fill: var(--board);
+  stroke: var(--board-line);
+  stroke-width: 1.5;
 }
 
 .rules-race-cell.four {
-  fill: #262336;
+  fill: color-mix(in srgb, var(--cyan) 8%, var(--board));
   stroke: var(--accent-2);
   stroke-dasharray: 6 4;
 }
@@ -27,7 +27,7 @@
 }
 
 .rules-race-piece {
-  fill: #fff;
+  fill: var(--bg);
   font-size: 13px;
   font-weight: 800;
   text-anchor: middle;
@@ -35,8 +35,12 @@
 }
 
 .rules-race-now {
-  stroke: #fff;
+  stroke: var(--text);
   stroke-width: 3;
+}
+
+.rules-race-mine {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--seat-0) 45%, transparent));
 }
 
 .rules-race-prison {
@@ -53,6 +57,7 @@
 .rules-race-chip {
   padding: 2px 10px;
   border-radius: 999px;
+  color: var(--bg);
   font-size: 0.85rem;
   font-weight: 700;
 }

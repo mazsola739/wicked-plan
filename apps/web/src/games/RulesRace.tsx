@@ -42,7 +42,7 @@ interface RaceView {
   score: number;
 }
 
-const SEAT_COLOURS = ['#e23a54', '#e0b53a', '#3aa86b', '#4a8fd9', '#a45bd6', '#e07b39', '#38b6b0', '#d65b9c'];
+const SEAT_COLOURS = Array.from({ length: 8 }, (_, i) => `var(--seat-${i})`);
 const COLS = 5;
 const CELL = 96;
 
@@ -110,7 +110,13 @@ export default function RulesRace({ view }: ScreenProps) {
               const py = y + 52 + Math.floor(k / 3) * 26;
               return (
                 <g key={r.id}>
-                  <circle cx={px} cy={py} r={13} fill={SEAT_COLOURS[i]} className={r.id === v.current ? 'rules-race-now' : ''} />
+                  <circle
+                    cx={px}
+                    cy={py}
+                    r={13}
+                    style={{ fill: SEAT_COLOURS[i] }}
+                    className={`${r.id === 'you' ? 'rules-race-mine' : ''}${r.id === v.current ? ' rules-race-now' : ''}`}
+                  />
                   <text x={px} y={py + 5} className="rules-race-piece">
                     {nameOf(r.id)[0]}
                   </text>

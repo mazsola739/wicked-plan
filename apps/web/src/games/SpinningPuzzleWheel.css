@@ -11,6 +11,11 @@
   padding: 4px;
 }
 
+.spw-board {
+  background: var(--board);
+  border: 1px solid var(--line);
+}
+
 .spw-rim {
   fill: var(--bg);
   stroke: var(--accent-2);
@@ -26,7 +31,7 @@
 }
 
 .spw-plate {
-  fill: #262336;
+  fill: var(--board);
   stroke: var(--line);
   stroke-width: 2;
 }
@@ -36,8 +41,12 @@
   stroke-width: 4;
 }
 
+.spw-thumb.now {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 45%, transparent));
+}
+
 .spw-thumb.done .spw-plate {
-  fill: #213a2c;
+  fill: color-mix(in srgb, var(--ok) 18%, var(--board));
 }
 
 .spw-center {
@@ -55,11 +64,18 @@
 }
 
 .spw-cell {
-  fill: var(--panel-2);
+  fill: var(--board);
+  stroke: var(--board-line);
+  stroke-width: 1;
 }
 
 .spw-cell.target {
-  fill: #5e5c7a;
+  fill: color-mix(in srgb, var(--violet) 30%, var(--panel-2));
+  stroke: color-mix(in srgb, var(--violet) 70%, transparent);
+}
+
+.spw-cell.piece {
+  stroke: none;
 }
 
 .spw-board .spw-cell {
@@ -68,27 +84,27 @@
 
 .spw-cell.piece.p0,
 .spw-piece .p0 rect {
-  fill: #e0564f;
+  fill: var(--g-red);
 }
 
 .spw-cell.piece.p1,
 .spw-piece .p1 rect {
-  fill: #4f8fe6;
+  fill: var(--g-blue);
 }
 
 .spw-cell.piece.p2,
 .spw-piece .p2 rect {
-  fill: #3fb874;
+  fill: var(--g-green);
 }
 
 .spw-cell.piece.p3,
 .spw-piece .p3 rect {
-  fill: #e0b53a;
+  fill: var(--g-yellow);
 }
 
 .spw-ghost {
-  fill: rgba(255, 255, 255, 0.6);
-  stroke: #fff;
+  fill: color-mix(in srgb, var(--g-white) 55%, transparent);
+  stroke: var(--g-white);
   stroke-width: 2;
   pointer-events: none;
 }
@@ -107,8 +123,8 @@
 .spw-piece {
   min-height: 64px;
   border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
   cursor: pointer;
   padding: 6px;
 }
@@ -120,7 +136,8 @@
 
 .spw-piece.on {
   border-color: var(--accent-2);
-  background: #262336;
+  background: color-mix(in srgb, var(--accent-2) 12%, var(--panel));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-2) 45%, transparent);
 }
 
 .spw-piece.used svg {

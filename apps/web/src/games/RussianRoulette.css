@@ -12,26 +12,29 @@
 }
 
 .russian-roulette-drum .body {
-  fill: #403e56;
-  stroke: #7a7f96;
-  stroke-width: 3;
+  fill: var(--board);
+  stroke: var(--silver);
+  stroke-width: 2;
 }
 
 .russian-roulette-drum .chamber {
-  fill: var(--panel);
+  fill: var(--bg);
+  stroke: var(--board-line);
+  stroke-width: 1;
 }
 
 .russian-roulette-drum .chamber.next {
   stroke: var(--accent-2);
   stroke-width: 3;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent-2) 45%, transparent));
 }
 
 .russian-roulette-drum .hub {
-  fill: #7a7f96;
+  fill: var(--muted);
 }
 
 .russian-roulette-drum .paint {
-  fill: #e0329a;
+  fill: var(--g-pink);
   opacity: 0.9;
 }
 
@@ -60,7 +63,7 @@
 }
 
 .russian-roulette-charges i.on {
-  background: #e0329a;
+  background: var(--g-pink);
 }
 
 .russian-roulette-lives i.on {
@@ -85,7 +88,7 @@
 }
 
 .russian-roulette-hit {
-  color: #ff5fb8;
+  color: var(--g-pink);
 }
 
 .russian-roulette-safe {

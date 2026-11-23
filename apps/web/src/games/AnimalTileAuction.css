@@ -9,13 +9,18 @@
 .ata-cell {
   aspect-ratio: 1;
   border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--panel-2);
+  border: 1px solid var(--board-line);
+  background: var(--board);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   cursor: default;
+}
+
+.ata-cell:has(svg) {
+  background: var(--glass);
+  border-color: var(--glass-edge);
 }
 
 .ata-grid.placing .ata-cell:not(:disabled) {
@@ -24,7 +29,9 @@
 }
 
 .ata-cell.cursor {
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 0 12px color-mix(in srgb, var(--violet) 45%, transparent);
 }
 
 .ata-cell.big {
@@ -42,19 +49,19 @@
 }
 
 .ata-a0 {
-  fill: #e8833a;
+  fill: var(--g-orange);
 }
 
 .ata-a1 {
-  fill: #b9a1e0;
+  fill: var(--g-purple);
 }
 
 .ata-a2 {
-  fill: #6ccf6a;
+  fill: var(--g-green);
 }
 
 .ata-a3 {
-  fill: #a7774f;
+  fill: var(--g-yellow);
 }
 
 .ata-top {
@@ -85,8 +92,8 @@
 }
 
 .ata-pattern span:has(svg) {
-  background: var(--panel-2);
-  border: 1px solid var(--line);
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
 }
 
 .ata-bid {
@@ -110,7 +117,7 @@
 }
 
 .ata-chips li.me {
-  color: var(--accent-2);
+  color: var(--seat-0);
 }
 
 .ata-log {

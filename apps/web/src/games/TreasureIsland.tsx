@@ -105,6 +105,7 @@ function Island({ view, pick, onPick }: { view: IslandView; pick: Square | null;
           <text
             key={view.players[k]}
             className={`ti-dig${k === view.you ? ' me' : ''}`}
+            style={{ fill: `var(--seat-${k})` }}
             x={d[0] * C + 8 + (k % 3) * 10}
             y={d[1] * C + 12 + Math.floor(k / 3) * 14}
           >

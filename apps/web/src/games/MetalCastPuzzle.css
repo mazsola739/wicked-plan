@@ -2,12 +2,17 @@
   max-height: 34dvh;
 }
 
+.drawing.mcp {
+  background: var(--board);
+  border: 1px solid var(--line);
+}
+
 .mcp-bar {
-  fill: #3a3650;
+  fill: color-mix(in srgb, var(--silver) 22%, var(--board));
 }
 
 .mcp-post {
-  stroke: #8a90a3;
+  stroke: color-mix(in srgb, var(--silver) 55%, var(--board));
   stroke-width: 4;
 }
 
@@ -18,8 +23,8 @@
 }
 
 .mcp-handle {
-  fill: #4b2a86;
-  stroke: #2a1752;
+  fill: color-mix(in srgb, var(--violet) 40%, var(--board));
+  stroke: var(--violet);
   stroke-width: 2;
 }
 
@@ -30,21 +35,22 @@
 
 .mcp-wire {
   fill: none;
-  stroke: #8a90a3;
+  stroke: color-mix(in srgb, var(--silver) 60%, var(--board));
   stroke-width: 6;
   stroke-linecap: round;
 }
 
 .mcp-wire.back {
-  stroke: #5a5f72;
+  stroke: color-mix(in srgb, var(--silver) 40%, var(--board));
 }
 
 .mcp-ring.on .mcp-wire.back {
-  stroke: #12808f;
+  stroke: color-mix(in srgb, var(--cyan) 50%, var(--board));
 }
 
 .mcp-wire.front.on {
-  stroke: var(--accent-2);
+  stroke: var(--cyan);
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--cyan) 45%, transparent));
 }
 
 .mcp-num {

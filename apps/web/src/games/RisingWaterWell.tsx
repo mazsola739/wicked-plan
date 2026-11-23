@@ -34,7 +34,8 @@ interface WellView {
 
 const W = 300;
 const H = 210;
-const COLOURS = ['#e23a54', '#4f9ad6', '#e0b53a'];
+const COLOURS = ['var(--g-red)', 'var(--g-blue)', 'var(--g-yellow)'];
+const WEIGHT = 'var(--silver)';
 const COLOUR_NAMES = ['red', 'blue', 'gold'];
 const SHAPE_NAMES = ['circle', 'triangle', 'square', 'star'];
 
@@ -48,10 +49,10 @@ function star(cx: number, cy: number, r: number): string {
 
 /** A circle, triangle, square or star of radius r. */
 function Shape({ shape, x, y, r, fill }: { shape: number; x: number; y: number; r: number; fill: string }) {
-  if (shape === 0) return <circle cx={x} cy={y} r={r} fill={fill} />;
-  if (shape === 1) return <polygon points={`${x},${y - r} ${x + r},${y + r * 0.8} ${x - r},${y + r * 0.8}`} fill={fill} />;
-  if (shape === 2) return <rect x={x - r * 0.85} y={y - r * 0.85} width={r * 1.7} height={r * 1.7} fill={fill} />;
-  return <polygon points={star(x, y, r * 1.15)} fill={fill} />;
+  if (shape === 0) return <circle cx={x} cy={y} r={r} style={{ fill }} />;
+  if (shape === 1) return <polygon points={`${x},${y - r} ${x + r},${y + r * 0.8} ${x - r},${y + r * 0.8}`} style={{ fill }} />;
+  if (shape === 2) return <rect x={x - r * 0.85} y={y - r * 0.85} width={r * 1.7} height={r * 1.7} style={{ fill }} />;
+  return <polygon points={star(x, y, r * 1.15)} style={{ fill }} />;
 }
 
 function Tally({ count, x, y }: { count: number; x: number; y: number }) {
@@ -73,7 +74,7 @@ function Balance({ x, left, right }: { x: number; left: number[]; right: number[
   const pan = (items: number[], px: number) =>
     items.map((s, i) => (
       // biome-ignore lint/suspicious/noArrayIndexKey: items are positional
-      <Shape key={i} shape={s} x={px - (items.length - 1) * 7.5 + i * 15} y={s === 0 ? 132 : 129} r={s === 0 ? 7 : 9.5} fill="#c9cedb" />
+      <Shape key={i} shape={s} x={px - (items.length - 1) * 7.5 + i * 15} y={s === 0 ? 132 : 129} r={s === 0 ? 7 : 9.5} fill={WEIGHT} />
     ));
   return (
     <g>
@@ -124,7 +125,14 @@ function Drawing({ riddle }: { riddle: Riddle }) {
       return (
         <g>
           {riddle.stones.map((s) => (
-            <Shape key={`${s.x},${s.y}`} shape={s.shape} x={12 + s.x * 2.76} y={8 + s.y * 2} r={11} fill={COLOURS[s.colour] ?? '#888'} />
+            <Shape
+              key={`${s.x},${s.y}`}
+              shape={s.shape}
+              x={12 + s.x * 2.76}
+              y={8 + s.y * 2}
+              r={11}
+              fill={COLOURS[s.colour] ?? 'var(--muted)'}
+            />
           ))}
         </g>
       );

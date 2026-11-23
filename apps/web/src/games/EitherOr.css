@@ -40,7 +40,7 @@
 }
 
 .eo-scores li.me > span:first-child {
-  color: var(--accent-2);
+  color: var(--seat-0);
 }
 
 .eo-scores em {
@@ -71,11 +71,11 @@
 }
 
 .eo-choice.side0 {
-  --edge: #6fc3ff;
+  --edge: var(--g-blue);
 }
 
 .eo-choice.side1 {
-  --edge: #f08a5d;
+  --edge: var(--g-orange);
 }
 
 .eo-choice.on {

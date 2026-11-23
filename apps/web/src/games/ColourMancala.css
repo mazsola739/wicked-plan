@@ -4,26 +4,27 @@
 
 .cm-track {
   fill: none;
-  stroke: var(--line);
+  stroke: var(--board-line);
   stroke-width: 2;
 }
 
+/* Each row is tinted with its owner's seat colour (--cm-own, set per hole). */
 .cm-hole > .cm-base {
-  fill: var(--panel-2);
+  fill: color-mix(in srgb, var(--cm-own) 14%, var(--board));
   stroke: var(--line);
   stroke-width: 2;
 }
 
 .cm-hole.mine > .cm-base {
-  fill: #262336;
+  fill: color-mix(in srgb, var(--cm-own) 22%, var(--board));
 }
 
 .cm-hole.store > .cm-base {
-  fill: var(--panel);
+  fill: color-mix(in srgb, var(--cm-own) 9%, var(--board));
 }
 
 .cm-hole.turn > .cm-base {
-  stroke: var(--accent-2);
+  stroke: var(--cm-own);
 }
 
 .cm-hole.path > .cm-base {
@@ -38,20 +39,20 @@
 
 .cm-stone.red,
 .cm-swatch.red {
-  fill: #e0564f;
-  background: #e0564f;
+  fill: var(--g-red);
+  background: var(--g-red);
 }
 
 .cm-stone.green,
 .cm-swatch.green {
-  fill: #3fb874;
-  background: #3fb874;
+  fill: var(--g-green);
+  background: var(--g-green);
 }
 
 .cm-stone.blue,
 .cm-swatch.blue {
-  fill: #4f8fe6;
-  background: #4f8fe6;
+  fill: var(--g-blue);
+  background: var(--g-blue);
 }
 
 .cm-count,
@@ -68,22 +69,23 @@
   font-weight: 700;
 }
 
+/* Numbers in a stone colour, lightened a little so small text stays readable on tinted rows. */
 .cm-store-text .red,
 .cm-mini .red {
-  fill: #ff7b73;
-  color: #ff7b73;
+  fill: color-mix(in srgb, var(--g-red) 75%, var(--g-white));
+  color: color-mix(in srgb, var(--g-red) 75%, var(--g-white));
 }
 
 .cm-store-text .green,
 .cm-mini .green {
-  fill: #5fd394;
-  color: #5fd394;
+  fill: color-mix(in srgb, var(--g-green) 75%, var(--g-white));
+  color: color-mix(in srgb, var(--g-green) 75%, var(--g-white));
 }
 
 .cm-store-text .blue,
 .cm-mini .blue {
-  fill: #7fb0ff;
-  color: #7fb0ff;
+  fill: color-mix(in srgb, var(--g-blue) 75%, var(--g-white));
+  color: color-mix(in srgb, var(--g-blue) 75%, var(--g-white));
 }
 
 .cm-center {
@@ -113,7 +115,7 @@
 
 .cm-colour.on {
   --edge: var(--accent-2);
-  --fill: #262336;
+  --fill: color-mix(in srgb, var(--accent-2) 16%, var(--panel));
 }
 
 .cm-swatch {

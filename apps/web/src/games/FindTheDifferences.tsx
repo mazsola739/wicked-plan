@@ -36,8 +36,23 @@ interface FindTheDifferencesView {
   over: boolean;
 }
 
-const COLOURS = ['#e0453a', '#f0a531', '#f2df4b', '#4bb556', '#3a8fe0', '#8a55d6', '#e66fb5', '#f4f1ea'];
-const GROUNDS = ['#2b4a3a', '#2c3550', '#4a2f3c', '#3c3a2c'];
+const COLOURS = [
+  'var(--g-red)',
+  'var(--g-orange)',
+  'var(--g-yellow)',
+  'var(--g-green)',
+  'var(--g-blue)',
+  'var(--g-purple)',
+  'var(--g-pink)',
+  'var(--g-white)',
+];
+/** Four grounds: the dark board, tinted a little. */
+const GROUNDS = [
+  'color-mix(in srgb, var(--violet) 16%, var(--board))',
+  'color-mix(in srgb, var(--cyan) 10%, var(--board))',
+  'color-mix(in srgb, var(--g-blue) 16%, var(--board))',
+  'color-mix(in srgb, var(--g-pink) 12%, var(--board))',
+];
 
 function polygon(x: number, y: number, r: number, n: number, turn: number, inner?: number): string {
   const pts: string[] = [];
@@ -55,17 +70,17 @@ function ShapeArt({ s }: { s: Shape }) {
   const up = -Math.PI / 2;
   switch (s.kind) {
     case 0:
-      return <circle cx={s.x} cy={s.y} r={s.r} fill={fill} />;
+      return <circle cx={s.x} cy={s.y} r={s.r} style={{ fill }} />;
     case 1:
-      return <rect x={s.x - s.r * 0.85} y={s.y - s.r * 0.85} width={s.r * 1.7} height={s.r * 1.7} rx={s.r * 0.12} fill={fill} />;
+      return <rect x={s.x - s.r * 0.85} y={s.y - s.r * 0.85} width={s.r * 1.7} height={s.r * 1.7} rx={s.r * 0.12} style={{ fill }} />;
     case 2:
-      return <polygon points={polygon(s.x, s.y + s.r * 0.15, s.r * 1.05, 3, up)} fill={fill} />;
+      return <polygon points={polygon(s.x, s.y + s.r * 0.15, s.r * 1.05, 3, up)} style={{ fill }} />;
     case 3:
-      return <polygon points={polygon(s.x, s.y, s.r * 1.05, 5, up, 0.45)} fill={fill} />;
+      return <polygon points={polygon(s.x, s.y, s.r * 1.05, 5, up, 0.45)} style={{ fill }} />;
     case 4:
-      return <polygon points={polygon(s.x, s.y, s.r, 4, up)} fill={fill} />;
+      return <polygon points={polygon(s.x, s.y, s.r, 4, up)} style={{ fill }} />;
     default:
-      return <polygon points={polygon(s.x, s.y, s.r, 6, 0)} fill={fill} />;
+      return <polygon points={polygon(s.x, s.y, s.r, 6, 0)} style={{ fill }} />;
   }
 }
 
@@ -93,7 +108,7 @@ function Picture({
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: tapping a spot in a picture has no keyboard equivalent
     <svg className="fd-pic" viewBox="0 0 1000 1000" role="img" aria-label={label} onClick={tap}>
-      <rect width="1000" height="1000" fill={GROUNDS[ground]} />
+      <rect width="1000" height="1000" style={{ fill: GROUNDS[ground] }} />
       {shapes.map((s) => (
         <ShapeArt key={s.id} s={s} />
       ))}

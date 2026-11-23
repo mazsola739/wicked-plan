@@ -4,8 +4,8 @@
 }
 
 .sym .sym-cell {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--board);
+  border: 1px solid var(--board-line);
   border-radius: 4px;
   cursor: pointer;
 }
@@ -56,7 +56,9 @@
 
 .sym-colour.sel {
   border-color: var(--text);
-  box-shadow: 0 0 0 2px var(--accent-2);
+  box-shadow:
+    0 0 0 2px var(--accent-2),
+    0 0 12px color-mix(in srgb, var(--accent-2) 45%, transparent);
 }
 
 @media (min-width: 720px) {

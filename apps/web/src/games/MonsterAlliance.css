@@ -4,8 +4,8 @@
   align-items: center;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid var(--bad);
-  background: linear-gradient(135deg, #2a1420, var(--panel));
+  border: 1px solid var(--g-red);
+  background: var(--glass);
 }
 
 .ma-monster h3 {
@@ -23,13 +23,13 @@
 }
 
 .ma-face path:first-child {
-  fill: #5b2a3a;
-  stroke: var(--bad);
+  fill: color-mix(in srgb, var(--g-red) 22%, var(--board));
+  stroke: var(--g-red);
   stroke-width: 3;
 }
 
 .ma-eye {
-  fill: var(--warn);
+  fill: var(--g-yellow);
 }
 
 .ma-teeth {

@@ -22,8 +22,8 @@ interface HiddenView {
   shadowWon: boolean;
 }
 
-/** Stone colours: index 1–3 the seats, 4 the Shadow. */
-const COLOURS = ['', '#e3e7ef', '#3aa86b', '#4f8fd8', '#0b0910'];
+/** Stone colours: index 1–3 the seats (you first), 4 the Shadow. */
+const COLOURS = ['', 'var(--seat-0)', 'var(--seat-1)', 'var(--seat-2)', 'var(--g-black)'];
 
 export default function HiddenFourthPlayer({ view: raw }: ScreenProps) {
   const view = raw as HiddenView;
@@ -75,7 +75,10 @@ export default function HiddenFourthPlayer({ view: raw }: ScreenProps) {
               return (
                 <button key={c} type="button" className={cls} disabled={!view.yourTurn || v !== 0} onClick={() => place(c)}>
                   {v !== 0 && (
-                    <span className={`hidden-fourth-player-stone${v === 4 ? ' shadow' : ''}`} style={{ background: COLOURS[v] }} />
+                    <span
+                      className={`hidden-fourth-player-stone${v === 4 ? ' shadow' : v === view.me + 1 ? ' mine' : ''}`}
+                      style={{ background: COLOURS[v] }}
+                    />
                   )}
                 </button>
               );

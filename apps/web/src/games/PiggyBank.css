@@ -9,24 +9,29 @@
   flex: none;
 }
 
+/* A pink neon line pig on the dark card. */
 .piggy-bank-pig .body,
 .piggy-bank-pig .ear {
-  fill: #e79bb4;
+  fill: color-mix(in srgb, var(--g-pink) 18%, var(--board));
+  stroke: var(--g-pink);
+  stroke-width: 2.5;
 }
 
 .piggy-bank-pig .snout {
-  fill: #d77e9c;
+  fill: color-mix(in srgb, var(--g-pink) 30%, var(--board));
+  stroke: var(--g-pink);
+  stroke-width: 2.5;
 }
 
 .piggy-bank-pig .dark {
-  fill: #5a2a3c;
+  fill: var(--g-pink);
 }
 
 .piggy-bank-pig .count {
   text-anchor: middle;
   font-size: 30px;
   font-weight: 800;
-  fill: #5a2a3c;
+  fill: var(--text);
 }
 
 .piggy-bank-pig.open {
@@ -45,15 +50,16 @@
   height: 18px;
   border-radius: 50%;
   vertical-align: middle;
-  border: 2px solid #a7aec2;
+  border: 2px solid var(--silver);
 }
 
 .piggy-bank-white {
-  background: radial-gradient(circle at 35% 35%, #fff, #c9cedb);
+  background: radial-gradient(circle at 35% 35%, var(--g-white), color-mix(in srgb, var(--g-white) 75%, var(--bg)));
 }
 
+/* Black coins keep the silver edge so they show on the dark page. */
 .piggy-bank-black {
-  background: radial-gradient(circle at 35% 35%, #4a4e5e, var(--bg));
+  background: radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--silver) 25%, var(--g-black)), var(--g-black));
 }
 
 .piggy-bank-pending {

@@ -3,9 +3,15 @@
   aspect-ratio: 1;
 }
 
+.drawing.nine-mens-morris-board {
+  background: var(--board);
+  border: 1px solid var(--line);
+}
+
+/* The lines are the board (they show which points connect), so a little stronger than --board-line. */
 .nine-mens-morris-line {
   fill: none;
-  stroke: #4a4764;
+  stroke: color-mix(in srgb, var(--silver) 40%, transparent);
   stroke-width: 0.06;
 }
 
@@ -18,31 +24,32 @@
 }
 
 .nine-mens-morris-point.empty .stone {
-  fill: #4a4764;
+  fill: color-mix(in srgb, var(--silver) 45%, var(--board));
 }
 
 .nine-mens-morris-point.mine .stone {
-  fill: #e3e7ef;
-  stroke: var(--panel);
+  fill: var(--seat-0);
+  stroke: var(--bg);
   stroke-width: 0.04;
 }
 
 .nine-mens-morris-point.theirs .stone {
-  fill: var(--bad);
-  stroke: var(--panel);
+  fill: var(--seat-1);
+  stroke: var(--bg);
   stroke-width: 0.04;
 }
 
 .nine-mens-morris-point.can .hit {
-  fill: rgba(34, 211, 238, 0.25);
+  fill: color-mix(in srgb, var(--cyan) 25%, transparent);
 }
 
 .nine-mens-morris-point.empty.can .stone {
-  fill: var(--accent-2);
+  fill: var(--cyan);
 }
 
+/* Your pieces are cyan, so the selection ring is white. */
 .nine-mens-morris-point.mine.sel .stone {
-  stroke: var(--accent-2);
+  stroke: var(--text);
   stroke-width: 0.1;
 }
 
@@ -85,11 +92,12 @@
 }
 
 .nine-mens-morris-hand i.mine {
-  background: #e3e7ef;
+  background: var(--seat-0);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--seat-0) 45%, transparent);
 }
 
 .nine-mens-morris-hand i.theirs {
-  background: var(--bad);
+  background: var(--seat-1);
 }
 
 .nine-mens-morris-mill {

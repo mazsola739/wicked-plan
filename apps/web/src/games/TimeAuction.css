@@ -20,11 +20,13 @@
   gap: 4px;
 }
 
+/* A gold token: a neon gold ring on dark glass. */
 .time-auction-tokens i {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #f3d37a, #e0b53a 60%, #8c6a1c);
+  border: 2px solid var(--g-yellow);
+  background: color-mix(in srgb, var(--g-yellow) 28%, var(--panel));
 }
 
 .time-auction-log {
@@ -59,7 +61,7 @@
 .time-auction-bar div {
   position: absolute;
   inset: 0 auto 0 0;
-  background: color-mix(in srgb, var(--cyan) 40%, #0b2a33);
+  background: color-mix(in srgb, var(--cyan) 40%, var(--bg));
   transition: width 0.25s linear;
 }
 
@@ -74,8 +76,12 @@
   aspect-ratio: 1;
   margin-top: auto;
   border-radius: 50%;
-  border: 6px solid #3b1680;
-  background: radial-gradient(circle at 40% 35%, #a77bff, var(--accent) 65%, #431c96);
+  border: 6px solid var(--violet);
+  background: radial-gradient(
+    circle at 40% 35%,
+    color-mix(in srgb, var(--violet) 40%, var(--panel)),
+    color-mix(in srgb, var(--violet) 14%, var(--bg)) 70%
+  );
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -83,7 +89,7 @@
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  box-shadow: 0 8px 0 #260d55;
+  box-shadow: 0 8px 0 color-mix(in srgb, var(--violet) 30%, var(--bg));
   transition:
     transform 0.06s,
     box-shadow 0.06s;
@@ -91,8 +97,14 @@
 
 .time-auction-btn.held {
   transform: translateY(6px);
-  box-shadow: 0 2px 0 #260d55;
-  background: radial-gradient(circle at 40% 35%, #c7a6ff, #9255f7 65%, #4f22ad);
+  box-shadow:
+    0 2px 0 color-mix(in srgb, var(--violet) 30%, var(--bg)),
+    0 0 12px color-mix(in srgb, var(--violet) 45%, transparent);
+  background: radial-gradient(
+    circle at 40% 35%,
+    color-mix(in srgb, var(--violet) 62%, var(--panel)),
+    color-mix(in srgb, var(--violet) 30%, var(--bg)) 70%
+  );
 }
 
 .time-auction-btn:disabled {

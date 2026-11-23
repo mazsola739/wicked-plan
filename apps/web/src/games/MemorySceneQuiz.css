@@ -2,10 +2,15 @@
   max-height: 42dvh;
 }
 
+.drawing.msq-scene {
+  background: var(--board);
+  border: 1px solid var(--line);
+}
+
 .msq-cell {
-  fill: var(--panel-2);
-  stroke: var(--line);
-  stroke-width: 2;
+  fill: var(--board);
+  stroke: var(--board-line);
+  stroke-width: 1.5;
 }
 
 .msq-hidden {
@@ -22,23 +27,23 @@
 }
 
 .msq-shape.red {
-  fill: #e0564f;
+  fill: var(--g-red);
 }
 
 .msq-shape.blue {
-  fill: #4f8fe6;
+  fill: var(--g-blue);
 }
 
 .msq-shape.green {
-  fill: #3fb874;
+  fill: var(--g-green);
 }
 
 .msq-shape.yellow {
-  fill: #f0c53a;
+  fill: var(--g-yellow);
 }
 
 .msq-shape.purple {
-  fill: #a46be0;
+  fill: var(--g-purple);
 }
 
 .msq-question {

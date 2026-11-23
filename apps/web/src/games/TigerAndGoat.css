@@ -3,8 +3,9 @@
   aspect-ratio: 1;
 }
 
+/* The lines are the board (they show which points connect), so a little stronger than --board-line. */
 .tiger-and-goat-line {
-  stroke: #3a3650;
+  stroke: color-mix(in srgb, var(--silver) 40%, transparent);
   stroke-width: 0.04;
 }
 
@@ -17,7 +18,7 @@
 }
 
 .tiger-and-goat-point .stone {
-  fill: #3a3650;
+  fill: color-mix(in srgb, var(--silver) 45%, transparent);
 }
 
 .tiger-and-goat-point text {
@@ -25,16 +26,19 @@
   font-weight: 800;
   text-anchor: middle;
   dominant-baseline: central;
-  fill: #12111a;
+  fill: var(--bg);
   pointer-events: none;
 }
 
-.tiger-and-goat-point.tiger .stone {
-  fill: #e0b53a;
+/* Tigers and goats are coloured by side: yours seat 0, the opponent's seat 1. */
+.tiger-and-goat-point.tiger .stone,
+.tiger-and-goat-point.goat .stone {
+  fill: var(--seat-1);
 }
 
-.tiger-and-goat-point.goat .stone {
-  fill: #e3e7ef;
+.tiger-and-goat-point.mine .stone {
+  fill: var(--seat-0);
+  filter: drop-shadow(0 0 0.1px color-mix(in srgb, var(--seat-0) 45%, transparent));
 }
 
 .tiger-and-goat-point.last .hit {
@@ -44,11 +48,11 @@
 }
 
 .tiger-and-goat-point.can .hit {
-  fill: rgba(34, 211, 238, 0.22);
+  fill: color-mix(in srgb, var(--cyan) 22%, transparent);
 }
 
 .tiger-and-goat-point.sel .stone {
-  stroke: var(--accent);
+  stroke: var(--text);
   stroke-width: 0.08;
 }
 

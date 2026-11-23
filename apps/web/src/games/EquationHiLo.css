@@ -31,7 +31,7 @@
 }
 
 .ehl-seats li.me > div:first-child > span {
-  color: var(--accent-2);
+  color: var(--seat-0);
 }
 
 .ehl-up {
@@ -44,8 +44,9 @@
   width: 22px;
   height: 30px;
   border-radius: 5px;
-  background: #e3e7ef;
-  color: #12111a;
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  color: var(--text);
   font-weight: 700;
   font-size: 0.85rem;
   display: inline-flex;
@@ -54,7 +55,8 @@
 }
 
 .ehl-mini.down {
-  background: repeating-linear-gradient(45deg, #262336, #262336 4px, #322e46 4px, #322e46 8px);
+  background: var(--card-back);
+  box-shadow: var(--card-back-frame);
 }
 
 .ehl-pot {
@@ -81,9 +83,9 @@
   width: 56px;
   height: 76px;
   border-radius: 8px;
-  border: 2px solid #e3e7ef;
-  background: #e3e7ef;
-  color: #12111a;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
+  color: var(--text);
   font-size: 1.6rem;
   font-weight: 800;
   display: inline-flex;
@@ -108,7 +110,8 @@
 
 .ehl-card.hidden {
   border-color: var(--accent-2);
-  background: #c9cedb;
+  background:
+    linear-gradient(color-mix(in srgb, var(--violet) 16%, transparent), color-mix(in srgb, var(--violet) 16%, transparent)), var(--glass);
 }
 
 .ehl-builder {

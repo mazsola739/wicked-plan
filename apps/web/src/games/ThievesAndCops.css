@@ -15,7 +15,7 @@
 
 .tc-dot {
   fill: var(--text);
-  stroke: var(--panel);
+  stroke: var(--board);
   stroke-width: 4;
 }
 
@@ -24,13 +24,14 @@
 }
 
 .tc-station.can .tc-hit {
-  fill: rgba(34, 211, 238, 0.22);
+  fill: color-mix(in srgb, var(--cyan) 22%, transparent);
   stroke: var(--accent-2);
   stroke-width: 2;
 }
 
 .tc-station.chosen .tc-dot {
   fill: var(--accent-2);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--cyan) 45%, transparent));
 }
 
 .tc-name {
@@ -41,8 +42,8 @@
 }
 
 .tc-loot {
-  fill: #e0b53a;
-  stroke: #4a3608;
+  fill: var(--g-yellow);
+  stroke: var(--board);
   stroke-width: 2;
 }
 
@@ -55,19 +56,19 @@
 
 .tc-ghost circle {
   fill: none;
-  stroke: var(--bad);
+  stroke: var(--g-red);
   stroke-width: 2;
   stroke-dasharray: 4 3;
 }
 
 .tc-token circle {
-  stroke: var(--panel);
+  stroke: var(--board);
   stroke-width: 2;
 }
 
 .tc-token text,
 .tc-ghost text {
-  fill: #fff;
+  fill: var(--bg);
   font-size: 13px;
   font-weight: 800;
   text-anchor: middle;
@@ -75,20 +76,21 @@
 }
 
 .tc-token.police circle {
-  fill: #4a8fd9;
+  fill: var(--g-blue);
 }
 
 .tc-token.thief circle {
-  fill: var(--bad);
+  fill: var(--g-red);
 }
 
 .tc-token.corrupt circle {
-  fill: #85703a;
+  fill: var(--g-orange);
 }
 
 .tc-token.me circle {
-  stroke: #fff;
+  stroke: var(--seat-0);
   stroke-width: 3;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--seat-0) 45%, transparent));
 }
 
 .tc-token.caught {
@@ -96,15 +98,15 @@
 }
 
 .tc-ghost text {
-  fill: var(--bad);
+  fill: var(--g-red);
   font-size: 10px;
 }
 
 .tc-card {
   padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
 }
 
 .tc-card p {
@@ -113,7 +115,7 @@
 
 .tc-card.tc-thief,
 .tc-card.tc-corrupt {
-  border-color: var(--bad);
+  border-color: var(--g-red);
 }
 
 .tc-accuse {
@@ -131,15 +133,16 @@
   font-size: 0.75rem;
   font-weight: 800;
   line-height: 22px;
-  background: #4a8fd9;
+  color: var(--bg);
+  background: var(--g-blue);
 }
 
 .tc-badge.thief {
-  background: var(--bad);
+  background: var(--g-red);
 }
 
 .tc-badge.corrupt {
-  background: #85703a;
+  background: var(--g-orange);
 }
 
 .tc-players li {

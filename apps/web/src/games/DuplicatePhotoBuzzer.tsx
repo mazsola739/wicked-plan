@@ -24,8 +24,23 @@ interface BuzzerView {
   over: boolean;
 }
 
-const COLOURS = ['#e0453a', '#f0a531', '#f2df4b', '#4bb556', '#3a8fe0', '#8a55d6', '#e66fb5', '#f4f1ea'];
-const GROUNDS = ['#2b4a3a', '#2c3550', '#4a2f3c', '#3c3a2c'];
+const COLOURS = [
+  'var(--g-red)',
+  'var(--g-orange)',
+  'var(--g-yellow)',
+  'var(--g-green)',
+  'var(--g-blue)',
+  'var(--g-purple)',
+  'var(--g-pink)',
+  'var(--g-white)',
+];
+/** Four grounds: the dark board, tinted a little (as in Find the Differences). */
+const GROUNDS = [
+  'color-mix(in srgb, var(--violet) 16%, var(--board))',
+  'color-mix(in srgb, var(--cyan) 10%, var(--board))',
+  'color-mix(in srgb, var(--g-blue) 16%, var(--board))',
+  'color-mix(in srgb, var(--g-pink) 12%, var(--board))',
+];
 const LAYOUTS: [number, number][][] = [
   [
     [250, 300],
@@ -59,22 +74,22 @@ function polygon(x: number, y: number, r: number, n: number, turn: number, inner
 }
 
 function Mark({ kind, colour, x, y }: { kind: number; colour: number; x: number; y: number }) {
-  const fill = COLOURS[colour];
+  const style = { fill: COLOURS[colour] };
   const r = 130;
   const up = -Math.PI / 2;
   switch (kind) {
     case 0:
-      return <circle cx={x} cy={y} r={r} fill={fill} />;
+      return <circle cx={x} cy={y} r={r} style={style} />;
     case 1:
-      return <rect x={x - r * 0.85} y={y - r * 0.85} width={r * 1.7} height={r * 1.7} rx={r * 0.12} fill={fill} />;
+      return <rect x={x - r * 0.85} y={y - r * 0.85} width={r * 1.7} height={r * 1.7} rx={r * 0.12} style={style} />;
     case 2:
-      return <polygon points={polygon(x, y + r * 0.15, r * 1.05, 3, up)} fill={fill} />;
+      return <polygon points={polygon(x, y + r * 0.15, r * 1.05, 3, up)} style={style} />;
     case 3:
-      return <polygon points={polygon(x, y, r * 1.05, 5, up, 0.45)} fill={fill} />;
+      return <polygon points={polygon(x, y, r * 1.05, 5, up, 0.45)} style={style} />;
     case 4:
-      return <polygon points={polygon(x, y, r, 4, up)} fill={fill} />;
+      return <polygon points={polygon(x, y, r, 4, up)} style={style} />;
     default:
-      return <polygon points={polygon(x, y, r, 6, 0)} fill={fill} />;
+      return <polygon points={polygon(x, y, r, 6, 0)} style={style} />;
   }
 }
 
@@ -82,7 +97,7 @@ function PictureArt({ p, className }: { p: Picture; className?: string }) {
   const spots = LAYOUTS[p.layout] ?? LAYOUTS[0] ?? [];
   return (
     <svg className={`db-pic ${className ?? ''}`} viewBox="0 0 1000 1000" role="img" aria-label="Picture">
-      <rect width="1000" height="1000" fill={GROUNDS[p.ground]} />
+      <rect width="1000" height="1000" style={{ fill: GROUNDS[p.ground] }} />
       {p.marks.map((m, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: three marks in fixed spots
         <Mark key={i} kind={m.kind} colour={m.colour} x={spots[i]?.[0] ?? 500} y={spots[i]?.[1] ?? 500} />

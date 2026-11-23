@@ -22,7 +22,8 @@ interface LayTheGrassView {
   over: boolean;
 }
 
-const GRASS = ['#43a85a', '#e0b53a', '#4a8fd6', '#c45ab8'];
+/** Grass in each seat's colour, by seat index (you first). */
+const GRASS = ['var(--seat-0)', 'var(--seat-1)', 'var(--seat-2)', 'var(--seat-3)'];
 
 function normalize(cells: Cell[]): Cell[] {
   const mx = Math.min(...cells.map((c) => c[0]));
@@ -49,7 +50,7 @@ function Piece({ cells, color }: { cells: Cell[]; color: string }) {
       aria-label="Grass piece"
     >
       {cells.map(([x, y]) => (
-        <rect key={`${x},${y}`} x={x + 0.05} y={y + 0.05} width="0.9" height="0.9" rx="0.15" fill={color} />
+        <rect key={`${x},${y}`} x={x + 0.05} y={y + 0.05} width="0.9" height="0.9" rx="0.15" style={{ fill: color }} />
       ))}
     </svg>
   );
@@ -112,7 +113,7 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
                 type="button"
                 aria-label={`Square ${x + 1}, ${y + 1}`}
                 className={`lg-sq${c === -2 ? ' rock' : ''}${g ? (fits ? ' ghost' : ' ghost bad') : ''}${lastSet.has(i) ? ' last' : ''}`}
-                style={c >= 0 ? { background: GRASS[c] } : undefined}
+                style={c >= 0 ? { background: `color-mix(in srgb, ${GRASS[c]} 40%, var(--board))`, borderColor: GRASS[c] } : undefined}
                 disabled={!mine}
                 onClick={() => tap(x, y)}
               />
@@ -132,12 +133,12 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
           {view.piece && (
             <div className="lg-pieces">
               <div className="lg-now">
-                <Piece cells={shape} color={GRASS[view.you] ?? '#43a85a'} />
+                <Piece cells={shape} color={GRASS[view.you] ?? 'var(--seat-0)'} />
                 <span className="muted small">this round</span>
               </div>
               {view.next && (
                 <div className="lg-next">
-                  <Piece cells={normalize(view.next)} color="#55526c" />
+                  <Piece cells={normalize(view.next)} color="var(--muted)" />
                   <span className="muted small">next</span>
                 </div>
               )}

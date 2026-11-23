@@ -110,9 +110,11 @@ export default function TigerAndGoat({ view: raw }: ScreenProps) {
             const x = i % 5;
             const y = Math.floor(i / 5);
             const can = targets.has(i) || (!placing && movable.has(i));
-            const cls = `tiger-and-goat-point${c === 1 ? ' tiger' : c === 2 ? ' goat' : ''}${can ? ' can' : ''}${sel === i ? ' sel' : ''}${
-              board.last?.[1] === i ? ' last' : ''
-            }`;
+            // Your side's pieces take your seat colour, the opponent's theirs.
+            const mine = c !== 0 && (c === 1) === (board.side === 'tiger');
+            const cls = `tiger-and-goat-point${c === 1 ? ' tiger' : c === 2 ? ' goat' : ''}${mine ? ' mine' : ''}${can ? ' can' : ''}${
+              sel === i ? ' sel' : ''
+            }${board.last?.[1] === i ? ' last' : ''}`;
             return (
               // biome-ignore lint/a11y/useSemanticElements: an SVG point cannot be a <button>
               <g key={`${x},${y}`} className={cls} onClick={() => tap(i)} role="button" tabIndex={-1} onKeyDown={() => {}}>

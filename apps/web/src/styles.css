@@ -18,6 +18,49 @@
   --touch: 48px;
   --display: "Cinzel", Georgia, "Times New Roman", serif;
   --chamfer: 14px;
+
+  /* Inside the games (docs/design.md): named colours as neon on near-black, one seat order
+     (you first, in cyan), dark boards with silver lines, cards and tiles as dark glass. */
+  --g-red: #ff4d6d;
+  --g-orange: #ff8a3d;
+  --g-yellow: #ffd23f;
+  --g-green: #3ddc84;
+  --g-cyan: #22d3ee;
+  --g-blue: #4d8dff;
+  --g-purple: #a855f7;
+  --g-pink: #ff5cc8;
+  --g-white: #e8ebf3;
+  --g-black: #2a2738;
+  --seat-0: var(--g-cyan);
+  --seat-1: var(--g-purple);
+  --seat-2: var(--g-pink);
+  --seat-3: var(--g-yellow);
+  --seat-4: var(--g-green);
+  --seat-5: var(--g-orange);
+  --seat-6: var(--g-blue);
+  --seat-7: var(--g-white);
+  --board: #0d0c14;
+  --board-line: color-mix(in srgb, var(--silver) 22%, transparent);
+  --glass: linear-gradient(160deg, #221f33, #121119);
+  --glass-edge: color-mix(in srgb, var(--silver) 38%, transparent);
+  /* The one card back of every card game: the crown on a fine cyan/violet diamond lattice, with an
+     inset silver frame (use background: var(--card-back); box-shadow: var(--card-back-frame)). */
+  --card-back:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='10 -4 80 40'%3E%3Cpath d='M14,32 L18,15 L30,25 L36,7 L44,21 L50,-1 L56,21 L64,7 L70,25 L82,15 L86,32 Q50,26 14,32 Z' fill='none' stroke='%23d7dbe4' stroke-opacity='.7' stroke-width='3.2' stroke-linejoin='miter'/%3E%3C/svg%3E")
+    center / 54% auto no-repeat,
+    radial-gradient(closest-side, #0c0b13 55%, color-mix(in srgb, #0c0b13 60%, transparent) 72%, transparent 100%) center / 84%
+    62% no-repeat,
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--violet) 26%, transparent) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--cyan) 18%, transparent) 0 1px, transparent 1px 8px),
+    linear-gradient(160deg, #201a33, #0c0b13);
+  --card-back-frame: inset 0 0 0 3px #0c0b13, inset 0 0 0 4px color-mix(in srgb, var(--silver) 30%, transparent);
+  /* The same back without the crown, for backs that carry a label or sit many to a board. */
+  --card-back-plain:
+    radial-gradient(closest-side, #0c0b13 55%, color-mix(in srgb, #0c0b13 60%, transparent) 72%, transparent 100%) center / 84% 62%
+    no-repeat,
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--violet) 26%, transparent) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--cyan) 18%, transparent) 0 1px, transparent 1px 8px),
+    linear-gradient(160deg, #201a33, #0c0b13);
   color-scheme: dark;
 }
 
@@ -430,31 +473,32 @@ h2 {
 .drawing {
   width: 100%;
   max-height: 38dvh;
-  background: var(--panel);
-  border-radius: 16px;
+  background: var(--board);
+  border: 1px solid var(--line);
+  border-radius: 12px;
   padding: 10px;
 }
 
 .cube .top {
-  fill: #e3e7ef;
-  stroke: #26233a;
+  fill: var(--g-white);
+  stroke: var(--board);
   stroke-width: 1.5;
 }
 
 .cube .left {
-  fill: #a7aec2;
-  stroke: #26233a;
+  fill: color-mix(in srgb, var(--cyan) 32%, #8890a8);
+  stroke: var(--board);
   stroke-width: 1.5;
 }
 
 .cube .right {
-  fill: #6f7790;
-  stroke: #26233a;
+  fill: color-mix(in srgb, var(--violet) 38%, #4a4660);
+  stroke: var(--board);
   stroke-width: 1.5;
 }
 
 .segment {
-  stroke: var(--text);
+  stroke: var(--silver);
   stroke-width: 4;
   stroke-linecap: round;
 }
@@ -503,8 +547,8 @@ h2 {
 .key {
   min-height: 54px;
   border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
   font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
@@ -579,17 +623,19 @@ h2 {
 .card-btn {
   position: relative;
   min-height: 60px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: #e3e7ef;
-  color: #12111a;
+  border-radius: 8px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
+  color: var(--text);
   font-size: 1.6rem;
   font-weight: 800;
   cursor: pointer;
 }
 
 .card-btn.picked {
-  background: var(--accent-2);
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 45%, transparent);
 }
 
 .card-btn small {
@@ -597,6 +643,7 @@ h2 {
   top: 3px;
   right: 6px;
   font-size: 0.7rem;
+  color: var(--muted);
 }
 
 .hex {
@@ -604,14 +651,16 @@ h2 {
 }
 
 .hex-cell polygon {
-  fill: var(--panel-2);
-  stroke: var(--line);
-  stroke-width: 2;
+  fill: #15131f;
+  stroke: var(--glass-edge);
+  stroke-width: 1.5;
   cursor: pointer;
 }
 
 .hex-cell.picked polygon {
-  fill: var(--accent);
+  fill: color-mix(in srgb, var(--violet) 45%, #15131f);
+  stroke: var(--violet);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--violet) 60%, transparent));
 }
 
 .hex-cell text {
@@ -642,7 +691,7 @@ h2 {
 .sq {
   border: none;
   border-radius: 6px;
-  background: #262336;
+  background: color-mix(in srgb, var(--silver) 9%, var(--board));
   font-weight: 700;
   font-size: 0.95rem;
   padding: 0;
@@ -650,11 +699,11 @@ h2 {
 }
 
 .sq.dark {
-  background: #1b1926;
+  background: var(--board);
 }
 
 .sq.seen {
-  background: color-mix(in srgb, var(--violet) 28%, var(--panel));
+  background: color-mix(in srgb, var(--violet) 30%, var(--board));
   color: var(--muted);
 }
 
@@ -664,9 +713,12 @@ h2 {
 }
 
 .sq.here {
-  background: var(--accent);
-  color: var(--text);
+  background: color-mix(in srgb, var(--cyan) 26%, var(--board));
+  color: var(--cyan);
   font-size: 1.5rem;
+  box-shadow:
+    inset 0 0 0 1px var(--cyan),
+    0 0 12px color-mix(in srgb, var(--cyan) 45%, transparent);
 }
 
 .sq:disabled {
@@ -675,17 +727,18 @@ h2 {
 
 .magic .sq {
   font-size: 1.3rem;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
 }
 
 .magic .sq.given {
-  color: var(--accent-2);
-  background: var(--panel-2);
+  color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 8%, var(--board));
 }
 
 .magic .sq.here {
-  background: var(--accent);
+  background: color-mix(in srgb, var(--violet) 40%, var(--board));
+  border-color: var(--violet);
   font-size: 1.3rem;
 }
 

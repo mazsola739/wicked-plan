@@ -5,11 +5,11 @@
   width: 34px;
   height: 46px;
   border-radius: 6px;
-  background: #e3e7ef;
-  color: #12111a;
+  background: var(--glass);
+  color: var(--text);
   font-weight: 800;
   font-size: 1.1rem;
-  border: 2px solid transparent;
+  border: 1px solid var(--glass-edge);
 }
 
 .minus-one-card.small {
@@ -23,7 +23,9 @@
 }
 
 .minus-one-card.on {
-  border-color: var(--accent-2);
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 45%, transparent);
 }
 
 .minus-one-seat {
@@ -32,7 +34,8 @@
 }
 
 .list li.minus-one-won {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--cyan);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 45%, transparent);
 }
 
 .minus-one-log {
@@ -55,16 +58,17 @@
 }
 
 .minus-one-hand .card-btn:disabled:not(.picked) {
-  background: #262336;
+  background: var(--panel);
+  border-color: var(--line);
   color: var(--muted);
 }
 
 .minus-one-big {
   min-height: 120px;
   border-radius: 12px;
-  border: 2px solid var(--accent-2);
-  background: #e3e7ef;
-  color: #12111a;
+  border: 2px solid var(--cyan);
+  background: var(--glass);
+  color: var(--text);
   font-size: 3rem;
   font-weight: 800;
   cursor: pointer;

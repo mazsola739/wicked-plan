@@ -17,10 +17,11 @@
 
 .question-and-truth-row.mine span {
   text-align: center;
-  padding: 8px 0;
+  padding: 7px 0;
   border-radius: 8px;
-  background: #e3e7ef;
-  color: #12111a;
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  color: var(--text);
   font-weight: 800;
 }
 
@@ -46,6 +47,7 @@
 
 .question-and-truth-slot.on {
   border: 2px solid var(--accent-2);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent-2) 45%, transparent);
 }
 
 .question-and-truth-menu {
@@ -63,7 +65,7 @@
   display: inline-block;
   min-width: 18px;
   border-radius: 9px;
-  background: #262336;
+  background: var(--line);
   color: var(--accent-2);
   font-size: 0.75rem;
 }

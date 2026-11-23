@@ -63,7 +63,15 @@ export function RaceBar({ view }: { view: RaceView }) {
   );
 }
 
-export const PIECE_COLOURS = ['#e0b53a', '#4f9ad6', '#3aa86b', '#dc2f4f', '#9b6bd6', '#e07b39', '#4cc3b5'];
+export const PIECE_COLOURS = [
+  'var(--g-yellow)',
+  'var(--g-blue)',
+  'var(--g-green)',
+  'var(--g-red)',
+  'var(--g-purple)',
+  'var(--g-orange)',
+  'var(--g-cyan)',
+];
 
 function normalize(cells: Cell[]): Cell[] {
   const mx = Math.min(...cells.map((c) => c[0]));
@@ -89,7 +97,7 @@ function ShapeIcon({ cells, colour, mark }: { cells: Cell[]; colour: string; mar
   return (
     <svg viewBox={`${-(size - w) / 2} ${-(size - h) / 2} ${size} ${size}`} className="pp-icon" aria-hidden="true">
       {cells.map(([x, y]) => (
-        <rect key={`${x},${y}`} x={x + 0.05} y={y + 0.05} width={0.9} height={0.9} rx={0.12} fill={colour} />
+        <rect key={`${x},${y}`} x={x + 0.05} y={y + 0.05} width={0.9} height={0.9} rx={0.12} style={{ fill: colour }} />
       ))}
       {mark && <circle cx={a[0] + 0.5} cy={a[1] + 0.5} r={0.16} className="pp-anchor" />}
     </svg>
@@ -196,7 +204,7 @@ export default function PiecePuzzle({ view: raw }: ScreenProps) {
               >
                 <ShapeIcon
                   cells={sel?.piece === k ? sel.shape : normalize(p.placed ?? p.shape)}
-                  colour={PIECE_COLOURS[k % PIECE_COLOURS.length] ?? '#888'}
+                  colour={PIECE_COLOURS[k % PIECE_COLOURS.length] ?? 'var(--muted)'}
                   mark={sel?.piece === k}
                 />
               </button>

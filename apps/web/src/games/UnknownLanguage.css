@@ -1,6 +1,6 @@
 .ul-wall {
-  background: var(--panel-2);
-  border: 1px solid var(--line);
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
   border-radius: 12px;
   padding: 12px;
 }

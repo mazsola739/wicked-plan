@@ -10,8 +10,8 @@
   position: relative;
   aspect-ratio: 1;
   border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--panel-2);
+  border: 1px solid var(--board-line);
+  background: var(--board);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,13 +33,15 @@
 }
 
 .ab-cell.marked {
-  background: color-mix(in srgb, var(--cyan) 12%, var(--panel));
-  border-color: var(--accent-2);
+  background: color-mix(in srgb, var(--ab-own, var(--seat-0)) 14%, var(--board));
+  border-color: var(--ab-own, var(--seat-0));
 }
 
 .ab-cell.picked {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 0 12px color-mix(in srgb, var(--violet) 45%, transparent);
 }
 
 .ab-shape {
@@ -55,18 +57,18 @@
 }
 
 .ab-s0 {
-  stroke: #6fc3ff;
-  color: #6fc3ff;
+  stroke: var(--g-blue);
+  color: var(--g-blue);
 }
 
 .ab-s1 {
-  stroke: #7ddc8f;
-  color: #7ddc8f;
+  stroke: var(--g-green);
+  color: var(--g-green);
 }
 
 .ab-s2 {
-  stroke: #f0c94a;
-  color: #f0c94a;
+  stroke: var(--g-yellow);
+  color: var(--g-yellow);
 }
 
 .ab-grid.small {
@@ -96,7 +98,7 @@
 }
 
 .ab-counts > div.mine {
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow: 0 0 0 2px var(--seat-0);
 }
 
 .ab-counts svg {

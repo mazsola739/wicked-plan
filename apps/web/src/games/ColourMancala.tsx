@@ -1,7 +1,7 @@
 // Colour Mancala: a ring of pits, stones in three colours; your weakest colour counts.
 // Rules page: docs/games/colour-mancala.md
 
-import { useState } from 'react';
+import { type CSSProperties, useState } from 'react';
 import './ColourMancala.css';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
 
@@ -88,7 +88,7 @@ function Ring({ view }: { view: MancalaView }) {
         const ly = (R + (store ? sr : pr) + 14) * Math.sin(a);
         return (
           // biome-ignore lint/suspicious/noArrayIndexKey: holes are positional
-          <g key={h} className={cls}>
+          <g key={h} className={cls} style={{ '--cm-own': `var(--seat-${seat})` } as CSSProperties}>
             <circle className="cm-base" cx={x} cy={y} r={store ? sr : pr} />
             {store ? (
               <text x={x} y={y} className="cm-store-text">
