@@ -180,6 +180,7 @@ impl Game for Rules {
         GameInfo {
             id: "minus-one",
             kind: "prison",
+            difficulty: "easy",
             min_players: 3,
             max_players: 6,
             name: "Minus One",

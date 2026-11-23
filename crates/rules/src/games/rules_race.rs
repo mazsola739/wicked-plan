@@ -419,6 +419,7 @@ impl Game for Rules {
         GameInfo {
             id: "rules-race",
             kind: "main",
+            difficulty: "medium",
             min_players: 4,
             max_players: 8,
             name: "Rules Race",

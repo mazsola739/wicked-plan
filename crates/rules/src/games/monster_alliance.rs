@@ -308,6 +308,7 @@ impl Game for Rules {
         GameInfo {
             id: "monster-alliance",
             kind: "main",
+            difficulty: "hard",
             min_players: 4,
             max_players: 8,
             name: "Monster Alliance",

@@ -3,6 +3,7 @@ import { nameOf } from './games/common';
 import { SCREENS } from './games/registry';
 import { HowToPlay } from './HowTo';
 import { setPaused, start, stop, usePlay } from './play';
+import { Snapshot } from './Snapshot';
 import type { GameInfo, PlayerResult } from './types';
 
 const KINDS: [string, string][] = [
@@ -33,6 +34,8 @@ export function App() {
   );
 }
 
+const LEVELS = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+
 function seatsText(g: GameInfo): string {
   const seats = Math.max(g.minPlayers, Math.min(4, g.maxPlayers));
   return seats === 1 ? 'Solo' : `You + ${seats - 1} bot${seats > 2 ? 's' : ''}`;
@@ -53,10 +56,14 @@ function Picker({ games }: { games: GameInfo[] }) {
             <h2 className="group-title">{label}</h2>
             <ul className="games">
               {list.map((g) => (
-                <li key={g.id}>
+                <li key={g.id} className={`game-card ${g.difficulty}`}>
+                  <Snapshot id={g.id} />
                   <button type="button" className="game-btn" onClick={() => start(g.id)}>
-                    <strong>{g.name}</strong>
-                    <span>{g.short}</span>
+                    <span className="game-head">
+                      <strong>{g.name}</strong>
+                      <span className="level">{LEVELS[g.difficulty]}</span>
+                    </span>
+                    <span className="game-short">{g.short}</span>
                     <em>{seatsText(g)}</em>
                   </button>
                 </li>

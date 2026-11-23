@@ -124,7 +124,7 @@ h2 {
 
 .btn:active:not(:disabled),
 .key:active:not(:disabled),
-.game-btn:active:not(:disabled),
+.game-card:active,
 .card-btn:active,
 .sq:active:not(:disabled) {
   transform: scale(0.96);
@@ -220,27 +220,97 @@ h2 {
   gap: 8px;
 }
 
+/* A game card: a still preview of the game on top, coloured by difficulty
+   (green easy, yellow medium, red hard); the button covers the whole card. */
+.game-card {
+  --level: var(--accent-2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--level);
+  background: #24202b;
+  overflow: hidden;
+  transition: transform 0.06s;
+}
+
+.game-card.easy {
+  --level: var(--ok);
+}
+
+.game-card.hard {
+  --level: var(--bad);
+}
+
+.game-card:has(.game-btn:focus-visible) {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+.snap {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  pointer-events: none;
+}
+
+.snap-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 16px;
+  transform-origin: top left;
+}
+
+.snap-inner .screen {
+  min-height: 0;
+}
+
 .game-btn {
   width: 100%;
   min-height: 64px;
   text-align: left;
   padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: #24202b;
+  border: none;
+  background: none;
   display: flex;
   flex-direction: column;
   gap: 2px;
   cursor: pointer;
+  outline: none;
 }
 
-.game-btn span {
+.game-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.game-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.level {
+  flex: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--level);
+  background: color-mix(in srgb, var(--level) 18%, transparent);
+}
+
+.game-short {
   color: var(--muted);
   font-size: 0.85rem;
-}
-
-.game-btn:disabled {
-  cursor: default;
 }
 
 /* --- in a game --- */
@@ -607,7 +677,7 @@ h2 {
     filter: brightness(1.2);
   }
 
-  .game-btn:hover:not(:disabled),
+  .game-card:hover,
   .card-btn:hover {
     border-color: var(--accent-2);
   }
@@ -762,4 +832,11 @@ h2 {
   margin-top: 16px;
   opacity: 0.85;
   pointer-events: none;
+}
+
+/* The card already names the game; the picture shows the board. */
+.snap-inner .game-top,
+.snap-inner .timer,
+.snap-inner .key-hint {
+  display: none;
 }

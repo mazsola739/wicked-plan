@@ -1,7 +1,7 @@
 // Time Auction: hold the button to bid time from your bank. Rules: docs/games/time-auction.md
 
-import { useEffect, useRef } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar } from './common';
+import { useContext, useEffect, useRef } from 'react';
+import { GameTop, KeyHint, move, nameOf, Play, PreviewContext, type ScreenProps, TimerBar } from './common';
 import './TimeAuction.css';
 
 type Phase = 'ready' | 'countdown' | 'bidding' | 'result' | 'over';
@@ -56,7 +56,9 @@ export default function TimeAuction({ view }: ScreenProps) {
     if (ref.current.holding) move({ type: 'release' });
   };
   // Desktop: hold Space.
+  const preview = useContext(PreviewContext);
   useEffect(() => {
+    if (preview) return;
     const down = (e: KeyboardEvent) => {
       if (e.code !== 'Space') return;
       e.preventDefault();

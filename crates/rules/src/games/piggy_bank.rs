@@ -287,6 +287,7 @@ impl Game for Rules {
         GameInfo {
             id: "piggy-bank",
             kind: "prison",
+            difficulty: "medium",
             min_players: 3,
             max_players: 6,
             name: "Piggy Bank",

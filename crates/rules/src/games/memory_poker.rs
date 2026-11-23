@@ -232,6 +232,7 @@ impl Game for MemoryPoker {
         GameInfo {
             id: "memory-poker",
             kind: "mini-solo",
+            difficulty: "medium",
             min_players: 1,
             max_players: 4,
             name: "Memory Poker",

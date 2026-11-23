@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 export { move } from '../play';
 
@@ -17,18 +17,23 @@ export function nameOf(id: string): string {
   return BOT_NAMES[(n - 1) % BOT_NAMES.length] ?? id;
 }
 
+/** True inside a picker card's still preview: the screen must not listen to keys. */
+export const PreviewContext = createContext(false);
+
 /** Keyboard shortcuts for desktop; ignored while typing in a field. */
 export function useKeys(handler: (key: string) => boolean | undefined): void {
   const ref = useRef(handler);
   ref.current = handler;
+  const preview = useContext(PreviewContext);
   useEffect(() => {
+    if (preview) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.target instanceof HTMLInputElement) return;
       if (ref.current(e.key)) e.preventDefault();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [preview]);
 }
 
 /** The game layout: header on top; on a wide screen the board sits beside the controls. */

@@ -453,6 +453,7 @@ impl Game for Rules {
         GameInfo {
             id: "fence-building",
             kind: "exile",
+            difficulty: "medium",
             min_players: 1,
             max_players: 4,
             name: "Fence Building",

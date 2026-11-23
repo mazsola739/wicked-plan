@@ -6,7 +6,7 @@ checked 2026-11-22). The genre and mechanics follow The Devil's Plan, but **name
 our own** (working names, open to change); classic board games (mill, gomoku, knight's tour) keep their names.
 
 Types: **Main** (everyone, the day's main game), **Mini team**, **Mini solo**, **Prison** (the losers' game),
-**Hidden** (found and played alone), **Final duel** (one against one). Difficulty and minimum players are estimates.
+**Hidden** (found and played alone), **Final duel** (one against one). Difficulty and minimum players are estimates; the difficulty is also in each game's `GameInfo` and colours its card on the page (green easy, yellow medium, red hard).
 
 Status: ✅ the rules are in `crates/rules/src/games/<id>.rs` and the page plays it (all 51 since 2026-11-23).
 The exact rules of each digital version are on its page in `docs/games/<id>.md`; they adapt the short lines below.
@@ -82,15 +82,15 @@ Eliminated players go to a hidden place. They can come back in two ways: crack t
 the trial, or win the exile matches until day 6. The source names the matches but not their rules yet, so
 these rows are sketches from the names.
 
-| Game | Type | Min. | In short |
+| Game | Difficulty | Min. | In short |
 |---|---|---|---|
-| ✅ Unknown Language | exile, solo | 1 | Decode a made-up picture script (root + part-of-speech mark) and read the place's rules and how to open the trial. |
-| ✅ Magic Square Trial | hidden | 1 | A 7×7 magic square, 1–49, with the 1 given; one hour. (Ours: 3×3, 4×4, 5×5 with a few numbers given.) |
-| ✅ Piece Puzzle | exile | 1 | A tangram-like piece puzzle, as a race. |
-| ✅ Find the Differences | exile | 1 | Spot the differences between two pictures, as a race. |
-| ✅ Secret Code | exile | 1 | Code breaking, as a race. |
-| ✅ Fence Building | exile | 1 | A fence-building logic puzzle, as a race. |
-| ✅ Symmetry Puzzle | exile | 1 | A symmetry puzzle, as a race. |
+| ✅ Unknown Language | hard | 1 | Decode a made-up picture script (root + part-of-speech mark) and read the place's rules and how to open the trial. |
+| ✅ Magic Square Trial | hard | 1 | A 7×7 magic square, 1–49, with the 1 given; one hour. (Ours: 3×3, 4×4, 5×5 with a few numbers given.) |
+| ✅ Piece Puzzle | medium | 1 | A tangram-like piece puzzle, as a race. |
+| ✅ Find the Differences | easy | 1 | Spot the differences between two pictures, as a race. |
+| ✅ Secret Code | medium | 1 | Code breaking, as a race. |
+| ✅ Fence Building | medium | 1 | A fence-building logic puzzle, as a race. |
+| ✅ Symmetry Puzzle | medium | 1 | A symmetry puzzle, as a race. |
 
 ## Final duels
 

@@ -410,6 +410,7 @@ impl Game for Rules {
         GameInfo {
             id: "equation-hi-lo",
             kind: "main",
+            difficulty: "medium",
             min_players: 3,
             max_players: 6,
             name: "Equation Hi-Lo",

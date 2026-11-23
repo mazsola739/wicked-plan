@@ -228,6 +228,7 @@ impl Game for SpinningPuzzleWheel {
         GameInfo {
             id: "spinning-puzzle-wheel",
             kind: "mini-team",
+            difficulty: "medium",
             min_players: 1,
             max_players: 4,
             name: "Spinning Puzzle Wheel",

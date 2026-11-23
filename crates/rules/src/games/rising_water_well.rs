@@ -166,6 +166,7 @@ impl Game for Rules {
         GameInfo {
             id: "rising-water-well",
             kind: "hidden",
+            difficulty: "hard",
             min_players: 1,
             max_players: 1,
             name: "Rising Water Well",

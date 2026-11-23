@@ -27,6 +27,8 @@ pub struct GameInfo {
     pub id: &'static str,
     /// main | mini-solo | mini-team | prison | hidden | exile | final-duel
     pub kind: &'static str,
+    /// easy | medium | hard (docs/games.md); the picker colours the card by it.
+    pub difficulty: &'static str,
     pub min_players: u32,
     pub max_players: u32,
     pub name: &'static str,

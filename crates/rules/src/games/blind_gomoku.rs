@@ -222,6 +222,7 @@ impl Game for BlindGomoku {
         GameInfo {
             id: "blind-gomoku",
             kind: "hidden",
+            difficulty: "hard",
             min_players: 1,
             max_players: 1,
             name: "Blind Gomoku",

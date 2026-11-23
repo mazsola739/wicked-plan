@@ -127,6 +127,7 @@ impl Game for Rules {
         GameInfo {
             id: "metal-cast-puzzle",
             kind: "prison",
+            difficulty: "easy",
             min_players: 1,
             max_players: 1,
             name: "Metal Cast Puzzle",

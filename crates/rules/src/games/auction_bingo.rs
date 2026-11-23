@@ -202,6 +202,7 @@ impl Game for Rules {
         GameInfo {
             id: "auction-bingo",
             kind: "main",
+            difficulty: "medium",
             min_players: 3,
             max_players: 8,
             name: "Auction Bingo",

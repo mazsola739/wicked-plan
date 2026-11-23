@@ -3,6 +3,7 @@
 export interface GameInfo {
   id: string;
   kind: string;
+  difficulty: 'easy' | 'medium' | 'hard';
   minPlayers: number;
   maxPlayers: number;
   name: string;

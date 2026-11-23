@@ -179,6 +179,7 @@ impl Game for Rules {
         GameInfo {
             id: "time-auction",
             kind: "prison",
+            difficulty: "easy",
             min_players: 2,
             max_players: 6,
             name: "Time Auction",

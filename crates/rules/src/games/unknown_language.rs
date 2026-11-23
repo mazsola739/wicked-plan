@@ -444,6 +444,7 @@ impl Game for Rules {
         GameInfo {
             id: "unknown-language",
             kind: "exile",
+            difficulty: "hard",
             min_players: 1,
             max_players: 1,
             name: "Unknown Language",

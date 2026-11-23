@@ -431,6 +431,7 @@ impl Game for Rules {
         GameInfo {
             id: "piece-puzzle",
             kind: "exile",
+            difficulty: "medium",
             min_players: 1,
             max_players: 4,
             name: "Piece Puzzle",

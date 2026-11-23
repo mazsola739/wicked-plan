@@ -226,6 +226,7 @@ impl Game for LayTheGrass {
         GameInfo {
             id: "lay-the-grass",
             kind: "mini-solo",
+            difficulty: "medium",
             min_players: 1,
             max_players: 4,
             name: "Lay the Grass",

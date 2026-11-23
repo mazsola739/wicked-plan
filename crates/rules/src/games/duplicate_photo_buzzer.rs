@@ -234,6 +234,7 @@ impl Game for DuplicatePictureBuzzer {
         GameInfo {
             id: "duplicate-photo-buzzer",
             kind: "mini-team",
+            difficulty: "easy",
             min_players: 1,
             max_players: 4,
             name: "Duplicate Picture Buzzer",

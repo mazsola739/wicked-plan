@@ -60,6 +60,21 @@ export function stop(): void {
   set({ current: null });
 }
 
+const previews = new Map<string, unknown>();
+
+/** The opening view of a game with a fixed seed, for the still preview on its picker card. */
+export function previewView(gameId: string): unknown {
+  if (!previews.has(gameId)) {
+    const g = new LocalGame(gameId, 7);
+    try {
+      previews.set(gameId, JSON.parse(g.view()));
+    } finally {
+      g.free();
+    }
+  }
+  return previews.get(gameId);
+}
+
 /** While paused (the rules are open) no game time passes, so timers and bots wait. */
 export function setPaused(p: boolean): void {
   paused = p;

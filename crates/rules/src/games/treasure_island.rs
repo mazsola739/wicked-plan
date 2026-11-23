@@ -228,6 +228,7 @@ impl Game for TreasureIsland {
         GameInfo {
             id: "treasure-island",
             kind: "main",
+            difficulty: "hard",
             min_players: 3,
             max_players: 6,
             name: "Treasure Island",

@@ -258,6 +258,7 @@ impl Game for Rules {
         GameInfo {
             id: "hidden-rules-race",
             kind: "main",
+            difficulty: "hard",
             min_players: 4,
             max_players: 8,
             name: "Hidden Rules Race",

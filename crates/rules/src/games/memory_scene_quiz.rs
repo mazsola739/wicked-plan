@@ -253,6 +253,7 @@ impl Game for MemorySceneQuiz {
         GameInfo {
             id: "memory-scene-quiz",
             kind: "mini-team",
+            difficulty: "medium",
             min_players: 1,
             max_players: 4,
             name: "Memory Scene Quiz",

@@ -258,6 +258,7 @@ impl Game for Rules {
         GameInfo {
             id: "either-or",
             kind: "main",
+            difficulty: "hard",
             min_players: 3,
             max_players: 8,
             name: "Either Or",

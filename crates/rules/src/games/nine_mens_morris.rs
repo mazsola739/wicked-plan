@@ -332,6 +332,7 @@ impl Game for NineMensMorris {
         GameInfo {
             id: "nine-mens-morris",
             kind: "final-duel",
+            difficulty: "medium",
             min_players: 2,
             max_players: 2,
             name: "Nine Men's Morris",

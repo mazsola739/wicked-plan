@@ -149,6 +149,7 @@ impl Game for BigOrSmall {
         GameInfo {
             id: "big-or-small",
             kind: "final-duel",
+            difficulty: "easy",
             min_players: 2,
             max_players: 2,
             name: "Big or Small",

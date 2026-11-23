@@ -276,6 +276,7 @@ impl Game for TigerAndGoat {
         GameInfo {
             id: "tiger-and-goat",
             kind: "final-duel",
+            difficulty: "hard",
             min_players: 2,
             max_players: 2,
             name: "Tiger and Goat",

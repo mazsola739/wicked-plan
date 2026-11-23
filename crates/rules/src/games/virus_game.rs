@@ -377,6 +377,7 @@ impl Game for Rules {
         GameInfo {
             id: "virus-game",
             kind: "main",
+            difficulty: "hard",
             min_players: 6,
             max_players: 10,
             name: "Virus Game",

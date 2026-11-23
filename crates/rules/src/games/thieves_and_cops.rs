@@ -356,6 +356,7 @@ impl Game for Rules {
         GameInfo {
             id: "thieves-and-cops",
             kind: "main",
+            difficulty: "hard",
             min_players: 4,
             max_players: 8,
             name: "Thieves and Cops",

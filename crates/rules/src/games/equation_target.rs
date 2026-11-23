@@ -119,6 +119,7 @@ crate::quiz_game!(
     GameInfo {
         id: "equation-target",
         kind: "prison",
+        difficulty: "medium",
         min_players: 1,
         max_players: 1,
         name: "Equation Target",

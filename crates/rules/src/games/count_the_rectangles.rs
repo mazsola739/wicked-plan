@@ -136,6 +136,7 @@ crate::quiz_game!(
     GameInfo {
         id: "count-the-rectangles",
         kind: "mini-solo",
+        difficulty: "easy",
         min_players: 1,
         max_players: 1,
         name: "Count the Rectangles",

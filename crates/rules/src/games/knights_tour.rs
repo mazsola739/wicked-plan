@@ -115,6 +115,7 @@ impl Game for KnightsTour {
         GameInfo {
             id: "knights-tour",
             kind: "hidden",
+            difficulty: "hard",
             min_players: 1,
             max_players: 1,
             name: "Knight's Tour",

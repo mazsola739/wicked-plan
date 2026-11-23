@@ -252,6 +252,7 @@ impl Game for QuestionAndTruth {
         GameInfo {
             id: "question-and-truth",
             kind: "final-duel",
+            difficulty: "hard",
             min_players: 2,
             max_players: 2,
             name: "Question and Truth",

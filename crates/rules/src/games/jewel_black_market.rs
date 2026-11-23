@@ -224,6 +224,7 @@ impl Game for Rules {
         GameInfo {
             id: "jewel-black-market",
             kind: "main",
+            difficulty: "medium",
             min_players: 4,
             max_players: 8,
             name: "Jewel Black Market",

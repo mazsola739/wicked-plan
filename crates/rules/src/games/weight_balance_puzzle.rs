@@ -274,6 +274,7 @@ impl Game for WeightBalancePuzzle {
         GameInfo {
             id: "weight-balance-puzzle",
             kind: "mini-team",
+            difficulty: "hard",
             min_players: 1,
             max_players: 2,
             name: "Weight Balance Puzzle",

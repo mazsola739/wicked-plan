@@ -202,6 +202,7 @@ impl Game for Rules {
         GameInfo {
             id: "dice-prediction",
             kind: "prison",
+            difficulty: "medium",
             min_players: 2,
             max_players: 6,
             name: "Dice Prediction",

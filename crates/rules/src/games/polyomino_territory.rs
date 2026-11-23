@@ -368,6 +368,7 @@ impl Game for PolyominoTerritory {
         GameInfo {
             id: "polyomino-territory",
             kind: "main",
+            difficulty: "hard",
             min_players: 2,
             max_players: 4,
             name: "Polyomino Territory",

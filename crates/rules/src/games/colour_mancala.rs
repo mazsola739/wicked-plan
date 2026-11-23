@@ -198,6 +198,7 @@ impl Game for ColourMancala {
         GameInfo {
             id: "colour-mancala",
             kind: "main",
+            difficulty: "hard",
             min_players: 2,
             max_players: 4,
             name: "Colour Mancala",

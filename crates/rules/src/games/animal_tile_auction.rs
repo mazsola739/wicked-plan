@@ -269,6 +269,7 @@ impl Game for Rules {
         GameInfo {
             id: "animal-tile-auction",
             kind: "main",
+            difficulty: "medium",
             min_players: 3,
             max_players: 6,
             name: "Animal Tile Auction",

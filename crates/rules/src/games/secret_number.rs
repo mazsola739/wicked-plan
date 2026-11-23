@@ -246,6 +246,7 @@ impl Game for Rules {
         GameInfo {
             id: "secret-number",
             kind: "main",
+            difficulty: "hard",
             min_players: 4,
             max_players: 8,
             name: "Secret Number",

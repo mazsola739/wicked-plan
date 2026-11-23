@@ -405,6 +405,7 @@ impl Game for WallTerritory {
         GameInfo {
             id: "wall-territory",
             kind: "prison",
+            difficulty: "hard",
             min_players: 2,
             max_players: 3,
             name: "Wall Territory",

@@ -367,6 +367,7 @@ impl Game for Rules {
         GameInfo {
             id: "mystery-stock-market",
             kind: "main",
+            difficulty: "hard",
             min_players: 3,
             max_players: 8,
             name: "Mystery Stock Market",

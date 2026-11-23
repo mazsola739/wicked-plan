@@ -205,6 +205,7 @@ impl Game for HiddenFourthPlayer {
         GameInfo {
             id: "hidden-fourth-player",
             kind: "mini-team",
+            difficulty: "hard",
             min_players: 3,
             max_players: 3,
             name: "Hidden Fourth Player",

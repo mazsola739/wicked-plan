@@ -22,7 +22,15 @@ macro_rules! stub_game {
             type Move = serde_json::Value;
             type View = ();
             fn info() -> $crate::game::GameInfo {
-                $crate::game::GameInfo { id: $id, kind: $kind, min_players: $min, max_players: $max, name: $name, short: "" }
+                $crate::game::GameInfo {
+                    id: $id,
+                    kind: $kind,
+                    difficulty: "",
+                    min_players: $min,
+                    max_players: $max,
+                    name: $name,
+                    short: "",
+                }
             }
             fn setup(_: &[String], _: u64) -> Result<(), String> {
                 Err("Not built yet".into())
@@ -176,6 +184,8 @@ mod tests {
         assert_eq!(ids.len(), all.len());
         let kinds = ["main", "mini-solo", "mini-team", "prison", "hidden", "exile", "final-duel"];
         assert!(all.iter().all(|g| kinds.contains(&g.kind)));
+        let levels = ["easy", "medium", "hard"];
+        assert!(all.iter().all(|g| levels.contains(&g.difficulty)), "every game needs a difficulty");
     }
 
     #[test]

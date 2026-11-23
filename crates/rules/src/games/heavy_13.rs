@@ -234,6 +234,7 @@ impl Game for Rules {
         GameInfo {
             id: "heavy-13",
             kind: "prison",
+            difficulty: "hard",
             min_players: 3,
             max_players: 6,
             name: "Heavy 13",

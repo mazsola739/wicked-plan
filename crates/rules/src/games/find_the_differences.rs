@@ -247,6 +247,7 @@ impl Game for FindTheDifferences {
         GameInfo {
             id: "find-the-differences",
             kind: "exile",
+            difficulty: "easy",
             min_players: 1,
             max_players: 4,
             name: "Find the Differences",

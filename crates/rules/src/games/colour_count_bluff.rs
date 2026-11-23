@@ -195,6 +195,7 @@ impl Game for Rules {
         GameInfo {
             id: "colour-count-bluff",
             kind: "main",
+            difficulty: "medium",
             min_players: 3,
             max_players: 6,
             name: "Colour Count Bluff",

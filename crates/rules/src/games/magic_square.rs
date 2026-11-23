@@ -176,6 +176,7 @@ impl Game for MagicSquare {
         GameInfo {
             id: "magic-square",
             kind: "hidden",
+            difficulty: "hard",
             min_players: 1,
             max_players: 1,
             name: "Magic Square",

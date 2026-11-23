@@ -341,6 +341,7 @@ impl Game for WordBlockTower {
         GameInfo {
             id: "word-block-tower",
             kind: "mini-team",
+            difficulty: "easy",
             min_players: 1,
             max_players: 4,
             name: "Word Block Tower",
