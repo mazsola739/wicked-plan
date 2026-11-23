@@ -2,6 +2,18 @@
 
 Final duel, played solo here. Code: `crates/rules/src/games/hexagon.rs`.
 
+## How to play
+
+**Goal:** remember the board, then find lines that add up to the target in 5 rounds.
+
+- 19 cells in a hexagon hold numbers from 1 to 9. You see them for 30 seconds; tap **Ready** to start sooner.
+- Then the numbers are turned over and the cells show the letters A–S.
+- Each round shows a target, and you have 25 seconds.
+- Tap three neighbouring cells in a straight line, in any of the three directions, whose numbers add up to the target. The order does not matter.
+- Tap **Submit**. A right answer scores 100, plus up to 100 more for speed.
+
+## Rules in detail
+
 - 19 cells in a hexagon (rows of 3, 4, 5, 4, 3) hold numbers 1–9, lettered A–S.
 - **Study:** the numbers are shown for **30 seconds** (or until you tap Ready), then turned over.
 - **5 rounds**, **25 seconds** each: a target is shown; pick **three neighbouring cells in a straight line**

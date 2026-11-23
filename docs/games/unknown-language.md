@@ -2,6 +2,20 @@
 
 Exile game, solo. Code: `crates/rules/src/games/unknown_language.rs`.
 
+## How to play
+
+**Goal:** crack a picture script from a few translated carvings, then read and write it.
+
+- Each word is a root glyph plus a small mark. The mark tells you if the word is a thing, an action or a quality.
+- The same root with another mark is a related word, like "fire", "burns" and "hot".
+- Study the example carvings: they show the word order and which mark means what.
+- There are **9 questions** in three stages. Each one asks you to pick the right translation or the right script out of 4.
+- Stage 1 uses things and actions, stage 2 adds qualities, stage 3 shows known roots with a new mark.
+- You have **75 seconds** per question. A right answer is worth 50, plus up to 50 for speed. Wrong or too slow: 0.
+- Watch for near misses: swapped subject and object, a changed word, or another word order. (Keys 1–4 on desktop.)
+
+## Rules in detail
+
 The walls of the hidden place are covered in a picture script nobody can read. Some carvings come with a
 translation. Work out the script from those examples, then read and write it.
 

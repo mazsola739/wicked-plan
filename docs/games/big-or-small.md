@@ -2,6 +2,21 @@
 
 Final duel, 2 players. Code: `crates/rules/src/games/big_or_small.rs`, screen: `apps/web/src/games/BigOrSmall.tsx`.
 
+## How to play
+
+**Goal:** finish with more chips than your opponent.
+
+- You both hold the cards 1–9 and start with 10 chips. There are 9 rounds.
+- Each round the dealer turns up a card. Then you both choose in secret, within 45 seconds.
+- Tap one of your cards to play face down. Each card can be played only once.
+- Bet on your **opponent's** card against the dealer's: tap **Smaller**, **Equal ×2** or **Bigger**.
+- Pick a stake of 1–3 chips, then tap **Play**.
+- When both have chosen, the cards are shown. A right bet wins its stake (equal pays double); a wrong bet loses it.
+- If time runs out, a choice is made for you.
+- Tip: count the cards your opponent has already played; the last rounds can be worked out.
+
+## Rules in detail
+
 - Each player holds the cards **1–9** (both hands are the same and known to both). Each starts with **10 chips**.
 - **9 rounds.** Each round the dealer turns up a card from its own shuffled 1–9 deck.
 - Both players then decide at the same time, in secret:

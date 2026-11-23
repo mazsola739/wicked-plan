@@ -2,6 +2,20 @@
 
 Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/dice_prediction.rs`.
 
+## How to play
+
+**Goal:** guess where your own hand will rank at the table each round.
+
+- There are 6 rounds. Each round you get three dice: an open die everyone sees, a secret die only you see, and a blind die everyone sees except you.
+- First tap **Keep** or **Reroll secret** (15 seconds). You may reroll once; others see that you rerolled, not the result.
+- Then tap the rank you expect your hand to have, 1 being the best (15 seconds).
+- Hands, best first: triple, straight (three values in a row), pair, nothing. Equal kinds compare the sum.
+- An exact prediction scores 3, off by one scores 1, and the best hand of the round scores 1 more.
+- Timeouts: you keep, and you predict the middle rank.
+- Tip: you can see everyone's blind dice, but not your own.
+
+## Rules in detail
+
 - **6 rounds.** Each round everyone rolls three dice:
   - the **open die**: everyone sees it;
   - the **secret die**: only you see it;

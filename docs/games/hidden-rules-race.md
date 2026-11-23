@@ -2,6 +2,19 @@
 
 Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/src/games/hidden_rules_race.rs`.
 
+## How to play
+
+**Goal:** get your piece closest to the goal in the centre of the board.
+
+- The 7×7 board has squares in five colours. Each colour has its own secret movement rule: step one, step two, backwards, turn right, or turn left.
+- Each round, tap a direction (up, right, down or left) in secret within 20 seconds. Then all pieces move at once. If you don't choose, your piece stays.
+- The rule used is the one of the square your piece starts on. A move off the board does not happen.
+- Watch the last round's log: every piece's colour, direction and result is a clue. Tap a colour to note your guess.
+- After rounds 6, 12 and 18, one rule is revealed to everyone.
+- The race ends when a piece reaches the goal, or after 30 rounds. The closer to the goal, the better your place.
+
+## Rules in detail
+
 Everyone races a cube piece over a 7×7 board of coloured squares to the **goal in the centre**. How
 a piece moves depends on the colour of the square it stands on, and those **movement rules are secret**:
 you work them out from what happens to everyone's pieces.

@@ -2,6 +2,20 @@
 
 Final duel, 2 players. Code: `crates/rules/src/games/tiger_and_goat.rs`, screen: `apps/web/src/games/TigerAndGoat.tsx`.
 
+## How to play
+
+**Goal:** score more points than your opponent over two boards: you are the tigers on board A and the goats on board B.
+
+- Each board has 4 tigers in the corners and 20 goats waiting in hand. Goats move first.
+- Goats: tap an empty point to place a goat. Once all 20 are placed, slide a goat one step along a line.
+- Tigers: slide one step, or jump over a goat to the empty point right behind it to capture it.
+- Tigers win a board with **5 captures**; goats win by leaving the tigers no move.
+- Every step you make one move. Switch boards with the board buttons, tap a piece, then where it goes.
+- You have **60 seconds** per step, or a move is made for you.
+- Points: as tigers 50 per capture and +250 for a win; as goats 50 per capture short of 5 and +250 for a win.
+
+## Rules in detail
+
 The classic hunt game, played on **two boards at once**: on board A you are the **tigers** and the opponent
 the goats; on board B the sides are swapped. Both players play the same boards, so the results compare
 directly.

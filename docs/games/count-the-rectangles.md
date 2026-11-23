@@ -2,6 +2,19 @@
 
 Mini solo. Code: `crates/rules/src/games/count_the_rectangles.rs`.
 
+## How to play
+
+**Goal:** count every rectangle in each figure, fast and right.
+
+- There are 5 rounds of 30 seconds each.
+- Each round shows a figure of straight lines. Type how many rectangles it draws and tap **OK**.
+- Squares count, and so does the outer frame.
+- A rectangle counts only when all four sides are drawn along their full length. Watch the shorter lines.
+- A right answer scores 100, plus up to 100 more for speed. A wrong answer or a timeout scores 0.
+- The figures get more lines each round.
+
+## Rules in detail
+
 - **5 rounds**, **30 seconds** each. Each round shows a figure of straight lines; count every rectangle its
   lines draw. Squares count, and so does the outer frame.
 - A rectangle counts only when all four sides are drawn along their full length.

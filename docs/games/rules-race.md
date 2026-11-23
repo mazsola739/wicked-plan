@@ -2,6 +2,19 @@
 
 Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/src/games/rules_race.rs`.
 
+## How to play
+
+**Goal:** be the first to reach square 18, or be furthest ahead after 15 rounds.
+
+- At the start, pick one condition and one effect, then tap **Write my secret rule** (40 s). Your rule fires whenever another player's roll meets the condition, and it stays secret until it first fires.
+- On your turn, tap **Roll the die** (12 s, or it rolls itself). The die has 1, 2, 3, 3, prison and escape.
+- Numbers move you forward. Prison locks your piece unless you hold an escape card; escape gives you a card.
+- In prison you skip turns until you roll escape or have sat out two turns.
+- Group rules, such as **Bump**, apply to everyone. After every 3rd round, vote to switch one on or off, or tap **Keep them all** (20 s).
+- Tip: a well-chosen rule can push rivals back or send them to prison.
+
+## Rules in detail
+
 A race along a track of squares 0–18. Everyone writes one secret **personal rule** at the start; the
 **group rules** can be changed by vote. The first piece on square 18 wins.
 

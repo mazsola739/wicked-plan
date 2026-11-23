@@ -2,6 +2,21 @@
 
 Main game, 3–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/auction_bingo.rs`.
 
+## How to play
+
+**Goal:** mark the most lines on your secret 3×3 bingo board.
+
+- Your board holds 3 circles, 3 triangles and 3 stars. You start with 20 coins.
+- There are 7 rounds. First tap an empty cell (20 seconds): you go for its shape this round.
+- You then see how many players picked each shape, but not who.
+- Next set a bid and tap **Bid** (20 seconds). Bids are secret.
+- For each shape, the single highest bidder among those who picked it pays and marks the cell. A tie: nobody wins that shape. Losers keep their coins.
+- No pick means a random empty cell; no bid means 0.
+- You score 5 per completed line (rows, columns, diagonals), 1 per marked cell and 1 per 5 coins left.
+- Tip: if few others picked your shape, a small bid may be enough.
+
+## Rules in detail
+
 - Everyone has their own **3×3 bingo board**: 3 circles, 3 triangles and 3 stars in a random layout,
   and **20 coins**. Boards and coins are secret.
 - **7 rounds**, each in two secret, simultaneous steps:

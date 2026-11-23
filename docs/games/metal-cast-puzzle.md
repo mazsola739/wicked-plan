@@ -3,6 +3,20 @@
 Prison game, solo; our digital take on a cast-metal disentanglement puzzle. Code:
 `crates/rules/src/games/metal_cast_puzzle.rs`.
 
+## How to play
+
+**Goal:** slide every ring off the metal loop in as few moves as you can.
+
+- Tap a ring, or its number button, to slide it on or off.
+- **Ring 1 can always move.** Any other ring can move only when the ring just below it is **on** and every ring below that one is **off**.
+- If a ring is blocked it doesn't move, and this costs you nothing.
+- There are three levels: 4 rings in **3 minutes**, 5 in **4 minutes** and 6 in **6 minutes**.
+- A solved level is worth **150, 250 or 400** points. You get the full amount for the fewest possible moves, and less for each extra move. You also get 1 point for every 2 seconds left.
+- **Reset level** puts the rings back to the start, but your moves still count.
+- **Give up**, or run out of time, and the level scores 0.
+
+## Rules in detail
+
 The puzzle is a row of rings hanging on a long metal loop (the "linked rings" family of puzzles).
 Ring 1 sits at the free end of the loop, the highest ring at the handle.
 

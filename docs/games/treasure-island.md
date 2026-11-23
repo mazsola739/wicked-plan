@@ -2,6 +2,19 @@
 
 Main game, 3–6 players (on the page: you + 3 bots). Code: `crates/rules/src/games/treasure_island.rs`.
 
+## How to play
+
+**Goal:** dig as close to the hidden treasure as you can, and keep as many coins as you can.
+
+- The island is a 9 × 9 grid. You start with **100 coins** and one private clue box only you can see.
+- An opened box shows an arrow pointing toward the treasure. Squares that still fit your arrows are lit.
+- **5 auctions:** each one offers a box. Set your bid with the buttons and tap **Bid**; you have **20 seconds**. The highest bid pays and sees the arrow; tied top bids all pay and all see it.
+- Then tap a square and **Dig**, once only, within **30 seconds**.
+- Dig points by distance (a diagonal step counts as one): **exact 500, one step 300, two 150, three 50**, farther 0.
+- Your score is your dig points **plus the coins you kept**, so don't overpay for clues.
+
+## Rules in detail
+
 - **The island:** a 9 × 9 grid (81 squares). The **treasure** is buried on one secret square.
 - **Clue boxes** stand on other squares. Opening a box shows an **arrow**: the direction from the box
   towards the treasure, one of 8 (straight north / south / east / west only when the treasure is in the

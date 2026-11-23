@@ -3,6 +3,20 @@
 Mini team game, 3 players (you and two bots). Code: `crates/rules/src/games/hidden_fourth_player.rs`,
 screen: `apps/web/src/games/HiddenFourthPlayer.tsx`.
 
+## How to play
+
+**Goal:** make your own lines of three, while the team stops the Shadow from making one.
+
+- You and two bots play on a 7×7 board, each in your own colour. The Shadow, run by the game, plays too.
+- Each round you place a stone first, then each bot, then the Shadow. Tap an empty square. You have 30 seconds, or the stone is placed for you.
+- Three of one colour in a row (across, down or diagonal) is a line. Four in a row counts as 2 lines.
+- If the Shadow makes a line, the game ends at once.
+- If the board fills with no Shadow line, the team survives: everyone gets 100, plus 100 per own line, plus a 300 bonus.
+- If the Shadow wins, everyone gets 100 plus only 50 per own line.
+- **Tip:** blocking pays more than your own lines. Squares where the Shadow could finish a line are marked as danger.
+
+## Rules in detail
+
 Three players play three-in-a-row on one board, each in their own colour, against a fourth player nobody
 controls: **the Shadow**, run by the rules. Its plan is unknown; all you see is where it plays.
 

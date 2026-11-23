@@ -2,6 +2,20 @@
 
 Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/sniper_holdem.rs`.
 
+## How to play
+
+**Goal:** finish 6 hands of poker with the most chips.
+
+- You start with 25 chips and pay 1 chip each hand. You get 2 private cards, and 4 shared cards lie face up. Your hand is the best five of your six cards.
+- There is one betting round (15 s a turn): **Check** or **Call**, **Raise +2**, or **Fold**.
+- Then everyone still in secretly snipes one hand rank, or taps **No snipe** (15 s).
+- Every hand whose rank anyone sniped is knocked out, even by your own snipe. The best hand left wins the pot.
+- If every hand is knocked out, the pot carries over to the next hand.
+- Tip: snipe the rank you fear will beat you, not your own.
+- If time runs out while betting, you check, or fold when there is a bet to call.
+
+## Rules in detail
+
 - **Deck:** 40 cards, values **1–10** in four colours (red, blue, green, gold).
 - Everyone starts with **25 chips**. **6 hands**; the game ends earlier when only one player has chips.
 - **Each hand:** everyone with chips pays an **ante of 1**. Each gets **2 private cards**; **4 shared cards**

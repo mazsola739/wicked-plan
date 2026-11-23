@@ -2,6 +2,20 @@
 
 Final duel, 2 players. Code: `crates/rules/src/games/nine_mens_morris.rs`, screen: `apps/web/src/games/NineMensMorris.tsx`.
 
+## How to play
+
+**Goal:** bring your opponent down to 2 pieces, or leave them with no move.
+
+- You each have **9 pieces**, and you move first.
+- **Placing:** on each turn, tap an empty point to put a piece there, until your pieces are all on the board.
+- **Moving:** then, on each turn, tap one of your pieces and then a neighbouring empty point along a line.
+- **Flying:** when you are down to 3 pieces, a piece can jump to any empty point.
+- **Mill:** three of your pieces in a row along a line. Making a mill lets you tap one glowing enemy piece to remove it.
+- You have **60 seconds** a turn. If the time runs out, a bot plays your turn for you.
+- Points: **100 + 50** for each piece you still have, plus **400** for a win. A draw gives each player **150** extra.
+
+## Rules in detail
+
 The classic mill game on 24 points (three nested squares joined at the middles of their sides).
 
 - Each player has **9 pieces**. The first seat (you on the page) moves first.

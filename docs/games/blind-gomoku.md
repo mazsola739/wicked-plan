@@ -2,6 +2,19 @@
 
 Hidden game, solo against the house bot (1 seat). Code: `crates/rules/src/games/blind_gomoku.rs`.
 
+## How to play
+
+**Goal:** get five or more of your dark tiles in a row before the bot does.
+
+- The board is 9×9. You play dark and move first; the bot plays light.
+- On your turn, tap an empty square, then tap it again (or tap **Place**) to put your tile there.
+- Rows count across, down or diagonally, and are checked after every move.
+- **The catch:** only the newest tile shows its colour. Every older tile is face down, so you must remember which squares are yours.
+- Tap **Peek** to see every tile face up for 3 seconds. You have two peeks per game.
+- Winning fast scores more; each peek used costs 100 points. A full board is a draw.
+
+## Rules in detail
+
 - A **9×9** board. You play the dark tiles and move first; the bot plays the light tiles.
 - Take turns placing one tile on an empty square. **Five or more in a row** (across, down or diagonal)
   of one colour wins; the rules check this after every move, so you can also win without noticing.

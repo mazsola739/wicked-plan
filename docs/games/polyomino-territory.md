@@ -3,6 +3,20 @@
 Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/games/polyomino_territory.rs`.
 Our short version of the 30 × 30 original: a **14 × 14** board.
 
+## How to play
+
+**Goal:** own the most squares on the 14 × 14 board.
+
+- You start with one square in a corner and hold 3 pieces. After each placement you draw a new one.
+- On your turn, pick a piece, use **↻ Turn** or **⇋ Flip**, tap the board to put it there, then tap **Place**.
+- A piece must cover empty squares and touch your own squares edge to edge.
+- Cover a **⟳ Encore** square and you place again at once.
+- Cover a **↗ Leap** square to earn a leap. Tap **↗ Leap** before placing, and that piece may go anywhere empty.
+- You have 30 seconds a turn; then a move is made for you. If you cannot place any piece, you are skipped.
+- The game ends when nobody can place, or after 40 turns each. Every square you own is worth 10 points; the highest score wins.
+
+## Rules in detail
+
 - **Start:** every player owns one start square: the corners (with 3 players: two top corners and the
   middle of the bottom edge).
 - **Hand:** everyone holds **3 pieces** (polyominoes of 1–5 squares, drawn at random from 17 shapes) and

@@ -18,6 +18,7 @@ export interface PlayState {
 let state: PlayState = { ready: false, games: [], current: null, error: null };
 let game: LocalGame | null = null;
 let timer: ReturnType<typeof setInterval> | undefined;
+let paused = false;
 const listeners = new Set<() => void>();
 
 function set(patch: Partial<PlayState>): void {
@@ -46,7 +47,7 @@ export function start(gameId: string): void {
   let last = performance.now();
   timer = setInterval(() => {
     const now = performance.now();
-    game?.tick(Math.round(now - last));
+    if (!paused) game?.tick(Math.round(now - last));
     last = now;
     refresh();
   }, TICK_MS);
@@ -57,6 +58,11 @@ export function stop(): void {
   game?.free();
   game = null;
   set({ current: null });
+}
+
+/** While paused (the rules are open) no game time passes, so timers and bots wait. */
+export function setPaused(p: boolean): void {
+  paused = p;
 }
 
 /** Sends one of your moves; a refused move shows its reason for a moment. */

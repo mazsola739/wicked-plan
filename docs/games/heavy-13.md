@@ -2,6 +2,20 @@
 
 Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/heavy_13.rs`.
 
+## How to play
+
+**Goal:** score the most points over 10 rounds by adding rocks to the stacks without overloading them.
+
+- There are four coloured stacks: red, blue, green and gold. Each holds 13 at most.
+- You get 8 cards (values 1–6), 1 rainbow chip and 2 passes. Each round everyone plays one card or passes, in secret and at the same time, within 20 seconds.
+- Tap a card, then **Play on its colour** or tap its stack. Once a game, the rainbow chip lets you tap any other stack instead. Or tap **Pass**.
+- Every card you play scores its value at once.
+- If a stack goes over 13, everyone who added to it this round loses twice their card's value, and the stack is emptied.
+- If a stack hits exactly 13, everyone who added to it gets +3, and it is emptied.
+- If time runs out, you pass if you can, otherwise your lowest card goes on its own colour.
+
+## Rules in detail
+
 - Four coloured **stacks** of rocks (red, blue, green, gold) start empty. A stack holds **13** at most.
 - **Cards:** values **1–6** in the four colours, two of each (48 cards). Everyone is dealt **8 cards**,
   and gets **1 rainbow chip** and **2 passes**. **10 rounds** — exactly one card or pass a round.

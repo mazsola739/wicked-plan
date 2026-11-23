@@ -2,6 +2,19 @@
 
 Final duel, 2 players. Code: `crates/rules/src/games/question_and_truth.rs`, screen: `apps/web/src/games/QuestionAndTruth.tsx`.
 
+## How to play
+
+**Goal:** work out your opponent's secret row of the cards 1–8 before they work out yours.
+
+- You each have a secret row of the cards 1–8 in random order, and 10 tokens. You see only your own row.
+- On your turn, ask one question about their row and pay its cost: the card at a position or where a card is (3 tokens), the sum of two positions (2), or a yes/no question (1).
+- Pick a question, tap the numbers it needs, then tap the ask button. Every answer is true.
+- Build your guess by tapping a slot, then a card. Tap **Final guess**, then tap again to confirm. After that you ask no more questions.
+- With no tokens left, you can only guess. You have 60 seconds a turn, or the bot plays it for you.
+- You score 100 per right position, +100 for the whole row, and 10 per token left when you guessed. More points wins.
+
+## Rules in detail
+
 - Each player gets a secret row of the cards **1–8** in a random order (positions 1–8, left to right).
   You see your own row; the goal is to work out the opponent's.
 - Each player has **10 tokens**. Players take turns (the first seat starts). On your turn either **ask one

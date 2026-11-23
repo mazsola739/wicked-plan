@@ -2,6 +2,19 @@
 
 Main game, 4–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/secret_number.rs`.
 
+## How to play
+
+**Goal:** guess the other players' secret numbers while keeping yours hidden.
+
+- Everyone has a different secret number from 1 to 100. There are 5 rounds.
+- **Trade (20 s):** tap a player to swap clues, or tap **Skip the trade**. You learn something about their number, and they learn the same kind of thing about yours.
+- **Guess (25 s):** tap a player and type their number on the keypad, or tap **Pass**.
+- A right guess scores +50, costs them 30, and shows their number to everyone.
+- A wrong guess costs you 5, but tells you whether their number is higher or lower.
+- No answer in time means skip or pass. At the end, everyone whose number was never shown scores +40. The highest total wins.
+
+## Rules in detail
+
 - Everyone gets a **different secret number from 1 to 100**.
 - **5 rounds**, each in two secret, simultaneous steps:
   1. **Trade** (20 s): pick another player, or skip. A trade is a swap of clues: **you get a clue about

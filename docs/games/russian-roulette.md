@@ -3,6 +3,20 @@
 Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/russian_roulette.rs`.
 No gore: the drum holds **paint charges**; a hit costs a life, and a player with no lives is out.
 
+## How to play
+
+**Goal:** keep your lives longer than everyone else at the table.
+
+- A drum has 6 chambers, 2 of them charged with paint. You start with 2 lives and 16 credits; only you see your credits.
+- On your turn (20 s) you may spend credits first, then you must tap **Pull**. A charged chamber costs you a life.
+- **Peek (3)** shows you alone whether the next chamber is charged.
+- **Spin (2)** turns the drum to a random chamber; everyone sees it.
+- **Tamper (4)** secretly moves the drum one chamber on without firing.
+- When time runs out, you pull. When both charges are spent, the drum is reloaded.
+- The game ends when one player has lives left, or after 6 pulls each. Most lives wins; equal lives go to more credits left.
+
+## Rules in detail
+
 - **The drum** has **6 chambers**, **2 of them charged**, in secret places. It turns one chamber after
   every pull. When both charges are spent it is **reloaded** (new secret places; everyone sees that).
 - Everyone starts with **2 lives** and **16 credits**. Credits are secret: only you see yours.

@@ -2,6 +2,19 @@
 
 Exile game, a race for 1–4 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/symmetry_puzzle.rs`.
 
+## How to play
+
+**Goal:** finish each figure so it is a perfect mirror image, before the other racers.
+
+- A coloured figure should be symmetric about the marked axis, but some cells are missing. The given cells are fixed.
+- Pick a colour, then tap cells to paint them. Tap a cell in the same colour again (or use the eraser ⌫) to clear it.
+- Paint exactly what the mirror needs: the right colour in every cell and no extra cells. There is no check button; the round ends the moment it is right.
+- **Three rounds:** a vertical axis (1.5 min), a diagonal axis (2 min), then both a vertical and a horizontal axis (3 min).
+- Points by finishing place: **200, 140, 90, 60**, plus 1 point for every 2 seconds left. Not finished: 0.
+- Stuck? **Give up this round** and wait for the next one.
+
+## Rules in detail
+
 A coloured figure on a grid should be symmetric about the marked axis (or axes), but parts of it are
 missing. Paint the missing cells so the figure becomes symmetric.
 

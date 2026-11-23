@@ -2,6 +2,19 @@
 
 Exile game, a race: 1–4 seats (the page: you + 3 bots). Code: `crates/rules/src/games/secret_code.rs`.
 
+## How to play
+
+**Goal:** crack the hidden code of four dice in as few guesses as you can.
+
+- Each die shows 1–6, and faces may repeat. The total of the pips is shown from the start.
+- There are 3 codes, with 2 minutes and at most 8 guesses each. Everyone races on the same code.
+- Tap four dice faces, then tap **Guess**. Tap a die in your entry to remove it.
+- Each answer shows **exact** (right face, right place) and **near** (right face, wrong place).
+- A solved code scores 60 + 25 × (9 − guesses used): 260 for one guess, 85 for eight. The fastest solver gets +50. Unsolved: 0.
+- After you solve the code or use all 8 guesses, the code is shown. Tap **Next code** to go on sooner.
+
+## Rules in detail
+
 - Under the cup lie **four dice** in a row; the code is their faces (1–6, faces may repeat).
 - **Our twist:** the **total of the pips** is shown from the start.
 - Everyone races on the **same code**. **3 codes**, **2 minutes** each, at most **8 guesses** per code.

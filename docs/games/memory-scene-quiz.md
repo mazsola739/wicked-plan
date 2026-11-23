@@ -3,6 +3,20 @@
 Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 `crates/rules/src/games/memory_scene_quiz.rs`.
 
+## How to play
+
+**Goal:** remember a scene well enough that your team answers all 10 questions about it correctly.
+
+- The scene has 8 objects in a grid. Each object has a shape, a colour and a count of 1 to 3 copies.
+- You study it for **30 seconds**, or until everyone taps **Ready**. Then it disappears.
+- Next come **10 questions** with 4 answers each. They go round the team: you, then each teammate, then you again.
+- When it's your question, tap one of the four answers. You have **15 seconds**.
+- Questions ask about colours, shapes, counts, positions, and which object was not in the scene.
+- **One wrong answer, or running out of time, ends the game for the whole team.**
+- Every right answer earns the team **100 points** (all ten: 1000), and everyone gets the team's score.
+
+## Rules in detail
+
 - **Scene:** a 4 × 3 grid with **8 objects**. Each object has a **shape** (circle, square, triangle, star,
   heart, moon), a **colour** (red, blue, green, yellow, purple) and a **count** (1–3 copies in its cell).
 - **Study:** everyone sees the scene for **30 seconds**; it ends early when every player taps Ready.

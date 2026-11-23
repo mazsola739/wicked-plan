@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { nameOf } from './games/common';
 import { SCREENS } from './games/registry';
-import { start, stop, usePlay } from './play';
+import { HowToPlay } from './HowTo';
+import { setPaused, start, stop, usePlay } from './play';
 import type { GameInfo, PlayerResult } from './types';
 
 const KINDS: [string, string][] = [
@@ -67,15 +69,64 @@ function Picker({ games }: { games: GameInfo[] }) {
   );
 }
 
+// The rules open by themselves the first time a game is played on this browser.
+// Storage may be blocked; then the rules just open every time.
+function seen(id: string): boolean {
+  try {
+    return localStorage.getItem(`wp-seen-${id}`) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markSeen(id: string): void {
+  try {
+    localStorage.setItem(`wp-seen-${id}`, '1');
+  } catch {}
+}
+
 function GameView({ info, view, results }: { info: GameInfo; view: unknown; results: PlayerResult[] | null }) {
   const Screen = SCREENS[info.id];
+  const [rules, setRules] = useState(() => !seen(info.id));
+  useEffect(() => markSeen(info.id), [info.id]);
+  useEffect(() => {
+    setPaused(rules);
+    return () => setPaused(false);
+  }, [rules]);
   return (
     <div className="screen">
       <nav className="game-nav">
         <button type="button" className="btn small ghost" onClick={stop}>
           ← Games
         </button>
+        {!rules && (
+          <button type="button" className="btn small ghost" onClick={() => setRules(true)}>
+            How to play
+          </button>
+        )}
       </nav>
+      {rules ? (
+        <HowToPlay id={info.id} name={info.name} onClose={() => setRules(false)} />
+      ) : (
+        <Board info={info} view={view} results={results} Screen={Screen} />
+      )}
+    </div>
+  );
+}
+
+function Board({
+  info,
+  view,
+  results,
+  Screen,
+}: {
+  info: GameInfo;
+  view: unknown;
+  results: PlayerResult[] | null;
+  Screen: (typeof SCREENS)[string] | undefined;
+}) {
+  return (
+    <>
       {results && <Results info={info} results={results} />}
       {/* After the end the final view stays below the results, so reveals (true weights, roles…) can be read. */}
       {view && Screen ? (
@@ -85,7 +136,7 @@ function GameView({ info, view, results }: { info: GameInfo; view: unknown; resu
       ) : (
         !results && <p className="muted center">Loading…</p>
       )}
-    </div>
+    </>
   );
 }
 

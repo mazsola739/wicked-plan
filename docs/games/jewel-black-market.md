@@ -2,6 +2,20 @@
 
 Main game, 4–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/jewel_black_market.rs`.
 
+## How to play
+
+**Goal:** score the most over 3 rounds by ending each round with a good card.
+
+- Each round you get one hidden card. Three cards lie face down in the buyer's space and one in the discard.
+- Jewels: Diamond 5 and 6, Gold 4 and 5, Silver 2, 3, 4, Bronze 1, 1, 2, 2. Bombs: −6 and −4.
+- There are two swap rounds. On your turn (20 seconds), tap **Keep my card**, tap a player to swap with them, or tap a buyer card or the **Discard** to swap with it.
+- If you hold a bomb, you must swap it with a player.
+- At the end of the round a jewel scores its value times the number of same-type jewels in the buyer's space (none there: 0). A bomb costs its value.
+- Others only see who swapped with whom, so remember what you saw.
+- If time runs out, you keep your card, and a bomb goes to the next seat.
+
+## Rules in detail
+
 - **13 cards:** Diamond 5, 6 · Gold 4, 5 · Silver 2, 3, 4 · Bronze 1, 1, 2, 2 · Bomb −6, −4.
 - **3 rounds.** Each round the cards are shuffled: every seat gets **one hidden card**, **3 go face down
   to the buyer's space**, **1 face down to the discard**; the rest are set aside unseen.

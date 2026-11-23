@@ -2,6 +2,20 @@
 
 Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/piggy_bank.rs`.
 
+## How to play
+
+**Goal:** lose as few points as possible while a piggy bank of coins goes round the table.
+
+- There are 6 rounds. Each round counts one colour, white or black, and starts with an empty bank.
+- Holding the bank, add 1 or 2 coins with **+ White** and **+ Black**, then tap **Drop and pass** (15 s). Others see how many coins, not their colours.
+- When the bank reaches you, you see the coins just dropped. Claim how many coins of the round's colour are inside in total (20 s).
+- Everyone else taps **Trust** or **Doubt!** (10 s; no answer means trust).
+- If anyone doubts, the bank opens. A right claim costs every doubter a point; a wrong one costs the claimer a point.
+- If nobody doubts, the claimer drops coins next. A bank of 10 or more coins opens anyway; a wrong claim costs the claimer a point.
+- Tip: an honest claim is the last claim plus what you saw. The fewest points lost wins.
+
+## Rules in detail
+
 - A piggy bank goes round the table. Coins are **white** or **black**; there are always enough.
 - **6 rounds.** Each round has a **colour** (white and black take turns, the first one at random) and
   starts with an empty bank.

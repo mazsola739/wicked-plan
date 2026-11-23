@@ -2,6 +2,19 @@
 
 Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/src/games/thieves_and_cops.rs`.
 
+## How to play
+
+**Goal:** as a thief, collect hidden pieces without getting caught; as police, catch the thieves. One officer is secretly corrupt and helps the thieves.
+
+- Everyone knows who the thieves are. Thieves and the corrupt officer know where the pieces are and always see the thieves.
+- Each of the **12 rounds**, everyone moves at once: tap a lit station to move one stop, or **Stay**. No choice in **20 seconds** means you stay.
+- An honest officer catches a thief by ending on the same station, or by passing them on the same stretch of line.
+- Thieves take pieces by stepping on them. Honest police see the thieves only after rounds 2, 4, 6, 8 and 10, or where a piece is taken.
+- The thieves' side wins by keeping **5 pieces**; otherwise the police win.
+- At the end the police vote on who is corrupt. Unmasking them costs the corrupt officer 300 and gives each honest officer 100.
+
+## Rules in detail
+
 Thieves sneak around a metro map collecting hidden pieces; the police hunt them. One police officer
 is secretly **corrupt** and works for the thieves.
 

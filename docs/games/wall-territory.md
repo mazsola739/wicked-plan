@@ -3,6 +3,19 @@
 Prison game, 2–3 players (the page plays 3: you and two bots). Code: `crates/rules/src/games/wall_territory.rs`,
 screen: `apps/web/src/games/WallTerritory.tsx`.
 
+## How to play
+
+**Goal:** wall off the biggest area of the 7×7 board for your own two pieces.
+
+- Players take turns. On your turn, tap one of your pieces, then tap where it goes: 0, 1 or 2 squares straight, turning allowed, never through walls or pieces.
+- Then build a wall on one side of the square it stands on: tap **Top**, **Right**, **Bottom** or **Left**. Walls never come down, and you can't build on the board edge.
+- Once no other player's piece can reach your pieces' area, you are **sealed in** and skip your turns.
+- The game ends when everyone is sealed in.
+- Your score is **100 + 20 per square** of the areas holding only your pieces. Most area wins.
+- You have **60 seconds** per turn, or a move is made for you.
+
+## Rules in detail
+
 - A **7×7** board of squares. Each player has **2 pieces** on fixed start squares (which start set a seat
   gets is dealt by the seed):
   - set A: (1,1) and (5,5); set B: (5,1) and (1,5); set C (3 players only): (3,0) and (3,6) — x, y from the

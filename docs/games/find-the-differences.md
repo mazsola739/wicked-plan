@@ -2,6 +2,18 @@
 
 Exile game, a race: 1–4 seats (the page: you + 3 bots). Code: `crates/rules/src/games/find_the_differences.rs`.
 
+## How to play
+
+**Goal:** find every difference between the two pictures before the bots do.
+
+- 3 rounds of 60 seconds. The right picture has 5, 6 and 7 differences in rounds 1–3.
+- A difference is a shape in another colour, another kind of shape, another size, or a missing shape.
+- Tap the difference in either picture. A find scores +30, but a tap on nothing costs 10, so don't tap wildly.
+- Find them all for a race bonus: +100 if you are first, +50 second, +25 third.
+- When you have found them all or time runs out, every difference is circled for 4 seconds. Tap **Next pictures** (or **Finish** after the last round) to go on sooner.
+
+## Rules in detail
+
 - Two pictures drawn from the seed: about 14 shapes (circle, square, triangle, star, diamond, hexagon)
   in 8 colours on a coloured ground. The right picture has **5, 6 and 7 differences** in rounds 1–3:
   a shape in another **colour**, another **kind** of shape, another **size**, or **missing**.

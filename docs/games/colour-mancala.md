@@ -2,6 +2,20 @@
 
 Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/games/colour_mancala.rs`.
 
+## How to play
+
+**Goal:** fill your store with stones, balancing all three colours.
+
+- The board is a ring. You own a row of 5 pits and a store; each pit starts with 4 stones in red, green and blue.
+- On your turn, tap a colour under **Sow first**, then tap one of your pits.
+- You drop its stones one by one around the ring: the chosen colour first, then the next colours in order. You skip other players' stores.
+- If your last stone lands in your own store, you move again.
+- If it lands in an empty pit of your own and the facing pit has stones, you capture both into your store.
+- You have 20 seconds per turn, or a move is made for you.
+- **The catch:** only your weakest colour really counts. Points are 50 × your lowest colour total plus all your stones.
+
+## Rules in detail
+
 - **Board:** a ring. Every player owns a row of **5 pits** followed by their own **store**. Players sit
   around the ring in seat order.
 - **Stones** come in three colours: **red, green, blue**. At the start every pit holds **4 stones**;

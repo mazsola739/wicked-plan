@@ -3,6 +3,20 @@
 Team game, played as a race here: 1–4 seats (the page: you + 3 bots).
 Code: `crates/rules/src/games/duplicate_photo_buzzer.rs`.
 
+## How to play
+
+**Goal:** be the first to buzz when a picture repeats.
+
+- There are 6 rounds. In each round, pictures flash one after another.
+- Exactly one picture repeats an earlier one from the same round. Tap **BUZZ** while it is on screen or during the picture after it.
+- The first right buzz wins the round: 100 points, plus up to 60 more for speed.
+- A buzz at any other time costs 30 points, and you are out for the rest of the round.
+- **The catch:** some pictures are near copies, with one shape in another colour or kind. They do not count.
+- Pictures speed up each round, from 1.4 seconds down to 0.9.
+- After each round the repeat and its original are shown; tap **Next round** to go on.
+
+## Rules in detail
+
 - Pictures flash one after another: a coloured ground with three shapes (6 kinds, 8 colours) in one of
   four layouts, all drawn from the seed. No photos.
 - **6 rounds.** In each round a stream of 7–14 pictures plays; exactly **one picture repeats** an earlier

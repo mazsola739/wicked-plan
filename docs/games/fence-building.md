@@ -2,6 +2,20 @@
 
 Exile game, a race for 1–4 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/fence_building.rs`.
 
+## How to play
+
+**Goal:** draw the one closed fence that fits all the numbers, faster than the bots.
+
+- The fence runs along the grid lines between the dots. It must be one single loop: no branches, no crossings, no touching itself, no loose ends.
+- A number in a plot tells how many of its four sides are fenced. Plots without a number can have any count.
+- Tap near a side of a plot to fence it. Tap again for a cross (just a note for yourself), and once more to clear it.
+- A number turns green when its count is met and red when it has too many.
+- There is no check button: you are done the moment the fence is right.
+- 3 rounds: 5×5 in 2 minutes, 6×6 in 3 minutes, 7×7 in 5 minutes.
+- Finish first, second, third or fourth for 200, 140, 90 or 60 points, plus 1 point per 2 seconds left. Not finished: 0.
+
+## Rules in detail
+
 Build one closed fence along the grid lines of a field. A number in a plot tells how many of the plot's
 four sides carry fence.
 

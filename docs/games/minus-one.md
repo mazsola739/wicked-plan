@@ -2,6 +2,20 @@
 
 Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/minus_one.rs`.
 
+## How to play
+
+**Goal:** win big pots by keeping the lowest card that nobody else keeps.
+
+- Everyone starts with the same ten cards, 1 to 10. The game has **7 rounds**.
+- **Show:** tap two different cards, then tap **Show**. Everyone's pair is revealed at the same time.
+- **Keep:** look at the other pairs, then tap the one card of yours you want to keep.
+- The **lowest kept card that nobody else kept** wins the round. Its owner scores the sum of all kept cards.
+- If every kept card matches someone else's, nobody scores.
+- Your kept card is used up, and the other card goes back to your hand. Save your low cards for big pots.
+- Timeouts: **20 seconds** to show (your two lowest cards are shown for you) and **15 seconds** to keep (your lower card is kept for you).
+
+## Rules in detail
+
 - Everyone holds the same ten cards, **1 to 10**. **7 rounds.**
 - **Show (20 s):** everyone secretly picks **two different cards** from their hand. Then all pairs are
   shown at once. Timeout: your two lowest cards.

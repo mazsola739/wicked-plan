@@ -2,6 +2,20 @@
 
 Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/animal_tile_auction.rs`.
 
+## How to play
+
+**Goal:** build your secret animal pattern on the shared 5×5 grid more often than anyone else.
+
+- You get a secret pattern of three animals in a line or an L shape. It may appear turned, but not mirrored.
+- You start with 15 chips. There are 12 auctions, each for the next tile shown to everyone.
+- Set your bid with − and + or the quick buttons, then tap **Bid**. Bids are secret; you have 15 seconds (no bid counts as 0).
+- Only the single highest bidder pays and wins the tile. A tie for the top bid: nobody gets it and the tile is lost.
+- If you win, tap any empty cell to place the tile (15 seconds).
+- You score 25 for every complete copy of your pattern, 5 per animal in your best partial match, and 1 per chip left.
+- Others may place tiles to block you, so a cheap tile can matter as much as a dear one.
+
+## Rules in detail
+
 - A shared **5×5 grid**. Four animals: **fox, owl, frog, bear** (7 tiles of each). At the start
   **5 tiles** are placed on random cells.
 - Everyone gets a **secret pattern**: three animals in a line or an L shape, e.g. fox–owl–fox.

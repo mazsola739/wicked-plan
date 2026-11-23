@@ -2,6 +2,19 @@
 
 Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/src/games/monster_alliance.rs`.
 
+## How to play
+
+**Goal:** finish with the most points by helping to beat monsters and sharing in their rewards.
+
+- You start with **20 points** and **8 secret weapon cards** of strength 1 to 6. Six monsters come, one each round.
+- **Bid (15 s):** enter how many points you will pay for an extra weapon card, then tap **OK**. The highest bid wins it, but if the top bids are tied, nobody gets the card.
+- **Alliance (20 s):** tap up to two partners, then tap **Ask them**, or tap **Fight alone**. An alliance forms only if they pick you too.
+- **Attack (20 s):** tap the cards to throw, then tap **Attack**, or tap **Hold back**. Cards you play are used up.
+- If your alliance's total power reaches the monster's strength, it beats the monster. The strongest alliance that beats it takes the reward.
+- Inside the winning alliance, the reward is shared by how much power each member played.
+
+## Rules in detail
+
 Six monsters attack one by one. Bid points for extra weapons, form alliances of up to three, and
 throw weapon cards at the monster. The strongest alliance that beats it shares the reward.
 

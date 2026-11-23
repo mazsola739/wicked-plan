@@ -2,6 +2,19 @@
 
 Main game, 6–10 players (the page seats you and 5 bots). Code: `crates/rules/src/games/virus_game.rs`.
 
+## How to play
+
+**Goal:** if you are in the city, find and quarantine the terrorists; if you are a terrorist, infect at least half of the others.
+
+- You get a public number and a secret role: terrorist, officer, journalist, researcher or citizen. Only terrorists spread the virus.
+- **Contact (25 s):** pick one player to meet. The officer learns if they are a terrorist, the journalist sees whom they met, and a researcher vaccinates them.
+- **Test:** you learn if you are infected, and everyone sees how many new infections there were.
+- **Report (20 s):** **Accuse** one player in public, or **Stay quiet**.
+- **Vote (20 s):** vote someone into **Quarantine**, or **Nobody**. It takes at least 2 votes and no tie, and their side is then shown.
+- There are **4 rounds**. The winning side gets 500 each, the losers 200; you get +150 for your secret mission.
+
+## Rules in detail
+
 Hidden roles. The **terrorists** spread a virus; the **city** (citizens, officer, journalist,
 researchers) tries to find and quarantine them before too many people are infected.
 

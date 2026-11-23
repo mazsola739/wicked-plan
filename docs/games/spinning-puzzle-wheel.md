@@ -3,6 +3,19 @@
 Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 `crates/rules/src/games/spinning_puzzle_wheel.rs`.
 
+## How to play
+
+**Goal:** fill all six shape puzzles on the wheel together with your team, as fast as you can.
+
+- Each puzzle is a shape on a small grid with a tray of 4 pieces. Three of them fill the shape; one is a decoy.
+- The wheel turns: each turn it points at one unfinished puzzle and one player.
+- On your turn you have **12 seconds** for one action on that puzzle: place a piece, take one back, or **Pass**.
+- To place: tap a tray piece, use **↻ Turn** and **⇋ Flip**, tap the grid to move it, then tap **Place**.
+- To take a piece back, tap a placed piece in the tray, then **Take back**. If time runs out, you pass.
+- The team scores **100 per finished puzzle**. Finish all six and you get **+10 for every turn left** (36 turns in all).
+
+## Rules in detail
+
 - **The wheel** holds **6 shape puzzles**. Each puzzle is a silhouette on a 5 × 5 grid with its own tray of
   **4 pieces** (polyominoes of 3–5 squares): three of them fill the silhouette exactly, one is a decoy.
   (Another way to fill it counts too.)

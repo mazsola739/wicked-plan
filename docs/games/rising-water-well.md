@@ -2,6 +2,19 @@
 
 Hidden game, solo. Code: `crates/rules/src/games/rising_water_well.rs`.
 
+## How to play
+
+**Goal:** solve the four riddles on the wall and climb out before the well fills with water.
+
+- The well fills in 10 minutes. Each solved riddle opens one of the four locks on the grate.
+- The riddles come one at a time: count shapes, continue tally marks, balance scales, add up symbols, or read a clock seen in the water.
+- Every answer is a whole number. Type it on the keypad and tap **OK**.
+- A wrong answer lets in more water: you lose 30 seconds.
+- Each solved riddle scores 125. Escaping adds 200, plus 1 point for every 2 seconds left.
+- If the well fills, you keep the points of the riddles you solved. **Give up** stops and keeps them too.
+
+## Rules in detail
+
 You wake at the bottom of a dry well; water starts to pour in. Four picture riddles are carved into the
 wall. Each answer opens one lock of the grate above; open all four to climb out before the well is full.
 

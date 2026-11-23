@@ -2,6 +2,20 @@
 
 Main game, 3–8 players (the page seats you and 3 bots). Code: `crates/rules/src/games/mystery_stock_market.rs`.
 
+## How to play
+
+**Goal:** be the richest player after **24 rounds**, counting your cash and the shares you hold.
+
+- You start with **100,000** in cash. All seven stocks start at a price of **10,000**.
+- Each stock moves by its own **secret rule**, one of ten possible rules.
+- At the start you get one private clue: the exact rule of one stock. After rounds 8 and 16, one more stock's rule is shown to everyone.
+- **Trade (30 s):** tap a stock, choose 1, 5 or 10, then tap **Buy** or **Sell**. You can trade as often as you like. You can't borrow money or sell shares you don't have.
+- Tap **Done for this round** when you have finished. Then all the prices change.
+- Watch the price charts and the public totals of how many shares were bought and sold to work out each stock's rule.
+- At the end your worth is your cash plus your shares at the final prices.
+
+## Rules in detail
+
 Trade seven made-up stocks over 24 rounds. Every stock moves by its own **secret rule**; work the
 rules out from the price charts and trade on what you know. The richest player wins.
 

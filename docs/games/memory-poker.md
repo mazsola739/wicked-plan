@@ -2,6 +2,20 @@
 
 Mini game, 1–4 seats (the page: you + 3 bots). Code: `crates/rules/src/games/memory_poker.rs`.
 
+## How to play
+
+**Goal:** remember where the good cards are and take two that make the best poker hand.
+
+- The game has **3 rounds**. Each round, 16 cards lie face up in a 4×4 grid, with **3 shared cards** beside it.
+- Study the grid for **15 seconds**, or tap **Ready** when you are done. Then the grid turns face down.
+- Players take turns picking, in snake order, until everyone has **2 cards**. On your turn, tap a face-down card.
+- Only you see the cards you take. You have **20 seconds** a pick, or the first free square is taken for you.
+- Your hand is your 2 cards plus the 3 shared cards. A high card scores 20 and a straight flush scores 400, with the usual poker hands in between.
+- The best hand of the round gets **+60** more points.
+- Tip: watch which squares the others take. Your remembered card may already be gone.
+
+## Rules in detail
+
 - **3 rounds.** Each round 16 cards from a fresh 52-card deck lie in a 4×4 grid, and **3 shared cards**
   lie face up beside it.
 - **Study:** the grid is shown face up for **15 seconds** (it ends sooner once everyone taps Ready).

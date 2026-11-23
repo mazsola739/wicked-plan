@@ -3,6 +3,19 @@
 Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 `crates/rules/src/games/word_block_tower.rs`.
 
+## How to play
+
+**Goal:** with your team, use up every letter block in the pile with words from the round's topic.
+
+- There are **3 rounds**, each with a topic and a pile of letter blocks.
+- Players take turns, one word each. Tap blocks to spell a word from the topic (3–7 letters), then tap **Build**. **⌫** and **Clear** fix mistakes.
+- The last player's word must use **every block that is left**.
+- If the blocks left can't make a word, take back the word built just before yours instead of building.
+- You have **30 seconds** per turn, or a word is chosen for you.
+- Each round scores **300, minus 30 per take-back and 60 per timed-out turn**, at least 50.
+
+## Rules in detail
+
 - **3 rounds**, each with a **topic** (Animals, Fruits, Colours, Body, Kitchen, Weather; no topic twice) and a
   pile of **letter blocks**. The blocks are exactly the letters of one secret word per player from the topic.
 - Players build in turn, one word each: on your turn spell a word **from the topic** with blocks still in the
