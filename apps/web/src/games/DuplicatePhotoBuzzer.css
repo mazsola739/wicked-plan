@@ -10,7 +10,7 @@
   width: 100%;
   max-width: min(100%, 46dvh);
   aspect-ratio: 1;
-  border-radius: 16px;
+  border-radius: 12px;
 }
 
 .db-pic.flash {
@@ -37,8 +37,8 @@
   min-height: 96px;
   border: none;
   border-radius: 48px;
-  background: radial-gradient(circle at 50% 35%, #e8395a, var(--accent) 70%);
-  box-shadow: 0 6px 0 #7d0f25;
+  background: radial-gradient(circle at 50% 35%, var(--violet), var(--accent) 70%);
+  box-shadow: 0 6px 0 #3e1d77;
   font-size: 2rem;
   font-weight: 900;
   letter-spacing: 0.1em;
@@ -48,7 +48,7 @@
 
 .db-buzz:active:not(:disabled) {
   transform: translateY(4px);
-  box-shadow: 0 2px 0 #7d0f25;
+  box-shadow: 0 2px 0 #3e1d77;
 }
 
 .db-buzz:disabled {

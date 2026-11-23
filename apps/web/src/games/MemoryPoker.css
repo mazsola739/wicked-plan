@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 10px;
-  border-radius: 16px;
+  border-radius: 12px;
   background: radial-gradient(circle at 50% 30%, #1f5a3c, #12301f);
 }
 
@@ -26,7 +26,7 @@
   min-height: 56px;
   padding: 0;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: transparent;
   display: flex;
   align-items: center;
@@ -45,9 +45,9 @@
   justify-content: center;
   width: 52px;
   height: 64px;
-  border-radius: 9px;
-  background: #f4ede1;
-  color: #1d1a23;
+  border-radius: 8px;
+  background: #e3e7ef;
+  color: #12111a;
   font-weight: 800;
   line-height: 1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
@@ -84,8 +84,8 @@
 }
 
 .mp-card.back {
-  background: repeating-linear-gradient(45deg, #6d1a2e 0 6px, #8a2440 6px 12px);
-  border: 3px solid #f4ede1;
+  background: repeating-linear-gradient(45deg, #3d1f78 0 6px, #4f2a96 6px 12px);
+  border: 3px solid #e3e7ef;
 }
 
 .mp-card.small {
@@ -113,7 +113,7 @@
   align-items: center;
   justify-content: center;
   border: 2px dashed rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
+  border-radius: 8px;
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.8rem;
 }
@@ -135,7 +135,7 @@
   top: 2px;
   left: 5px;
   font-size: 0.65rem;
-  color: #8c8496;
+  color: #8a90a3;
 }
 
 .mp-seats li {

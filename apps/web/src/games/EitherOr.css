@@ -1,6 +1,6 @@
 .eo-round {
   padding: 16px;
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--panel);
   border: 1px solid var(--line);
   text-align: center;
@@ -8,7 +8,7 @@
 
 .eo-round.surprise {
   border-color: var(--accent-2);
-  background: #2a2318;
+  background: color-mix(in srgb, var(--cyan) 10%, var(--panel));
 }
 
 .eo-prompt {
@@ -32,7 +32,7 @@
   gap: 6px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: #24202b;
+  background: var(--panel-2);
 }
 
 .eo-scores li > span:first-child {
@@ -71,16 +71,16 @@
 }
 
 .eo-choice.side0 {
-  border-color: #6fc3ff;
+  --edge: #6fc3ff;
 }
 
 .eo-choice.side1 {
-  border-color: #f08a5d;
+  --edge: #f08a5d;
 }
 
 .eo-choice.on {
-  background: var(--accent);
-  border-color: var(--accent);
+  --edge: var(--accent);
+  --fill: var(--accent);
   opacity: 1;
 }
 

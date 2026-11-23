@@ -42,7 +42,7 @@ interface TcView {
   score: number;
 }
 
-const LINE_COLOURS = ['#d4a637', '#c4183a', '#4a8fd9', '#3aa86b', '#a45bd6'];
+const LINE_COLOURS = ['#e0b53a', '#e23b5a', '#4a8fd9', '#3aa86b', '#a45bd6'];
 const ROLE_TEXT: Record<Role, string> = {
   thief: 'Thief: collect pieces with the other thieves and stay away from the police.',
   cop: 'Police: catch the thieves. One of your colleagues is corrupt.',

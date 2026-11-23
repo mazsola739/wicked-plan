@@ -4,27 +4,27 @@
 }
 
 .rww-wall {
-  fill: #3b3442;
+  fill: #2e2c3c;
 }
 
 .rww-mortar {
-  stroke: #2a2430;
+  stroke: #191824;
   stroke-width: 1.5;
   fill: none;
 }
 
 .rww-tablet {
-  fill: #5e5566;
-  stroke: #2a2430;
+  fill: #4a4860;
+  stroke: #191824;
   stroke-width: 3;
 }
 
 .rww-panel {
-  fill: #6b6273;
+  fill: #57556e;
 }
 
 .rww-tally line {
-  stroke: #efe7dc;
+  stroke: #e3e7ef;
   stroke-width: 2.5;
   stroke-linecap: round;
 }
@@ -40,24 +40,24 @@
 .rww-op {
   font-size: 24px;
   font-weight: 700;
-  fill: #efe7dc;
+  fill: #e3e7ef;
   text-anchor: middle;
   dominant-baseline: central;
 }
 
 .rww-sym {
-  fill: #efe7dc;
+  fill: #e3e7ef;
 }
 
 .rww-metal {
-  stroke: #b9aa8a;
+  stroke: #a7aec2;
   stroke-width: 4;
   stroke-linecap: round;
   fill: none;
 }
 
 .rww-strings {
-  stroke: #b9aa8a;
+  stroke: #a7aec2;
   stroke-width: 1.2;
   fill: none;
 }
@@ -69,13 +69,13 @@
 }
 
 .rww-dial {
-  fill: #6b6273;
-  stroke: #b9aa8a;
+  fill: #57556e;
+  stroke: #a7aec2;
   stroke-width: 4;
 }
 
 .rww-tick {
-  stroke: #efe7dc;
+  stroke: #e3e7ef;
   stroke-width: 3;
 }
 
@@ -84,7 +84,7 @@
 }
 
 .rww-hand {
-  stroke: #efe7dc;
+  stroke: #e3e7ef;
   stroke-width: 7;
   stroke-linecap: round;
 }

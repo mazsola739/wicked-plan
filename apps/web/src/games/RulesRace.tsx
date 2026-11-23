@@ -42,7 +42,7 @@ interface RaceView {
   score: number;
 }
 
-const SEAT_COLOURS = ['#c4183a', '#d4a637', '#3aa86b', '#4a8fd9', '#a45bd6', '#e07b39', '#38b6b0', '#d65b9c'];
+const SEAT_COLOURS = ['#e23a54', '#e0b53a', '#3aa86b', '#4a8fd9', '#a45bd6', '#e07b39', '#38b6b0', '#d65b9c'];
 const COLS = 5;
 const CELL = 96;
 

@@ -23,7 +23,7 @@ interface HiddenView {
 }
 
 /** Stone colours: index 1–3 the seats, 4 the Shadow. */
-const COLOURS = ['', '#e8dcc4', '#3aa86b', '#4f8fd8', '#0b0910'];
+const COLOURS = ['', '#e3e7ef', '#3aa86b', '#4f8fd8', '#0b0910'];
 
 export default function HiddenFourthPlayer({ view: raw }: ScreenProps) {
   const view = raw as HiddenView;

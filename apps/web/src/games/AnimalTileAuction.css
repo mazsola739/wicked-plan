@@ -8,9 +8,9 @@
 
 .ata-cell {
   aspect-ratio: 1;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid var(--line);
-  background: #24202b;
+  background: var(--panel-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,7 +38,7 @@
 }
 
 .ata-animal .eye {
-  fill: #121016;
+  fill: var(--bg);
 }
 
 .ata-a0 {
@@ -85,7 +85,7 @@
 }
 
 .ata-pattern span:has(svg) {
-  background: #2c2635;
+  background: var(--panel-2);
   border: 1px solid var(--line);
 }
 

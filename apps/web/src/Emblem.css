@@ -1,0 +1,14 @@
+/* The artwork has its own near-black background: "lighten" lets the page show through it and the
+   radial mask fades its square edges, so it sits on the page without a box. */
+.emblem {
+  display: block;
+  aspect-ratio: 246 / 237;
+  mix-blend-mode: lighten;
+  mask-image: radial-gradient(closest-side, #000 78%, transparent 96%);
+  user-select: none;
+}
+
+.crown {
+  display: inline-block;
+  overflow: visible;
+}

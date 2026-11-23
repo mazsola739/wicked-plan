@@ -4,7 +4,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px;
-  border-radius: 14px;
+  border-radius: 12px;
   background: radial-gradient(ellipse at center, #1f4a36, #14301f);
 }
 
@@ -23,7 +23,7 @@
   height: 64px;
   padding: 4px 6px;
   border-radius: 7px;
-  background: #f4eee2;
+  background: #e3e7ef;
   font-weight: 800;
   font-size: 1.3rem;
   line-height: 1;
@@ -67,7 +67,7 @@
 }
 
 .sniper-holdem-card.gold {
-  color: #b2861a;
+  color: #8a6510;
 }
 
 .sniper-holdem-card.gold i {
@@ -127,5 +127,5 @@
 }
 
 .sniper-holdem-snipes .sniper-holdem-own {
-  border-color: var(--accent-2);
+  --edge: var(--accent-2);
 }

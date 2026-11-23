@@ -59,7 +59,7 @@ function Island({ view, pick, onPick }: { view: IslandView; pick: Square | null;
           <path d="M 0 0 L 10 5 L 0 10 z" className="ti-head" />
         </marker>
       </defs>
-      <rect className="ti-sea" x={-12} y={-12} width={n * C + 24} height={n * C + 24} rx={18} />
+      <rect className="ti-sea" x={-12} y={-12} width={n * C + 24} height={n * C + 24} rx={12} />
       {cells.map((c) => (
         // biome-ignore lint/a11y/useSemanticElements: an SVG cell cannot be a <button>
         <rect
@@ -200,7 +200,7 @@ export default function TreasureIsland({ view: raw }: ScreenProps) {
       stage={
         <>
           <Island view={view} pick={pick} onPick={setPick} />
-          <p className="muted small center">Lit squares still fit your arrows ({view.possible.length}). Your private box has a gold rim.</p>
+          <p className="muted small center">Lit squares still fit your arrows ({view.possible.length}). Your private box has a cyan rim.</p>
         </>
       }
       controls={

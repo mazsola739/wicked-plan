@@ -12,13 +12,13 @@
 }
 
 .russian-roulette-drum .body {
-  fill: #4a4452;
-  stroke: #6b6375;
+  fill: #403e56;
+  stroke: #7a7f96;
   stroke-width: 3;
 }
 
 .russian-roulette-drum .chamber {
-  fill: #1d1a23;
+  fill: var(--panel);
 }
 
 .russian-roulette-drum .chamber.next {
@@ -27,7 +27,7 @@
 }
 
 .russian-roulette-drum .hub {
-  fill: #6b6375;
+  fill: #7a7f96;
 }
 
 .russian-roulette-drum .paint {

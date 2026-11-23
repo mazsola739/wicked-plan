@@ -24,7 +24,7 @@ interface WallView {
   over: boolean;
 }
 
-const COLOURS = ['#e8dcc4', '#c4183a', '#3aa86b'];
+const COLOURS = ['#e3e7ef', '#e23b5a', '#3aa86b'];
 const SIDES: { dir: Dir; label: string; key: string }[] = [
   { dir: 'n', label: 'Top', key: 'ArrowUp' },
   { dir: 'w', label: 'Left', key: 'ArrowLeft' },

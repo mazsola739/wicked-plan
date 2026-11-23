@@ -9,17 +9,17 @@
 }
 
 .cm-hole > .cm-base {
-  fill: #2a2532;
+  fill: var(--panel-2);
   stroke: var(--line);
   stroke-width: 2;
 }
 
 .cm-hole.mine > .cm-base {
-  fill: #33293d;
+  fill: #262336;
 }
 
 .cm-hole.store > .cm-base {
-  fill: #1a171f;
+  fill: var(--panel);
 }
 
 .cm-hole.turn > .cm-base {
@@ -112,8 +112,8 @@
 }
 
 .cm-colour.on {
-  border-color: var(--accent-2);
-  background: #3a3342;
+  --edge: var(--accent-2);
+  --fill: #262336;
 }
 
 .cm-swatch {
@@ -132,7 +132,7 @@
 
 .cm-pit {
   min-height: 64px;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: var(--panel);
   display: flex;
@@ -166,7 +166,7 @@
 }
 
 .cm-scores li.cm-now {
-  background: #2f2838;
+  background: color-mix(in srgb, var(--violet) 18%, var(--panel-2));
 }
 
 @media (hover: hover) and (pointer: fine) {

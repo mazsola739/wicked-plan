@@ -5,7 +5,7 @@
 
 .nine-mens-morris-line {
   fill: none;
-  stroke: #5a5066;
+  stroke: #4a4764;
   stroke-width: 0.06;
 }
 
@@ -18,23 +18,23 @@
 }
 
 .nine-mens-morris-point.empty .stone {
-  fill: #5a5066;
+  fill: #4a4764;
 }
 
 .nine-mens-morris-point.mine .stone {
-  fill: #e8dcc4;
-  stroke: #1d1a23;
+  fill: #e3e7ef;
+  stroke: var(--panel);
   stroke-width: 0.04;
 }
 
 .nine-mens-morris-point.theirs .stone {
-  fill: var(--accent);
-  stroke: #1d1a23;
+  fill: var(--bad);
+  stroke: var(--panel);
   stroke-width: 0.04;
 }
 
 .nine-mens-morris-point.can .hit {
-  fill: rgba(212, 166, 55, 0.25);
+  fill: rgba(34, 211, 238, 0.25);
 }
 
 .nine-mens-morris-point.empty.can .stone {
@@ -85,11 +85,11 @@
 }
 
 .nine-mens-morris-hand i.mine {
-  background: #e8dcc4;
+  background: #e3e7ef;
 }
 
 .nine-mens-morris-hand i.theirs {
-  background: var(--accent);
+  background: var(--bad);
 }
 
 .nine-mens-morris-mill {

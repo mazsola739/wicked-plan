@@ -34,7 +34,7 @@ interface WellView {
 
 const W = 300;
 const H = 210;
-const COLOURS = ['#c4183a', '#4f9ad6', '#d4a637'];
+const COLOURS = ['#e23a54', '#4f9ad6', '#e0b53a'];
 const COLOUR_NAMES = ['red', 'blue', 'gold'];
 const SHAPE_NAMES = ['circle', 'triangle', 'square', 'star'];
 
@@ -73,7 +73,7 @@ function Balance({ x, left, right }: { x: number; left: number[]; right: number[
   const pan = (items: number[], px: number) =>
     items.map((s, i) => (
       // biome-ignore lint/suspicious/noArrayIndexKey: items are positional
-      <Shape key={i} shape={s} x={px - (items.length - 1) * 7.5 + i * 15} y={s === 0 ? 132 : 129} r={s === 0 ? 7 : 9.5} fill="#cfc6b6" />
+      <Shape key={i} shape={s} x={px - (items.length - 1) * 7.5 + i * 15} y={s === 0 ? 132 : 129} r={s === 0 ? 7 : 9.5} fill="#c9cedb" />
     ));
   return (
     <g>

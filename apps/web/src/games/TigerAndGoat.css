@@ -4,7 +4,7 @@
 }
 
 .tiger-and-goat-line {
-  stroke: #5a5066;
+  stroke: #3a3650;
   stroke-width: 0.04;
 }
 
@@ -17,7 +17,7 @@
 }
 
 .tiger-and-goat-point .stone {
-  fill: #5a5066;
+  fill: #3a3650;
 }
 
 .tiger-and-goat-point text {
@@ -25,16 +25,16 @@
   font-weight: 800;
   text-anchor: middle;
   dominant-baseline: central;
-  fill: #1d1a23;
+  fill: #12111a;
   pointer-events: none;
 }
 
 .tiger-and-goat-point.tiger .stone {
-  fill: var(--accent-2);
+  fill: #e0b53a;
 }
 
 .tiger-and-goat-point.goat .stone {
-  fill: #e8dcc4;
+  fill: #e3e7ef;
 }
 
 .tiger-and-goat-point.last .hit {
@@ -44,7 +44,7 @@
 }
 
 .tiger-and-goat-point.can .hit {
-  fill: rgba(212, 166, 55, 0.22);
+  fill: rgba(34, 211, 238, 0.22);
 }
 
 .tiger-and-goat-point.sel .stone {

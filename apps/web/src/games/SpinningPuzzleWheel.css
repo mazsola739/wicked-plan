@@ -12,7 +12,7 @@
 }
 
 .spw-rim {
-  fill: #1a171f;
+  fill: var(--bg);
   stroke: var(--accent-2);
   stroke-width: 4;
 }
@@ -26,7 +26,7 @@
 }
 
 .spw-plate {
-  fill: #2a2532;
+  fill: #262336;
   stroke: var(--line);
   stroke-width: 2;
 }
@@ -55,11 +55,11 @@
 }
 
 .spw-cell {
-  fill: #221e29;
+  fill: var(--panel-2);
 }
 
 .spw-cell.target {
-  fill: #6b6378;
+  fill: #5e5c7a;
 }
 
 .spw-board .spw-cell {
@@ -94,7 +94,7 @@
 }
 
 .spw-ghost.bad {
-  fill: rgba(217, 83, 79, 0.6);
+  fill: color-mix(in srgb, var(--bad) 60%, transparent);
   stroke: var(--bad);
 }
 
@@ -120,7 +120,7 @@
 
 .spw-piece.on {
   border-color: var(--accent-2);
-  background: #3a3342;
+  background: #262336;
 }
 
 .spw-piece.used svg {

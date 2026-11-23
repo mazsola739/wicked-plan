@@ -63,7 +63,7 @@ export function RaceBar({ view }: { view: RaceView }) {
   );
 }
 
-export const PIECE_COLOURS = ['#d4a637', '#4f9ad6', '#3aa86b', '#c4183a', '#9b6bd6', '#e07b39', '#4cc3b5'];
+export const PIECE_COLOURS = ['#e0b53a', '#4f9ad6', '#3aa86b', '#dc2f4f', '#9b6bd6', '#e07b39', '#4cc3b5'];
 
 function normalize(cells: Cell[]): Cell[] {
   const mx = Math.min(...cells.map((c) => c[0]));

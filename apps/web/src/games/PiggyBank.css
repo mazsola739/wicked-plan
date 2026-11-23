@@ -45,15 +45,15 @@
   height: 18px;
   border-radius: 50%;
   vertical-align: middle;
-  border: 2px solid #8a7d6a;
+  border: 2px solid #a7aec2;
 }
 
 .piggy-bank-white {
-  background: radial-gradient(circle at 35% 35%, #fff, #d9d2c4);
+  background: radial-gradient(circle at 35% 35%, #fff, #c9cedb);
 }
 
 .piggy-bank-black {
-  background: radial-gradient(circle at 35% 35%, #5a5462, #121016);
+  background: radial-gradient(circle at 35% 35%, #4a4e5e, var(--bg));
 }
 
 .piggy-bank-pending {

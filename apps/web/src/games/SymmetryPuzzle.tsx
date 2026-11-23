@@ -15,7 +15,7 @@ interface SymmetryView extends RaceView {
   given: boolean[];
 }
 
-const PAINT = ['transparent', '#d4a637', '#4f9ad6', '#c4183a'];
+const PAINT = ['transparent', '#e0b53a', '#4f9ad6', '#e23a54'];
 const AXIS_TEXT: Record<Axis, string> = {
   vertical: 'the vertical axis',
   horizontal: 'the horizontal axis',

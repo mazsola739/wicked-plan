@@ -4,19 +4,19 @@
 }
 
 .rules-race-cell {
-  fill: #24202b;
+  fill: var(--panel-2);
   stroke: var(--line);
   stroke-width: 2;
 }
 
 .rules-race-cell.four {
-  fill: #2c2536;
+  fill: #262336;
   stroke: var(--accent-2);
   stroke-dasharray: 6 4;
 }
 
 .rules-race-cell.goal {
-  fill: #3a1420;
+  fill: color-mix(in srgb, var(--accent) 30%, var(--panel));
   stroke: var(--accent);
 }
 

@@ -27,9 +27,9 @@
 .jbm-card {
   width: 64px;
   height: 88px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 2px solid var(--line);
-  background: #24202b;
+  background: var(--panel-2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -107,7 +107,7 @@
 
 .jbm-back {
   cursor: pointer;
-  background: repeating-linear-gradient(45deg, #2c2635, #2c2635 6px, #342d3f 6px, #342d3f 12px);
+  background: repeating-linear-gradient(45deg, var(--panel-2), var(--panel-2) 6px, #262336 6px, #262336 12px);
   color: var(--muted);
 }
 
@@ -138,7 +138,7 @@
   padding: 0 10px;
   border-radius: 10px;
   border: 1px solid var(--line);
-  background: #24202b;
+  background: var(--panel-2);
   cursor: pointer;
 }
 

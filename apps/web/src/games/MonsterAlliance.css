@@ -3,8 +3,8 @@
   gap: 14px;
   align-items: center;
   padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--accent);
+  border-radius: 12px;
+  border: 1px solid var(--bad);
   background: linear-gradient(135deg, #2a1420, var(--panel));
 }
 
@@ -24,17 +24,17 @@
 
 .ma-face path:first-child {
   fill: #5b2a3a;
-  stroke: var(--accent);
+  stroke: var(--bad);
   stroke-width: 3;
 }
 
 .ma-eye {
-  fill: var(--accent-2);
+  fill: var(--warn);
 }
 
 .ma-teeth {
   fill: none;
-  stroke: #f1ecf4;
+  stroke: var(--text);
   stroke-width: 3;
 }
 

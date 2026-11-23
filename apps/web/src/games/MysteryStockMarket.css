@@ -13,14 +13,14 @@
   padding: 6px 10px;
   border-radius: 12px;
   border: 1px solid var(--line);
-  background: #24202b;
+  background: var(--panel-2);
   text-align: left;
   cursor: pointer;
 }
 
 .msm-row.sel {
   border-color: var(--accent-2);
-  background: #2c2536;
+  background: #262336;
 }
 
 .msm-ticker {
@@ -96,7 +96,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid var(--line);
   background: var(--panel);
 }

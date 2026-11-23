@@ -7,7 +7,7 @@
   height: 64px;
   padding: 8px;
   border-radius: 12px;
-  background: #f4eee2;
+  background: #e3e7ef;
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
 }
 
@@ -19,11 +19,11 @@
 }
 
 .dice-prediction-die.secret {
-  background: #cfe0f4;
+  background: #c3def7;
 }
 
 .dice-prediction-die.blind {
-  background: #f4d6cf;
+  background: #f3d3d8;
 }
 
 .dice-prediction-die i {
@@ -33,12 +33,12 @@
 }
 
 .dice-prediction-die i.on {
-  background: #1d1a23;
+  background: #12111a;
 }
 
 .dice-prediction-die b {
   grid-area: 1 / 1 / 4 / 4;
-  color: #6b6175;
+  color: #626880;
   font-size: 1.6rem;
 }
 

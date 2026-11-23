@@ -153,7 +153,7 @@ export default function PolyominoTerritory({ view: raw }: ScreenProps) {
             />
           ))}
           {view.keys.map((key) => (
-            <text key={`${key.x},${key.y}`} className={`pt-key ${key.kind}`} x={key.x * C + C / 2} y={key.y * C + C / 2}>
+            <text key={`k${key.x},${key.y}`} className={`pt-key ${key.kind}`} x={key.x * C + C / 2} y={key.y * C + C / 2}>
               {key.kind === 'encore' ? '⟳' : '↗'}
             </text>
           ))}

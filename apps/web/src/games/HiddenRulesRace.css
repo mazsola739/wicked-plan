@@ -38,7 +38,7 @@
 }
 
 .hrr-goal {
-  background: #f1ecf4;
+  background: #e3e7ef;
 }
 
 .hrr-star {
@@ -53,9 +53,9 @@
   width: 40%;
   aspect-ratio: 1;
   border-radius: 4px;
-  border: 2px solid #1d1a23;
-  background: #f1ecf4;
-  color: #1d1a23;
+  border: 2px solid var(--panel);
+  background: #e3e7ef;
+  color: #12111a;
   font-size: 0.7rem;
   font-weight: 800;
   display: flex;
@@ -64,8 +64,8 @@
 }
 
 .hrr-piece.me {
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-2);
+  color: #06232b;
   border-color: #fff;
 }
 

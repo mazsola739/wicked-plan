@@ -13,7 +13,7 @@
   gap: 4px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: #24202b;
+  background: var(--panel-2);
   border: 1px solid var(--line);
 }
 
@@ -30,7 +30,7 @@
   opacity: 0.5;
 }
 
-.ehl-seats li.me span {
+.ehl-seats li.me > div:first-child > span {
   color: var(--accent-2);
 }
 
@@ -44,8 +44,8 @@
   width: 22px;
   height: 30px;
   border-radius: 5px;
-  background: #f1ecf4;
-  color: #121016;
+  background: #e3e7ef;
+  color: #12111a;
   font-weight: 700;
   font-size: 0.85rem;
   display: inline-flex;
@@ -54,7 +54,7 @@
 }
 
 .ehl-mini.down {
-  background: repeating-linear-gradient(45deg, #3a3342, #3a3342 4px, #4a4155 4px, #4a4155 8px);
+  background: repeating-linear-gradient(45deg, #262336, #262336 4px, #322e46 4px, #322e46 8px);
 }
 
 .ehl-pot {
@@ -80,10 +80,10 @@
 .ehl-card {
   width: 56px;
   height: 76px;
-  border-radius: 9px;
-  border: 2px solid #f1ecf4;
-  background: #f1ecf4;
-  color: #121016;
+  border-radius: 8px;
+  border: 2px solid #e3e7ef;
+  background: #e3e7ef;
+  color: #12111a;
   font-size: 1.6rem;
   font-weight: 800;
   display: inline-flex;
@@ -108,7 +108,7 @@
 
 .ehl-card.hidden {
   border-color: var(--accent-2);
-  background: #e8dcc0;
+  background: #c9cedb;
 }
 
 .ehl-builder {

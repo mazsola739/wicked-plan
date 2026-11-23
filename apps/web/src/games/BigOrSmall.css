@@ -3,7 +3,8 @@
   flex-direction: column;
   gap: 12px;
   background: var(--panel);
-  border-radius: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
   padding: 14px;
 }
 
@@ -28,9 +29,9 @@
 .big-or-small-card {
   width: 72px;
   height: 100px;
-  border-radius: 12px;
-  background: #e8dcc4;
-  color: #1d1a23;
+  border-radius: 8px;
+  background: #e3e7ef;
+  color: #12111a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,13 +50,13 @@
   text-align: center;
   padding: 4px 0;
   border-radius: 6px;
-  background: #e8dcc4;
-  color: #1d1a23;
+  background: #e3e7ef;
+  color: #12111a;
   font-weight: 700;
 }
 
 .big-or-small-mini span.gone {
-  background: #2a2532;
+  background: var(--panel-2);
   color: var(--muted);
   text-decoration: line-through;
 }

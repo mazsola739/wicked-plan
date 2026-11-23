@@ -10,8 +10,8 @@
   position: relative;
   aspect-ratio: 1;
   border-radius: 12px;
-  border: 2px solid var(--line);
-  background: #24202b;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,7 +33,7 @@
 }
 
 .ab-cell.marked {
-  background: #3a2e18;
+  background: color-mix(in srgb, var(--cyan) 12%, var(--panel));
   border-color: var(--accent-2);
 }
 
@@ -91,7 +91,7 @@
   align-items: center;
   padding: 6px;
   border-radius: 10px;
-  background: #24202b;
+  background: var(--panel-2);
   font-size: 0.85rem;
 }
 

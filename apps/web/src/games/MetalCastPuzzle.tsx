@@ -49,8 +49,8 @@ export default function MetalCastPuzzle({ view: raw }: ScreenProps) {
         <svg className="drawing mcp" viewBox={`0 0 ${width} 210`} role="img" aria-label="Rings on a metal loop">
           <defs>
             <linearGradient id="mcp-steel" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#e6e1ea" />
-              <stop offset="1" stopColor="#7d7686" />
+              <stop offset="0" stopColor="#e3e7ef" />
+              <stop offset="1" stopColor="#7d8396" />
             </linearGradient>
           </defs>
           {/* The bar that holds the posts. */}

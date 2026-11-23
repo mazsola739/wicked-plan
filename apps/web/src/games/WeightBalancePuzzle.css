@@ -3,7 +3,7 @@
 }
 
 .wb-stand {
-  fill: #3a3342;
+  fill: #262336;
 }
 
 .wb-beam {
@@ -20,14 +20,14 @@
 }
 
 .wb-pan {
-  fill: #4a4256;
+  fill: #3a3650;
   stroke: var(--muted);
   stroke-width: 2;
 }
 
 .wb-block {
-  fill: #e8dcc4;
-  stroke: #3b3346;
+  fill: #e3e7ef;
+  stroke: #3a3650;
   stroke-width: 1.5;
 }
 
@@ -40,16 +40,16 @@
 }
 
 .wb-letter {
-  fill: #1d1a23;
+  fill: #12111a;
   font-size: 16px;
 }
 
 .wb-weight {
-  fill: #8b8496;
+  fill: #a7aec2;
 }
 
 .wb-grams {
-  fill: #121016;
+  fill: #12111a;
   font-size: 11px;
 }
 
@@ -81,7 +81,7 @@
 
 .wb-block-btn {
   min-height: 60px;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: var(--panel);
   display: flex;
@@ -114,7 +114,7 @@
 
 .wb-block-btn.sel {
   border-color: var(--accent-2);
-  background: #3a3342;
+  background: #262336;
 }
 
 .wb-block-btn .wb-val {

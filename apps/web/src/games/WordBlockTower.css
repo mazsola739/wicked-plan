@@ -29,18 +29,18 @@
   width: 32px;
   height: 36px;
   border-radius: 6px;
-  background: #e8dcc4;
-  color: #1d1a23;
+  background: #e3e7ef;
+  color: #12111a;
   font-weight: 800;
   font-size: 1.1rem;
-  box-shadow: 0 3px 0 #8a7d6a;
+  box-shadow: 0 3px 0 #a7aec2;
 }
 
 .wbt-tiles.small .wbt-tile {
   width: 24px;
   height: 26px;
   font-size: 0.9rem;
-  box-shadow: 0 2px 0 #8a7d6a;
+  box-shadow: 0 2px 0 #a7aec2;
 }
 
 .wbt-pile {
@@ -56,11 +56,11 @@
   height: 52px;
   border-radius: 8px;
   border: none;
-  background: #e8dcc4;
-  color: #1d1a23;
+  background: #e3e7ef;
+  color: #12111a;
   font-size: 1.4rem;
   font-weight: 800;
-  box-shadow: 0 4px 0 #8a7d6a;
+  box-shadow: 0 4px 0 #a7aec2;
   cursor: pointer;
 }
 
@@ -74,7 +74,7 @@
 
 .wbt-block:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 #8a7d6a;
+  box-shadow: 0 2px 0 #a7aec2;
 }
 
 .wbt-word {

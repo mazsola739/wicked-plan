@@ -18,6 +18,23 @@ The earlier base-building mobile game was dropped on 2026-11-22.
 - **Original names and look:** the show's games are not copied one to one; we write our own versions.
 - **All 51 catalogue games get a digital version** (decided 2026-11-23), built in groups.
 
+## Visual identity (2026-11-23, from the user's key art)
+
+- **Emblem, the Observer:** the user's own artwork (`apps/web/src/assets/observer.png`): a pointed
+  hood seen from the front, a black void for a face drawn by glowing LED features (a cyan
+  nested-diamond eye, a violet slash eye, a zigzag grin), a W crown above and ring arcs around it.
+  The crown alone is the small mark (top bar, footer, favicon), drawn in SVG in `Emblem.tsx`.
+- **Palette:** near-black background, dark violet-grey surfaces, **cyan** for highlights and the main
+  action, **violet** for fills and the second action, **silver** for the title and line art.
+  Difficulty keeps green / yellow / red.
+- **Type:** Cinzel (bundled, `@fontsource/cinzel`) for the title and headings; the system sans for
+  everything else; tiny labels in letter-spaced capitals.
+- **Shapes:** long hexagonal buttons (pointed ends), thin divider lines with a small diamond in the
+  middle, thin geometric line art. Glow only on the emblem and focus/hover; `prefers-reduced-motion`
+  turns animation off.
+- **Landing:** the emblem and the title on top, a short "How it works", then the catalogue with
+  filters (type, difficulty, solo or with bots). No sign-in, lobby or leaderboard until rooms exist.
+
 ## Open questions (the user decides)
 
 - Should games keep a score history or best scores on the page?

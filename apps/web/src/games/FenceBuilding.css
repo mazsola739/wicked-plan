@@ -41,7 +41,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .fb-hit:hover {
-    fill: rgb(212 166 55 / 0.12);
+    fill: rgb(34 211 238 / 0.12);
   }
 }
 

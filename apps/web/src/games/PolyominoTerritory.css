@@ -4,7 +4,7 @@
 }
 
 .pt-cell {
-  fill: #2a2532;
+  fill: var(--panel-2);
   cursor: pointer;
 }
 
@@ -61,7 +61,7 @@
 }
 
 .pt-ghost.bad {
-  fill: rgba(217, 83, 79, 0.6);
+  fill: rgba(240, 82, 100, 0.6);
   stroke: var(--bad);
 }
 
@@ -82,7 +82,7 @@
 
 .pt-piece.on {
   border-color: var(--accent-2);
-  background: #3a3342;
+  background: #262336;
 }
 
 .pt-mini {
@@ -94,9 +94,10 @@
   fill: #e0564f;
 }
 
-.pt-leap-on {
-  border-color: #c7a4ff;
-  background: #3b2d52;
+/* Buttons are hexagons: the edge and fill are the --edge / --fill of .btn, not border and background. */
+.btn.pt-leap-on {
+  --edge: #c7a4ff;
+  --fill: #3b2d52;
 }
 
 .pt-swatch {
@@ -108,5 +109,5 @@
 }
 
 .list li.pt-now {
-  background: #2f2838;
+  background: #262336;
 }

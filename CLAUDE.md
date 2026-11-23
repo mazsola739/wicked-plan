@@ -36,7 +36,9 @@ When a rule or number changes, change it in the docs first, then the code.
 ```
 apps/web/src/
   play.ts               the game being played: LocalGame (wasm), tick every 250 ms, move()
-  App.tsx               game picker, game view with "← Games", result panel
+  App.tsx               landing (hero, How it works, catalogue with filters), game view, result panel
+  Emblem.tsx            the Observer emblem (assets/observer.png, the user's art) and the SVG crown mark
+  styles.css            theme tokens (:root) and shared styles; see "Visual identity" in docs/design.md
   games/registry.tsx    game id → screen component (every game is already listed)
   games/<Name>.tsx      one screen per game (default export, props: ScreenProps)
   games/common.tsx      shared UI: Play layout, TimerBar, GameTop, RoundDots, NumberPad, useKeys, KeyHint, nameOf, move

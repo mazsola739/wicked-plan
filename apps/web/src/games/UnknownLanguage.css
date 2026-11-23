@@ -1,7 +1,7 @@
 .ul-wall {
-  background: #2a2532;
+  background: var(--panel-2);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 12px;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .ul-glyph line {
-  stroke: #efe7dc;
+  stroke: var(--silver);
   stroke-width: 2.6;
   stroke-linecap: round;
 }

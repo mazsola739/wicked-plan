@@ -3,7 +3,7 @@
 }
 
 .msq-cell {
-  fill: #2a2532;
+  fill: var(--panel-2);
   stroke: var(--line);
   stroke-width: 2;
 }
@@ -17,7 +17,7 @@
 }
 
 .msq-shape {
-  stroke: #121016;
+  stroke: var(--bg);
   stroke-width: 2;
 }
 

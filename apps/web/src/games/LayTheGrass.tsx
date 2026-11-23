@@ -22,7 +22,7 @@ interface LayTheGrassView {
   over: boolean;
 }
 
-const GRASS = ['#43a85a', '#d4a637', '#4a8fd6', '#c45ab8'];
+const GRASS = ['#43a85a', '#e0b53a', '#4a8fd6', '#c45ab8'];
 
 function normalize(cells: Cell[]): Cell[] {
   const mx = Math.min(...cells.map((c) => c[0]));
@@ -137,7 +137,7 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
               </div>
               {view.next && (
                 <div className="lg-next">
-                  <Piece cells={normalize(view.next)} color="#5d566a" />
+                  <Piece cells={normalize(view.next)} color="#55526c" />
                   <span className="muted small">next</span>
                 </div>
               )}

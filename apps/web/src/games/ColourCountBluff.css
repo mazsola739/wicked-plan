@@ -12,7 +12,7 @@
   flex-direction: column;
   padding: 6px 10px;
   border-radius: 10px;
-  background: #24202b;
+  background: var(--panel-2);
   border: 1px solid var(--line);
 }
 
@@ -29,7 +29,7 @@
 }
 
 .ccb-lives {
-  color: var(--accent);
+  color: var(--bad);
   letter-spacing: 2px;
   min-height: 1.2em;
 }
@@ -64,13 +64,13 @@
 .ccb-card {
   width: 54px;
   height: 76px;
-  border-radius: 9px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
   font-size: 1.3rem;
-  color: #121016;
+  color: #12111a;
   border: 2px solid rgb(255 255 255 / 25%);
   background: var(--c);
 }
@@ -114,14 +114,18 @@
 
 .ccb-pick {
   padding: 0 4px;
-  border-color: var(--c);
   color: var(--c);
   text-transform: capitalize;
 }
 
+/* The hexagon button's edge is --edge (styles.css loads after this file, so two classes). */
+.btn.ccb-pick {
+  --edge: var(--c);
+}
+
 .ccb-pick.on {
-  background: var(--c);
-  color: #121016;
+  --fill: var(--c);
+  color: #12111a;
 }
 
 .ccb-count {

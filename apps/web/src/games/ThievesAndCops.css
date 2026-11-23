@@ -14,8 +14,8 @@
 }
 
 .tc-dot {
-  fill: #f1ecf4;
-  stroke: #1d1a23;
+  fill: var(--text);
+  stroke: var(--panel);
   stroke-width: 4;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .tc-station.can .tc-hit {
-  fill: rgba(212, 166, 55, 0.25);
+  fill: rgba(34, 211, 238, 0.22);
   stroke: var(--accent-2);
   stroke-width: 2;
 }
@@ -41,8 +41,8 @@
 }
 
 .tc-loot {
-  fill: #2fd2c4;
-  stroke: #0d3d39;
+  fill: #e0b53a;
+  stroke: #4a3608;
   stroke-width: 2;
 }
 
@@ -55,13 +55,13 @@
 
 .tc-ghost circle {
   fill: none;
-  stroke: var(--accent);
+  stroke: var(--bad);
   stroke-width: 2;
   stroke-dasharray: 4 3;
 }
 
 .tc-token circle {
-  stroke: #1d1a23;
+  stroke: var(--panel);
   stroke-width: 2;
 }
 
@@ -79,11 +79,11 @@
 }
 
 .tc-token.thief circle {
-  fill: var(--accent);
+  fill: var(--bad);
 }
 
 .tc-token.corrupt circle {
-  fill: #6b5a2a;
+  fill: #85703a;
 }
 
 .tc-token.me circle {
@@ -96,13 +96,13 @@
 }
 
 .tc-ghost text {
-  fill: var(--accent);
+  fill: var(--bad);
   font-size: 10px;
 }
 
 .tc-card {
   padding: 10px 14px;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid var(--line);
   background: var(--panel);
 }
@@ -113,7 +113,7 @@
 
 .tc-card.tc-thief,
 .tc-card.tc-corrupt {
-  border-color: var(--accent);
+  border-color: var(--bad);
 }
 
 .tc-accuse {
@@ -135,11 +135,11 @@
 }
 
 .tc-badge.thief {
-  background: var(--accent);
+  background: var(--bad);
 }
 
 .tc-badge.corrupt {
-  background: #6b5a2a;
+  background: #85703a;
 }
 
 .tc-players li {

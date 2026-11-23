@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Crown, Emblem } from './Emblem';
 import { nameOf } from './games/common';
 import { SCREENS } from './games/registry';
 import { HowToPlay } from './HowTo';
@@ -41,38 +42,184 @@ function seatsText(g: GameInfo): string {
   return seats === 1 ? 'Solo' : `You + ${seats - 1} bot${seats > 2 ? 's' : ''}`;
 }
 
+const STEPS: [string, string][] = [
+  ['Pick a game', 'Fifty-one puzzles, bluffs and duels, from a two-minute count to a long game of alliances.'],
+  ['Read the brief', 'Every game opens with a one-minute How to play. The clock waits while you read.'],
+  ['Outsmart the table', 'Solo puzzles race the clock. Everything else is you against bots that bluff back.'],
+];
+
+type Filter = { kind: string; level: string; seats: string };
+const ANY: Filter = { kind: 'all', level: 'all', seats: 'all' };
+
+function matches(g: GameInfo, f: Filter): boolean {
+  const solo = g.maxPlayers === 1;
+  return (
+    (f.kind === 'all' || g.kind === f.kind) &&
+    (f.level === 'all' || g.difficulty === f.level) &&
+    (f.seats === 'all' || (f.seats === 'solo') === solo)
+  );
+}
+
 function Picker({ games }: { games: GameInfo[] }) {
+  const [filter, setFilter] = useState<Filter>(ANY);
+  const shown = games.filter((g) => matches(g, filter));
+  const random = () => {
+    const pick = shown[Math.floor(Math.random() * shown.length)] ?? games[0];
+    if (pick) start(pick.id);
+  };
   return (
     <div className="screen picker">
-      <header>
-        <h1 className="title">Wicked Plan</h1>
-        <p className="muted">Pick a game. Puzzles, bluffs and duels; in the games for several players you play against bots.</p>
-        <p className="muted small">Based on the idea of the show The Devil's Plan. An unofficial fan project.</p>
+      <nav className="topbar">
+        <a className="brand" href="#top" aria-label="Wicked Plan, top of the page">
+          <Crown className="brand-crown" />
+          <span>Wicked Plan</span>
+        </a>
+        <span className="topnav">
+          <a href="#how">How it works</a>
+          <a href="#games">Games</a>
+        </span>
+      </nav>
+
+      <header className="hero" id="top">
+        <Emblem className="hero-emblem" />
+        <div className="hero-text">
+          <p className="label tagline">A digital arena of strategy</p>
+          <h1 className="title">Wicked Plan</h1>
+          <p className="lead">Puzzles, bluffs and duels. Think ahead, trust carefully: in the games for several players you face bots.</p>
+          <div className="hero-actions">
+            <a className="btn primary" href="#games">
+              Enter the arena
+            </a>
+            <button type="button" className="btn violet" onClick={random}>
+              Random game
+            </button>
+          </div>
+          <p className="muted small credit">Based on the idea of the show The Devil's Plan. An unofficial fan project.</p>
+        </div>
       </header>
-      {KINDS.map(([kind, label]) => {
-        const list = games.filter((g) => g.kind === kind);
-        if (!list.length) return null;
-        return (
-          <section key={kind}>
-            <h2 className="group-title">{label}</h2>
-            <ul className="games">
-              {list.map((g) => (
-                <li key={g.id} className={`game-card ${g.difficulty}`}>
-                  <Snapshot id={g.id} />
-                  <button type="button" className="game-btn" onClick={() => start(g.id)}>
-                    <span className="game-head">
-                      <strong>{g.name}</strong>
-                      <span className="level">{LEVELS[g.difficulty]}</span>
-                    </span>
-                    <span className="game-short">{g.short}</span>
-                    <em>{seatsText(g)}</em>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        );
-      })}
+
+      <Divider />
+
+      <section className="how" id="how" aria-labelledby="how-title">
+        <h2 className="section-title" id="how-title">
+          How it works
+        </h2>
+        <ol className="steps">
+          {STEPS.map(([title, text], i) => (
+            <li key={title}>
+              <span className="step-no">{['I', 'II', 'III'][i]}</span>
+              <strong>{title}</strong>
+              <span className="muted">{text}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <Divider />
+
+      <section className="catalog" id="games" aria-labelledby="games-title">
+        <h2 className="section-title" id="games-title">
+          Games
+        </h2>
+        <Filters filter={filter} onChange={setFilter} />
+        <p className="muted small" aria-live="polite">
+          {shown.length === games.length ? `${games.length} games` : `${shown.length} of ${games.length} games`}
+        </p>
+        {shown.length === 0 && (
+          <div className="empty">
+            <p className="muted">No game fits these filters.</p>
+            <button type="button" className="btn ghost small" onClick={() => setFilter(ANY)}>
+              Clear filters
+            </button>
+          </div>
+        )}
+        {KINDS.map(([kind, label]) => {
+          const list = shown.filter((g) => g.kind === kind);
+          if (!list.length) return null;
+          return (
+            <section key={kind}>
+              <h3 className="group-title">{label}</h3>
+              <ul className="games">
+                {list.map((g) => (
+                  <li key={g.id} className={`game-card ${g.difficulty}`}>
+                    <Snapshot id={g.id} />
+                    <button type="button" className="game-btn" onClick={() => start(g.id)}>
+                      <span className="game-head">
+                        <strong>{g.name}</strong>
+                        <span className="level">{LEVELS[g.difficulty]}</span>
+                      </span>
+                      <span className="game-short">{g.short}</span>
+                      <em>{seatsText(g)}</em>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+      </section>
+
+      <Divider />
+      <footer className="footer muted small">
+        <Crown className="footer-crown" />
+        <span>Wicked Plan · an unofficial fan project · all games run in your browser</span>
+      </footer>
+    </div>
+  );
+}
+
+const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }[] = [
+  { key: 'kind', label: 'Type', options: [['all', 'All'], ...KINDS.map(([k, l]): [string, string] => [k, l.replace(/ games$/, '')])] },
+  {
+    key: 'level',
+    label: 'Difficulty',
+    options: [
+      ['all', 'All'],
+      ['easy', 'Easy'],
+      ['medium', 'Medium'],
+      ['hard', 'Hard'],
+    ],
+  },
+  {
+    key: 'seats',
+    label: 'Players',
+    options: [
+      ['all', 'All'],
+      ['solo', 'Solo'],
+      ['bots', 'With bots'],
+    ],
+  },
+];
+
+function Filters({ filter, onChange }: { filter: Filter; onChange: (f: Filter) => void }) {
+  return (
+    <div className="filters">
+      {FILTERS.map((f) => (
+        <fieldset key={f.key} className="filter">
+          <legend className="label">{f.label}</legend>
+          <div className="chips">
+            {f.options.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className={`chip${value !== 'all' && f.key === 'level' ? ` ${value}` : ''}`}
+                aria-pressed={filter[f.key] === value}
+                onClick={() => onChange({ ...filter, [f.key]: value })}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+    </div>
+  );
+}
+
+function Divider() {
+  return (
+    <div className="divider" aria-hidden="true">
+      <span />
     </div>
   );
 }
@@ -153,6 +300,7 @@ function Results({ info, results }: { info: GameInfo; results: PlayerResult[] })
   const ranked = [...results].sort((a, b) => a.rank - b.rank || b.points - a.points);
   return (
     <section className="card result">
+      <Emblem className="result-emblem" />
       <div className="label">{info.name}</div>
       <h2>{heading(results, mine)}</h2>
       <div className="score big">{mine?.points ?? 0} points</div>

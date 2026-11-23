@@ -28,14 +28,14 @@
 }
 
 .pp-cell {
-  fill: #3a3342;
-  stroke: #5a5166;
+  fill: #262336;
+  stroke: #3a3650;
   stroke-width: 0.03;
   cursor: pointer;
 }
 
 .pp-cell.filled {
-  stroke: #1d1a23;
+  stroke: var(--panel);
   stroke-width: 0.06;
 }
 
@@ -57,7 +57,7 @@
 
 .pp-piece.sel {
   border-color: var(--accent-2);
-  background: #2f2a38;
+  background: var(--line);
 }
 
 .pp-piece.placed {
@@ -75,7 +75,7 @@
 }
 
 .pp-anchor {
-  fill: #121016;
+  fill: var(--bg);
 }
 
 @media (hover: hover) and (pointer: fine) {
