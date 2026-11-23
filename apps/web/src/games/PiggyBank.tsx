@@ -39,21 +39,64 @@ interface PbView {
   log: Opening[];
 }
 
-const Coin = ({ c }: { c: Colour }) => <span className={`piggy-bank-coin ${c === 'white' ? 'piggy-bank-white' : 'piggy-bank-black'}`} />;
+/** A faceted coin (an octagon cut like a gem, a minted diamond in the middle), lit from the top left. */
+const Coin = ({ c }: { c: Colour }) => (
+  <svg viewBox="0 0 20 20" className={`piggy-bank-coin piggy-bank-${c}`} role="img" aria-label={`${c} coin`}>
+    <path className="edge" d="M6.4,1.2 13.6,1.2 18.8,6.4 18.8,13.6 13.6,18.8 6.4,18.8 1.2,13.6 1.2,6.4Z" />
+    <path fill="#fff" fillOpacity=".5" d="M1.2,6.4 6.4,1.2 7.6,4.2 4.2,7.6Z" />
+    <path fill="#fff" fillOpacity=".3" d="M6.4,1.2 13.6,1.2 12.4,4.2 7.6,4.2Z M7,10 10,7 10,10Z" />
+    <path fill="#fff" fillOpacity=".18" d="M1.2,6.4 4.2,7.6 4.2,12.4 1.2,13.6Z M13.6,1.2 18.8,6.4 15.8,7.6 12.4,4.2Z" />
+    <path fill="#000" fillOpacity=".12" d="M10,7 13,10 10,10Z" />
+    <path fill="#000" fillOpacity=".15" d="M18.8,6.4 18.8,13.6 15.8,12.4 15.8,7.6Z M1.2,13.6 4.2,12.4 7.6,15.8 6.4,18.8Z" />
+    <path fill="#000" fillOpacity=".25" d="M13.6,18.8 6.4,18.8 7.6,15.8 12.4,15.8Z M10,13 7,10 10,10Z" />
+    <path fill="#000" fillOpacity=".35" d="M18.8,13.6 13.6,18.8 12.4,15.8 15.8,12.4Z M13,10 10,13 10,10Z" />
+    <path fill="#fff" d="M5.6,5.8 6.4,6.6 5.6,7.4 4.8,6.6Z" />
+  </svg>
+);
 
+/** The legs' x positions; each leg is lit on its left half, shaded on its right, with a dark hoof. */
+const LEGS = [44, 66, 94, 116];
+
+/** A faceted pink pig facing right, lit from the top left; the count sits on its side. */
 function Pig({ coins, open }: { coins: number; open: boolean }) {
   return (
     <svg className={`piggy-bank-pig${open ? ' open' : ''}`} viewBox="0 0 160 110" role="img" aria-label={`Piggy bank, ${coins} coins`}>
-      <ellipse cx="80" cy="60" rx="58" ry="40" className="body" />
-      <path d="M44 30 L52 8 L64 26Z" className="ear" />
-      <ellipse cx="136" cy="62" rx="14" ry="12" className="snout" />
-      <circle cx="132" cy="60" r="2.5" className="dark" />
-      <circle cx="140" cy="60" r="2.5" className="dark" />
-      <circle cx="112" cy="44" r="4" className="dark" />
-      <rect x="62" y="22" width="34" height="6" rx="3" className="dark" />
-      {[44, 66, 94, 116].map((x) => (
-        <rect key={x} x={x - 7} y="90" width="14" height="16" rx="4" className="body" />
+      <path d="M88,22 96,6 105,22Z" />
+      <path fill="#000" fillOpacity=".3" d="M88,22 96,6 105,22Z" />
+      <path d="M24,50 12,41 8,49 15,52 10,58 22,61Z" />
+      <path fill="#000" fillOpacity=".2" d="M8,49 15,52 10,58 22,61Z" />
+      {LEGS.map((x) => (
+        <g key={x}>
+          <path d={`M${x - 7},84 ${x + 7},84 ${x + 6},106 ${x - 6},106Z`} />
+          <path fill="#fff" fillOpacity=".2" d={`M${x - 7},84 ${x},84 ${x},106 ${x - 6},106Z`} />
+          <path fill="#000" fillOpacity=".25" d={`M${x},84 ${x + 7},84 ${x + 6},106 ${x},106Z`} />
+          <path fill="#000" fillOpacity=".3" d={`M${x - 6.2},101 ${x + 6.2},101 ${x + 6},106 ${x - 6},106Z`} />
+        </g>
       ))}
+      <path d="M24,46 40,28 70,19 102,19 124,29 136,44 137,76 124,90 96,98 60,99 34,91 22,72Z" />
+      <path fill="#fff" fillOpacity=".42" d="M40,28 70,19 58,40Z" />
+      <path fill="#fff" fillOpacity=".3" d="M24,46 40,28 58,40Z" />
+      <path fill="#fff" fillOpacity=".22" d="M70,19 102,19 96,38 58,40Z" />
+      <path fill="#fff" fillOpacity=".12" d="M102,19 124,29 96,38Z M24,46 58,40 22,72Z M58,40 96,38 80,74Z" />
+      <path fill="#000" fillOpacity=".12" d="M136,44 137,76 120,58Z M22,72 80,74 34,91Z" />
+      <path fill="#000" fillOpacity=".2" d="M34,91 80,74 60,99Z M96,38 120,58 80,74Z" />
+      <path fill="#000" fillOpacity=".26" d="M60,99 80,74 96,98Z" />
+      <path fill="#000" fillOpacity=".32" d="M96,98 80,74 120,58 124,90Z" />
+      <path fill="#000" fillOpacity=".35" d="M124,90 120,58 137,76Z" />
+      <path d="M102,23 113,4 125,31Z" />
+      <path fill="#fff" fillOpacity=".38" d="M102,23 113,4 113,27Z" />
+      <path fill="#000" fillOpacity=".22" d="M113,4 125,31 113,27Z" />
+      <path d="M130,49 144,47 152,55 153,68 146,76 131,75Z" />
+      <path fill="#fff" fillOpacity=".36" d="M130,49 144,47 142,61Z" />
+      <path fill="#fff" fillOpacity=".14" d="M144,47 152,55 142,61Z M131,75 130,49 142,61Z" />
+      <path fill="#000" fillOpacity=".14" d="M152,55 153,68 142,61Z" />
+      <path fill="#000" fillOpacity=".32" d="M153,68 146,76 142,61Z" />
+      <path fill="#000" fillOpacity=".22" d="M146,76 131,75 142,61Z" />
+      <path
+        className="eye"
+        d="M114,39.5 118,42 118,46 114,48.5 110,46 110,42Z M62,25 96,24 95,29 63,30Z M138,57 140,59.5 139,64 136.5,61.5Z M147,57 149,59.5 148,64 145.5,61.5Z"
+      />
+      <path fill="#fff" d="M112.6,41.6 113.6,42.6 112.6,43.6 111.6,42.6Z M47,31 48.4,32.4 47,33.8 45.6,32.4Z" />
       <text x="78" y="72" className="count">
         {coins}
       </text>

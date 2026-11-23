@@ -54,34 +54,102 @@ const GROUNDS = [
   'color-mix(in srgb, var(--g-pink) 12%, var(--board))',
 ];
 
-function polygon(x: number, y: number, r: number, n: number, turn: number, inner?: number): string {
-  const pts: string[] = [];
+type Pt = [number, number];
+
+function polygon(x: number, y: number, r: number, n: number, turn: number, inner?: number): Pt[] {
+  const pts: Pt[] = [];
   const steps = inner ? n * 2 : n;
   for (let i = 0; i < steps; i++) {
     const a = turn + (i * 2 * Math.PI) / steps;
     const rr = inner && i % 2 ? r * inner : r;
-    pts.push(`${(x + rr * Math.cos(a)).toFixed(1)},${(y + rr * Math.sin(a)).toFixed(1)}`);
+    pts.push([x + rr * Math.cos(a), y + rr * Math.sin(a)]);
   }
-  return pts.join(' ');
+  return pts;
 }
 
-function ShapeArt({ s }: { s: Shape }) {
-  const fill = COLOURS[s.colour];
+const points = (pts: Pt[]) => pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+
+/** The corners of a shape round its centre `cy` (the circle as a 12-gon, for its facets). */
+function corners(s: Shape, cy: number): Pt[] {
   const up = -Math.PI / 2;
+  const h = s.r * 0.85;
+  const c = s.r * 0.2;
   switch (s.kind) {
     case 0:
-      return <circle cx={s.x} cy={s.y} r={s.r} style={{ fill }} />;
-    case 1:
-      return <rect x={s.x - s.r * 0.85} y={s.y - s.r * 0.85} width={s.r * 1.7} height={s.r * 1.7} rx={s.r * 0.12} style={{ fill }} />;
+      return polygon(s.x, s.y, s.r, 12, up);
+    case 1: {
+      const cut: Pt[] = [
+        [h - c, -h],
+        [h, c - h],
+        [h, h - c],
+        [h - c, h],
+        [c - h, h],
+        [-h, h - c],
+        [-h, c - h],
+        [c - h, -h],
+      ];
+      return cut.map(([x, y]) => [s.x + x, s.y + y]);
+    }
     case 2:
-      return <polygon points={polygon(s.x, s.y + s.r * 0.15, s.r * 1.05, 3, up)} style={{ fill }} />;
+      return polygon(s.x, cy, s.r * 1.05, 3, up);
     case 3:
-      return <polygon points={polygon(s.x, s.y, s.r * 1.05, 5, up, 0.45)} style={{ fill }} />;
+      return polygon(s.x, s.y, s.r * 1.05, 5, up, 0.45);
     case 4:
-      return <polygon points={polygon(s.x, s.y, s.r, 4, up)} style={{ fill }} />;
+      return polygon(s.x, s.y, s.r, 4, up);
     default:
-      return <polygon points={polygon(s.x, s.y, s.r, 6, 0)} style={{ fill }} />;
+      return polygon(s.x, s.y, s.r, 6, 0);
   }
+}
+
+/**
+ * A shape cut like a gem, lit from the top left as the animals of Animal Tile Auction: one facet
+ * per edge, white or black by how much it faces the light, a flat top (the star's facets meet in
+ * the middle) and a white glint. The facets follow only kind, place and size, never the colour,
+ * so the same shape is cut the same in both pictures.
+ */
+function ShapeArt({ s }: { s: Shape }) {
+  const fill = COLOURS[s.colour];
+  const cy = s.kind === 2 ? s.y + s.r * 0.15 : s.y;
+  const p = corners(s, cy);
+  const table = s.kind === 3 ? 0 : 0.5;
+  const top = p.map(([x, y]): Pt => [s.x + (x - s.x) * table, cy + (y - cy) * table]);
+  const gx = s.x - s.r * 0.2;
+  const gy = s.y - s.r * 0.22;
+  const g = s.r * 0.08;
+  return (
+    <>
+      {s.kind === 0 ? <circle cx={s.x} cy={s.y} r={s.r} style={{ fill }} /> : <polygon points={points(p)} style={{ fill }} />}
+      {p.map((a, i) => {
+        const j = (i + 1) % p.length;
+        const b = p[j] ?? a;
+        const ex = b[0] - a[0];
+        const ey = b[1] - a[1];
+        // The edge's normal (ey, -ex), turned away from the centre, against the light from the top left.
+        const side = Math.sign(ey * ((a[0] + b[0]) / 2 - s.x) - ex * ((a[1] + b[1]) / 2 - cy));
+        const light = (side * (0.8 * ex - 0.6 * ey)) / Math.hypot(ex, ey);
+        const facet: Pt[] = table ? [a, b, top[j] ?? b, top[i] ?? a] : [a, b, [s.x, cy]];
+        return (
+          <polygon
+            // biome-ignore lint/suspicious/noArrayIndexKey: a shape's facets are fixed
+            key={i}
+            points={points(facet)}
+            fill={light > 0 ? '#fff' : '#000'}
+            fillOpacity={light > 0 ? 0.1 + 0.4 * light : 0.12 - 0.23 * light}
+          />
+        );
+      })}
+      {table > 0 && <polygon points={points(top)} fill="#fff" fillOpacity={0.15} />}
+      <polygon
+        points={points([
+          [gx, gy - g],
+          [gx + g, gy],
+          [gx, gy + g],
+          [gx - g, gy],
+        ])}
+        fill="#fff"
+      />
+    </>
+  );
 }
 
 function Picture({

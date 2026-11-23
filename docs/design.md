@@ -25,7 +25,13 @@ The earlier base-building mobile game was dropped on 2026-11-22.
   nested-diamond eye, a violet slash eye, a zigzag grin), a W crown above and ring arcs around it.
   The crown alone is the small mark (top bar, footer, favicon), drawn in SVG in `Emblem.tsx`.
   From the user's poster (2026-11-23): `hood.webp`, the hooded Observer large and without crown or
-  rings (the landing page), and `face.webp`, its LED eyes and grin alone on transparent (the game bar).
+  rings (the landing page, the How to play monitor, the results), and `face.webp`, its LED eyes and
+  grin alone on transparent (the peeking face).
+- **Game icons** (the user's art, 2026-11-23): one neon icon per game, `assets/icons/<game-id>.webp`
+  (256 px, transparent), shown by `GameIcon.tsx`, loaded only when in view. It is the big picture
+  on the game's card (the still of the game stays behind it, faint, like a watermark), small beside
+  the name on the card and in the sidebar's game list, beside the title in the game (`GameTop`),
+  and on the How to play monitor, taking turns with the Observer (a flicker at each switch).
 - **Palette:** near-black background, dark violet-grey surfaces, **cyan** for highlights and the main
   action, **violet** for fills and the second action, **silver** for the title and line art.
   Difficulty keeps green / yellow / red.
@@ -43,6 +49,15 @@ The earlier base-building mobile game was dropped on 2026-11-22.
     dark glass with a coloured edge. Dark glass is for neutral things: number cards, playing cards.
   - **Seats** use one order everywhere: `--seat-0` is you (cyan), then violet, pink, yellow, green,
     orange, blue, white (`--seat-1`…`--seat-7`).
+  - **Icons are faceted** (decided 2026-11-23, after the user picked the faceted animals of
+    Animal Tile Auction, the reference): every pictogram a game draws (animals, card suits,
+    jewels, monsters, pieces, objects) is a low-poly SVG in its colour, like a cut gem: a bold
+    silhouette split into angular facets, lit from the top left (white overlays at 10–50%
+    opacity on the upper-left facets, black at 12–35% on the lower-right), dark cut-outs in the
+    page's near-black (`eye`), and one or two tiny white diamond glints. It must still read at
+    about 25 px. Board squares that *are* a colour can be cut stones in CSS too (a flat table and
+    four lit bevels; Hidden Rules Race), and pieces small cut gems. Grid lines, charts, numbers
+    and text stay as they are.
   - **Surfaces:** no felt, wood, soil or sand; boards are `--board` (near-black) with thin silver
     `--board-line` lines. Cards and tiles are dark glass (`--glass`, edge `--glass-edge`) with light
     text and neon symbols, like the floating cards of the key art. Glow is soft and only on what
@@ -51,16 +66,23 @@ The earlier base-building mobile game was dropped on 2026-11-22.
   unseen host watches and speaks to you over a live feed. Our own wording and look, no lines or
   images from films.
   - Opening a game switches it on like an old monitor (a short CRT flash, never blocking).
-  - How to play is a **transmission from the Observer**: the emblem on a scan-lined "monitor", a red
-    LIVE dot (it blinks a few times, then stays) and a channel tag (CH and the game's catalogue
-    number; nothing counts up, the game waits). The Goal line types itself out, the bullets follow;
+  - How to play is a **transmission from the Observer**: the hooded Observer on a scan-lined
+    "monitor", a red LIVE dot (it blinks a few times, then stays) and a channel tag, always **CH 08**
+    (the user's nod to another show; only the number, never a name; nothing counts up, the game
+    waits). The Goal line types itself out, the bullets follow;
     a tap or any key shows everything at once.
   - **The Observer watches**: on the landing page the hooded Observer's signal glitches every 7–16 s
     (one soft pulse and a cyan/violet split, under three flashes per second, WCAG 2.3.1). During a
-    game only its **face** is in the bar (`face.webp`), without the hood, and mostly not at all:
-    every 9–20 s its piercing gaze shines through the dark: the face surfaces blurred and dim,
-    sharpens and glows, flickers like a faulty light, glances aside and fades away, as if peeking
-    at you.
+    game only its **face** is there (`face.webp`), without the hood, behind the game like a
+    background (never taking a tap), and mostly not at all. Only play time counts (not while the
+    rules are open or after the end); after 10 minutes of play it all starts again.
+    - **Once a game**, at a random moment 25 s–2.5 min in, large in the top-right corner (4 s): its
+      piercing gaze comes in like a weak broadcast: far, small, blurred and looking away toward the
+      game, it **turns to face you** and keeps coming closer as it sharpens, scan lines over it; the
+      signal tears sideways once and blinks to a line once; it flickers and fades still staring.
+    - **3–5 times**, at random moments in the first 4 minutes (at least 15 s apart), small,
+      somewhere in the play area where bare background shows (2.6 s): it lifts its head, looks at
+      you and lowers it again.
   - **Replays** (decided 2026-11-23): when anyone (you or a bot) makes a big move, the game freezes
     on that moment for about 3 s under a TV-style REPLAY banner: whose move it was and one line
     on what happened. The game clock stands still meanwhile (no ticks, bots wait); a tap or any key
@@ -68,8 +90,11 @@ The earlier base-building mobile game was dropped on 2026-11-22.
     with the lowest card, a perfect bid, a winning line...), rare enough to stay special, and its
     rules page lists them under "Replay moments". A replay never shows what that seat could not see.
   - With `prefers-reduced-motion` none of this moves: no flash, no typing, no glitches.
-- **Landing:** the hooded Observer and the title on top, a short "How it works", then the catalogue
-  with a search field and filters (type, category, difficulty, solo or with bots). No sign-in, lobby or leaderboard until rooms exist.
+- **Landing:** the hooded Observer and the title on top (with a yellow "Under construction" pill
+  while the page is shown publicly as work in progress), a short "How it works", then the
+  catalogue with a search field and filters (type, category, difficulty, solo or with bots): from
+  1024 px a sticky sidebar beside the cards, below that folded behind a Filters button that counts
+  the active filters. No sign-in, lobby or leaderboard until rooms exist.
 
 ## Open questions (the user decides)
 

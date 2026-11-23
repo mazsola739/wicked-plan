@@ -8,6 +8,12 @@
   user-select: none;
 }
 
+/* The hooded figure from the poster: a square on black, the hood's hem fading into the dark. */
+.emblem.hood {
+  aspect-ratio: 1;
+  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+}
+
 .crown {
   display: inline-block;
   overflow: visible;
@@ -113,12 +119,38 @@
   }
 }
 
-/* The peeking face: the LED eyes and grin alone (transparent around them); invisible until it peeks. */
+/* The peeking face: the LED eyes and grin alone (transparent around them), behind the game (the
+   game screen is its own stacking context, see .game-screen); invisible until it peeks. It never
+   takes a tap. Big: in the top-right corner of the window. Small: wherever Peeker found bare
+   background (left/top set inline). */
 .peeker {
-  display: block;
-  width: 80px;
-  aspect-ratio: 264 / 174;
+  position: fixed;
+  z-index: -1;
+  aspect-ratio: 432 / 286;
+  pointer-events: none;
   opacity: 0;
+}
+
+.peeker.big {
+  top: 6px;
+  right: 6px;
+  width: 62vw;
+  transform-origin: 100% 0;
+}
+
+.peeker.small {
+  width: 84px;
+  transform-origin: 50% 100%;
+}
+
+@media (min-width: 720px) {
+  .peeker.big {
+    width: clamp(300px, 34vw, 480px);
+  }
+
+  .peeker.small {
+    width: 112px;
+  }
 }
 
 .peeker img {
@@ -127,58 +159,126 @@
   height: 100%;
 }
 
-.peeker.peek {
-  animation: px-peek 3.4s ease-in-out;
+/* Scan lines over the face, as on a weak broadcast. */
+.peeker::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgb(8 8 12 / 0.5) 0 1px, transparent 1px 3px);
 }
 
-.peeker.peek img {
-  animation: px-glance 3.4s ease-in-out;
+.peeker.big.peek {
+  animation: px-peek 4s linear;
 }
 
-/* Surfaces blurred and dim, the gaze sharpens, two soft flickers (well under three a second), fades. */
+.peeker.big.peek img {
+  animation: px-turn 4s ease-in-out;
+}
+
+.peeker.small.peek {
+  animation: px-look 2.6s ease-in-out;
+}
+
+/* The small one: head down, it lifts its head, looks at you for a moment and lowers it again. */
+@keyframes px-look {
+  0% {
+    opacity: 0;
+    filter: blur(2px);
+    transform: perspective(500px) translateY(12%) rotateX(-62deg);
+  }
+  28% {
+    opacity: 0.7;
+    filter: blur(0);
+    transform: perspective(500px) translateY(0) rotateX(0);
+  }
+  68% {
+    opacity: 0.7;
+    filter: blur(0);
+    transform: perspective(500px) translateY(0) rotateX(0);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(2px);
+    transform: perspective(500px) translateY(12%) rotateX(-62deg);
+  }
+}
+
+/* Like a weak broadcast coming in, the face coming closer all the time: far, small and blurred, it
+   sharpens; the signal tears sideways once and blinks to a line once; it flickers and fades while
+   still near. Three dips in 4 s, well under three flashes a second (WCAG 2.3.1). */
 @keyframes px-peek {
   0% {
     opacity: 0;
-    filter: blur(4px);
+    filter: blur(5px);
+    transform: scale(0.65);
   }
-  14% {
-    opacity: 0.35;
+  10% {
+    opacity: 0.4;
     filter: blur(2px);
   }
-  19% {
+  14% {
     opacity: 0.12;
   }
-  27% {
-    opacity: 0.9;
+  22% {
+    opacity: 0.8;
     filter: blur(0);
   }
-  70% {
-    opacity: 0.9;
+  35% {
+    transform: scale(1);
+  }
+  48% {
+    transform: translateX(0) skewX(0) scale(1.1);
+  }
+  49.5% {
+    transform: translateX(-14px) skewX(-8deg) scale(1.11);
+  }
+  51% {
+    transform: translateX(8px) skewX(5deg) scale(1.11);
+  }
+  52.5% {
+    transform: translateX(0) skewX(0) scale(1.12);
+  }
+  61% {
+    clip-path: inset(0);
+  }
+  62.5% {
+    clip-path: inset(47% 0 47% 0);
+  }
+  64.5% {
+    clip-path: inset(0);
+  }
+  80% {
+    opacity: 0.8;
     filter: blur(0);
   }
-  77% {
+  86% {
     opacity: 0.3;
   }
-  83% {
+  91% {
     opacity: 0.65;
     filter: blur(1px);
   }
   100% {
     opacity: 0;
-    filter: blur(4px);
+    filter: blur(5px);
+    transform: scale(1.4);
   }
 }
 
-@keyframes px-glance {
+/* It appears looking away, toward the game, then turns to face you (a little past, then settles). */
+@keyframes px-turn {
   0% {
-    transform: translateX(-3px);
+    transform: perspective(1100px) rotateY(-70deg);
   }
-  40% {
-    transform: translateX(0);
+  16% {
+    transform: perspective(1100px) rotateY(-60deg);
   }
-  62%,
+  34% {
+    transform: perspective(1100px) rotateY(6deg);
+  }
+  42%,
   100% {
-    transform: translateX(4px);
+    transform: perspective(1100px) rotateY(0);
   }
 }
 

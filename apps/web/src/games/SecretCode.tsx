@@ -61,11 +61,33 @@ const PIPS: Record<number, [number, number][]> = {
   ],
 };
 
+/**
+ * A die face cut like a gem (docs/design.md, "Icons are faceted"): bevels lit from the top left,
+ * a white glint, hexagonal pips shaded on their lower right. An empty slot is a dashed outline.
+ */
 function Die({ face }: { face: number | null }) {
   return (
     <svg className={`sc-die${face ? '' : ' empty'}`} viewBox="0 0 40 40" aria-label={face ? `${face}` : 'empty'} role="img">
-      <rect x="2" y="2" width="36" height="36" rx="8" />
-      {face && PIPS[face]?.map(([x, y]) => <circle key={`${x}${y}`} cx={x * 10} cy={y * 10} r="3.6" />)}
+      {face ? (
+        <>
+          <path className="sc-die-body" d="M7,2 33,2 38,7 38,33 33,38 7,38 2,33 2,7Z" />
+          <path fill="#fff" fillOpacity=".5" d="M2,7 7,2 9,5 5,9Z" />
+          <path fill="#fff" fillOpacity=".4" d="M7,2 33,2 31,5 9,5Z" />
+          <path fill="#fff" fillOpacity=".3" d="M2,33 2,7 5,9 5,31Z" />
+          <path fill="#000" fillOpacity=".25" d="M38,7 38,33 35,31 35,9Z" />
+          <path fill="#000" fillOpacity=".3" d="M33,38 7,38 9,35 31,35Z" />
+          <path fill="#000" fillOpacity=".35" d="M38,33 33,38 31,35 35,31Z" />
+          <path fill="#fff" d="M5.2,4.1 6.3,5.2 5.2,6.3 4.1,5.2Z" />
+          {PIPS[face]?.map(([x, y]) => (
+            <g key={`${x}${y}`} transform={`translate(${x * 10} ${y * 10})`}>
+              <path className="sc-pip" d="M0,-4.1 3.55,-2.05 3.55,2.05 0,4.1 -3.55,2.05 -3.55,-2.05Z" />
+              <path fill="#000" fillOpacity=".3" d="M3.55,-2.05 3.55,2.05 0,4.1 -3.55,2.05Z" />
+            </g>
+          ))}
+        </>
+      ) : (
+        <rect x="2" y="2" width="36" height="36" rx="8" />
+      )}
     </svg>
   );
 }

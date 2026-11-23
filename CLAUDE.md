@@ -38,6 +38,7 @@ apps/web/src/
   play.ts               the game being played: LocalGame (wasm), tick every 250 ms, move()
   App.tsx               landing (hero, How it works, catalogue with filters), game view, result panel
   Emblem.tsx            the Observer (the user's art in assets/: observer.png, hood.webp, face.webp), the peeking face, the SVG crown mark
+  GameIcon.tsx          each game's neon icon (the user's art, assets/icons/<game-id>.webp)
   styles.css            theme tokens (:root) and shared styles; see "Visual identity" in docs/design.md
   games/registry.tsx    game id → screen component (every game is already listed)
   games/<Name>.tsx      one screen per game (default export, props: ScreenProps)

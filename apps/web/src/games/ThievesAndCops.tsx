@@ -50,6 +50,36 @@ const ROLE_TEXT: Record<Role, string> = {
   corrupt: 'Corrupt officer: act like police, but help the thieves win. You never catch anyone.',
 };
 
+// Faceted pieces (docs/design.md, "Icons are faceted"), lit from the top left.
+const pt = (a: number, r: number) => `${(r * Math.cos(a)).toFixed(1)},${(r * Math.sin(a)).toFixed(1)}`;
+const OCT = (r: number) => Array.from({ length: 8 }, (_, i) => pt(Math.PI / 8 + (Math.PI / 4) * i, r));
+// An agent token is a cut octagon: each bevel facet white toward the light, black away from it.
+const OUTER = OCT(13);
+const INNER = OCT(8.5);
+const TOKEN_EDGE = `M${OUTER.join(' ')}Z`;
+const TOKEN_FACETS = OUTER.flatMap((p, i) => {
+  const j = (i + 1) % 8;
+  const d = Math.cos((Math.PI / 4) * j + (3 * Math.PI) / 4); // this facet faces 45° × j
+  if (Math.abs(d) < 0.2) return [];
+  const light = d > 0 ? { fill: '#fff', fillOpacity: 0.1 + 0.35 * d } : { fill: '#000', fillOpacity: 0.12 + 0.23 * -d };
+  return [{ d: `M${p} ${OUTER[j]} ${INNER[j]} ${INNER[i]}Z`, ...light }];
+});
+
+/** The loot: a gold jewel cut like a gem, centred on a station. */
+function Loot({ x, y }: { x: number; y: number }) {
+  return (
+    <g className="tc-loot" transform={`translate(${x} ${y})`}>
+      <path className="edge" d="M-5,-8 5,-8 10,-3 0,10 -10,-3Z" />
+      <path fill="#fff" fillOpacity=".5" d="M-5,-8 5,-8 3,-3 -3,-3Z" />
+      <path fill="#fff" fillOpacity=".3" d="M-10,-3 -5,-8 -3,-3Z" />
+      <path fill="#fff" fillOpacity=".15" d="M5,-8 10,-3 3,-3Z M-10,-3 -3,-3 0,10Z" />
+      <path fill="#000" fillOpacity=".12" d="M-3,-3 3,-3 0,10Z" />
+      <path fill="#000" fillOpacity=".32" d="M3,-3 10,-3 0,10Z" />
+      <path fill="#fff" d="M-3,-7 -2,-6 -3,-5 -4,-6Z" />
+    </g>
+  );
+}
+
 function names(line: string): string {
   return line.replace(/\b(you|bot-\d+)\b/g, (id) => nameOf(id));
 }
@@ -108,9 +138,7 @@ export default function ThievesAndCops({ view }: ScreenProps) {
               >
                 <circle cx={s.x} cy={s.y} r={can ? 24 : 15} className="tc-hit" />
                 <circle cx={s.x} cy={s.y} r={13} className="tc-dot" />
-                {v.loot?.includes(i) && (
-                  <rect x={s.x - 6} y={s.y - 6} width={12} height={12} className="tc-loot" transform={`rotate(45 ${s.x} ${s.y})`} />
-                )}
+                {v.loot?.includes(i) && <Loot x={s.x} y={s.y} />}
                 {taken && (
                   <text x={s.x} y={s.y + 5} className="tc-taken">
                     ✕
@@ -142,11 +170,17 @@ export default function ThievesAndCops({ view }: ScreenProps) {
               const y = s.y - 28;
               const cls = a.role === 'thief' ? 'thief' : a.role === 'corrupt' ? 'corrupt' : 'police';
               return (
-                <g key={a.id} className={`tc-token ${cls}${a.index === v.me ? ' me' : ''}${a.caught ? ' caught' : ''}`}>
-                  <circle cx={x} cy={y} r={12} />
-                  <text x={x} y={y + 4}>
-                    {nameOf(a.id)[0]}
-                  </text>
+                <g
+                  key={a.id}
+                  className={`tc-token ${cls}${a.index === v.me ? ' me' : ''}${a.caught ? ' caught' : ''}`}
+                  transform={`translate(${x} ${y})`}
+                >
+                  <path className="edge" d={TOKEN_EDGE} />
+                  {TOKEN_FACETS.map((f) => (
+                    <path key={f.d} {...f} />
+                  ))}
+                  <path fill="#fff" d="M-7,-8 -6,-7 -7,-6 -8,-7Z" />
+                  <text y={4}>{nameOf(a.id)[0]}</text>
                 </g>
               );
             });

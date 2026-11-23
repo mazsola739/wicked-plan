@@ -66,11 +66,66 @@ const rankName = (r: Rank) => RANKS.find(([k]) => k === r)?.[1] ?? r;
 const COLOURS = ['red', 'blue', 'green', 'gold'];
 const ACTIONS: Record<Action, string> = { ante: 'ante', check: 'check', call: 'call', raise: 'raise', fold: 'fold' };
 
+/**
+ * The faceted suit mark in the card's colour (red circle, blue square, green triangle, gold
+ * diamond), cut like a gem: a flat table in a bevel lit from the top left, a white glint.
+ */
+function Suit({ suit }: { suit: number }) {
+  return (
+    <svg viewBox="0 0 20 20" role="img" aria-label={COLOURS[suit]}>
+      {suit === 0 && (
+        <>
+          <path d="M6.4,1.2 13.6,1.2 18.8,6.4 18.8,13.6 13.6,18.8 6.4,18.8 1.2,13.6 1.2,6.4Z" />
+          <path fill="#fff" fillOpacity=".5" d="M1.2,6.4 6.4,1.2 7.6,4.2 4.2,7.6Z" />
+          <path fill="#fff" fillOpacity=".32" d="M6.4,1.2 13.6,1.2 12.4,4.2 7.6,4.2Z" />
+          <path fill="#fff" fillOpacity=".18" d="M1.2,6.4 4.2,7.6 4.2,12.4 1.2,13.6Z M13.6,1.2 18.8,6.4 15.8,7.6 12.4,4.2Z" />
+          <path fill="#fff" fillOpacity=".12" d="M4.2,7.6 7.6,4.2 12.4,4.2 15.8,7.6 4.2,12.4Z" />
+          <path fill="#000" fillOpacity=".15" d="M18.8,6.4 18.8,13.6 15.8,12.4 15.8,7.6Z M1.2,13.6 4.2,12.4 7.6,15.8 6.4,18.8Z" />
+          <path fill="#000" fillOpacity=".25" d="M13.6,18.8 6.4,18.8 7.6,15.8 12.4,15.8Z" />
+          <path fill="#000" fillOpacity=".35" d="M18.8,13.6 13.6,18.8 12.4,15.8 15.8,12.4Z" />
+          <path fill="#fff" d="M6.4,5.4 7.4,6.4 6.4,7.4 5.4,6.4Z" />
+        </>
+      )}
+      {suit === 1 && (
+        <>
+          <path d="M2,2 18,2 18,18 2,18Z" />
+          <path fill="#fff" fillOpacity=".4" d="M2,2 18,2 14,6 6,6Z" />
+          <path fill="#fff" fillOpacity=".2" d="M2,2 6,6 6,14 2,18Z" />
+          <path fill="#fff" fillOpacity=".12" d="M6,6 14,6 6,14Z" />
+          <path fill="#000" fillOpacity=".2" d="M18,2 18,18 14,14 14,6Z" />
+          <path fill="#000" fillOpacity=".35" d="M2,18 6,14 14,14 18,18Z" />
+          <path fill="#fff" d="M7.5,6.6 8.4,7.5 7.5,8.4 6.6,7.5Z" />
+        </>
+      )}
+      {suit === 2 && (
+        <>
+          <path d="M10,1 19.5,18 0.5,18Z" />
+          <path fill="#fff" fillOpacity=".42" d="M10,1 0.5,18 5.9,14.5 10,7.2Z" />
+          <path fill="#fff" fillOpacity=".12" d="M10,7.2 10,14.5 5.9,14.5Z" />
+          <path fill="#000" fillOpacity=".14" d="M10,1 19.5,18 14.1,14.5 10,7.2Z" />
+          <path fill="#000" fillOpacity=".35" d="M19.5,18 0.5,18 5.9,14.5 14.1,14.5Z" />
+          <path fill="#fff" d="M8.3,9.4 9.1,10.2 8.3,11 7.5,10.2Z" />
+        </>
+      )}
+      {suit === 3 && (
+        <>
+          <path d="M10,0.5 19.5,10 10,19.5 0.5,10Z" />
+          <path fill="#fff" fillOpacity=".45" d="M0.5,10 10,0.5 10,5.5 5.5,10Z" />
+          <path fill="#fff" fillOpacity=".15" d="M10,0.5 19.5,10 14.5,10 10,5.5Z M5.5,10 10,5.5 10,14.5Z" />
+          <path fill="#000" fillOpacity=".12" d="M10,19.5 0.5,10 5.5,10 10,14.5Z" />
+          <path fill="#000" fillOpacity=".35" d="M19.5,10 10,19.5 10,14.5 14.5,10Z" />
+          <path fill="#fff" d="M7.6,8.2 8.4,9 7.6,9.8 6.8,9Z" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 function PlayingCard({ c, small }: { c: number; small?: boolean }) {
   return (
     <span className={`sniper-holdem-card ${COLOURS[Math.floor(c / 10)]}${small ? ' small' : ''}`}>
       {(c % 10) + 1}
-      <i />
+      <Suit suit={Math.floor(c / 10)} />
     </span>
   );
 }

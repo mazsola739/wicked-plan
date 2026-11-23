@@ -118,17 +118,19 @@
 }
 
 .rww-shackle {
-  fill: none;
-  stroke: var(--muted);
-  stroke-width: 3;
+  fill: var(--muted);
 }
 
 .rww-body {
   fill: var(--line);
 }
 
+.rww-lock .eye {
+  fill: var(--bg);
+}
+
 .rww-lock.open .rww-shackle {
-  stroke: var(--accent-2);
+  fill: var(--accent-2);
 }
 
 .rww-lock.open .rww-body {

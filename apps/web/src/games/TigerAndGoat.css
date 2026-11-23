@@ -21,16 +21,11 @@
   fill: color-mix(in srgb, var(--silver) 45%, transparent);
 }
 
-.tiger-and-goat-point text {
-  font-size: 0.3px;
-  font-weight: 800;
-  text-anchor: middle;
-  dominant-baseline: central;
+.tiger-and-goat-point .eye {
   fill: var(--bg);
-  pointer-events: none;
 }
 
-/* Tigers and goats are coloured by side: yours seat 0, the opponent's seat 1. */
+/* Tigers and goats are faceted heads coloured by side: yours seat 0, the opponent's seat 1. */
 .tiger-and-goat-point.tiger .stone,
 .tiger-and-goat-point.goat .stone {
   fill: var(--seat-1);
@@ -51,9 +46,11 @@
   fill: color-mix(in srgb, var(--cyan) 22%, transparent);
 }
 
-.tiger-and-goat-point.sel .stone {
+/* The selected piece gets a ring around its head. */
+.tiger-and-goat-point.sel .hit {
   stroke: var(--text);
-  stroke-width: 0.08;
+  stroke-width: 0.06;
+  stroke-dasharray: none;
 }
 
 .tiger-and-goat-tabs {

@@ -29,12 +29,59 @@ interface BingoView {
 
 const NAMES = ['circle', 'triangle', 'star'];
 
+/**
+ * A shape as a faceted gem in its colour, lit from the top left (white and black overlays, a white
+ * glint). Unmarked cells show only its outline; the facets appear once it is marked.
+ */
 function Shape({ shape }: { shape: number }) {
   return (
     <svg viewBox="0 0 40 40" className={`ab-shape ab-s${shape}`} aria-label={NAMES[shape]}>
-      {shape === 0 && <circle cx="20" cy="20" r="13" />}
-      {shape === 1 && <polygon points="20,6 34,32 6,32" />}
-      {shape === 2 && <polygon points="20,4 24.5,15 36,15.5 27,23 30,34.5 20,28 10,34.5 13,23 4,15.5 15.5,15" />}
+      {shape === 0 && (
+        <>
+          <path d="M20,6 27,7.9 32.1,13 34,20 32.1,27 27,32.1 20,34 13,32.1 7.9,27 6,20 7.9,13 13,7.9Z" />
+          <g className="ab-facets">
+            <path fill="#fff" fillOpacity=".1" d="M7.9,27 6,20 12.5,20 13.5,23.8Z" />
+            <path fill="#fff" fillOpacity=".2" d="M20,6 27,7.9 23.8,13.5 20,12.5Z" />
+            <path fill="#fff" fillOpacity=".3" d="M6,20 7.9,13 13.5,16.3 12.5,20Z" />
+            <path fill="#fff" fillOpacity=".4" d="M7.9,13 13,7.9 16.2,13.5 13.5,16.3Z M13,7.9 20,6 20,12.5 16.2,13.5Z" />
+            <path fill="#000" fillOpacity=".12" d="M13,32.1 7.9,27 13.5,23.8 16.3,26.5Z" />
+            <path fill="#000" fillOpacity=".2" d="M32.1,13 34,20 27.5,20 26.5,16.3Z" />
+            <path fill="#000" fillOpacity=".28" d="M20,34 13,32.1 16.3,26.5 20,27.5Z" />
+            <path
+              fill="#000"
+              fillOpacity=".35"
+              d="M34,20 32.1,27 26.5,23.8 27.5,20Z M32.1,27 27,32.1 23.8,26.5 26.5,23.8Z M27,32.1 20,34 20,27.5 23.8,26.5Z"
+            />
+            <path fill="#fff" d="M15,13.8 16.2,15 15,16.2 13.8,15Z" />
+          </g>
+        </>
+      )}
+      {shape === 1 && (
+        <>
+          <path d="M20,6 34,32 6,32Z" />
+          <g className="ab-facets">
+            <path fill="#fff" fillOpacity=".2" d="M14.1,27 20,16.1 20,23.3Z" />
+            <path fill="#fff" fillOpacity=".4" d="M6,32 20,6 20,16.1 14.1,27Z" />
+            <path fill="#000" fillOpacity=".12" d="M25.9,27 14.1,27 20,23.3Z" />
+            <path fill="#000" fillOpacity=".2" d="M20,6 34,32 25.9,27 20,16.1Z" />
+            <path fill="#000" fillOpacity=".35" d="M34,32 6,32 14.1,27 25.9,27Z" />
+            <path fill="#fff" d="M17.6,20.4 18.8,21.6 17.6,22.8 16.4,21.6Z" />
+          </g>
+        </>
+      )}
+      {shape === 2 && (
+        <>
+          <path d="M20,4 24.5,15 36,15.5 27,23 30,34.5 20,28 10,34.5 13,23 4,15.5 15.5,15Z" />
+          <g className="ab-facets">
+            <path fill="#fff" fillOpacity=".3" d="M24.5,15 36,15.5 20,20.6Z M10,34.5 13,23 20,20.6Z" />
+            <path fill="#fff" fillOpacity=".4" d="M4,15.5 15.5,15 20,20.6Z M15.5,15 20,4 20,20.6Z" />
+            <path fill="#000" fillOpacity=".2" d="M20,4 24.5,15 20,20.6Z M13,23 4,15.5 20,20.6Z" />
+            <path fill="#000" fillOpacity=".28" d="M27,23 30,34.5 20,20.6Z M30,34.5 20,28 20,20.6Z" />
+            <path fill="#000" fillOpacity=".35" d="M36,15.5 27,23 20,20.6Z M20,28 10,34.5 20,20.6Z" />
+            <path fill="#fff" d="M17.2,12.8 18.4,14 17.2,15.2 16,14Z" />
+          </g>
+        </>
+      )}
     </svg>
   );
 }

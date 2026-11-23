@@ -371,6 +371,46 @@ h2 {
   min-height: 0;
 }
 
+/* The card's top: the game's neon icon in front, the still of the game behind it as a watermark. */
+.card-art {
+  position: relative;
+}
+
+.card-art .snap {
+  opacity: 0.2;
+  filter: saturate(0.7);
+}
+
+.card-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 86%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgb(8 8 12 / 0.9));
+}
+
+.name-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 7px;
+  vertical-align: -5px;
+}
+
+.game-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon {
+  flex: none;
+  width: 46px;
+  height: 46px;
+}
+
 .game-btn {
   width: 100%;
   min-height: 64px;
@@ -998,12 +1038,6 @@ a.btn {
   width: min(64vw, 250px);
 }
 
-/* The hooded Observer from the poster: a square on black, the hood's hem fading into the dark. */
-.hero-emblem .emblem {
-  aspect-ratio: 1;
-  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
-}
-
 .hero-text {
   display: flex;
   flex-direction: column;
@@ -1024,6 +1058,30 @@ a.btn {
 .tagline {
   color: var(--cyan);
   margin: 0;
+}
+
+/* "Under construction": a yellow hexagonal pill above the tagline, like the difficulty pills. */
+.wip {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  padding: 4px 16px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--g-yellow);
+  background: color-mix(in srgb, var(--g-yellow) 75%, transparent);
+  clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%);
+}
+
+.wip::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: color-mix(in srgb, var(--g-yellow) 14%, var(--panel));
+  clip-path: inherit;
 }
 
 .lead {
@@ -1147,6 +1205,117 @@ a.btn {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+/* Search and filters, then the games. From 1024 px the search and filters are a sticky sidebar;
+   below that the filters fold away behind the Filters button. */
+.catalog-body,
+.catalog-side,
+.catalog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.catalog-side {
+  gap: 10px;
+}
+
+.filters-toggle {
+  align-self: flex-start;
+  min-height: var(--touch);
+}
+
+.filters:not(.open) {
+  display: none;
+}
+
+/* The sidebar's list of the games found (desktop only): small icon and name, a click starts it. */
+.side-list {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.side-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 2px 8px 2px 2px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.side-list button:hover,
+.side-list button:focus-visible {
+  background: var(--panel-2);
+  color: var(--text);
+  outline: none;
+}
+
+.side-list .game-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+}
+
+@media (min-width: 1024px) {
+  .app:has(> .picker) {
+    max-width: 1240px;
+  }
+
+  .catalog-body {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .catalog-side {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    gap: 14px;
+  }
+
+  .filters-toggle {
+    display: none;
+  }
+
+  .catalog-side .filters,
+  .catalog-side .filters:not(.open) {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .catalog-side .chip {
+    min-height: 34px;
+    padding: 0 14px;
+    font-size: 0.8rem;
+  }
+
+  /* The list takes the room left in the sidebar and scrolls on its own. */
+  .side-list {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 140px;
+    overflow-y: auto;
+    margin-right: -4px;
+    padding-right: 4px;
+    border-top: 1px solid var(--line);
+    padding-top: 8px;
+  }
 }
 
 /* The search field: a long hexagon like the buttons (edge = background, fill = ::before). */
@@ -1348,9 +1517,17 @@ a.btn {
 /* The game bar keeps one height (touch-size buttons), with or without the peeking face. */
 .game-nav .btn {
   min-height: var(--touch);
+  white-space: nowrap;
 }
 
 /* Opening a game switches it on like an old monitor: a bright line that opens into the picture. */
+/* Its own stacking context, so the peeking face (z-index -1) sits behind the game but above the
+   page background. */
+.game-screen {
+  position: relative;
+  z-index: 0;
+}
+
 .tv-on {
   animation: tv-on 0.55s ease-out;
   transform-origin: 50% 40%;
@@ -1487,8 +1664,88 @@ a.btn {
   animation: tx-roll 4.5s linear 2;
 }
 
+.tx-emblem,
+.tx-icon {
+  grid-area: 1 / 1;
+  width: 102px;
+}
+
+.tx-icon {
+  height: 88px;
+  width: auto;
+  aspect-ratio: 1;
+}
+
+/* The Observer and the game's icon take turns (8 s): each switch is a short broadcast flicker,
+   two dips in about 0.6 s, well under three flashes a second (WCAG 2.3.1). */
 .tx-emblem {
-  width: 92px;
+  animation: tx-observer 8s linear infinite;
+}
+
+.tx-icon {
+  opacity: 0;
+  animation: tx-game 8s linear infinite;
+}
+
+@keyframes tx-observer {
+  0%,
+  42% {
+    opacity: 1;
+    transform: none;
+  }
+  44% {
+    opacity: 0.25;
+    transform: translateX(5px) skewX(-6deg);
+  }
+  46% {
+    opacity: 0.7;
+    transform: translateX(-3px);
+  }
+  49%,
+  92% {
+    opacity: 0;
+    transform: none;
+  }
+  95% {
+    opacity: 0.5;
+    transform: translateX(-4px) skewX(5deg);
+  }
+  97% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tx-game {
+  0%,
+  44% {
+    opacity: 0;
+    transform: none;
+  }
+  46% {
+    opacity: 0.45;
+    transform: translateX(4px) skewX(6deg);
+  }
+  47.5% {
+    opacity: 0.15;
+  }
+  50%,
+  92% {
+    opacity: 1;
+    transform: none;
+  }
+  94% {
+    opacity: 0.3;
+    transform: translateX(-5px) skewX(-5deg);
+  }
+  97%,
+  100% {
+    opacity: 0;
+    transform: none;
+  }
 }
 
 @media (min-width: 720px) {
@@ -1497,7 +1754,11 @@ a.btn {
   }
 
   .tx-emblem {
-    width: 150px;
+    width: 168px;
+  }
+
+  .tx-icon {
+    height: 148px;
   }
 }
 
@@ -1587,6 +1848,16 @@ a.btn {
   .tx-screen::after {
     animation: none;
   }
+
+  /* Without motion the monitor shows only the game's icon, steady. */
+  .tx-emblem {
+    display: none;
+  }
+
+  .tx-icon {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .result {
@@ -1609,7 +1880,7 @@ a.btn {
 /* The Observer looks up as the result is revealed. */
 .result-emblem {
   align-self: center;
-  width: 112px;
+  width: 136px;
   animation: result-reveal 1.1s ease-out both;
 }
 

@@ -52,8 +52,26 @@
   stroke-linejoin: round;
 }
 
+/* Unmarked: the outline only. Marked (and in the counts row): the faceted gem, a little larger
+   since it has no stroke. */
+.ab-facets {
+  display: none;
+}
+
+.ab-counts .ab-shape,
 .ab-cell.marked .ab-shape {
   fill: currentColor;
+  stroke: none;
+}
+
+.ab-cell.marked .ab-shape {
+  width: 66%;
+  height: 66%;
+}
+
+.ab-counts .ab-facets,
+.ab-cell.marked .ab-facets {
+  display: inline;
 }
 
 .ab-s0 {

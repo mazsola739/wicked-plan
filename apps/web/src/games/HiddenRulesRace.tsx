@@ -36,6 +36,25 @@ interface HrrView {
 const ARROW: Record<Dir, string> = { up: '↑', right: '→', down: '↓', left: '←' };
 const KEYS: Record<string, Dir> = { ArrowUp: 'up', ArrowRight: 'right', ArrowDown: 'down', ArrowLeft: 'left' };
 
+/** The goal: a faceted star, every arm cut along its ridge and lit from the top left. */
+function Star() {
+  return (
+    <svg viewBox="0 0 40 40" className="hrr-star" role="img" aria-label="goal">
+      <path d="M20,2 24.7,14.5 38.1,15.1 27.6,23.5 31.2,36.4 20,29 8.8,36.4 12.4,23.5 1.9,15.1 15.3,14.5Z" />
+      <path fill="#fff" fillOpacity=".42" d="M1.9,15.1 15.3,14.5 20,21Z" />
+      <path fill="#fff" fillOpacity=".34" d="M20,2 15.3,14.5 20,21Z" />
+      <path fill="#fff" fillOpacity=".26" d="M1.9,15.1 12.4,23.5 20,21Z" />
+      <path fill="#fff" fillOpacity=".18" d="M20,2 24.7,14.5 20,21Z" />
+      <path fill="#fff" fillOpacity=".1" d="M8.8,36.4 12.4,23.5 20,21Z" />
+      <path fill="#000" fillOpacity=".12" d="M38.1,15.1 24.7,14.5 20,21Z M8.8,36.4 20,29 20,21Z" />
+      <path fill="#000" fillOpacity=".25" d="M38.1,15.1 27.6,23.5 20,21Z" />
+      <path fill="#000" fillOpacity=".3" d="M31.2,36.4 20,29 20,21Z" />
+      <path fill="#000" fillOpacity=".35" d="M31.2,36.4 27.6,23.5 20,21Z" />
+      <path fill="#fff" d="M11.5,15.4 12.7,16.6 11.5,17.8 10.3,16.6Z M18.6,8.6 19.4,9.4 18.6,10.2 17.8,9.4Z" />
+    </svg>
+  );
+}
+
 function describe(s: Step): string {
   if (!s.dir) return 'stayed (no choice)';
   const dx = s.to[0] - s.from[0];
@@ -82,7 +101,7 @@ export default function HiddenRulesRace({ view }: ScreenProps) {
             const goal = x === v.goal[0] && y === v.goal[1];
             return (
               <div key={`${x},${y}`} className={`hrr-sq hrr-${goal ? 'goal' : v.colours[c]}`}>
-                {goal && <span className="hrr-star">★</span>}
+                {goal && <Star />}
                 {here.map((p) => (
                   <span key={p.id} className={`hrr-piece${p.id === 'you' ? ' me' : ''}`} title={nameOf(p.id)}>
                     {nameOf(p.id)[0]}

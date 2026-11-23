@@ -2,8 +2,9 @@
 // assets/observer.png (the emblem with crown and ring), assets/hood.webp (the hooded Observer from
 // the poster) and assets/face.webp (its LED eyes and grin alone). The small crown mark is SVG.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import face from './assets/face.webp';
+import hoodArt from './assets/hood.webp';
 import observer from './assets/observer.png';
 import './Emblem.css';
 
@@ -15,18 +16,18 @@ export function reducedMotion(): boolean {
 }
 
 /**
- * The hooded Observer: by default the emblem with its crown and ring, or other art of it (`src`).
- * With `watching`, its signal glitches now and then (every 7–16 s: a cyan/violet split and a
- * flash), as if it were watching you on a live feed.
+ * The hooded Observer: the emblem with its crown and ring, or with `hood` the large hooded figure
+ * from the poster. With `watching`, its signal glitches now and then (every 7–16 s: a cyan/violet
+ * split and a flash), as if it were watching you on a live feed.
  */
 export function Emblem({
   className = '',
-  src = observer,
+  hood = false,
   watching = false,
   decorative = false,
 }: {
   className?: string;
-  src?: string;
+  hood?: boolean;
   watching?: boolean;
   /** Pure decoration (the game bar, the transmission monitor): hidden from screen readers. */
   decorative?: boolean;
@@ -51,48 +52,143 @@ export function Emblem({
     return () => window.clearTimeout(timer);
   }, [watching]);
 
-  if (!watching) return <img className={`emblem ${className}`} src={src} alt={decorative ? '' : ALT} />;
+  const src = hood ? hoodArt : observer;
+  const art = hood ? 'emblem hood' : 'emblem';
+  if (!watching) return <img className={`${art} ${className}`} src={src} alt={decorative ? '' : ALT} />;
   const label = decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': ALT };
   return (
     <span className={`emblem-watch ${className}${glitch ? ' glitch' : ''}`} {...label}>
-      <img className="emblem" src={src} alt="" />
-      <img className="emblem em-ghost em-cyan" src={src} alt="" />
-      <img className="emblem em-ghost em-violet" src={src} alt="" />
+      <img className={art} src={src} alt="" />
+      <img className={`${art} em-ghost em-cyan`} src={src} alt="" />
+      <img className={`${art} em-ghost em-violet`} src={src} alt="" />
     </span>
   );
+}
+
+/** How long the big peek and a small one last (match the CSS animations). */
+const BIG_MS = 4000;
+const SMALL_MS = 2600;
+/** Play time after which the plan starts again: only very long games see it all a second time. */
+const CYCLE_MS = 10 * 60_000;
+
+type Planned = { at: number; big: boolean };
+
+/** One cycle: the big peek once (25 s–2.5 min in) and 3–5 small ones in the first 4 min, 15 s apart. */
+function planCycle(start: number): Planned[] {
+  const rand = (a: number, b: number) => a + Math.random() * (b - a);
+  const plan: Planned[] = [{ at: start + rand(25_000, 150_000), big: true }];
+  const small = 3 + Math.floor(Math.random() * 3);
+  for (let tries = 0; plan.length < small + 1 && tries < 500; tries++) {
+    const at = start + rand(8_000, 240_000);
+    if (plan.every((p) => Math.abs(p.at - at) > 15_000)) plan.push({ at, big: false });
+  }
+  return plan.sort((a, b) => a.at - b.at);
+}
+
+/** True when the point shows the bare page background: no card, button, text or bordered box. */
+function bare(x: number, y: number): boolean {
+  for (let el = document.elementFromPoint(x, y); el; el = el.parentElement) {
+    if (el.classList.contains('game-screen') || el === document.body) return true;
+    if (el.matches('button, a, input, select, textarea, img, svg, canvas')) return false;
+    if ([...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim())) return false;
+    const cs = getComputedStyle(el);
+    const clear = cs.backgroundColor === 'transparent' || cs.backgroundColor.endsWith(', 0)');
+    if (!clear || cs.backgroundImage !== 'none' || (cs.borderStyle !== 'none' && cs.borderTopWidth !== '0px')) return false;
+  }
+  return true;
+}
+
+/** A spot below the game bar, in view, where a small face of w x h shows on bare background. */
+function findSpot(w: number, h: number): { x: number; y: number } | null {
+  const top = (document.querySelector('.game-nav')?.getBoundingClientRect().bottom ?? 0) + 8;
+  const room = window.innerHeight - top - h;
+  if (room < 0) return null;
+  const probes: [number, number][] = [
+    [0.5, 0.5],
+    [0.15, 0.25],
+    [0.85, 0.25],
+    [0.15, 0.75],
+    [0.85, 0.75],
+  ];
+  for (let i = 0; i < 60; i++) {
+    const x = Math.random() * (window.innerWidth - w);
+    const y = top + Math.random() * room;
+    if (probes.every(([fx, fy]) => bare(x + fx * w, y + fy * h))) return { x, y };
+  }
+  return null;
 }
 
 /**
  * Only the Observer's face, without the hood, peeking at you during a game (docs/design.md,
- * Broadcast feel): its LED eyes and grin (assets/face.webp). Mostly invisible; every 9–20 s its
- * gaze shines through the dark: it surfaces blurred, sharpens, flickers, glances aside and fades.
- * Nothing shows with reduced motion.
+ * Broadcast feel): its LED eyes and grin (assets/face.webp), behind the game. Once a game, at a
+ * random moment, it comes in large in the top-right corner like a weak broadcast: looking away, it
+ * turns to face you and keeps coming closer, the signal tears and blinks, and it fades. 3–5 times
+ * more, small, somewhere on the bare background of the play area: it lifts its head, looks at you
+ * and lowers it again. Only play time counts (`active`: not while the rules are open or the game is
+ * over); after 10 minutes of play it all starts again. Nothing shows with reduced motion.
  */
-export function Peeker({ className = '' }: { className?: string }) {
-  const [peek, setPeek] = useState(false);
+export function Peeker({ active }: { active: boolean }) {
+  const [peek, setPeek] = useState<{ big: boolean; x: number; y: number } | null>(null);
+  const on = useRef(active);
+  on.current = active;
   useEffect(() => {
     if (reducedMotion()) return;
-    let timer = 0;
-    const schedule = (wait: number) => {
-      timer = window.setTimeout(() => {
-        setPeek(true);
-        timer = window.setTimeout(() => {
-          setPeek(false);
-          schedule(9000 + Math.random() * 11000);
-        }, PEEK_MS);
-      }, wait);
-    };
-    schedule(2500 + Math.random() * 3000);
-    return () => window.clearTimeout(timer);
+    let played = 0;
+    let cycle = 0;
+    let plan = planCycle(0);
+    let until = 0;
+    let last = performance.now();
+    const id = window.setInterval(() => {
+      const now = performance.now();
+      const dt = now - last;
+      last = now;
+      if (!on.current) {
+        if (until) setPeek(null);
+        until = 0;
+        return;
+      }
+      played += dt;
+      if (until) {
+        if (played < until) return;
+        setPeek(null);
+        until = 0;
+      }
+      if (!plan.length && played >= cycle + CYCLE_MS) {
+        cycle = played;
+        plan = planCycle(played);
+      }
+      const next = plan[0];
+      if (!next || played < next.at) return;
+      plan.shift();
+      if (next.big) {
+        setPeek({ big: true, x: 0, y: 0 });
+        until = played + BIG_MS;
+        return;
+      }
+      const w = window.innerWidth >= 720 ? 112 : 84;
+      const spot = findSpot(w, (w * 286) / 432);
+      if (!spot) {
+        plan.push({ at: played + 10_000, big: false });
+        plan.sort((a, b) => a.at - b.at);
+        return;
+      }
+      setPeek({ big: false, ...spot });
+      until = played + SMALL_MS;
+    }, 250);
+    return () => window.clearInterval(id);
   }, []);
+  const kind = peek && !peek.big ? 'small' : 'big';
   return (
-    <span className={`peeker ${className}${peek ? ' peek' : ''}`} aria-hidden="true">
+    <span
+      className={`peeker ${kind}${peek ? ' peek' : ''}`}
+      style={peek && !peek.big ? { left: peek.x, top: peek.y } : undefined}
+      hidden={!active}
+      aria-hidden="true"
+    >
       <img src={face} alt="" />
     </span>
   );
 }
-
-const PEEK_MS = 3400;
 
 /** The crown alone: the small brand mark. */
 export function Crown({ className = '' }: { className?: string }) {

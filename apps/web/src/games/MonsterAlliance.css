@@ -20,12 +20,11 @@
 .ma-face svg {
   width: 72px;
   height: 72px;
+  fill: var(--g-red);
 }
 
-.ma-face path:first-child {
-  fill: color-mix(in srgb, var(--g-red) 22%, var(--board));
-  stroke: var(--g-red);
-  stroke-width: 3;
+.ma-face .eye {
+  fill: var(--bg);
 }
 
 .ma-eye {
@@ -33,9 +32,7 @@
 }
 
 .ma-teeth {
-  fill: none;
-  stroke: var(--text);
-  stroke-width: 3;
+  fill: var(--text);
 }
 
 .ma-bonus {

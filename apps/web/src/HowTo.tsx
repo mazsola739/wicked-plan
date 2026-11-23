@@ -5,6 +5,7 @@
 
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Emblem, reducedMotion } from './Emblem';
+import { GameIcon } from './GameIcon';
 
 const PAGES = import.meta.glob('../../../docs/games/*.md', {
   query: '?raw',
@@ -87,7 +88,7 @@ function TypedGoal({ goal, skip, onDone }: { goal: string; skip: boolean; onDone
   );
 }
 
-export function HowToPlay({ id, name, channel, onClose }: { id: string; name: string; channel: number; onClose: () => void }) {
+export function HowToPlay({ id, name, onClose }: { id: string; name: string; onClose: () => void }) {
   const list = useMemo(() => blocks(id), [id]);
   const first = list[0];
   const goal = first && !first.list && GOAL.test(first.lines[0] ?? '') ? (first.lines[0] ?? '').replace(GOAL, '') : '';
@@ -118,10 +119,12 @@ export function HowToPlay({ id, name, channel, onClose }: { id: string; name: st
       <header className="tx-bar">
         <span className="tx-live">Live</span>
         <span className="label">From the Observer</span>
-        <span className="tx-channel">CH {String(channel).padStart(2, '0')}</span>
+        <span className="tx-channel">CH 08</span>
       </header>
+      {/* The Observer and the game's icon take turns on the monitor, switching with a flicker. */}
       <div className="tx-screen" aria-hidden="true">
-        <Emblem className="tx-emblem" watching decorative />
+        <Emblem className="tx-emblem" hood watching decorative />
+        <GameIcon id={id} className="tx-icon" />
       </div>
       <div className="label">{name}</div>
       <h2 ref={heading} tabIndex={-1}>

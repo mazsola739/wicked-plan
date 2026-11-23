@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { GameIcon } from '../GameIcon';
 
 export { move } from '../play';
 
@@ -19,6 +20,9 @@ export function nameOf(id: string): string {
 
 /** True inside a picker card's still preview: the screen must not listen to keys. */
 export const PreviewContext = createContext(false);
+
+/** The id of the game being played, so GameTop can show its icon beside the title. */
+export const GameIdContext = createContext<string | null>(null);
 
 /** Keyboard shortcuts for desktop; ignored while typing in a field. */
 export function useKeys(handler: (key: string) => boolean | undefined): void {
@@ -66,11 +70,15 @@ export function TimerBar({ leftMs, totalMs }: { leftMs: number; totalMs: number 
 }
 
 export function GameTop({ title, step, score }: { title: string; step: string; score: number }) {
+  const id = useContext(GameIdContext);
   return (
     <header className="game-top">
-      <div>
-        <div className="label">{step}</div>
-        <h2>{title}</h2>
+      <div className="game-title">
+        {id && <GameIcon id={id} className="title-icon" />}
+        <div>
+          <div className="label">{step}</div>
+          <h2>{title}</h2>
+        </div>
       </div>
       <div className="score big">{score}</div>
     </header>

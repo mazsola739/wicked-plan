@@ -45,6 +45,22 @@ function minCount(bet: Bet | null, colour: number): number {
   return colour > bet.colour ? bet.count : bet.count + 1;
 }
 
+/** A life: a faceted heart in the text colour, lit from the top left, with a white glint. */
+function Heart() {
+  return (
+    <svg viewBox="0 0 40 40" className="ccb-heart" role="img" aria-label="life">
+      <path d="M20,10 23.5,6 28,4 33.5,5.5 37,11 36,18 29,27 20,36 11,27 4,18 3,11 6.5,5.5 12,4 16.5,6Z" />
+      <path fill="#fff" fillOpacity=".1" d="M3,11 12,12.5 4,18Z" />
+      <path fill="#fff" fillOpacity=".3" d="M6.5,5.5 12,4 16.5,6 12,12.5Z" />
+      <path fill="#fff" fillOpacity=".4" d="M3,11 6.5,5.5 12,12.5Z M33.5,5.5 28,4 23.5,6 28,12.5Z M23.5,6 20,10 20,21 28,12.5Z" />
+      <path fill="#000" fillOpacity=".12" d="M4,18 12,12.5 20,21 11,27Z M11,27 20,21 20,36Z M37,11 33.5,5.5 28,12.5Z" />
+      <path fill="#000" fillOpacity=".28" d="M37,11 28,12.5 36,18Z M29,27 20,21 20,36Z" />
+      <path fill="#000" fillOpacity=".35" d="M36,18 28,12.5 20,21 29,27Z" />
+      <path fill="#fff" d="M9.6,7.6 10.8,8.8 9.6,10 8.4,8.8Z" />
+    </svg>
+  );
+}
+
 function Cards({ hand, small }: { hand: number[]; small?: boolean }) {
   return (
     <div className={`ccb-hand${small ? ' small' : ''}`}>
@@ -104,7 +120,10 @@ export default function ColourCountBluff({ view: raw }: ScreenProps) {
               <li key={p} className={`${view.turn === i ? 'turn' : ''}${view.lives[i] === 0 ? ' out' : ''}${i === view.me ? ' me' : ''}`}>
                 <span>{nameOf(p)}</span>
                 <span className="ccb-lives" role="img" aria-label={`${view.lives[i]} lives`}>
-                  {'♥'.repeat(view.lives[i] ?? 0)}
+                  {Array.from({ length: view.lives[i] ?? 0 }, (_, k) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: identical hearts
+                    <Heart key={k} />
+                  ))}
                 </span>
                 <span className="muted small">{view.cards[i]} cards</span>
               </li>
@@ -177,7 +196,12 @@ export default function ColourCountBluff({ view: raw }: ScreenProps) {
                     <li key={p}>
                       <span>
                         {nameOf(p)}
-                        {view.last.loser === i ? ' −♥' : ''}
+                        {view.last.loser === i && (
+                          <>
+                            {' '}
+                            −<Heart />
+                          </>
+                        )}
                       </span>
                       <Cards hand={view.last.hands[i] ?? []} small />
                     </li>

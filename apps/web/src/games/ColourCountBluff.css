@@ -29,9 +29,22 @@
 }
 
 .ccb-lives {
+  display: flex;
+  gap: 2px;
   color: var(--bad);
-  letter-spacing: 2px;
   min-height: 1.2em;
+}
+
+.ccb-heart {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.125em;
+}
+
+.ccb-lives .ccb-heart {
+  width: 1.2em;
+  height: 1.2em;
 }
 
 .ccb-bet {

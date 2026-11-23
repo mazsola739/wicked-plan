@@ -78,9 +78,10 @@
   font-size: 1.35rem;
 }
 
-.mp-card i {
-  font-style: normal;
-  font-size: 1.25rem;
+.mp-suit {
+  width: 1.4rem;
+  height: 1.4rem;
+  fill: currentColor;
 }
 
 .mp-card.red {
@@ -102,8 +103,9 @@
   font-size: 0.85rem;
 }
 
-.mp-card.small i {
-  font-size: 0.8rem;
+.mp-card.small .mp-suit {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .mp-gone {

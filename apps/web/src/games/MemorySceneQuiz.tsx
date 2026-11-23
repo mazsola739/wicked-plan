@@ -1,6 +1,7 @@
 // Memory Scene Quiz: study a scene, then the team answers 10 questions in turn.
 // Rules page: docs/games/memory-scene-quiz.md
 
+import type { ReactNode } from 'react';
 import './MemorySceneQuiz.css';
 import { GameTop, KeyHint, move, nameOf, Play, RoundDots, type ScreenProps, TimerBar, useKeys } from './common';
 
@@ -61,38 +62,91 @@ const SPOTS: [number, number][][] = [
   ],
 ];
 
-function starPoints(r: number): string {
-  return Array.from({ length: 10 }, (_, i) => {
-    const a = (Math.PI / 5) * i - Math.PI / 2;
-    const d = i % 2 ? r * 0.45 : r;
-    return `${(d * Math.cos(a)).toFixed(1)},${(d * Math.sin(a)).toFixed(1)}`;
-  }).join(' ');
-}
+/**
+ * The shapes as faceted gems drawn at r = 20 around (0, 0), lit from the top left: white and black
+ * overlays make the facets, with a white glint. The first path is the silhouette in the object's colour.
+ */
+const SHAPES: Record<string, ReactNode> = {
+  circle: (
+    <>
+      <path d="M0,-18 9,-15.6 15.6,-9 18,0 15.6,9 9,15.6 0,18 -9,15.6 -15.6,9 -18,0 -15.6,-9 -9,-15.6Z" />
+      <path fill="#fff" fillOpacity=".1" d="M-15.6,9 -18,0 -9.5,0 -8.2,4.8Z" />
+      <path fill="#fff" fillOpacity=".2" d="M0,-18 9,-15.6 4.7,-8.2 0,-9.5Z" />
+      <path fill="#fff" fillOpacity=".3" d="M-18,0 -15.6,-9 -8.2,-4.8 -9.5,0Z" />
+      <path fill="#fff" fillOpacity=".4" d="M-15.6,-9 -9,-15.6 -4.8,-8.2 -8.2,-4.8Z M-9,-15.6 0,-18 0,-9.5 -4.8,-8.2Z" />
+      <path fill="#000" fillOpacity=".12" d="M-9,15.6 -15.6,9 -8.2,4.8 -4.7,8.2Z" />
+      <path fill="#000" fillOpacity=".2" d="M15.6,-9 18,0 9.5,0 8.2,-4.7Z" />
+      <path fill="#000" fillOpacity=".28" d="M18,0 15.6,9 8.2,4.7 9.5,0Z M0,18 -9,15.6 -4.7,8.2 0,9.5Z" />
+      <path fill="#000" fillOpacity=".35" d="M15.6,9 9,15.6 4.7,8.2 8.2,4.7Z M9,15.6 0,18 0,9.5 4.7,8.2Z" />
+      <path fill="#fff" d="M-6.5,-7.8 -5.2,-6.5 -6.5,-5.2 -7.8,-6.5Z" />
+    </>
+  ),
+  square: (
+    <>
+      <path d="M-16,-16 16,-16 16,16 -16,16Z" />
+      <path fill="#fff" fillOpacity=".1" d="M-8,-8 8,-8 0,0Z M-8,8 -8,-8 0,0Z" />
+      <path fill="#fff" fillOpacity=".2" d="M-16,16 -16,-16 -8,-8 -8,8Z" />
+      <path fill="#fff" fillOpacity=".3" d="M-16,-16 16,-16 8,-8 -8,-8Z" />
+      <path fill="#000" fillOpacity=".28" d="M16,-16 16,16 8,8 8,-8Z" />
+      <path fill="#000" fillOpacity=".35" d="M16,16 -16,16 -8,8 8,8Z" />
+      <path fill="#fff" d="M-4.6,-5.9 -3.3,-4.6 -4.6,-3.3 -5.9,-4.6Z" />
+    </>
+  ),
+  triangle: (
+    <>
+      <path d="M0,-20 19,16 -19,16Z" />
+      <path fill="#fff" fillOpacity=".1" d="M-8,9 0,-6.1 0,4Z" />
+      <path fill="#fff" fillOpacity=".4" d="M-19,16 0,-20 0,-6.1 -8,9Z" />
+      <path fill="#000" fillOpacity=".12" d="M0,-20 19,16 8,9 0,-6.1Z M8,9 -8,9 0,4Z" />
+      <path fill="#000" fillOpacity=".35" d="M19,16 -19,16 -8,9 8,9Z" />
+      <path fill="#fff" d="M-3.2,-1.1 -1.9,0.2 -3.2,1.5 -4.5,0.2Z" />
+    </>
+  ),
+  star: (
+    <>
+      <path d="M0,-22 5.8,-8 20.9,-6.8 9.4,3.1 12.9,17.8 0,9.9 -12.9,17.8 -9.4,3.1 -20.9,-6.8 -5.8,-8Z" />
+      <path fill="#fff" fillOpacity=".3" d="M5.8,-8 20.9,-6.8 0,0Z M-12.9,17.8 -9.4,3.1 0,0Z" />
+      <path fill="#fff" fillOpacity=".4" d="M-20.9,-6.8 -5.8,-8 0,0Z M-5.8,-8 0,-22 0,0Z" />
+      <path fill="#000" fillOpacity=".2" d="M0,-22 5.8,-8 0,0Z M-9.4,3.1 -20.9,-6.8 0,0Z" />
+      <path fill="#000" fillOpacity=".28" d="M9.4,3.1 12.9,17.8 0,0Z M12.9,17.8 0,9.9 0,0Z" />
+      <path fill="#000" fillOpacity=".35" d="M20.9,-6.8 9.4,3.1 0,0Z M0,9.9 -12.9,17.8 0,0Z" />
+      <path fill="#fff" d="M-3.6,-8.7 -2.3,-7.4 -3.6,-6.1 -4.9,-7.4Z" />
+    </>
+  ),
+  heart: (
+    <>
+      <path d="M0,-10 3.5,-14 8,-16 13.5,-14.5 17,-9 16,-2 9,7 0,16 -9,7 -16,-2 -17,-9 -13.5,-14.5 -8,-16 -3.5,-14Z" />
+      <path fill="#fff" fillOpacity=".1" d="M-17,-9 -8,-7.5 -16,-2Z" />
+      <path fill="#fff" fillOpacity=".3" d="M-13.5,-14.5 -8,-16 -3.5,-14 -8,-7.5Z" />
+      <path fill="#fff" fillOpacity=".4" d="M-17,-9 -13.5,-14.5 -8,-7.5Z M13.5,-14.5 8,-16 3.5,-14 8,-7.5Z M3.5,-14 0,-10 0,1 8,-7.5Z" />
+      <path fill="#000" fillOpacity=".12" d="M-16,-2 -8,-7.5 0,1 -9,7Z M-9,7 0,1 0,16Z M17,-9 13.5,-14.5 8,-7.5Z" />
+      <path fill="#000" fillOpacity=".28" d="M17,-9 8,-7.5 16,-2Z M9,7 0,1 0,16Z" />
+      <path fill="#000" fillOpacity=".35" d="M16,-2 8,-7.5 0,1 9,7Z" />
+      <path fill="#fff" d="M-10.4,-12.5 -9.1,-11.2 -10.4,-9.9 -11.7,-11.2Z" />
+    </>
+  ),
+  moon: (
+    <>
+      <path d="M12,-16 0.2,-20 -11.7,-16.3 -19,-6.2 -19,6.2 -11.7,16.3 0.2,20 12,16 6.9,13.1 3,8.5 1,3 1,-3 3,-8.5 6.9,-13.1Z" />
+      <path fill="#fff" fillOpacity=".1" d="M12,-16 0.2,-20 3.2,-16.9Z M3.2,16.9 12,16 6.9,13.1Z" />
+      <path fill="#fff" fillOpacity=".2" d="M-19,-6.2 -19,6.2 -10,4.8 -10,-4.8Z" />
+      <path fill="#fff" fillOpacity=".4" d="M-11.7,-16.3 -19,-6.2 -10,-4.8 -5,-12.8Z" />
+      <path fill="#fff" fillOpacity=".5" d="M0.2,-20 -11.7,-16.3 -5,-12.8 3.2,-16.9Z" />
+      <path fill="#000" fillOpacity=".12" d="M-19,6.2 -11.7,16.3 -5,12.8 -10,4.8Z M-10,4.8 -5,12.8 3,8.5 1,3Z" />
+      <path fill="#000" fillOpacity=".28" d="M-10,-4.8 -10,4.8 1,3 1,-3Z" />
+      <path
+        fill="#000"
+        fillOpacity=".35"
+        d="M12,-16 3.2,-16.9 6.9,-13.1Z M3.2,-16.9 -5,-12.8 3,-8.5 6.9,-13.1Z M-5,-12.8 -10,-4.8 1,-3 3,-8.5Z M-11.7,16.3 0.2,20 3.2,16.9 -5,12.8Z M0.2,20 12,16 3.2,16.9Z"
+      />
+      <path fill="#fff" d="M-12.6,-9.7 -11.3,-8.4 -12.6,-7.1 -13.9,-8.4Z" />
+    </>
+  ),
+};
 
-/** One shape centred on (0, 0). */
+/** One shape centred on (0, 0); anything unknown is the moon. */
 function Shape({ shape, r }: { shape: string; r: number }) {
-  switch (shape) {
-    case 'circle':
-      return <circle r={r * 0.9} />;
-    case 'square':
-      return <rect x={-r * 0.8} y={-r * 0.8} width={r * 1.6} height={r * 1.6} rx={2} />;
-    case 'triangle':
-      return <polygon points={`0,${-r} ${r * 0.95},${r * 0.8} ${-r * 0.95},${r * 0.8}`} />;
-    case 'star':
-      return <polygon points={starPoints(r * 1.1)} />;
-    case 'heart':
-      return (
-        <path
-          d={`M 0 ${r * 0.9} C ${-r * 1.5} ${-r * 0.1} ${-r * 0.6} ${-r * 1.2} 0 ${-r * 0.4} C ${r * 0.6} ${-r * 1.2} ${r * 1.5} ${-r * 0.1} 0 ${r * 0.9} Z`}
-        />
-      );
-    default:
-      return (
-        <path
-          d={`M ${r * 0.6} ${-r * 0.8} A ${r} ${r} 0 1 0 ${r * 0.6} ${r * 0.8} A ${r * 0.85} ${r * 0.85} 0 0 1 ${r * 0.6} ${-r * 0.8} Z`}
-        />
-      );
-  }
+  return <g transform={`scale(${r / 20})`}>{SHAPES[shape] ?? SHAPES.moon}</g>;
 }
 
 function Scene({ view }: { view: SceneView }) {

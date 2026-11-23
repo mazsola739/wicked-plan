@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import hood from './assets/hood.webp';
 import { Crown, Emblem, Peeker } from './Emblem';
-import { nameOf, useKeys } from './games/common';
+import { GameIcon } from './GameIcon';
+import { GameIdContext, nameOf, useKeys } from './games/common';
 import { SCREENS } from './games/registry';
 import { HowToPlay } from './HowTo';
 import { setPaused, start, stop, usePlay } from './play';
@@ -30,7 +30,7 @@ export function App() {
         <p className="muted center">Loading…</p>
       ) : current && info ? (
         <>
-          <GameView info={info} channel={play.games.indexOf(info) + 1} view={current.view} results={current.results} />
+          <GameView info={info} view={current.view} results={current.results} />
           {play.replay && <Replay moment={play.replay} />}
         </>
       ) : (
@@ -88,6 +88,9 @@ function matches(g: GameInfo, f: Filter): boolean {
 
 function Picker({ games }: { games: GameInfo[] }) {
   const [filter, setFilter] = useState<Filter>(ANY);
+  // Below the sidebar width the filters fold away behind a button that counts the active ones.
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const active = FILTERS.filter((f) => filter[f.key] !== 'all').length;
   const shown = games.filter((g) => matches(g, filter));
   const random = () => {
     const pick = shown[Math.floor(Math.random() * shown.length)] ?? games[0];
@@ -107,8 +110,9 @@ function Picker({ games }: { games: GameInfo[] }) {
       </nav>
 
       <header className="hero" id="top">
-        <Emblem className="hero-emblem" src={hood} watching />
+        <Emblem className="hero-emblem" hood watching />
         <div className="hero-text">
+          <p className="wip">Under construction</p>
           <p className="label tagline">A digital arena of strategy</p>
           <h1 className="title">Wicked Plan</h1>
           <p className="lead">Puzzles, bluffs and duels. Think ahead, trust carefully: in the games for several players you face bots.</p>
@@ -147,43 +151,76 @@ function Picker({ games }: { games: GameInfo[] }) {
         <h2 className="section-title" id="games-title">
           Games
         </h2>
-        <Search value={filter.query} onChange={(query) => setFilter({ ...filter, query })} />
-        <Filters filter={filter} onChange={setFilter} />
-        <p className="muted small" aria-live="polite">
-          {shown.length === games.length ? `${games.length} games` : `${shown.length} of ${games.length} games`}
-        </p>
-        {shown.length === 0 && (
-          <div className="empty">
-            <p className="muted">No game fits these filters.</p>
-            <button type="button" className="btn ghost small" onClick={() => setFilter(ANY)}>
-              Clear filters
+        <div className="catalog-body">
+          <aside className="catalog-side" aria-label="Find a game">
+            <Search value={filter.query} onChange={(query) => setFilter({ ...filter, query })} />
+            <button
+              type="button"
+              className="btn small ghost filters-toggle"
+              aria-expanded={filtersOpen}
+              aria-controls="filters"
+              onClick={() => setFiltersOpen(!filtersOpen)}
+            >
+              {active ? `Filters · ${active}` : 'Filters'}
             </button>
+            <Filters open={filtersOpen} filter={filter} onChange={setFilter} />
+            <p className="muted small" aria-live="polite">
+              {shown.length === games.length ? `${games.length} games` : `${shown.length} of ${games.length} games`}
+            </p>
+            {/* Desktop only: the games found, small icon and name, in the order of the cards. */}
+            <ul className="side-list">
+              {KINDS.flatMap(([kind]) => shown.filter((g) => g.kind === kind)).map((g) => (
+                <li key={g.id}>
+                  <button type="button" onClick={() => start(g.id)}>
+                    <GameIcon id={g.id} />
+                    <span>{g.name}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </aside>
+          <div className="catalog-list">
+            {shown.length === 0 && (
+              <div className="empty">
+                <p className="muted">No game fits these filters.</p>
+                <button type="button" className="btn ghost small" onClick={() => setFilter(ANY)}>
+                  Clear filters
+                </button>
+              </div>
+            )}
+            {KINDS.map(([kind, label]) => {
+              const list = shown.filter((g) => g.kind === kind);
+              if (!list.length) return null;
+              return (
+                <section key={kind}>
+                  <h3 className="group-title">{label}</h3>
+                  <ul className="games">
+                    {list.map((g) => (
+                      <li key={g.id} className={`game-card ${g.difficulty}`}>
+                        {/* The game's neon icon, with the still of the game behind it like a watermark. */}
+                        <div className="card-art">
+                          <Snapshot id={g.id} />
+                          <GameIcon id={g.id} className="card-icon" />
+                        </div>
+                        <button type="button" className="game-btn" onClick={() => start(g.id)}>
+                          <span className="game-head">
+                            <strong>
+                              <GameIcon id={g.id} className="name-icon" />
+                              {g.name}
+                            </strong>
+                            <span className="level">{LEVELS[g.difficulty]}</span>
+                          </span>
+                          <span className="game-short">{g.short}</span>
+                          <em>{seatsText(g)}</em>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
           </div>
-        )}
-        {KINDS.map(([kind, label]) => {
-          const list = shown.filter((g) => g.kind === kind);
-          if (!list.length) return null;
-          return (
-            <section key={kind}>
-              <h3 className="group-title">{label}</h3>
-              <ul className="games">
-                {list.map((g) => (
-                  <li key={g.id} className={`game-card ${g.difficulty}`}>
-                    <Snapshot id={g.id} />
-                    <button type="button" className="game-btn" onClick={() => start(g.id)}>
-                      <span className="game-head">
-                        <strong>{g.name}</strong>
-                        <span className="level">{LEVELS[g.difficulty]}</span>
-                      </span>
-                      <span className="game-short">{g.short}</span>
-                      <em>{seatsText(g)}</em>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
+        </div>
       </section>
 
       <Divider />
@@ -219,9 +256,9 @@ const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }
   },
 ];
 
-function Filters({ filter, onChange }: { filter: Filter; onChange: (f: Filter) => void }) {
+function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; onChange: (f: Filter) => void }) {
   return (
-    <div className="filters">
+    <div id="filters" className={`filters${open ? ' open' : ''}`}>
       {FILTERS.map((f) => (
         <fieldset key={f.key} className="filter">
           <legend className="label">{f.label}</legend>
@@ -295,7 +332,7 @@ function markSeen(id: string): void {
   } catch {}
 }
 
-function GameView({ info, channel, view, results }: { info: GameInfo; channel: number; view: unknown; results: PlayerResult[] | null }) {
+function GameView({ info, view, results }: { info: GameInfo; view: unknown; results: PlayerResult[] | null }) {
   const Screen = SCREENS[info.id];
   const [rules, setRules] = useState(() => !seen(info.id));
   useEffect(() => markSeen(info.id), [info.id]);
@@ -316,13 +353,14 @@ function GameView({ info, channel, view, results }: { info: GameInfo; channel: n
     wasOpen.current = rules;
   }, [rules]);
   return (
-    <div className="screen tv-on">
+    <div className="screen game-screen tv-on">
+      {/* While you play, the Observer's face peeks at you from behind the game (the transmission shows it otherwise). */}
+      <Peeker active={!rules && !results} />
       <nav className="game-nav">
         <button type="button" className="btn small ghost" onClick={stop}>
           ← Games
         </button>
-        {/* While you play, the Observer's face peeks at you from the dark (the transmission shows it otherwise). */}
-        {rules ? <span /> : <Peeker />}
+        <span />
         {rules ? (
           <span />
         ) : (
@@ -332,7 +370,7 @@ function GameView({ info, channel, view, results }: { info: GameInfo; channel: n
         )}
       </nav>
       {rules ? (
-        <HowToPlay key={info.id} id={info.id} name={info.name} channel={channel} onClose={() => setRules(false)} />
+        <HowToPlay key={info.id} id={info.id} name={info.name} onClose={() => setRules(false)} />
       ) : (
         <Board info={info} view={view} results={results} Screen={Screen} />
       )}
@@ -357,7 +395,9 @@ function Board({
       {/* After the end the final view stays below the results, so reveals (true weights, roles…) can be read. */}
       {view && Screen ? (
         <div className={results ? 'final-view' : undefined}>
-          <Screen view={view} />
+          <GameIdContext.Provider value={info.id}>
+            <Screen view={view} />
+          </GameIdContext.Provider>
         </div>
       ) : (
         !results && <p className="muted center">Loading…</p>
@@ -371,7 +411,7 @@ function Results({ info, results }: { info: GameInfo; results: PlayerResult[] })
   const ranked = [...results].sort((a, b) => a.rank - b.rank || b.points - a.points);
   return (
     <section className="card result">
-      <Emblem className="result-emblem" />
+      <Emblem className="result-emblem" hood />
       <div className="label">{info.name}</div>
       <h2>{heading(results, mine)}</h2>
       <div className="score big">{mine?.points ?? 0} points</div>

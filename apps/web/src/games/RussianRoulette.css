@@ -11,16 +11,14 @@
   flex: none;
 }
 
+/* Faceted steel; the chambers and the axle are cut in the page's near-black. */
 .russian-roulette-drum .body {
-  fill: var(--board);
-  stroke: var(--silver);
-  stroke-width: 2;
+  fill: color-mix(in srgb, var(--silver) 45%, var(--board));
 }
 
-.russian-roulette-drum .chamber {
+.russian-roulette-drum .chamber,
+.russian-roulette-drum .eye {
   fill: var(--bg);
-  stroke: var(--board-line);
-  stroke-width: 1;
 }
 
 .russian-roulette-drum .chamber.next {
@@ -54,20 +52,19 @@
   gap: 6px;
 }
 
-.russian-roulette-charges i,
-.russian-roulette-lives i {
+.russian-roulette-charges svg,
+.russian-roulette-lives svg {
   width: 16px;
   height: 16px;
-  border-radius: 50%;
-  background: var(--line);
+  fill: var(--line);
 }
 
-.russian-roulette-charges i.on {
-  background: var(--g-pink);
+.russian-roulette-charges svg.on {
+  fill: var(--g-pink);
 }
 
-.russian-roulette-lives i.on {
-  background: var(--ok);
+.russian-roulette-lives svg.on {
+  fill: var(--ok);
 }
 
 .list li.russian-roulette-turn {

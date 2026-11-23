@@ -38,17 +38,37 @@ const PIPS: Record<number, number[]> = {
   6: [0, 2, 3, 5, 6, 8],
 };
 
+/** Pip i as a small octagon, and its shaded lower-right half (a pip is a cut gem too). */
+const pipAt = (i: number): [number, number] => [10.5 + (i % 3) * 9.5, 10.5 + Math.floor(i / 3) * 9.5];
+const pip = (i: number) => {
+  const [x, y] = pipAt(i);
+  return `M${x - 1.4},${y - 3.4}h2.8l2,2v2.8l-2,2h-2.8l-2,-2v-2.8Z`;
+};
+const pipShade = (i: number) => {
+  const [x, y] = pipAt(i);
+  return `M${x + 2.4},${y - 2.4}l1,1v2.8l-2,2h-2.8l-1,-1Z`;
+};
+
+/** A faceted die face: a bevelled cube face lit from the top left, white gem pips (or '?'). */
 function Die({ n, tone, small }: { n: number | null; tone?: 'secret' | 'blind'; small?: boolean }) {
+  const pips = n === null ? [] : (PIPS[n] ?? []);
   return (
     <span className={`dice-prediction-die${tone ? ` ${tone}` : ''}${small ? ' small' : ''}`}>
-      {n === null ? (
-        <b>?</b>
-      ) : (
-        Array.from({ length: 9 }, (_, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: fixed pip grid
-          <i key={i} className={PIPS[n]?.includes(i) ? 'on' : ''} />
-        ))
-      )}
+      <svg viewBox="0 0 40 40" role="img" aria-label={n === null ? 'unknown die' : `die ${n}`}>
+        <path className="edge" d="M6,1 34,1 39,6 39,34 34,39 6,39 1,34 1,6Z" />
+        <path fill="#fff" fillOpacity=".5" d="M1,6 6,1 8,4 4,8Z" />
+        <path fill="#fff" fillOpacity=".3" d="M6,1 34,1 32,4 8,4Z" />
+        <path fill="#fff" fillOpacity=".18" d="M1,6 4,8 4,32 1,34Z" />
+        <path fill="#fff" fillOpacity=".1" d="M34,1 39,6 36,8 32,4Z M4,8 8,4 32,4 36,8 4,32Z" />
+        <path fill="#000" fillOpacity=".12" d="M1,34 4,32 8,36 6,39Z" />
+        <path fill="#000" fillOpacity=".2" d="M39,6 39,34 36,32 36,8Z" />
+        <path fill="#000" fillOpacity=".3" d="M34,39 6,39 8,36 32,36Z" />
+        <path fill="#000" fillOpacity=".35" d="M39,34 34,39 32,36 36,32Z" />
+        <path fill="#fff" d="M5,3.6 6.2,4.8 5,6 3.8,4.8Z" />
+        {pips.length > 0 && <path className="pip" d={pips.map(pip).join('')} />}
+        {pips.length > 0 && <path fill="#000" fillOpacity=".22" d={pips.map(pipShade).join('')} />}
+      </svg>
+      {n === null && <b aria-hidden="true">?</b>}
     </span>
   );
 }

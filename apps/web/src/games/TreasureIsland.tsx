@@ -45,6 +45,48 @@ interface IslandView {
 
 const C = 40;
 
+/**
+ * Faceted (low-poly) pictograms lit from the top left, like the animals of Animal Tile Auction:
+ * drawn round 0,0 in the colour of their group (CSS fill), white and black overlays make the
+ * facets, `eye` shapes are cut in the page's near-black, white glints.
+ */
+function Chest() {
+  return (
+    <>
+      <path d="M-13,-10 -7,-13.5 7,-13.5 13,-10 14.5,-4 14,12 -14,12 -14.5,-4Z" />
+      <path fill="#fff" fillOpacity=".5" d="M-13,-10 -7,-13.5 0,-13.5 0,-10Z" />
+      <path fill="#fff" fillOpacity=".25" d="M0,-13.5 7,-13.5 13,-10 0,-10Z" />
+      <path fill="#fff" fillOpacity=".15" d="M-13,-10 0,-10 0,-4 -14.5,-4Z M-14.4,-2.4 14.4,-2.4 -14,12Z" />
+      <path fill="#000" fillOpacity=".15" d="M0,-10 13,-10 14.5,-4 0,-4Z" />
+      <path fill="#000" fillOpacity=".22" d="M14.4,-2.4 14,12 -14,12Z" />
+      <path
+        fill="#000"
+        fillOpacity=".3"
+        d="M-10,-11.7 -6.8,-13.5 -6.8,12 -10,12Z M6.8,-13.5 10,-11.7 10,12 6.8,12Z M-14,9 14,9 14,12 -14,12Z"
+      />
+      <path className="eye" d="M-14.5,-4 14.5,-4 14.4,-2.4 -14.4,-2.4Z" />
+      <path fill="#fff" fillOpacity=".5" d="M-3.2,-5 3.2,-5 3.2,2 0,4.2 -3.2,2Z" />
+      <path className="eye" d="M0,-2.3 1,-1.3 0.5,-0.3 1,2 -1,2 -0.5,-0.3 -1,-1.3Z" />
+      <path fill="#fff" d="M-4.5,-12.6 -3.8,-11.9 -4.5,-11.2 -5.2,-11.9Z M-11.6,-0.9 -11,-0.3 -11.6,0.3 -12.2,-0.3Z" />
+    </>
+  );
+}
+
+function XMark() {
+  return (
+    <>
+      <path d="M-8.9,-13.1 0,-4.2 8.9,-13.1 13.1,-8.9 4.2,0 13.1,8.9 8.9,13.1 0,4.2 -8.9,13.1 -13.1,8.9 -4.2,0 -13.1,-8.9Z" />
+      <path fill="#fff" fillOpacity=".45" d="M0,0 0,-4.2 8.9,-13.1 11,-11Z" />
+      <path fill="#fff" fillOpacity=".35" d="M0,0 0,-4.2 -8.9,-13.1 -11,-11Z" />
+      <path fill="#fff" fillOpacity=".25" d="M0,0 -4.2,0 -13.1,8.9 -11,11Z" />
+      <path fill="#fff" fillOpacity=".12" d="M0,0 -11,-11 -13.1,-8.9 -4.2,0Z M0,0 4.2,0 13.1,8.9 11,11Z" />
+      <path fill="#000" fillOpacity=".2" d="M0,0 11,-11 13.1,-8.9 4.2,0Z M0,0 -11,11 -8.9,13.1 0,4.2Z" />
+      <path fill="#000" fillOpacity=".35" d="M0,0 11,11 8.9,13.1 0,4.2Z" />
+      <path fill="#fff" d="M4.6,-8.8 5.3,-8.1 4.6,-7.4 3.9,-8.1Z" />
+    </>
+  );
+}
+
 function Island({ view, pick, onPick }: { view: IslandView; pick: Square | null; onPick: (s: Square) => void }) {
   const n = view.size;
   const possible = new Set(view.possible.map(([x, y]) => `${x},${y}`));
@@ -100,6 +142,11 @@ function Island({ view, pick, onPick }: { view: IslandView; pick: Square | null;
           </g>
         );
       })}
+      {view.treasure && (
+        <g className="ti-treasure" transform={`translate(${view.treasure[0] * C + C / 2} ${view.treasure[1] * C + C / 2})`}>
+          <Chest />
+        </g>
+      )}
       {view.digs?.map((d, k) =>
         d ? (
           <text
@@ -115,12 +162,8 @@ function Island({ view, pick, onPick }: { view: IslandView; pick: Square | null;
       )}
       {dig && !view.digs && (
         <g className="ti-x" transform={`translate(${dig[0] * C + C / 2} ${dig[1] * C + C / 2})`}>
-          <line x1={-11} y1={-11} x2={11} y2={11} />
-          <line x1={11} y1={-11} x2={-11} y2={11} />
+          <XMark />
         </g>
-      )}
-      {view.treasure && (
-        <circle className="ti-treasure" cx={view.treasure[0] * C + C / 2} cy={view.treasure[1] * C + C / 2} r={C / 2 - 2} />
       )}
     </svg>
   );

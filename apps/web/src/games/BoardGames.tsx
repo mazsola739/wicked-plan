@@ -112,6 +112,40 @@ export function HexagonGame({ view }: { view: HexView }) {
 
 // --- Knight's Tour ---------------------------------------------------------
 
+/**
+ * The knight, a faceted horse head in the square's colour (docs/design.md, "Icons are faceted"):
+ * white facets lit from the top left, black ones down right, a dark eye and a white glint.
+ */
+function Knight() {
+  return (
+    <svg
+      viewBox="0 0 40 40"
+      width="1.2em"
+      height="1.2em"
+      fill="currentColor"
+      role="img"
+      aria-label="knight"
+      style={{ display: 'block', margin: 'auto' }}
+    >
+      <path d="M22,2.5 24.5,6 27,9 30.5,16 31.5,25 30,32 11,32 13.5,26.5 15,21.5 10.5,23.5 6,22.5 5.5,18.5 12,11 18.5,6.5Z" />
+      <path d="M9.5,32 30.5,32 33,34.5 33,38 7,38 7,34.5Z" />
+      <path fill="#fff" fillOpacity=".45" d="M18.5,6.5 12,11 5.5,18.5 11,17Z M9.5,32 30.5,32 33,34.5 7,34.5Z" />
+      <path fill="#fff" fillOpacity=".3" d="M22,2.5 24.5,6 18.5,6.5Z M5.5,18.5 11,17 10.5,23.5 6,22.5Z M13.5,26.5 22,24 20,32 11,32Z" />
+      <path fill="#fff" fillOpacity=".15" d="M18.5,6.5 24.5,6 19,14 11,17Z M7,34.5 20,34.5 20,38 7,38Z" />
+      <path fill="#fff" fillOpacity=".1" d="M11,17 19,14 15,21.5 10.5,23.5Z M19,14 22,24 13.5,26.5 15,21.5Z" />
+      <path fill="#000" fillOpacity=".14" d="M24.5,6 27,9 30.5,16 19,14Z" />
+      <path fill="#000" fillOpacity=".26" d="M30.5,16 31.5,25 22,24 19,14Z M20,34.5 33,34.5 33,38 20,38Z" />
+      <path
+        fill="#000"
+        fillOpacity=".35"
+        d="M22,24 31.5,25 30,32 20,32Z M24.5,6 27,9 30.5,16 31.5,25 29,23.5 28.8,19.8 26.6,18 26.7,14.4 24.5,12.6 24.4,9.4 22.6,8.2Z M21.4,4.8 22.6,6.4 20.6,6.6Z"
+      />
+      <path style={{ fill: 'var(--bg)' }} d="M13.4,12.6 15.8,10.8 17.8,11.4 15.6,13.6Z M6.8,19.8 8.8,19 9,20.6Z" />
+      <path fill="#fff" d="M15.6,11.3 16.2,11.9 15.6,12.5 15,11.9Z M10,32.8 10.6,33.4 10,34 9.4,33.4Z" />
+    </svg>
+  );
+}
+
 export function KnightGame({ view }: { view: KnightView }) {
   const order = new Map(view.path.map(([x, y], i) => [`${x},${y}`, i + 1]));
   const targets = new Set(view.targets.map(([x, y]) => `${x},${y}`));
@@ -140,7 +174,7 @@ export function KnightGame({ view }: { view: KnightView }) {
                 disabled={!targets.has(key)}
                 onClick={() => move({ type: 'step', x, y })}
               >
-                {here ? '♞' : (n ?? '')}
+                {here ? <Knight /> : (n ?? '')}
               </button>
             );
           })}

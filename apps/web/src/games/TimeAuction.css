@@ -20,13 +20,15 @@
   gap: 4px;
 }
 
-/* A gold token: filled gold, a brighter gold rim. */
-.time-auction-tokens i {
+/* A gold token: a faceted gold octagon with an hourglass cut in it (Token). */
+.time-auction-tokens svg {
   width: 18px;
   height: 18px;
-  border-radius: 50%;
-  border: 2px solid var(--g-yellow);
-  background: color-mix(in srgb, var(--g-yellow) 80%, #15121f);
+  fill: var(--g-yellow);
+}
+
+.time-auction-tokens .eye {
+  fill: var(--bg);
 }
 
 .time-auction-log {

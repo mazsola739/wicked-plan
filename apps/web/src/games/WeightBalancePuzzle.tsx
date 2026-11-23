@@ -46,14 +46,21 @@ const panText = (blocks: number[], extra: number) =>
 
 const resultText = (r: number) => (r > 0 ? 'left heavier' : r < 0 ? 'right heavier' : 'balanced');
 
-/** The scale: a beam tilted by `tilt` (1 left down, -1 right down, 0 level, null unknown). */
+/**
+ * The scale: a beam tilted by `tilt` (1 left down, -1 right down, 0 level, null unknown). The metal
+ * parts are faceted like the game icons: lit from the top left with white and black overlays.
+ */
 function Scale({ load, tilt }: { load: Load; tilt: number | null }) {
   const angle = tilt === null ? 0 : tilt * -9;
   const pan = (blocks: number[], extra: number, x: number) => (
     <g transform={`translate(${x} 0)`}>
       <line className="wb-string" x1={-40} y1={0} x2={-50} y2={60} />
       <line className="wb-string" x1={40} y1={0} x2={50} y2={60} />
-      <path className="wb-pan" d="M -62 60 Q 0 86 62 60 Z" />
+      <path className="wb-pan" d="M -62 60 L -36 68.6 L -12 72.5 L 12 72.5 L 36 68.6 L 62 60 Z" />
+      <path fill="#fff" fillOpacity=".18" d="M -62 60 L -36 60 L -36 68.6 Z" />
+      <path fill="#fff" fillOpacity=".1" d="M -36 60 L -12 60 L -12 72.5 L -36 68.6 Z" />
+      <path fill="#000" fillOpacity=".15" d="M 12 60 L 36 60 L 36 68.6 L 12 72.5 Z" />
+      <path fill="#000" fillOpacity=".3" d="M 36 60 L 62 60 L 36 68.6 Z" />
       {blocks.map((b, i) => (
         <g key={b} transform={`translate(${-48 + (i % 3) * 32} ${32 - Math.floor(i / 3) * 30})`}>
           <rect className="wb-block" width={28} height={28} rx={4} />
@@ -64,7 +71,13 @@ function Scale({ load, tilt }: { load: Load; tilt: number | null }) {
       ))}
       {extra > 0 && (
         <g transform={`translate(${blocks.length < 3 ? -48 + blocks.length * 32 : 30} ${blocks.length < 3 ? 34 : 2})`}>
-          <path className="wb-weight" d="M 4 26 L 8 6 L 20 6 L 24 26 Z" />
+          <path className="wb-weight" d="M 4 26 L 8 6 L 20 6 L 24 26 Z M 11 6 L 12 2.5 L 16 2.5 L 17 6 Z" />
+          <path fill="#fff" fillOpacity=".5" d="M 8 6 L 20 6 L 18 8 L 10 8 Z" />
+          <path fill="#fff" fillOpacity=".35" d="M 4 26 L 8 6 L 10 8 L 7.2 24.5 Z M 11 6 L 12 2.5 L 14 2.5 L 14 6 Z" />
+          <path fill="#fff" fillOpacity=".12" d="M 10 8 L 18 8 L 7.2 24.5 Z" />
+          <path fill="#000" fillOpacity=".22" d="M 20 6 L 24 26 L 20.8 24.5 L 18 8 Z M 14 2.5 L 16 2.5 L 17 6 L 14 6 Z" />
+          <path fill="#000" fillOpacity=".32" d="M 4 26 L 24 26 L 20.8 24.5 L 7.2 24.5 Z" />
+          <path fill="#fff" d="M 11.4 9.4 L 12.1 10.1 L 11.4 10.8 L 10.7 10.1 Z" />
           <text className="wb-grams" x={14} y={18}>
             {extra}
           </text>
@@ -75,8 +88,12 @@ function Scale({ load, tilt }: { load: Load; tilt: number | null }) {
   return (
     <svg className="drawing wb-scale" viewBox="-200 -40 400 200" role="img" aria-label="Balance scale">
       <path className="wb-stand" d="M -40 150 L 40 150 L 6 0 L -6 0 Z" />
+      <path fill="#fff" fillOpacity=".1" d="M -40 150 L 0 150 L 0 0 L -6 0 Z" />
+      <path fill="#000" fillOpacity=".25" d="M 0 150 L 40 150 L 6 0 L 0 0 Z" />
       <g transform={`rotate(${angle})`}>
-        <rect className="wb-beam" x={-150} y={-5} width={300} height={10} rx={5} />
+        <path className="wb-beam" d="M -150 0 L -146 -5 L 146 -5 L 150 0 L 146 5 L -146 5 Z" />
+        <path fill="#fff" fillOpacity=".4" d="M -148.8 -1.5 L -146 -5 L 146 -5 L 148.8 -1.5 Z" />
+        <path fill="#000" fillOpacity=".28" d="M -148.8 1.5 L -146 5 L 146 5 L 148.8 1.5 Z" />
         <g transform="translate(-130 0)">
           <g transform={`rotate(${-angle})`}>{pan(load.left, load.leftExtra, 0)}</g>
         </g>
@@ -84,7 +101,10 @@ function Scale({ load, tilt }: { load: Load; tilt: number | null }) {
           <g transform={`rotate(${-angle})`}>{pan(load.right, load.rightExtra, 0)}</g>
         </g>
       </g>
-      <circle className="wb-pivot" r={8} />
+      <path className="wb-pivot" d="M 7.4 3.1 L 3.1 7.4 L -3.1 7.4 L -7.4 3.1 L -7.4 -3.1 L -3.1 -7.4 L 3.1 -7.4 L 7.4 -3.1 Z" />
+      <path fill="#000" fillOpacity=".2" d="M 0 0 L 7.4 -3.1 L 7.4 3.1 Z M 0 0 L 3.1 7.4 L -3.1 7.4 Z" />
+      <path fill="#000" fillOpacity=".35" d="M 0 0 L 7.4 3.1 L 3.1 7.4 Z" />
+      <path fill="#000" fillOpacity=".12" d="M 0 0 L 3.1 -7.4 L 7.4 -3.1 Z M 0 0 L -3.1 7.4 L -7.4 3.1 Z" />
       {tilt !== null && (
         <text className="wb-result" y={-22}>
           {resultText(tilt)}

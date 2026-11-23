@@ -21,9 +21,14 @@
   dominant-baseline: central;
 }
 
+/* The dark edge is on the silhouette only, not on the facet overlays (which carry their own fill). */
 .msq-shape {
   stroke: var(--bg);
-  stroke-width: 2;
+  stroke-width: 1.5;
+}
+
+.msq-shape [fill] {
+  stroke: none;
 }
 
 .msq-shape.red {

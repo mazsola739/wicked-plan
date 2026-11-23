@@ -39,21 +39,90 @@ const WEIGHT = 'var(--silver)';
 const COLOUR_NAMES = ['red', 'blue', 'gold'];
 const SHAPE_NAMES = ['circle', 'triangle', 'square', 'star'];
 
-function star(cx: number, cy: number, r: number): string {
-  return Array.from({ length: 10 }, (_, i) => {
-    const a = (Math.PI / 5) * i - Math.PI / 2;
-    const rr = i % 2 ? r * 0.45 : r;
-    return `${cx + rr * Math.cos(a)},${cy + rr * Math.sin(a)}`;
-  }).join(' ');
-}
+/*
+ * The pictures are cut like gems (docs/design.md, "Icons are faceted"): drawn around 0,0 in the
+ * fill of their <g>, lit from the top left by white overlays, shaded down right by black ones,
+ * with a tiny white glint.
+ */
+
+/** A five-pointed star, one ridge per point (outer radius 11.5). */
+const STAR = (
+  <>
+    <polygon points="0,-11.5 3,-4.2 10.9,-3.6 4.9,1.6 6.8,9.3 0,5.2 -6.8,9.3 -4.9,1.6 -10.9,-3.6 -3,-4.2" />
+    <path fill="#fff" fillOpacity=".45" d="M0,0 -3,-4.2 0,-11.5Z M0,0 -10.9,-3.6 -3,-4.2Z" />
+    <path fill="#fff" fillOpacity=".35" d="M0,0 0,-11.5 3,-4.2Z M0,0 -4.9,1.6 -10.9,-3.6Z" />
+    <path fill="#000" fillOpacity=".2" d="M0,0 10.9,-3.6 4.9,1.6Z M0,0 0,5.2 -6.8,9.3Z" />
+    <path fill="#000" fillOpacity=".35" d="M0,0 4.9,1.6 6.8,9.3Z M0,0 6.8,9.3 0,5.2Z" />
+    <path fill="#fff" d="M-1.6,-4.3 -0.7,-3.4 -1.6,-2.5 -2.5,-3.4Z" />
+  </>
+);
 
 /** A circle, triangle, square or star of radius r. */
 function Shape({ shape, x, y, r, fill }: { shape: number; x: number; y: number; r: number; fill: string }) {
-  if (shape === 0) return <circle cx={x} cy={y} r={r} style={{ fill }} />;
-  if (shape === 1) return <polygon points={`${x},${y - r} ${x + r},${y + r * 0.8} ${x - r},${y + r * 0.8}`} style={{ fill }} />;
-  if (shape === 2) return <rect x={x - r * 0.85} y={y - r * 0.85} width={r * 1.7} height={r * 1.7} style={{ fill }} />;
-  return <polygon points={star(x, y, r * 1.15)} style={{ fill }} />;
+  return (
+    <g transform={`translate(${x} ${y}) scale(${r / 10})`} style={{ fill }}>
+      {shape === 0 && (
+        <>
+          <circle r={10} />
+          <path fill="#fff" fillOpacity=".5" d="M-5,-2.1 -9.2,-3.8A10,10 0 0 1 -3.8,-9.2L-2.1,-5Z" />
+          <path fill="#fff" fillOpacity=".4" d="M-2.1,-5 -3.8,-9.2A10,10 0 0 1 3.8,-9.2L2.1,-5Z" />
+          <path fill="#fff" fillOpacity=".3" d="M-5,2.1 -9.2,3.8A10,10 0 0 1 -9.2,-3.8L-5,-2.1Z" />
+          <path fill="#000" fillOpacity=".25" d="M5,-2.1 9.2,-3.8A10,10 0 0 1 9.2,3.8L5,2.1Z" />
+          <path fill="#000" fillOpacity=".3" d="M2.1,5 3.8,9.2A10,10 0 0 1 -3.8,9.2L-2.1,5Z" />
+          <path fill="#000" fillOpacity=".35" d="M5,2.1 9.2,3.8A10,10 0 0 1 3.8,9.2L2.1,5Z" />
+          <path fill="#fff" fillOpacity=".1" d="M5,2.1 2.1,5 -2.1,5 -5,2.1 -5,-2.1 -2.1,-5 2.1,-5 5,-2.1Z" />
+          <path fill="#fff" d="M-2.6,-3.5 -1.7,-2.6 -2.6,-1.7 -3.5,-2.6Z" />
+        </>
+      )}
+      {shape === 1 && (
+        <>
+          <polygon points="0,-10 10,8 -10,8" />
+          <path fill="#fff" fillOpacity=".45" d="M-10,8 0,-10 0,-3 -4.2,4.5Z" />
+          <path fill="#fff" fillOpacity=".12" d="M0,-3 4.2,4.5 -4.2,4.5Z" />
+          <path fill="#000" fillOpacity=".3" d="M10,8 -10,8 -4.2,4.5 4.2,4.5Z" />
+          <path fill="#fff" d="M-1.2,-1.3 -0.3,-0.4 -1.2,0.5 -2.1,-0.4Z" />
+        </>
+      )}
+      {shape === 2 && (
+        <>
+          <rect x={-8.5} y={-8.5} width={17} height={17} />
+          <path fill="#fff" fillOpacity=".4" d="M-8.5,-8.5 8.5,-8.5 4.3,-4.3 -4.3,-4.3Z" />
+          <path fill="#fff" fillOpacity=".3" d="M-8.5,8.5 -8.5,-8.5 -4.3,-4.3 -4.3,4.3Z" />
+          <path fill="#000" fillOpacity=".25" d="M8.5,-8.5 8.5,8.5 4.3,4.3 4.3,-4.3Z" />
+          <path fill="#000" fillOpacity=".3" d="M8.5,8.5 -8.5,8.5 -4.3,4.3 4.3,4.3Z" />
+          <path fill="#fff" d="M-2.4,-3.3 -1.5,-2.4 -2.4,-1.5 -3.3,-2.4Z" />
+        </>
+      )}
+      {shape === 3 && STAR}
+    </g>
+  );
 }
+
+/** One pan of a balance, around x = 0. */
+const PAN = (
+  <>
+    <path d="M-28,138 28,138 22,145 -22,145Z" />
+    <path fill="#fff" fillOpacity=".45" d="M-28,138 28,138 26.6,140 -26.6,140Z" />
+    <path fill="#fff" fillOpacity=".12" d="M-26.6,140 0,140 -4,145 -22,145Z" />
+    <path fill="#000" fillOpacity=".3" d="M0,140 26.6,140 22,145 -4,145Z" />
+  </>
+);
+/** The foot, the two pans and the pivot of a balance, around x = 0. */
+const STAND = (
+  <>
+    <path d="M-26,195 -14,187 14,187 26,195Z" />
+    <path fill="#fff" fillOpacity=".3" d="M-26,195 -14,187 2,187 -4,195Z" />
+    <path fill="#000" fillOpacity=".25" d="M2,187 14,187 26,195 -4,195Z" />
+    <g transform="translate(-45 0)">{PAN}</g>
+    <g transform="translate(45 0)">{PAN}</g>
+    <path d="M0,42 7,50 0,58 -7,50Z" />
+    <path fill="#fff" fillOpacity=".45" d="M0,42 -7,50 0,50Z" />
+    <path fill="#fff" fillOpacity=".12" d="M0,42 7,50 0,50Z" />
+    <path fill="#000" fillOpacity=".12" d="M-7,50 0,58 0,50Z" />
+    <path fill="#000" fillOpacity=".32" d="M7,50 0,58 0,50Z" />
+    <path fill="#fff" d="M-2.5,45.2 -1.7,46 -2.5,46.8 -3.3,46Z" />
+  </>
+);
 
 function Tally({ count, x, y }: { count: number; x: number; y: number }) {
   const lines: ReactNode[] = [];
@@ -79,38 +148,75 @@ function Balance({ x, left, right }: { x: number; left: number[]; right: number[
   return (
     <g>
       <line x1={x} y1={50} x2={x} y2={190} className="rww-metal" />
-      <path d={`M${x - 25} 192 H${x + 25}`} className="rww-metal" />
       <line x1={x - 45} y1={50} x2={x + 45} y2={50} className="rww-metal" />
       <path
         d={`M${x - 45} 50 L${x - 71} 140 M${x - 45} 50 L${x - 19} 140 M${x + 45} 50 L${x + 19} 140 M${x + 45} 50 L${x + 71} 140`}
         className="rww-strings"
       />
-      <path d={`M${x - 73} 140 H${x - 17} M${x + 17} 140 H${x + 73}`} className="rww-metal" />
+      <g transform={`translate(${x} 0)`} style={{ fill: WEIGHT }}>
+        {STAND}
+      </g>
       {pan(left, x - 45)}
       {pan(right, x + 45)}
     </g>
   );
 }
 
-/** A small padlock, open or shut. */
+/** A small faceted padlock, open (the shackle's right leg out of the body) or shut. */
 function Lock({ open }: { open: boolean }) {
+  const leg = open ? '19.5,9 16.5,9' : '19.5,13 16.5,13';
   return (
     <svg viewBox="0 0 24 28" className={`rww-lock${open ? ' open' : ''}`} aria-hidden="true">
-      <path d={open ? 'M7 12 V8 a5 5 0 0 1 10 0 V5' : 'M7 12 V8 a5 5 0 0 1 10 0 V12'} className="rww-shackle" />
-      <rect x={3} y={12} width={18} height={14} rx={3} className="rww-body" />
+      <path
+        className="rww-shackle"
+        d={`M4.5,13 4.5,7.5 6.5,3.5 9.5,1.5 14.5,1.5 17.5,3.5 19.5,7.5 ${leg} 16.5,8 15.3,5.4 13.6,4.4 10.4,4.4 8.7,5.4 7.5,8 7.5,13Z`}
+      />
+      <path fill="#fff" fillOpacity=".4" d="M4.5,13 4.5,7.5 6.5,3.5 9.5,1.5 10.4,4.4 8.7,5.4 7.5,8 7.5,13Z" />
+      <path fill="#fff" fillOpacity=".15" d="M9.5,1.5 14.5,1.5 13.6,4.4 10.4,4.4Z" />
+      <path fill="#000" fillOpacity=".25" d={`M14.5,1.5 17.5,3.5 19.5,7.5 ${leg} 16.5,8 15.3,5.4 13.6,4.4Z`} />
+      <path className="rww-body" d="M4.5,12 19.5,12 21,13.5 21,25 19.5,26.5 4.5,26.5 3,25 3,13.5Z" />
+      <path fill="#fff" fillOpacity=".35" d="M3,13.5 4.5,12 19.5,12 21,13.5 17.5,15 6.5,15Z" />
+      <path fill="#fff" fillOpacity=".18" d="M3,13.5 6.5,15 6.5,23.5 3,25Z" />
+      <path fill="#000" fillOpacity=".22" d="M21,13.5 21,25 17.5,23.5 17.5,15Z" />
+      <path fill="#000" fillOpacity=".35" d="M3,25 6.5,23.5 17.5,23.5 21,25 19.5,26.5 4.5,26.5Z" />
+      <path className="eye" d="M12,16.3 13.7,17.3 13.7,19.2 12.8,19.8 13.2,21.8 10.8,21.8 11.2,19.8 10.3,19.2 10.3,17.3Z" />
+      <path fill="#fff" d="M5.6,12.7 6.3,13.4 5.6,14.1 4.9,13.4Z" />
     </svg>
   );
 }
 
+/** A star, crescent moon or water drop, cut like the stones. */
 function SymbolGlyph({ id, x, y }: { id: number; x: number; y: number }) {
-  if (id === 0) return <polygon points={star(x, y, 12)} className="rww-sym" />;
-  if (id === 1)
-    return <path d={`M${x + 5} ${y - 11} A12 12 0 1 0 ${x + 5} ${y + 11} A14 14 0 0 1 ${x + 5} ${y - 11} Z`} className="rww-sym" />;
   return (
-    <path
-      d={`M${x} ${y - 13} C${x + 10} ${y - 1} ${x + 10} ${y + 11} ${x} ${y + 11} C${x - 10} ${y + 11} ${x - 10} ${y - 1} ${x} ${y - 13} Z`}
-      className="rww-sym"
-    />
+    <g transform={`translate(${x} ${y})`} className="rww-sym">
+      {id === 0 && <g transform="scale(1.04)">{STAR}</g>}
+      {id === 1 && (
+        <>
+          <path d="M5,-11 -2.8,-11.6 -9.3,-7.4 -11.8,0 -9.3,7.4 -2.8,11.6 5,11 2.1,7.9 0.3,4.2 -0.3,0 0.3,-4.2 2.1,-7.9Z" />
+          <path fill="#fff" fillOpacity=".5" d="M-2.8,-11.6 -9.3,-7.4 -6.1,-6.3 -1.1,-10.4Z" />
+          <path fill="#fff" fillOpacity=".4" d="M5,-11 -2.8,-11.6 -1.1,-10.4Z M-9.3,-7.4 -11.8,0 -8,0 -6.1,-6.3Z" />
+          <path fill="#fff" fillOpacity=".15" d="M-11.8,0 -9.3,7.4 -6.1,6.3 -8,0Z" />
+          <path fill="#000" fillOpacity=".15" d="M-9.3,7.4 -2.8,11.6 -1.1,10.4 -6.1,6.3Z M-6.1,6.3 -1.1,10.4 2.1,7.9 0.3,4.2Z" />
+          <path fill="#000" fillOpacity=".2" d="M-8,0 -6.1,6.3 0.3,4.2 -0.3,0Z" />
+          <path fill="#000" fillOpacity=".25" d="M-6.1,-6.3 -8,0 -0.3,0 0.3,-4.2Z" />
+          <path fill="#000" fillOpacity=".3" d="M-1.1,-10.4 -6.1,-6.3 0.3,-4.2 2.1,-7.9Z M-2.8,11.6 5,11 -1.1,10.4Z" />
+          <path fill="#000" fillOpacity=".35" d="M5,-11 -1.1,-10.4 2.1,-7.9Z" />
+          <path fill="#fff" d="M-7.2,-6.5 -6.3,-5.6 -7.2,-4.7 -8.1,-5.6Z" />
+        </>
+      )}
+      {id > 1 && (
+        <>
+          <path d="M0,-13 4.6,-5.5 7.4,0.5 7.4,6 4.3,9.9 0,11 -4.3,9.9 -7.4,6 -7.4,0.5 -4.6,-5.5Z" />
+          <path fill="#fff" fillOpacity=".5" d="M-7.4,0.5 -4.6,-5.5 -1,3Z" />
+          <path fill="#fff" fillOpacity=".45" d="M-4.6,-5.5 0,-13 -1,3Z" />
+          <path fill="#fff" fillOpacity=".3" d="M0,-13 4.6,-5.5 -1,3Z M-7.4,6 -7.4,0.5 -1,3Z" />
+          <path fill="#000" fillOpacity=".1" d="M-4.3,9.9 -7.4,6 -1,3Z" />
+          <path fill="#000" fillOpacity=".25" d="M7.4,0.5 7.4,6 -1,3Z M0,11 -4.3,9.9 -1,3Z" />
+          <path fill="#000" fillOpacity=".35" d="M7.4,6 4.3,9.9 -1,3Z M4.3,9.9 0,11 -1,3Z" />
+          <path fill="#fff" d="M-3.4,-2.9 -2.5,-2 -3.4,-1.1 -4.3,-2Z" />
+        </>
+      )}
+    </g>
   );
 }
 

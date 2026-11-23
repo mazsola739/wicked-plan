@@ -24,6 +24,26 @@ interface TaView {
 
 const secs = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 
+/**
+ * A gold token cut like a gem (docs/design.md, "Icons are faceted"): an octagon with facets lit
+ * from the top left, an hourglass cut in its face and a white glint.
+ */
+function Token() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M18.8,13.6 13.6,18.8 6.4,18.8 1.2,13.6 1.2,6.4 6.4,1.2 13.6,1.2 18.8,6.4Z" />
+      <path fill="#fff" fillOpacity=".5" d="M1.2,6.4 6.4,1.2 7.9,4.8 4.8,7.9Z" />
+      <path fill="#fff" fillOpacity=".4" d="M6.4,1.2 13.6,1.2 12.1,4.8 7.9,4.8Z" />
+      <path fill="#fff" fillOpacity=".3" d="M1.2,13.6 1.2,6.4 4.8,7.9 4.8,12.1Z" />
+      <path fill="#000" fillOpacity=".25" d="M18.8,6.4 18.8,13.6 15.2,12.1 15.2,7.9Z" />
+      <path fill="#000" fillOpacity=".3" d="M13.6,18.8 6.4,18.8 7.9,15.2 12.1,15.2Z" />
+      <path fill="#000" fillOpacity=".35" d="M18.8,13.6 13.6,18.8 12.1,15.2 15.2,12.1Z" />
+      <path className="eye" d="M7.7,6.9 12.3,6.9 10,10Z M7.7,13.1 12.3,13.1 10,10Z" />
+      <path fill="#fff" d="M5.6,3.8 6.4,4.6 5.6,5.4 4.8,4.6Z" />
+    </svg>
+  );
+}
+
 function status(v: TaView): string {
   const last = v.log[v.log.length - 1];
   switch (v.phase) {
@@ -105,7 +125,7 @@ export default function TimeAuction({ view }: ScreenProps) {
                 <span className="time-auction-tokens" title="tokens">
                   {Array.from({ length: s.tokens }, (_, i) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: identical tokens
-                    <i key={i} />
+                    <Token key={i} />
                   ))}
                   {s.tokens === 0 && <span className="muted small">no tokens</span>}
                 </span>

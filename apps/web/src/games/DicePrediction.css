@@ -1,21 +1,34 @@
+/* A faceted die (docs/design.md, Icons are faceted): the face is an SVG, the '?' sits on it. */
 .dice-prediction-die {
   display: inline-grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
   place-items: center;
   width: 64px;
   height: 64px;
-  padding: 8px;
-  border-radius: 12px;
-  background: var(--glass);
-  border: 1px solid var(--glass-edge);
+}
+
+.dice-prediction-die > * {
+  grid-area: 1 / 1;
+}
+
+.dice-prediction-die svg {
+  width: 100%;
+  height: 100%;
+  fill: #221f33;
+}
+
+.dice-prediction-die .edge {
+  stroke: var(--glass-edge);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.dice-prediction-die .pip {
+  fill: var(--g-white);
 }
 
 .dice-prediction-die.small {
   width: 32px;
   height: 32px;
-  padding: 4px;
-  border-radius: 7px;
 }
 
 /* The secret die is blue, the blind die pink: filled with the colour, softened a little toward the dark. */
@@ -27,24 +40,17 @@
   --tone: var(--g-pink);
 }
 
-.dice-prediction-die.secret,
-.dice-prediction-die.blind {
-  background: color-mix(in srgb, var(--tone) 80%, #15121f);
-  border-color: rgb(255 255 255 / 25%);
+.dice-prediction-die.secret svg,
+.dice-prediction-die.blind svg {
+  fill: color-mix(in srgb, var(--tone) 80%, #15121f);
 }
 
-.dice-prediction-die i {
-  width: 70%;
-  height: 70%;
-  border-radius: 50%;
-}
-
-.dice-prediction-die i.on {
-  background: var(--g-white);
+.dice-prediction-die.secret .edge,
+.dice-prediction-die.blind .edge {
+  stroke: rgb(255 255 255 / 25%);
 }
 
 .dice-prediction-die b {
-  grid-area: 1 / 1 / 4 / 4;
   color: var(--silver);
   font-size: 1.6rem;
 }

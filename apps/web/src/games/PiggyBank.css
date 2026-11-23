@@ -9,22 +9,13 @@
   flex: none;
 }
 
-/* A pink pig, filled pink (softened toward the dark) with a neon edge. */
-.piggy-bank-pig .body,
-.piggy-bank-pig .ear {
-  fill: color-mix(in srgb, var(--g-pink) 80%, #15121f);
-  stroke: var(--g-pink);
-  stroke-width: 2.5;
+/* A faceted pink pig (docs/design.md, Icons are faceted): the facets are white and black overlays. */
+.piggy-bank-pig {
+  fill: var(--g-pink);
 }
 
-.piggy-bank-pig .snout {
-  fill: color-mix(in srgb, var(--g-pink) 70%, #15121f);
-  stroke: var(--g-pink);
-  stroke-width: 2.5;
-}
-
-.piggy-bank-pig .dark {
-  fill: #12111a;
+.piggy-bank-pig .eye {
+  fill: var(--bg);
 }
 
 .piggy-bank-pig .count {
@@ -48,18 +39,21 @@
   display: inline-block;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
   vertical-align: middle;
-  border: 2px solid var(--silver);
 }
 
 .piggy-bank-white {
-  background: radial-gradient(circle at 35% 35%, var(--g-white), color-mix(in srgb, var(--g-white) 75%, var(--bg)));
+  fill: var(--g-white);
 }
 
-/* Black coins keep the silver edge so they show on the dark page. */
+/* Black coins keep a silver edge so they show on the dark page. */
 .piggy-bank-black {
-  background: radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--silver) 25%, var(--g-black)), var(--g-black));
+  fill: var(--g-black);
+}
+
+.piggy-bank-black .edge {
+  stroke: var(--silver);
+  stroke-width: 1.2;
 }
 
 .piggy-bank-pending {

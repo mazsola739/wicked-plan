@@ -43,8 +43,13 @@
 
 .tc-loot {
   fill: var(--g-yellow);
+}
+
+.tc-loot .edge,
+.tc-token .edge {
   stroke: var(--board);
   stroke-width: 2;
+  stroke-linejoin: round;
 }
 
 .tc-taken {
@@ -61,11 +66,6 @@
   stroke-dasharray: 4 3;
 }
 
-.tc-token circle {
-  stroke: var(--board);
-  stroke-width: 2;
-}
-
 .tc-token text,
 .tc-ghost text {
   fill: var(--bg);
@@ -75,19 +75,19 @@
   pointer-events: none;
 }
 
-.tc-token.police circle {
+.tc-token.police {
   fill: var(--g-blue);
 }
 
-.tc-token.thief circle {
+.tc-token.thief {
   fill: var(--g-red);
 }
 
-.tc-token.corrupt circle {
+.tc-token.corrupt {
   fill: var(--g-orange);
 }
 
-.tc-token.me circle {
+.tc-token.me .edge {
   stroke: var(--seat-0);
   stroke-width: 3;
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--seat-0) 45%, transparent));
