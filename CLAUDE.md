@@ -91,7 +91,8 @@ npm run hooks          # turn on the pre-commit checks once per clone
    nothing crashes, every game ends" test (`testing::bot_games` for solo, `testing::bot_games_with`
    for several seats). Puzzle games get a generator + solver first. Bots play sensibly, not randomly.
 5. **Original branding only.** The games follow the show's genre and mechanics, but names, art,
-   texts and look are our own. No names, logos, music or footage from TV shows or other games.
+   texts and look are our own. No names, logos, music or footage from TV shows or other games;
+   the one exception is the credit line under the picker title ("Based on the idea of the show …").
 
 ## Adding a game
 

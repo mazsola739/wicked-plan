@@ -47,6 +47,7 @@ function Picker({ games }: { games: GameInfo[] }) {
       <header>
         <h1 className="title">Wicked Plan</h1>
         <p className="muted">Pick a game. Puzzles, bluffs and duels; in the games for several players you play against bots.</p>
+        <p className="muted small">Based on the idea of the show The Devil's Plan. An unofficial fan project.</p>
       </header>
       {KINDS.map(([kind, label]) => {
         const list = games.filter((g) => g.kind === kind);
