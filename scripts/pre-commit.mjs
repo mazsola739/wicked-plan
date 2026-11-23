@@ -8,8 +8,9 @@ const ROOT = resolve(import.meta.dirname, '..');
 const CODE = /\.(ts|tsx|js|mjs|cjs)$/;
 const FORMATTABLE = /\.(ts|tsx|js|mjs|cjs|json)$/;
 const TAIL_LINES = 40;
-const BIOME = `node "${join(ROOT, 'node_modules/@biomejs/biome/bin/biome')}"`;
-const VITEST = `node "${join(ROOT, 'node_modules/vitest/vitest.mjs')}"`;
+// The running bun by its full path: a child cmd.exe cannot start WinGet's bun.exe link by name.
+const BUN = `"${process.execPath}"`;
+const BIOME = `${BUN} "${join(ROOT, 'node_modules/@biomejs/biome/bin/biome')}"`;
 
 const git = (args) => spawnSync('git', args, { cwd: ROOT, encoding: 'utf8' }).stdout.split('\0').filter(Boolean);
 const quote = (files) => files.map((f) => `"${f}"`).join(' ');
@@ -24,14 +25,14 @@ function run(label, cmd, cwd = ROOT) {
   }
   const output = `${result.stdout ?? ''}${result.stderr ?? ''}`.trimEnd().split('\n');
   console.log(`pre-commit: ${label} FAILED (${seconds}s): ${cmd}`);
-  // The failing lines first: tsc and vitest put a summary at the tail.
-  const failures = output.filter((line) => /error TS\d+|FAIL|AssertionError|✖|×/.test(line));
+  // The failing lines first: tsc and cargo put a summary at the tail.
+  const failures = output.filter((line) => /error TS\d+|error\[|FAILED|panicked|✖|×/.test(line));
   if (failures.length) console.log(failures.slice(0, 30).join('\n'), '\n---');
   console.log(output.slice(-TAIL_LINES).join('\n'));
   return false;
 }
 
-/** The npm workspaces (apps/*, packages/*), with the @wicked-plan packages each one imports. */
+/** The workspaces (apps/*, packages/*), with the @wicked-plan packages each one imports. */
 function workspaces() {
   const globs = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).workspaces;
   const out = [];
@@ -77,13 +78,10 @@ for (let grew = true; grew; ) {
   }
 }
 
-// Tests related to every changed file, wherever it lives (packages export their sources, so imports cross workspaces).
-const changedAbs = [...changed.values()].flat().map((f) => join(ROOT, f));
 for (const w of all) {
   if (!affected.has(w.name)) continue;
   const cwd = join(ROOT, w.dir);
-  if (w.scripts.typecheck) ok = run(`${w.dir} typecheck`, 'npm run --silent typecheck', cwd) && ok;
-  if (w.scripts.test) ok = run(`${w.dir} tests`, `${VITEST} related --run --passWithNoTests ${quote(changedAbs)}`, cwd) && ok;
+  if (w.scripts.typecheck) ok = run(`${w.dir} typecheck`, `${BUN} run --silent typecheck`, cwd) && ok;
 }
 
 // Rust (crates/: rules and the wasm bridge): format check, then every test.

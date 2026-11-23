@@ -4,10 +4,10 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "build": "vite build",
-    "preview": "vite preview --host",
-    "typecheck": "tsc -p tsconfig.json"
+    "dev": "bun --bun vite --host",
+    "build": "bun --bun vite build",
+    "preview": "bun --bun vite preview --host",
+    "typecheck": "bun --bun tsc -p tsconfig.json"
   },
   "dependencies": {
     "@fontsource/cinzel": "5.3.0",

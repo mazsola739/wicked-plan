@@ -1,4 +1,4 @@
-// Prints one line per file with its exported names: `npm run map <folder or file>...`. Cheaper than opening the files.
+// Prints one line per file with its exported names: `bun run map <folder or file>...`. Cheaper than opening the files.
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, relative, resolve } from 'node:path';
 
@@ -41,7 +41,7 @@ function exportsOf(file) {
 
 const targets = process.argv.slice(2);
 if (!targets.length) {
-  console.log('Usage: npm run map <folder or file>... (e.g. npm run map packages/rules/src)');
+  console.log('Usage: bun run map <folder or file>... (e.g. bun run map apps/web/src/games)');
   process.exit(0);
 }
 for (const target of targets) {
