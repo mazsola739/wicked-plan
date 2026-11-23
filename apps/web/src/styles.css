@@ -677,7 +677,10 @@ h2 {
     filter: brightness(1.2);
   }
 
-  .game-card:hover,
+  .game-card:hover {
+    border-color: var(--level);
+  }
+
   .card-btn:hover {
     border-color: var(--accent-2);
   }
