@@ -433,7 +433,6 @@ impl Game for WordBlockTower {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = WordBlockTower;
 
 #[cfg(test)]

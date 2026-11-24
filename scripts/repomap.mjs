@@ -4,7 +4,7 @@ import { extname, relative, resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const CODE = new Set(['.ts', '.tsx', '.js', '.mjs']);
-const SKIP = new Set(['node_modules', 'coverage', 'dist', 'build', 'android', '.vite']);
+const SKIP = new Set(['node_modules', 'dist', 'build', '.vite']);
 const EXPORT =
   /^export\s+(?:default\s+)?(?:abstract\s+)?(?:async\s+)?(?:function\*?|const|let|class|type|interface|enum)\s+([A-Za-z_$][\w$]*)/gm;
 const REEXPORT = /^export\s+(?:type\s+)?\{([^}]*)\}/gm;

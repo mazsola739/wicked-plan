@@ -7,7 +7,7 @@ import './PiecePuzzle.css';
 
 type Cell = [number, number];
 
-export interface RaceFinish {
+interface RaceFinish {
   id: string;
   timeMs: number | null;
   place: number | null;
@@ -63,7 +63,7 @@ export function RaceBar({ view }: { view: RaceView }) {
   );
 }
 
-export const PIECE_COLOURS = [
+const PIECE_COLOURS = [
   'var(--g-yellow)',
   'var(--g-blue)',
   'var(--g-green)',

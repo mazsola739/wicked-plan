@@ -290,7 +290,6 @@ impl Game for MagicSquare {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = MagicSquare;
 
 #[cfg(test)]

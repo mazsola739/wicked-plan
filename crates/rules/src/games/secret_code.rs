@@ -359,7 +359,6 @@ impl Game for SecretCode {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = SecretCode;
 
 #[cfg(test)]

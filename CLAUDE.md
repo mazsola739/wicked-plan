@@ -14,10 +14,9 @@ Chat with the user in Hungarian.
 ## Source documents
 
 - **`docs/design.md`: the main plan**: decisions, milestones, open questions.
-- **`docs/games.md`: the game catalogue** (51 games, by type), with what is done.
+- **`docs/games.md`: the game catalogue** (51 games, by type).
 - `docs/games/<game-id>.md`: one rules page per game; the page is the spec, write it first.
 - `docs/dev.md`: dev tools (tunnel, pre-commit, Biome, agents).
-- `Wicked Plan 1 - Design Plan.pdf`: the source of the catalogue.
 
 When a rule or number changes, change it in the docs first, then the code.
 
@@ -37,7 +36,7 @@ When a rule or number changes, change it in the docs first, then the code.
 apps/web/src/
   play.ts               the game being played: LocalGame (wasm), tick every 250 ms, move()
   App.tsx               landing (hero, How it works, catalogue with filters), game view, result panel
-  Emblem.tsx            the Observer (the user's art in assets/: observer.png, hood.webp, face.webp), the peeking face, the SVG crown mark
+  Emblem.tsx            the Observer (the user's art in assets/: hood.webp, face.webp), the peeking face, the SVG crown mark
   GameIcon.tsx          each game's neon icon (the user's art, assets/icons/<game-id>.webp)
   styles.css            theme tokens (:root) and shared styles; see "Visual identity" in docs/design.md
   games/registry.tsx    game id → screen component (every game is already listed)
@@ -87,8 +86,7 @@ bun run hooks          # turn on the pre-commit checks once per clone
    `State`; a seat gets only its `view_for`. The page shows only the view of seat `"you"`, so a
    server can referee later without changes.
 2. **Every game implements `Game`** (`crates/rules/src/game.rs`) as `pub struct Rules` (or
-   `pub type Rules`) with `pub const READY: bool = true`, in its own module. The page and bots only
-   talk to that contract.
+   `pub type Rules`) in its own module. The page and bots only talk to that contract.
 3. **Rules are pure and seeded.** Use `Rng::new(seed)`; no clock, no other randomness. Time arrives
    through `tick`. Same seed = same game.
 4. **Every rules module ships with tests and a bot**, including the "1,000 random bot games:
@@ -96,11 +94,12 @@ bun run hooks          # turn on the pre-commit checks once per clone
    for several seats). Puzzle games get a generator + solver first. Bots play sensibly, not randomly.
 5. **Original branding only.** The games follow the show's genre and mechanics, but names, art,
    texts and look are our own. No names, logos, music or footage from TV shows or other games;
-   the one exception is the credit line under the picker title ("Based on the idea of the show …").
+   the one exception is the credit line under the picker title ("Inspired by the Netflix show …"),
+   and the same credit in `README.md` and the GitHub description.
 
-## Adding a game
+## Changing or adding a game
 
-Every game already has its own files (stubs). Replace only these, never shared files:
+A game lives in its own files; a change to one game touches only these:
 
 1. `docs/games/<id>.md` — the rules page: first a `## How to play` section for players (a **Goal:** line
    and short bullets; only paragraphs, `- ` bullets and `**bold**`), shown in the game by `HowTo.tsx`;
@@ -108,9 +107,8 @@ Every game already has its own files (stubs). Replace only these, never shared f
    **Replay moments** line (the game's big moments, rare, never revealing a secret). A timer only
    where the game's line in `docs/games.md` gives a time limit or a race; otherwise a phase ends
    when everyone has moved.
-2. `crates/rules/src/games/<id_snake>.rs` — replace the `stub_game!` line with the real rules:
-   `pub const READY: bool = true;`, `pub struct Rules;` implementing `Game` with the same `info()`
-   id/kind/min/max as the stub (name and `short` may be improved). Several seats: implement `to_move`
+2. `crates/rules/src/games/<id_snake>.rs` — the rules: `pub struct Rules;` implementing `Game`.
+   Several seats: implement `to_move`
    (whose move it is; for secret simultaneous bids, everyone who has not bid yet); results via
    `rank_by_score`. `GameInfo` also needs a `difficulty` and 1-3 `tags` (docs/games.md,
    Categories). Replay moments: a `moments: Moments` in the state, pushed where they happen, and
@@ -121,6 +119,10 @@ Every game already has its own files (stubs). Replace only these, never shared f
    from `common.tsx`, `nameOf(id)` for seat names ("you", "bot-1"…). Game-specific CSS goes in
    `apps/web/src/games/<PascalName>.css`, imported by the screen, class names prefixed with the id.
 4. `bun run test`, `bun run wasm`, `bun run typecheck`, `bun run lint`; play it in the preview.
+
+A new game also needs its module in `registry!(…)` (`crates/rules/src/lib.rs`), its screen in
+`apps/web/src/games/registry.tsx`, its icon `apps/web/src/assets/icons/<id>.webp`, a row in
+`docs/games.md` (and its name in the Categories table there) and a row in `docs/README.md`.
 
 Seats on the page: `GameInfo::seats()` (the minimum, or 4 when allowed, never above the maximum);
 seat 0 is `"you"`, the rest are bots that move by themselves when `to_move` lists them.

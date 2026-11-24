@@ -374,7 +374,6 @@ impl Game for MemorySceneQuiz {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = MemorySceneQuiz;
 
 #[cfg(test)]

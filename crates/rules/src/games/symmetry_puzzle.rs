@@ -14,7 +14,6 @@ use crate::rng::Rng;
 #[serde(rename_all = "camelCase")]
 pub enum Axis {
     Vertical,
-    Horizontal,
     Diagonal,
     Both,
 }
@@ -31,7 +30,6 @@ pub fn orbit(n: usize, axis: Axis, cell: usize) -> Vec<usize> {
     let mut out = vec![cell];
     match axis {
         Axis::Vertical => out.push(at(r, n - 1 - c)),
-        Axis::Horizontal => out.push(at(n - 1 - r, c)),
         Axis::Diagonal => out.push(at(c, r)),
         Axis::Both => out.extend([at(r, n - 1 - c), at(n - 1 - r, c), at(n - 1 - r, n - 1 - c)]),
     }
@@ -244,7 +242,6 @@ impl Game for Rules {
     }
 }
 
-pub const READY: bool = true;
 
 #[cfg(test)]
 mod tests {

@@ -1,11 +1,10 @@
-// The Observer: Wicked Plan's emblem (docs/design.md, Visual identity). The art is the user's own:
-// assets/observer.png (the emblem with crown and ring), assets/hood.webp (the hooded Observer from
-// the poster) and assets/face.webp (its LED eyes and grin alone). The small crown mark is SVG.
+// The Observer: Wicked Plan's emblem (docs/design.md, Visual identity). The art is the owner's own:
+// assets/hood.webp (the hooded Observer from the poster) and assets/face.webp (its LED eyes and
+// grin alone). The small crown mark is SVG.
 
 import { useEffect, useRef, useState } from 'react';
 import face from './assets/face.webp';
 import hoodArt from './assets/hood.webp';
-import observer from './assets/observer.png';
 import './Emblem.css';
 
 const ALT = 'The Observer, a hooded figure with a glowing face';
@@ -16,18 +15,16 @@ export function reducedMotion(): boolean {
 }
 
 /**
- * The hooded Observer: the emblem with its crown and ring, or with `hood` the large hooded figure
- * from the poster. With `watching`, its signal glitches now and then (every 7–16 s: a cyan/violet
- * split and a flash), as if it were watching you on a live feed.
+ * The hooded Observer: the large hooded figure from the poster. With `watching`, its signal glitches
+ * now and then (every 7–16 s: a cyan/violet split and a flash), as if it were watching you on a live
+ * feed.
  */
 export function Emblem({
   className = '',
-  hood = false,
   watching = false,
   decorative = false,
 }: {
   className?: string;
-  hood?: boolean;
   watching?: boolean;
   /** Pure decoration (the game bar, the transmission monitor): hidden from screen readers. */
   decorative?: boolean;
@@ -52,8 +49,8 @@ export function Emblem({
     return () => window.clearTimeout(timer);
   }, [watching]);
 
-  const src = hood ? hoodArt : observer;
-  const art = hood ? 'emblem hood' : 'emblem';
+  const src = hoodArt;
+  const art = 'emblem';
   if (!watching) return <img className={`${art} ${className}`} src={src} alt={decorative ? '' : ALT} />;
   const label = decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': ALT };
   return (

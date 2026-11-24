@@ -134,7 +134,6 @@ pub struct TcState {
     pub time_left_ms: i64,
     pub unmasked: bool,
     pub log: Vec<String>,
-    pub rng: Rng,
     /// Replay moments: a catch; the piece that wins it for the thieves in round 11 or 12.
     pub moments: Moments,
 }
@@ -430,7 +429,6 @@ impl Game for Rules {
             time_left_ms: 0,
             unmasked: false,
             log: vec!["Round 1: everyone moves at once.".into()],
-            rng,
             moments: Moments::default(),
         })
     }
@@ -653,7 +651,6 @@ impl Game for Rules {
     }
 }
 
-pub const READY: bool = true;
 
 #[cfg(test)]
 mod tests {

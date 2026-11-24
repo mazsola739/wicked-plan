@@ -95,11 +95,6 @@ impl Moments {
             .collect()
     }
 
-    /// Every moment, for tests.
-    pub fn len(&self) -> usize {
-        self.list.len()
-    }
-
     pub fn is_empty(&self) -> bool {
         self.list.is_empty()
     }
@@ -136,7 +131,6 @@ pub trait Game {
 
 /// A running game behind JSON, so the page can hold any game the same way.
 pub trait Session: Send {
-    fn game_id(&self) -> &'static str;
     fn apply(&mut self, player: &str, mv: Value) -> Result<(), String>;
     fn tick(&mut self, ms: u64);
     fn view(&self, player: &str) -> Value;
@@ -154,9 +148,6 @@ pub struct Typed<G: Game> {
 }
 
 impl<G: Game + Send + 'static> Session for Typed<G> {
-    fn game_id(&self) -> &'static str {
-        G::info().id
-    }
     fn apply(&mut self, player: &str, mv: Value) -> Result<(), String> {
         let mv: G::Move = serde_json::from_value(mv).map_err(|e| format!("Bad move: {e}"))?;
         G::apply_move(&mut self.state, player, mv)
@@ -200,9 +191,6 @@ pub fn with_bots(inner: Box<dyn Session>, bots: Vec<String>, seed: u64) -> Box<d
 }
 
 impl Session for WithBots {
-    fn game_id(&self) -> &'static str {
-        self.inner.game_id()
-    }
     fn apply(&mut self, player: &str, mv: Value) -> Result<(), String> {
         if self.bots.iter().any(|(b, _)| b == player) {
             return Err("That seat is a bot".into());

@@ -1,17 +1,11 @@
-/* The artwork has its own near-black background: "lighten" lets the page show through it and the
-   radial mask fades its square edges, so it sits on the page without a box. */
+/* The hooded figure from the poster, a square on near-black: "lighten" lets the page show through
+   it and the hood's hem fades into the dark, so it sits on the page without a box. */
 .emblem {
   display: block;
-  aspect-ratio: 246 / 237;
-  mix-blend-mode: lighten;
-  mask-image: radial-gradient(closest-side, #000 78%, transparent 96%);
-  user-select: none;
-}
-
-/* The hooded figure from the poster: a square on black, the hood's hem fading into the dark. */
-.emblem.hood {
   aspect-ratio: 1;
+  mix-blend-mode: lighten;
   mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  user-select: none;
 }
 
 .crown {

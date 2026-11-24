@@ -1,7 +1,3 @@
-# Keep LF in the repo so Android/iOS builds also work on macOS and Linux.
+# LF in the repo on every OS.
 * text=auto eol=lf
-*.bat text eol=crlf
-*.cmd text eol=crlf
-*.pdf binary
 *.png binary
-*.jar binary

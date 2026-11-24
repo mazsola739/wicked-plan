@@ -2,56 +2,13 @@
 //! See docs/games.md for the catalogue and docs/games/<id>.md for each rules page.
 //!
 //! Every module in `games` exports `pub struct Rules` (or a `pub type Rules`)
-//! implementing `Game`, and `pub const READY: bool`. Games that are not ready
-//! yet are left out of the catalogue.
+//! implementing `Game`.
 
 pub mod game;
 pub mod quiz;
 pub mod rng;
 
 use game::{Game, GameInfo, Session, Typed, with_bots};
-
-/// A placeholder for a game that is not built yet: listed nowhere, ends at once.
-#[macro_export]
-macro_rules! stub_game {
-    ($id:literal, $kind:literal, $min:literal, $max:literal, $name:literal) => {
-        pub const READY: bool = false;
-        pub struct Rules;
-        impl $crate::game::Game for Rules {
-            type State = ();
-            type Move = serde_json::Value;
-            type View = ();
-            fn info() -> $crate::game::GameInfo {
-                $crate::game::GameInfo {
-                    id: $id,
-                    kind: $kind,
-                    difficulty: "",
-                    tags: &[],
-                    min_players: $min,
-                    max_players: $max,
-                    name: $name,
-                    short: "",
-                }
-            }
-            fn setup(_: &[String], _: u64) -> Result<(), String> {
-                Err("Not built yet".into())
-            }
-            fn apply_move(_: &mut (), _: &str, _: serde_json::Value) -> Result<(), String> {
-                Err("Not built yet".into())
-            }
-            fn view_for(_: &(), _: &str) {}
-            fn is_over(_: &()) -> bool {
-                true
-            }
-            fn results(_: &()) -> Vec<$crate::game::PlayerResult> {
-                Vec::new()
-            }
-            fn bot_move(_: &(), _: &str, _: u64) -> serde_json::Value {
-                serde_json::Value::Null
-            }
-        }
-    };
-}
 
 fn session<G: Game + Send + 'static>(players: &[String], seed: u64) -> Result<Box<dyn Session>, String> {
     Ok(Box::new(Typed::<G> { state: G::setup(players, seed)? }))
@@ -66,15 +23,13 @@ macro_rules! registry {
         /// Every playable game, in catalogue order.
         pub fn catalogue() -> Vec<GameInfo> {
             let mut out = Vec::new();
-            $(if games::$m::READY {
-                out.push(<games::$m::Rules as Game>::info());
-            })*
+            $(out.push(<games::$m::Rules as Game>::info());)*
             out
         }
 
         /// A game with exactly these players (no bots attached).
         pub fn new_session(game_id: &str, players: &[String], seed: u64) -> Result<Box<dyn Session>, String> {
-            $(if games::$m::READY && <games::$m::Rules as Game>::info().id == game_id {
+            $(if <games::$m::Rules as Game>::info().id == game_id {
                 return session::<games::$m::Rules>(players, seed);
             })*
             Err(format!("Unknown game: {game_id}"))
@@ -83,7 +38,7 @@ macro_rules! registry {
 }
 
 registry!(
-    // Built.
+    // The six first games (solo puzzles).
     count_the_cubes,
     count_the_rectangles,
     equation_target,
@@ -164,7 +119,6 @@ mod tests {
     fn every_catalogue_game_starts_a_table() {
         for info in catalogue() {
             let mut t = new_table(info.id, 1).unwrap();
-            assert_eq!(t.game_id(), info.id);
             assert!(!t.is_over());
             assert!(t.view(YOU).is_object());
             // Bots move on their own while time passes; nothing may crash.

@@ -32,7 +32,7 @@ function run(label, cmd, cwd = ROOT) {
   return false;
 }
 
-/** The workspaces (apps/*, packages/*), with the @wicked-plan packages each one imports. */
+/** The workspaces (apps/*), with the @wicked-plan packages each one imports. */
 function workspaces() {
   const globs = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).workspaces;
   const out = [];

@@ -142,10 +142,6 @@ h2 {
   text-align: center;
 }
 
-.spacer {
-  flex: 1;
-}
-
 .label {
   color: var(--muted);
   font-size: 0.75rem;
@@ -160,22 +156,6 @@ h2 {
 
 .row > * {
   flex: 1;
-}
-
-.field {
-  min-height: var(--touch);
-  padding: 0 14px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--panel);
-  font-size: 1.1rem;
-}
-
-.field.code {
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  text-align: center;
-  font-weight: 700;
 }
 
 /* Buttons are long hexagons with pointed ends. The edge colour is the button's background and the
@@ -246,15 +226,6 @@ h2 {
   --chamfer: 10px;
   min-height: 40px;
   padding: 0 22px;
-}
-
-.link {
-  background: none;
-  border: none;
-  color: var(--accent-2);
-  padding: 0;
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 .banner {
@@ -369,27 +340,6 @@ h2 {
 
 .snap-inner .screen {
   min-height: 0;
-}
-
-/* The card's top: the game's neon icon in front, the still of the game behind it as a watermark. */
-.card-art {
-  position: relative;
-}
-
-.card-art .snap {
-  opacity: 0.2;
-  filter: saturate(0.7);
-}
-
-.card-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  height: 86%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  filter: drop-shadow(0 0 10px rgb(8 8 12 / 0.9));
 }
 
 .name-icon {
@@ -929,7 +879,6 @@ h2 {
 
   .games {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
   }
 
   .equation {
@@ -1482,6 +1431,25 @@ a.btn {
   color: var(--muted);
 }
 
+.footer-links {
+  display: flex;
+  gap: 4px;
+}
+
+.footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 12px;
+  color: var(--cyan);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
 .group-title {
   font-family: var(--display);
   font-size: 0.85rem;
@@ -1498,29 +1466,20 @@ a.btn {
   margin-top: 4px;
 }
 
-/* The game bar: back on the left, the watching Observer in the middle, How to play on the right. */
+/* The game bar: back on the left, How to play on the right. */
 .game-nav {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 8px;
 }
 
-.game-nav > :first-child {
-  justify-self: start;
-}
-
-.game-nav > :last-child {
-  justify-self: end;
-}
-
-/* The game bar keeps one height (touch-size buttons), with or without the peeking face. */
+/* Touch-size buttons in the game bar (.btn.small alone is 40px high). */
 .game-nav .btn {
   min-height: var(--touch);
   white-space: nowrap;
 }
 
-/* Opening a game switches it on like an old monitor: a bright line that opens into the picture. */
 /* Its own stacking context, so the peeking face (z-index -1) sits behind the game but above the
    page background. */
 .game-screen {
@@ -1528,6 +1487,7 @@ a.btn {
   z-index: 0;
 }
 
+/* Opening a game switches it on like an old monitor: a bright line that opens into the picture. */
 .tv-on {
   animation: tv-on 0.55s ease-out;
   transform-origin: 50% 40%;
@@ -1578,10 +1538,31 @@ a.btn {
 }
 
 .howto ul {
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  padding-left: 0;
+  list-style: none;
+}
+
+/* Each bullet keeps to its own column beside the monitor (its own formatting context), with a
+   small diamond for a marker. */
+.howto li {
+  display: flow-root;
+  position: relative;
+  padding-left: 18px;
+}
+
+.howto li + li {
+  margin-top: 6px;
+}
+
+.howto li::before {
+  content: "";
+  position: absolute;
+  top: 0.6em;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  background: var(--cyan);
+  transform: rotate(45deg);
 }
 
 /* How to play as a transmission from the Observer (docs/design.md, Broadcast feel). */
@@ -1629,15 +1610,22 @@ a.btn {
   letter-spacing: 0.08em;
 }
 
+/* The monitor sits in the top-left corner and the text flows around it, to its right and below. */
+.tx-body {
+  display: flow-root;
+}
+
 /* The little monitor the Observer speaks from: scan lines, a vignette and a slow rolling band. */
 .tx-screen {
   position: relative;
+  float: left;
   display: grid;
   place-items: center;
-  height: 104px;
-  border-radius: 10px;
+  width: 128px;
+  height: 96px;
+  margin: 3px 14px 8px 0;
   border: 1px solid var(--glass-edge);
-  background: radial-gradient(ellipse at center, #120f1d, #050508 75%);
+  background: radial-gradient(ellipse at center, rgb(150 120 230 / 0.1), transparent 80%);
   overflow: hidden;
 }
 
@@ -1652,9 +1640,7 @@ a.btn {
 }
 
 .tx-screen::before {
-  background:
-    repeating-linear-gradient(0deg, rgb(0 0 0 / 0.38) 0 1px, transparent 1px 3px),
-    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.7));
+  background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.14) 0 1px, transparent 1px 3px);
   animation: tx-flicker 3.4s 2;
 }
 
@@ -1667,24 +1653,24 @@ a.btn {
 .tx-emblem,
 .tx-icon {
   grid-area: 1 / 1;
-  width: 102px;
-}
-
-.tx-icon {
-  height: 88px;
-  width: auto;
-  aspect-ratio: 1;
 }
 
 /* The Observer and the game's icon take turns (8 s): each switch is a short broadcast flicker,
    two dips in about 0.6 s, well under three flashes a second (WCAG 2.3.1). */
+/* The monitor is see-through: the Observer and the icon are shown faded (a filter, so the
+   flicker's opacity keyframes still apply on top). */
 .tx-emblem {
+  width: 92px;
   animation: tx-observer 8s linear infinite;
+  filter: opacity(0.7);
 }
 
 .tx-icon {
+  height: 80px;
+  aspect-ratio: 1;
   opacity: 0;
   animation: tx-game 8s linear infinite;
+  filter: opacity(0.6);
 }
 
 @keyframes tx-observer {
@@ -1750,20 +1736,28 @@ a.btn {
 
 @media (min-width: 720px) {
   .tx-screen {
-    height: 170px;
+    width: 224px;
+    height: 168px;
+    margin-right: 18px;
   }
 
   .tx-emblem {
-    width: 168px;
+    width: 160px;
   }
 
   .tx-icon {
-    height: 148px;
+    height: 140px;
   }
 }
 
 .tx-goal {
   font-size: 1.05rem;
+}
+
+.tx-body .tx-goal,
+.tx-body .tx-rest > p,
+.tx-body .tx-rest > ul {
+  margin-top: 10px;
 }
 
 /* The not-yet-typed rest of the Goal line keeps its place, so the text below does not jump. */
@@ -1782,10 +1776,21 @@ a.btn {
   animation: tx-blink 0.9s steps(1, end) infinite;
 }
 
-.tx-rest {
+/* "Don't show again for this game", above the Play button. */
+.tx-hide {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
+  min-height: var(--touch);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.tx-hide input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--cyan);
 }
 
 .tx-in {

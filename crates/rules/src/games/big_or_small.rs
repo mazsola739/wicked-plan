@@ -290,7 +290,6 @@ impl Game for BigOrSmall {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = BigOrSmall;
 
 #[cfg(test)]

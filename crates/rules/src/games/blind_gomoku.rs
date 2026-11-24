@@ -360,7 +360,6 @@ impl Game for BlindGomoku {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = BlindGomoku;
 
 #[cfg(test)]

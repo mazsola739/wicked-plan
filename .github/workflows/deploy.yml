@@ -1,0 +1,54 @@
+# Checks the rules and the page (lint, types, tests), builds them and publishes the page to GitHub Pages.
+# One-time setup on GitHub: Settings → Pages → Source: "GitHub Actions".
+name: Test and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: rustup target add wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates
+      # Must match the wasm-bindgen crate version exactly (crates/wasm/Cargo.toml).
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen@0.2.106
+      - run: bun install --frozen-lockfile
+      - run: bunx biome ci .
+      - run: bun run test
+      - run: bun run build
+      - run: bun run typecheck
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    # GitHub Pages needs a public repository on the free plan.
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

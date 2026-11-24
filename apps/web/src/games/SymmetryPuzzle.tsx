@@ -5,7 +5,7 @@ import { GameTop, KeyHint, move, Play, type ScreenProps, TimerBar, useKeys } fro
 import { RaceBar, type RaceView } from './PiecePuzzle';
 import './SymmetryPuzzle.css';
 
-type Axis = 'vertical' | 'horizontal' | 'diagonal' | 'both';
+type Axis = 'vertical' | 'diagonal' | 'both';
 
 interface SymmetryView extends RaceView {
   size: number;
@@ -18,7 +18,6 @@ interface SymmetryView extends RaceView {
 const PAINT = ['transparent', 'var(--g-yellow)', 'var(--g-blue)', 'var(--g-red)'];
 const AXIS_TEXT: Record<Axis, string> = {
   vertical: 'the vertical axis',
-  horizontal: 'the horizontal axis',
   diagonal: 'the diagonal axis',
   both: 'both axes',
 };
@@ -39,7 +38,7 @@ export default function SymmetryPuzzle({ view: raw }: ScreenProps) {
   });
   const lines: [number, number, number, number][] = [];
   if (view.axis === 'vertical' || view.axis === 'both') lines.push([n / 2, 0, n / 2, n]);
-  if (view.axis === 'horizontal' || view.axis === 'both') lines.push([0, n / 2, n, n / 2]);
+  if (view.axis === 'both') lines.push([0, n / 2, n, n / 2]);
   if (view.axis === 'diagonal') lines.push([0, 0, n, n]);
   return (
     <Play

@@ -398,7 +398,6 @@ impl Game for FindTheDifferences {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = FindTheDifferences;
 
 #[cfg(test)]

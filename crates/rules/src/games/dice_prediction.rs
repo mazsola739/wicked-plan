@@ -370,7 +370,6 @@ fn points_by_rank(keyed: &[(String, i64)]) -> Vec<PlayerResult> {
     rank_by_score(keyed).into_iter().map(|r| PlayerResult { points: 100 + 900 * (n - i64::from(r.rank)) / (n - 1), ..r }).collect()
 }
 
-pub const READY: bool = true;
 
 #[cfg(test)]
 mod tests {

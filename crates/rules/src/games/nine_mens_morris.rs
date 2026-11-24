@@ -499,7 +499,6 @@ impl Game for NineMensMorris {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = NineMensMorris;
 
 #[cfg(test)]

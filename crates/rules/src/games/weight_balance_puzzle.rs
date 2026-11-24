@@ -393,7 +393,6 @@ impl Game for WeightBalancePuzzle {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = WeightBalancePuzzle;
 
 #[cfg(test)]

@@ -379,7 +379,6 @@ fn points_by_rank(keyed: &[(String, i64)]) -> Vec<PlayerResult> {
         .collect()
 }
 
-pub const READY: bool = true;
 
 #[cfg(test)]
 mod tests {

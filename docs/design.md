@@ -3,8 +3,6 @@
 A **web page of puzzles and party games** in the genre of The Devil's Plan. One page lists every game;
 pick one and play. Solo puzzles are played alone; games for several players are played against bots.
 
-The earlier base-building mobile game was dropped on 2026-11-22.
-
 ## Decisions so far
 
 - **Platform:** a single-page React + TypeScript web app for desktop (wider layout, keyboard shortcuts)
@@ -16,27 +14,26 @@ The earlier base-building mobile game was dropped on 2026-11-22.
 - **Bots:** in games for several players the other seats are bots that move by themselves
   (seats: the game's minimum, or 4 when it allows more).
 - **Original names and look:** the show's games are not copied one to one; we write our own versions.
-- **All 51 catalogue games get a digital version** (decided 2026-11-23), built in groups.
+- **All 51 catalogue games have a digital version** (done 2026-11-23).
 - **Timers only where the game's rules give one** (decided 2026-11-24): a time limit, a race
   ("as fast as you can", "the fastest right answer wins") or time as the resource, as the game's
   line in `docs/games.md` says. Everywhere else you take your time: a phase ends when everyone has
   moved (bots move by themselves). Short result pauses stay, without a countdown bar. Spinning
   Puzzle Wheel keeps 12 s for the catalogue's 5, so a piece can be turned by touch.
 
-## Visual identity (2026-11-23, from the user's key art)
+## Visual identity (2026-11-23, from the Wicked Plan key art)
 
-- **Emblem, the Observer:** the user's own artwork (`apps/web/src/assets/observer.png`): a pointed
-  hood seen from the front, a black void for a face drawn by glowing LED features (a cyan
-  nested-diamond eye, a violet slash eye, a zigzag grin), a W crown above and ring arcs around it.
-  The crown alone is the small mark (top bar, footer, favicon), drawn in SVG in `Emblem.tsx`.
-  From the user's poster (2026-11-23): `hood.webp`, the hooded Observer large and without crown or
-  rings (the landing page, the How to play monitor, the results), and `face.webp`, its LED eyes and
-  grin alone on transparent (the peeking face).
-- **Game icons** (the user's art, 2026-11-23): one neon icon per game, `assets/icons/<game-id>.webp`
-  (256 px, transparent), shown by `GameIcon.tsx`, loaded only when in view. It is the big picture
-  on the game's card (the still of the game stays behind it, faint, like a watermark), small beside
-  the name on the card and in the sidebar's game list, beside the title in the game (`GameTop`),
-  and on the How to play monitor, taking turns with the Observer (a flicker at each switch).
+- **Emblem, the Observer:** the owner's own artwork, from the Wicked Plan poster (2026-11-23):
+  `apps/web/src/assets/hood.webp`, a pointed hood seen from the front, a black void for a face drawn
+  by glowing LED features (a cyan nested-diamond eye, a violet slash eye, a zigzag grin), shown large
+  on the landing page, the How to play monitor and the results; and `face.webp`, its LED eyes and
+  grin alone on transparent (the peeking face). The crown alone is the small mark (top bar, footer,
+  favicon), drawn in SVG in `Emblem.tsx`.
+- **Game icons** (the owner's art, 2026-11-23): one neon icon per game, `assets/icons/<game-id>.webp`
+  (256 px, transparent), shown by `GameIcon.tsx`, loaded only when in view. It is small beside the
+  name on the game's card (the card's picture is the still of the game) and in the sidebar's game
+  list, beside the title in the game (`GameTop`), and on the How to play monitor, taking turns with
+  the Observer (a flicker at each switch).
 - **Palette:** near-black background, dark violet-grey surfaces, **cyan** for highlights and the main
   action, **violet** for fills and the second action, **silver** for the title and line art.
   Difficulty keeps green / yellow / red.
@@ -54,8 +51,8 @@ The earlier base-building mobile game was dropped on 2026-11-22.
     dark glass with a coloured edge. Dark glass is for neutral things: number cards, playing cards.
   - **Seats** use one order everywhere: `--seat-0` is you (cyan), then violet, pink, yellow, green,
     orange, blue, white (`--seat-1`…`--seat-7`).
-  - **Icons are faceted** (decided 2026-11-23, after the user picked the faceted animals of
-    Animal Tile Auction, the reference): every pictogram a game draws (animals, card suits,
+  - **Icons are faceted** (decided 2026-11-23, with the faceted animals of Animal Tile Auction
+    as the reference): every pictogram a game draws (animals, card suits,
     jewels, monsters, pieces, objects) is a low-poly SVG in its colour, like a cut gem: a bold
     silhouette split into angular facets, lit from the top left (white overlays at 10–50%
     opacity on the upper-left facets, black at 12–35% on the lower-right), dark cut-outs in the
@@ -73,9 +70,12 @@ The earlier base-building mobile game was dropped on 2026-11-22.
   - Opening a game switches it on like an old monitor (a short CRT flash, never blocking).
   - How to play is a **transmission from the Observer**: the hooded Observer on a scan-lined
     "monitor", a red LIVE dot (it blinks a few times, then stays) and a channel tag, always **CH 08**
-    (the user's nod to another show; only the number, never a name; nothing counts up, the game
+    (a nod to another show; only the number, never a name; nothing counts up, the game
     waits). The Goal line types itself out, the bullets follow;
-    a tap or any key shows everything at once.
+    a tap or any key shows everything at once. The monitor sits in the top-left corner and the
+    text flows around it, to its right and below, so there is little to scroll. It opens by itself
+    when a game starts, unless **Don't show again for this game** was ticked (per game, on this
+    browser); the How to play button always opens it.
   - **The Observer watches**: on the landing page the hooded Observer's signal glitches every 7–16 s
     (one soft pulse and a cyan/violet split, under three flashes per second, WCAG 2.3.1). During a
     game only its **face** is there (`face.webp`), without the hood, behind the game like a
@@ -101,7 +101,7 @@ The earlier base-building mobile game was dropped on 2026-11-22.
   1024 px a sticky sidebar beside the cards, below that folded behind a Filters button that counts
   the active filters. No sign-in, lobby or leaderboard until rooms exist.
 
-## Open questions (the user decides)
+## Open questions (the owner decides)
 
 - Should games keep a score history or best scores on the page?
 - Rooms with friends: when, and with which server?
@@ -110,7 +110,6 @@ The earlier base-building mobile game was dropped on 2026-11-22.
 
 | # | Build | Done when |
 |---|---|---|
-| P0 | Cleanup: only the puzzles and the tools stay | Tests run, the docs describe the new plan — done |
 | P1 | Rules in Rust + WebAssembly; the page with six solo puzzles | Every puzzle can be played through in the browser — done 2026-11-22 |
 | P2 | Game picker page, bots for several seats, all 45 remaining games | Every catalogue game can be played through on desktop and phone, its tests (bot games) pass — done 2026-11-23 |
 | P3 | Rooms with friends (server) | Two people play one game together |

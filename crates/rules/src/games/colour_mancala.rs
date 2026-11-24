@@ -295,7 +295,6 @@ impl Game for ColourMancala {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = ColourMancala;
 
 #[cfg(test)]

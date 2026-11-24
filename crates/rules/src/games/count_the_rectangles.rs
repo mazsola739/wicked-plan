@@ -218,7 +218,6 @@ impl Game for CountTheRectangles {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = CountTheRectangles;
 
 #[cfg(test)]

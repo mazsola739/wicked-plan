@@ -377,7 +377,6 @@ impl Game for QuestionAndTruth {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = QuestionAndTruth;
 
 #[cfg(test)]

@@ -493,7 +493,6 @@ impl Game for PolyominoTerritory {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = PolyominoTerritory;
 
 #[cfg(test)]

@@ -42,7 +42,7 @@ const sections = readdirSync(DOCS)
     return [`- docs/${name}: ${heads.join(', ')}`];
   });
 
-const workspaces = ['apps', 'packages']
+const workspaces = ['apps']
   .filter((parent) => existsSync(join(ROOT, parent)))
   .flatMap((parent) =>
     readdirSync(join(ROOT, parent), { withFileTypes: true })

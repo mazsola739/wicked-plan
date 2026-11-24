@@ -36,7 +36,7 @@ missing. Paint the missing cells so the figure becomes symmetric.
   who finished, **200, 140, 90, 60**, plus 1 point per 2 seconds left. Not finished: 0.
 - Moves: `{type:"paint", cell, colour}` (cell row-major, colour 1… or 0 to clear), `{type:"giveUp"}`.
 - View: the race part (`round`, `rounds`, `timeLeftMs`, `roundTimeMs`, `racers`, `last`, `over`),
-  `size`, `axis` (`vertical` | `horizontal` | `diagonal` | `both`), `colours`, `cells` (0 = empty),
+  `size`, `axis` (`vertical` | `diagonal` | `both`), `colours`, `cells` (0 = empty),
   `given`.
 - Seats: seat 0 is the solver; the other seats are racing bots driven by time.
 - Bot (seat 0 in tests): paints the next wrong cell right.

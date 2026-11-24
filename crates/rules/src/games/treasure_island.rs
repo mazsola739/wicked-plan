@@ -371,7 +371,6 @@ impl Game for TreasureIsland {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = TreasureIsland;
 
 #[cfg(test)]

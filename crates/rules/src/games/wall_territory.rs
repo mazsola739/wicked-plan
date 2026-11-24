@@ -541,7 +541,6 @@ impl Game for WallTerritory {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = WallTerritory;
 
 #[cfg(test)]

@@ -197,7 +197,6 @@ impl Game for CountTheCubes {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = CountTheCubes;
 
 #[cfg(test)]

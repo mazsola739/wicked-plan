@@ -304,7 +304,6 @@ impl Game for HiddenFourthPlayer {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = HiddenFourthPlayer;
 
 #[cfg(test)]

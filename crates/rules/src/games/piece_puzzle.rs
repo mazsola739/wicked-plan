@@ -564,7 +564,6 @@ fn normalize_set(cells: &[Cell]) -> Vec<Cell> {
     v
 }
 
-pub const READY: bool = true;
 
 #[cfg(test)]
 mod tests {

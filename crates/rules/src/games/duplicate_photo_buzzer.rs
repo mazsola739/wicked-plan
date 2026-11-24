@@ -385,7 +385,6 @@ impl Game for DuplicatePictureBuzzer {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = DuplicatePictureBuzzer;
 
 #[cfg(test)]

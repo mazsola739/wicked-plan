@@ -60,7 +60,7 @@ function poly(points: [number, number, number][]): string {
   return points.map(([x, y, z]) => iso(x, y, z).join(',')).join(' ');
 }
 
-export function CubesDrawing({ puzzle }: { puzzle: CubesPuzzle }) {
+function CubesDrawing({ puzzle }: { puzzle: CubesPuzzle }) {
   const cubes: [number, number, number][] = [];
   for (let y = 0; y < puzzle.rows; y++) {
     for (let x = 0; x < puzzle.cols; x++) {
@@ -131,7 +131,7 @@ export function CubesGame({ view }: { view: QuizView<CubesPuzzle, number> }) {
 
 const U = 60; // lattice step
 
-export function RectanglesDrawing({ puzzle }: { puzzle: RectanglesPuzzle }) {
+function RectanglesDrawing({ puzzle }: { puzzle: RectanglesPuzzle }) {
   const lines: [number, number, number, number][] = [];
   puzzle.h.forEach((row, y) => {
     row.forEach((on, x) => {

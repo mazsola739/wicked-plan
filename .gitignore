@@ -1,15 +1,12 @@
 node_modules/
 dist/
+apps/web/src/wasm/
 *.log
 .DS_Store
 .vite/
-coverage/
-
+*.stackdump
 
 # Secrets
 .env
 .env.*
 !.env.example
-*.keystore
-*.jks
-apps/web/src/wasm/

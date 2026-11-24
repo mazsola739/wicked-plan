@@ -192,7 +192,6 @@ impl Game for EquationTarget {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = EquationTarget;
 
 #[cfg(test)]

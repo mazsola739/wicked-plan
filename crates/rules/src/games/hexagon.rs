@@ -257,7 +257,6 @@ impl Game for Hexagon {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = Hexagon;
 
 #[cfg(test)]

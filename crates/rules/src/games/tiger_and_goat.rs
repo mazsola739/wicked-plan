@@ -401,7 +401,6 @@ impl Game for TigerAndGoat {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = TigerAndGoat;
 
 #[cfg(test)]

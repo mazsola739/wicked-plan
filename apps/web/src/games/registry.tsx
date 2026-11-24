@@ -1,5 +1,5 @@
-// Every game's screen, by game id. Each new game's screen lives in its own file
-// (apps/web/src/games/<PascalName>.tsx, default export) and is already listed here.
+// Every game's screen, by game id. Each screen lives in its own file
+// (apps/web/src/games/<PascalName>.tsx, default export), except the six first games (QuizGames.tsx, BoardGames.tsx).
 
 import type { ComponentType } from 'react';
 import { HexagonGame, KnightGame, MagicGame } from './BoardGames';
@@ -51,17 +51,13 @@ import NineMensMorris from './NineMensMorris';
 import TigerAndGoat from './TigerAndGoat';
 import QuestionAndTruth from './QuestionAndTruth';
 
-// The six first games take their view directly.
-// biome-ignore lint/suspicious/noExplicitAny: each screen knows its own view shape
-const direct = (C: ComponentType<{ view: any }>) => (p: ScreenProps) => <C view={p.view} />;
-
 export const SCREENS: Record<string, ComponentType<ScreenProps>> = {
-  'count-the-cubes': direct(CubesGame),
-  'count-the-rectangles': direct(RectanglesGame),
-  'equation-target': direct(EquationGame),
-  hexagon: direct(HexagonGame),
-  'knights-tour': direct(KnightGame),
-  'magic-square': direct(MagicGame),
+  'count-the-cubes': CubesGame,
+  'count-the-rectangles': RectanglesGame,
+  'equation-target': EquationGame,
+  hexagon: HexagonGame,
+  'knights-tour': KnightGame,
+  'magic-square': MagicGame,
   'rules-race': RulesRace,
   'animal-tile-auction': AnimalTileAuction,
   'equation-hi-lo': EquationHiLo,

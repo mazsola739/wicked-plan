@@ -652,7 +652,6 @@ impl Game for Rules {
     }
 }
 
-pub const READY: bool = true;
 
 #[cfg(test)]
 mod tests {

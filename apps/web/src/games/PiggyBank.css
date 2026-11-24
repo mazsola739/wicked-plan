@@ -4,13 +4,10 @@
   gap: 14px;
 }
 
+/* A faceted pink pig (docs/design.md, Icons are faceted): the facets are white and black overlays. */
 .piggy-bank-pig {
   width: 140px;
   flex: none;
-}
-
-/* A faceted pink pig (docs/design.md, Icons are faceted): the facets are white and black overlays. */
-.piggy-bank-pig {
   fill: var(--g-pink);
 }
 

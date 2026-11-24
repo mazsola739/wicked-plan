@@ -88,8 +88,28 @@ function TypedGoal({ goal, skip, onDone }: { goal: string; skip: boolean; onDone
   );
 }
 
+// "Don't show again for this game": its rules stop opening by themselves on this browser (the How
+// to play button still opens them). Storage may be blocked; then the rules just open every time.
+const hideKey = (id: string) => `wp-hide-rules-${id}`;
+
+export function rulesHidden(id: string): boolean {
+  try {
+    return localStorage.getItem(hideKey(id)) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function setRulesHidden(id: string, hide: boolean): void {
+  try {
+    if (hide) localStorage.setItem(hideKey(id), '1');
+    else localStorage.removeItem(hideKey(id));
+  } catch {}
+}
+
 export function HowToPlay({ id, name, onClose }: { id: string; name: string; onClose: () => void }) {
   const list = useMemo(() => blocks(id), [id]);
+  const [hide, setHide] = useState(() => rulesHidden(id));
   const first = list[0];
   const goal = first && !first.list && GOAL.test(first.lines[0] ?? '') ? (first.lines[0] ?? '').replace(GOAL, '') : '';
   const rest = goal ? list.slice(1) : list;
@@ -121,34 +141,47 @@ export function HowToPlay({ id, name, onClose }: { id: string; name: string; onC
         <span className="label">From the Observer</span>
         <span className="tx-channel">CH 08</span>
       </header>
-      {/* The Observer and the game's icon take turns on the monitor, switching with a flicker. */}
-      <div className="tx-screen" aria-hidden="true">
-        <Emblem className="tx-emblem" hood watching decorative />
-        <GameIcon id={id} className="tx-icon" />
+      {/* The monitor sits in the top-left corner; the text flows around it, to its right and below. */}
+      <div className="tx-body">
+        {/* The Observer and the game's icon take turns on the monitor, switching with a flicker. */}
+        <div className="tx-screen" aria-hidden="true">
+          <Emblem className="tx-emblem" watching decorative />
+          <GameIcon id={id} className="tx-icon" />
+        </div>
+        <div className="label">{name}</div>
+        <h2 ref={heading} tabIndex={-1}>
+          How to play
+        </h2>
+        {goal && <TypedGoal goal={goal} skip={skip} onDone={finish} />}
+        <div className={done ? 'tx-rest' : 'tx-rest waiting'}>
+          {rest.map((b) =>
+            b.list ? (
+              <ul key={b.lines[0]}>
+                {b.lines.map((l) => (
+                  <li key={l} className="tx-in" style={{ animationDelay: `${step++ * 90}ms` }}>
+                    {inline(l)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p key={b.lines[0]} className="tx-in" style={{ animationDelay: `${step++ * 90}ms` }}>
+                {inline(b.lines[0] ?? '')}
+              </p>
+            ),
+          )}
+        </div>
       </div>
-      <div className="label">{name}</div>
-      <h2 ref={heading} tabIndex={-1}>
-        How to play
-      </h2>
-      {goal && <TypedGoal goal={goal} skip={skip} onDone={finish} />}
-      {list.length === 0 && <p className="muted">No rules text for this game yet.</p>}
-      <div className={done ? 'tx-rest' : 'tx-rest waiting'}>
-        {rest.map((b) =>
-          b.list ? (
-            <ul key={b.lines[0]}>
-              {b.lines.map((l) => (
-                <li key={l} className="tx-in" style={{ animationDelay: `${step++ * 90}ms` }}>
-                  {inline(l)}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p key={b.lines[0]} className="tx-in" style={{ animationDelay: `${step++ * 90}ms` }}>
-              {inline(b.lines[0] ?? '')}
-            </p>
-          ),
-        )}
-      </div>
+      <label className="tx-hide">
+        <input
+          type="checkbox"
+          checked={hide}
+          onChange={(e) => {
+            setHide(e.target.checked);
+            setRulesHidden(id, e.target.checked);
+          }}
+        />
+        Don't show again for this game
+      </label>
       <button type="button" className="btn primary" onClick={onClose}>
         Play
       </button>

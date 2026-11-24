@@ -381,7 +381,6 @@ impl Game for SpinningPuzzleWheel {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = SpinningPuzzleWheel;
 
 #[cfg(test)]

@@ -365,7 +365,6 @@ impl Game for LayTheGrass {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = LayTheGrass;
 
 #[cfg(test)]

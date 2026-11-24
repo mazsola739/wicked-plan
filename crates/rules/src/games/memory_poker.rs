@@ -401,7 +401,6 @@ impl Game for MemoryPoker {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = MemoryPoker;
 
 #[cfg(test)]

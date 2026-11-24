@@ -236,7 +236,6 @@ impl Game for KnightsTour {
     }
 }
 
-pub const READY: bool = true;
 pub type Rules = KnightsTour;
 
 #[cfg(test)]

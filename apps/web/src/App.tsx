@@ -3,7 +3,7 @@ import { Crown, Emblem, Peeker } from './Emblem';
 import { GameIcon } from './GameIcon';
 import { GameIdContext, nameOf, useKeys } from './games/common';
 import { SCREENS } from './games/registry';
-import { HowToPlay } from './HowTo';
+import { HowToPlay, rulesHidden } from './HowTo';
 import { setPaused, start, stop, usePlay } from './play';
 import { Replay } from './Replay';
 import { Snapshot } from './Snapshot';
@@ -50,7 +50,7 @@ function seatsText(g: GameInfo): string {
 const STEPS: [string, string][] = [
   ['Pick a game', 'Fifty-one puzzles, bluffs and duels, from a two-minute count to a long game of alliances.'],
   ['Read the brief', 'Every game opens with a one-minute How to play. The clock waits while you read.'],
-  ['Outsmart the table', 'Solo puzzles race the clock. Everything else is you against bots that bluff back.'],
+  ['Outsmart the table', 'Solo puzzles test your head, a few against the clock. Everything else is you against bots that bluff back.'],
 ];
 
 /** The categories (docs/games.md, Categories), in the order the filter shows them. */
@@ -110,7 +110,7 @@ function Picker({ games }: { games: GameInfo[] }) {
       </nav>
 
       <header className="hero" id="top">
-        <Emblem className="hero-emblem" hood watching />
+        <Emblem className="hero-emblem" watching />
         <div className="hero-text">
           <p className="wip">Under construction</p>
           <p className="label tagline">A digital arena of strategy</p>
@@ -124,7 +124,7 @@ function Picker({ games }: { games: GameInfo[] }) {
               Random game
             </button>
           </div>
-          <p className="muted small credit">Based on the idea of the show The Devil's Plan. An unofficial fan project.</p>
+          <p className="muted small credit">Inspired by the Netflix show The Devil's Plan. An unofficial fan project.</p>
         </div>
       </header>
 
@@ -197,11 +197,7 @@ function Picker({ games }: { games: GameInfo[] }) {
                   <ul className="games">
                     {list.map((g) => (
                       <li key={g.id} className={`game-card ${g.difficulty}`}>
-                        {/* The game's neon icon, with the still of the game behind it like a watermark. */}
-                        <div className="card-art">
-                          <Snapshot id={g.id} />
-                          <GameIcon id={g.id} className="card-icon" />
-                        </div>
+                        <Snapshot id={g.id} />
                         <button type="button" className="game-btn" onClick={() => start(g.id)}>
                           <span className="game-head">
                             <strong>
@@ -227,6 +223,14 @@ function Picker({ games }: { games: GameInfo[] }) {
       <footer className="footer muted small">
         <Crown className="footer-crown" />
         <span>Wicked Plan · an unofficial fan project · all games run in your browser</span>
+        <nav className="footer-links" aria-label="About the maker">
+          <a href="https://mazsola739.github.io/mazsola739/" target="_blank" rel="noreferrer">
+            Portfolio
+          </a>
+          <a href="https://github.com/mazsola739/wicked-plan" target="_blank" rel="noreferrer">
+            Source code
+          </a>
+        </nav>
       </footer>
     </div>
   );
@@ -316,26 +320,10 @@ function Divider() {
   );
 }
 
-// The rules open by themselves the first time a game is played on this browser.
-// Storage may be blocked; then the rules just open every time.
-function seen(id: string): boolean {
-  try {
-    return localStorage.getItem(`wp-seen-${id}`) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function markSeen(id: string): void {
-  try {
-    localStorage.setItem(`wp-seen-${id}`, '1');
-  } catch {}
-}
-
 function GameView({ info, view, results }: { info: GameInfo; view: unknown; results: PlayerResult[] | null }) {
   const Screen = SCREENS[info.id];
-  const [rules, setRules] = useState(() => !seen(info.id));
-  useEffect(() => markSeen(info.id), [info.id]);
+  // The rules open by themselves when a game starts, unless "Don't show again" was ticked for it.
+  const [rules, setRules] = useState(() => !rulesHidden(info.id));
   useEffect(() => {
     setPaused(rules);
     return () => setPaused(false);
@@ -360,10 +348,7 @@ function GameView({ info, view, results }: { info: GameInfo; view: unknown; resu
         <button type="button" className="btn small ghost" onClick={stop}>
           ← Games
         </button>
-        <span />
-        {rules ? (
-          <span />
-        ) : (
+        {!rules && (
           <button ref={howTo} type="button" className="btn small ghost" onClick={() => setRules(true)}>
             How to play
           </button>
@@ -411,7 +396,7 @@ function Results({ info, results }: { info: GameInfo; results: PlayerResult[] })
   const ranked = [...results].sort((a, b) => a.rank - b.rank || b.points - a.points);
   return (
     <section className="card result">
-      <Emblem className="result-emblem" hood />
+      <Emblem className="result-emblem" />
       <div className="label">{info.name}</div>
       <h2>{heading(results, mine)}</h2>
       <div className="score big">{mine?.points ?? 0} points</div>

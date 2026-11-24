@@ -577,7 +577,6 @@ impl Game for Rules {
     }
 }
 
-pub const READY: bool = true;
 
 /// The field bank, printed by the `print_bank` test.
 pub const BANK: [&[&str]; 3] = [

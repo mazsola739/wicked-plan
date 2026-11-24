@@ -25,7 +25,7 @@ One-time setup for the Rust side: `rustup target add wasm32-unknown-unknown` and
 
 When the phone is not on the same Wi-Fi, or you need HTTPS (for example to send the link to a friend):
 
-1. Install `cloudflared` once (Windows: `winget install Cloudflare.cloudflared`). It is already on this machine.
+1. Install `cloudflared` once (Windows: `winget install Cloudflare.cloudflared`).
 2. Two terminals in the repo root: `bun run dev` and `bun run tunnel`.
 3. `bun run tunnel` prints an `https://something.trycloudflare.com` address: open it on the phone.
 
@@ -55,4 +55,5 @@ Run it by hand with `bun run precommit`.
   workspaces, commands, the `docs/README.md` table, the sections of the big pages, git state.
 - **Agents** (`.claude/agents/`, Haiku, cheap): `scout` searches code and docs read-only and answers with
   `path:line` references; `validator` runs typecheck, lint and tests and reports only the failures.
-- **Preview:** `.claude/launch.json` has `web` (the page).
+- **Preview:** `.claude/launch.json` has `web` (the page) and `web-build` (the production build after
+  `bun run build`, served under `/wicked-plan/` like on GitHub Pages).
