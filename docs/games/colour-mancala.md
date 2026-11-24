@@ -1,4 +1,4 @@
-# Colour Mancala
+# Balance Mancala
 
 Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/games/colour_mancala.rs`.
 
@@ -12,6 +12,8 @@ Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/ga
 - If your last stone lands in your own store, you move again.
 - If it lands in an empty pit of your own and the facing pit has stones, you capture both into your store.
 - **The catch:** only your weakest colour really counts. Points are 50 × your lowest colour total plus all your stones.
+
+**On the show:** a player's final score was also the lowest of the three colour totals, and everyone needed at least 15 points (here there is no such bar: points are 50 × your lowest colour plus all your stones). Nobody reached 15, so every player lost half of their game tokens. The player with the lowest score then had to give their last 4 tokens to the top scorer and was out of the game.
 
 ## Rules in detail
 

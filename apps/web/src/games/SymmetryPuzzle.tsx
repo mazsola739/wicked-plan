@@ -1,4 +1,4 @@
-// Symmetry Puzzle: paint the missing mirror cells, a race. Rules page: docs/games/symmetry-puzzle.md
+// Symmetrical Puzzle: paint the missing mirror cells, a race. Rules page: docs/games/symmetry-puzzle.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, Play, type ScreenProps, TimerBar, useKeys } from './common';
@@ -44,7 +44,7 @@ export default function SymmetryPuzzle({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Symmetry Puzzle" step={`Round ${view.round} of ${view.rounds}`} score={view.racers[0]?.score ?? 0} />
+          <GameTop title="Symmetrical Puzzle" step={`Round ${view.round} of ${view.rounds}`} score={view.racers[0]?.score ?? 0} />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundTimeMs} />
           <RaceBar view={view} />
         </>

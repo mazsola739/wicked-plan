@@ -1,4 +1,4 @@
-# Minus One
+# Remove One
 
 Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/minus_one.rs`.
 

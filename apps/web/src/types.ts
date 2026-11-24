@@ -3,7 +3,7 @@
 export interface GameInfo {
   id: string;
   kind: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: 'easy' | 'normal' | 'medium' | 'hard' | 'expert';
   /** 1-3 categories (docs/games.md, Categories). */
   tags: string[];
   minPlayers: number;

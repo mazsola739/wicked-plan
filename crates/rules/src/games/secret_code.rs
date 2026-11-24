@@ -234,8 +234,8 @@ impl Game for SecretCode {
         GameInfo {
             id: "secret-code",
             kind: "exile",
-            difficulty: "medium",
-            tags: &["logic", "dice"],
+            difficulty: "hard",
+            tags: &["logic-puzzles", "bluff-deduction"],
             min_players: 1,
             max_players: 4,
             name: "Secret Code",

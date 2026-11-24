@@ -1,4 +1,4 @@
-// Animal Tile Auction. Rules page: docs/games/animal-tile-auction.md
+// Zoo. Rules page: docs/games/animal-tile-auction.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -216,7 +216,7 @@ export default function AnimalTileAuction({ view: raw }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Animal Tile Auction"
+          title="Zoo"
           step={view.phase === 'over' ? 'Game over' : `Auction ${view.auction} of ${view.auctions}`}
           score={view.patternScore + (view.chips[view.me] ?? 0)}
         />

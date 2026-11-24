@@ -1,4 +1,4 @@
-//! Weight Balance Puzzle (Team mini game, 1–2 players). Rules page: docs/games/weight-balance-puzzle.md
+//! Scale Game (Team mini game, 1–2 players). Rules page: docs/games/weight-balance-puzzle.md
 //!
 //! Five blocks with different secret weights 1–9 g. The team shares 12
 //! weighings on a balance scale (blocks plus counterweights on each pan), then
@@ -274,18 +274,18 @@ impl Game for WeightBalancePuzzle {
         GameInfo {
             id: "weight-balance-puzzle",
             kind: "mini-team",
-            difficulty: "hard",
-            tags: &["logic", "numbers", "alliance"],
+            difficulty: "medium",
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 2,
-            name: "Weight Balance Puzzle",
+            name: "Scale Game",
             short: "Share 12 weighings on one scale to find the weights of five blocks.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<State, String> {
         if !(1..=2).contains(&players.len()) {
-            return Err("Weight Balance Puzzle is for 1–2 players".into());
+            return Err("Scale Game is for 1–2 players".into());
         }
         let mut rng = Rng::new(seed);
         let mut pool: Vec<u32> = (1..=MAX_WEIGHT).collect();

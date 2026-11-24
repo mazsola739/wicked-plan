@@ -1,4 +1,4 @@
-// Find the Differences: tap what changed, faster than the rivals. Rules page: docs/games/find-the-differences.md
+// Spot the Difference: tap what changed, faster than the rivals. Rules page: docs/games/find-the-differences.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
@@ -102,7 +102,7 @@ function corners(s: Shape, cy: number): Pt[] {
 }
 
 /**
- * A shape cut like a gem, lit from the top left as the animals of Animal Tile Auction: one facet
+ * A shape cut like a gem, lit from the top left as the animals of Zoo: one facet
  * per edge, white or black by how much it faces the light, a flat top (the star's facets meet in
  * the middle) and a white glint. The facets follow only kind, place and size, never the colour,
  * so the same shape is cut the same in both pictures.
@@ -217,7 +217,7 @@ export default function FindTheDifferences({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Find the Differences" step={`Round ${view.round} of ${view.rounds}`} score={me?.points ?? 0} />
+          <GameTop title="Spot the Difference" step={`Round ${view.round} of ${view.rounds}`} score={me?.points ?? 0} />
           <TimerBar leftMs={view.revealing ? view.revealLeftMs : view.timeLeftMs} totalMs={view.revealing ? 4000 : view.roundMs} />
         </>
       }

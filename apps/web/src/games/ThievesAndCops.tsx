@@ -1,4 +1,4 @@
-// Thieves and Cops: a chase on a metro map with a secret corrupt officer. Rules: docs/games/thieves-and-cops.md
+// Crooked Cops: a chase on a metro map with a secret corrupt officer. Rules: docs/games/thieves-and-cops.md
 
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './ThievesAndCops.css';
@@ -104,7 +104,7 @@ export default function ThievesAndCops({ view }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Thieves and Cops"
+          title="Crooked Cops"
           step={end ? 'Everything revealed' : v.phase === 'unmask' ? 'Unmask the corrupt officer' : `Round ${v.round} of ${v.rounds}`}
           score={v.score}
         />

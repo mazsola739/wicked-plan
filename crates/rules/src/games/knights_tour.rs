@@ -1,4 +1,4 @@
-//! Knight's Tour (Hidden, solo). Rules page: docs/games/knights-tour.md
+//! The Knight's Tour (Hidden, solo). Rules page: docs/games/knights-tour.md
 //!
 //! Three boards: 5×5, 6×6, 7×7. Put the knight on any square, then move it
 //! like a chess knight (an L: two squares one way, one square sideways) until
@@ -125,16 +125,16 @@ impl Game for KnightsTour {
             id: "knights-tour",
             kind: "hidden",
             difficulty: "hard",
-            tags: &["logic", "board"],
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 1,
-            name: "Knight's Tour",
+            name: "The Knight's Tour",
             short: "Visit every square with the knight, never the same one twice. Three boards, 15 minutes.",
         }
     }
 
     fn setup(players: &[String], _seed: u64) -> Result<KnightState, String> {
-        let [player] = players else { return Err("Knight's Tour is a solo game".into()) };
+        let [player] = players else { return Err("The Knight's Tour is a solo game".into()) };
         Ok(KnightState {
             player: player.clone(),
             board: 0,

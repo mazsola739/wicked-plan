@@ -1,4 +1,4 @@
-// Minus One: show two cards, keep one; the lowest unique card wins. Rules: docs/games/minus-one.md
+// Remove One: show two cards, keep one; the lowest unique card wins. Rules: docs/games/minus-one.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -57,7 +57,7 @@ export default function MinusOne({ view }: ScreenProps) {
       : 'No unique card: nobody scores.';
   return (
     <Play
-      top={<GameTop title="Minus One" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
+      top={<GameTop title="Remove One" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <ul className="list">

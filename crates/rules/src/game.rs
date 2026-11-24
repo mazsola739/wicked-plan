@@ -21,8 +21,11 @@ pub struct PlayerResult {
 }
 
 /// The game categories (docs/games.md, Categories).
-pub const CATEGORIES: [&str; 12] =
-    ["cards", "bluff", "secret-role", "bidding", "memory", "logic", "numbers", "board", "dice", "words", "speed", "alliance"];
+pub const CATEGORIES: [&str; 7] =
+    ["logic-puzzles", "strategy-territory", "bluff-deduction", "social-alliances", "auction-economy", "memory-observation", "speed-risk"];
+
+/// The difficulty levels, easiest first (docs/games.md): level n of 5 is `LEVELS[n - 1]`.
+pub const LEVELS: [&str; 5] = ["easy", "normal", "medium", "hard", "expert"];
 
 /// Catalogue entry the game picker shows (docs/games.md).
 #[derive(Clone, Debug, Serialize)]
@@ -31,7 +34,7 @@ pub struct GameInfo {
     pub id: &'static str,
     /// main | mini-solo | mini-team | prison | hidden | exile | final-duel
     pub kind: &'static str,
-    /// easy | medium | hard (docs/games.md); the picker colours the card by it.
+    /// One of `LEVELS` (docs/games.md); the picker colours the card by it.
     pub difficulty: &'static str,
     /// 1-3 categories from `CATEGORIES` (docs/games.md, Categories); the picker filters by them.
     pub tags: &'static [&'static str],

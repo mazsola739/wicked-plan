@@ -1,4 +1,4 @@
-//! Jewel Black Market (main game, 4–8 seats). Rules page: docs/games/jewel-black-market.md
+//! Gem Black Market (main game, 4–8 seats). Rules page: docs/games/jewel-black-market.md
 //!
 //! Every seat holds one hidden card (jewel or bomb), the buyer holds 3, the
 //! discard 1. Two swap rounds (forward, then reverse); a jewel scores its value
@@ -237,18 +237,18 @@ impl Game for Rules {
         GameInfo {
             id: "jewel-black-market",
             kind: "main",
-            difficulty: "medium",
-            tags: &["cards", "memory"],
+            difficulty: "hard",
+            tags: &["bluff-deduction", "auction-economy"],
             min_players: 4,
             max_players: 8,
-            name: "Jewel Black Market",
+            name: "Gem Black Market",
             short: "One hidden card each; swap with players, the buyer or the discard. Match the buyer's jewels, dodge the bombs.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<JewelState, String> {
         if !(4..=8).contains(&players.len()) {
-            return Err("Jewel Black Market needs 4–8 players".into());
+            return Err("Gem Black Market needs 4–8 players".into());
         }
         let n = players.len();
         let mut s = JewelState {

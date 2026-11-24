@@ -1,4 +1,4 @@
-// Dice Prediction: three dice, one hidden from you; predict your own rank. Rules: docs/games/dice-prediction.md
+// Triple Dice: three dice, one hidden from you; predict your own rank. Rules: docs/games/dice-prediction.md
 
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './DicePrediction.css';
@@ -92,7 +92,7 @@ export default function DicePrediction({ view }: ScreenProps) {
   else if (mine) ask = `Your hand: ${KINDS[mine.kind]}, ranked ${ORD[mine.rank]} (you said ${ORD[mine.prediction]}): +${mine.points}.`;
   return (
     <Play
-      top={<GameTop title="Dice Prediction" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
+      top={<GameTop title="Triple Dice" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <ul className="list">

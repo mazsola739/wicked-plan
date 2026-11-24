@@ -1,5 +1,5 @@
 //! Shared engine for the solo puzzles that are "rounds of one question":
-//! Count the Cubes, Count the Rectangles, Equation Target.
+//! Count the Cubes, Count the Rectangles, Equation Pyramid.
 //! Each round shows a puzzle. Timed games (`round_ms > 0`) must answer before
 //! the timer runs out, and a correct answer scores `speed_points`. Untimed
 //! games (`round_ms == 0`) wait for the answer, and a correct one scores 100.

@@ -1,4 +1,4 @@
-# Animal Tile Auction
+# Zoo
 
 Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/animal_tile_auction.rs`.
 

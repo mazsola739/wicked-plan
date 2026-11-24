@@ -44,7 +44,7 @@ interface IslandView {
 const C = 40;
 
 /**
- * Faceted (low-poly) pictograms lit from the top left, like the animals of Animal Tile Auction:
+ * Faceted (low-poly) pictograms lit from the top left, like the animals of Zoo:
  * drawn round 0,0 in the colour of their group (CSS fill), white and black overlays make the
  * facets, `eye` shapes are cut in the page's near-black, white glints.
  */

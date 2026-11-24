@@ -1,4 +1,4 @@
-//! Dice Prediction (prison game, 2–6 seats). Rules page: docs/games/dice-prediction.md
+//! Triple Dice (prison game, 2–6 seats). Rules page: docs/games/dice-prediction.md
 //!
 //! Three dice each: one open, one secret (only you see it), one blind (everyone
 //! but you sees it). Reroll the secret die once if you like, then predict your
@@ -210,17 +210,17 @@ impl Game for Rules {
             id: "dice-prediction",
             kind: "prison",
             difficulty: "medium",
-            tags: &["dice", "logic"],
+            tags: &["bluff-deduction", "speed-risk"],
             min_players: 2,
             max_players: 6,
-            name: "Dice Prediction",
+            name: "Triple Dice",
             short: "Build a three-dice hand with hidden dice, then predict your own rank.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<DpState, String> {
         if !(2..=6).contains(&players.len()) {
-            return Err("Dice Prediction needs 2–6 players".into());
+            return Err("Triple Dice needs 2–6 players".into());
         }
         let seats = players
             .iter()

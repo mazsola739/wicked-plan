@@ -1,4 +1,4 @@
-// Equation Hi-Lo. Rules page: docs/games/equation-hi-lo.md
+// Equation High-Low. Rules page: docs/games/equation-hi-lo.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -178,7 +178,7 @@ export default function EquationHiLo({ view: raw }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Equation Hi-Lo"
+          title="Equation High-Low"
           step={view.over ? 'Game over' : `Hand ${view.hand} of ${view.hands} · ${steps[view.phase]}`}
           score={me?.chips ?? 0}
         />

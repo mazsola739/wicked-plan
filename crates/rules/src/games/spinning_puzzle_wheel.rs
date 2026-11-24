@@ -1,4 +1,4 @@
-//! Spinning Puzzle Wheel (Team mini game, 1–4 players). Rules page: docs/games/spinning-puzzle-wheel.md
+//! Cooperative Puzzle (Team mini game, 1–4 players). Rules page: docs/games/spinning-puzzle-wheel.md
 //!
 //! Six silhouettes on a wheel, each with its own tray of pieces. The wheel
 //! turns from player to player; each gets a few seconds to place (or take back)
@@ -243,18 +243,18 @@ impl Game for SpinningPuzzleWheel {
         GameInfo {
             id: "spinning-puzzle-wheel",
             kind: "mini-team",
-            difficulty: "medium",
-            tags: &["logic", "alliance"],
+            difficulty: "normal",
+            tags: &["logic-puzzles", "speed-risk"],
             min_players: 1,
             max_players: 4,
-            name: "Spinning Puzzle Wheel",
+            name: "Cooperative Puzzle",
             short: "The wheel turns from player to player: a few seconds each to place one piece. Finish the shapes together.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<State, String> {
         if !(1..=4).contains(&players.len()) {
-            return Err("Spinning Puzzle Wheel is for 1–4 players".into());
+            return Err("Cooperative Puzzle is for 1–4 players".into());
         }
         let mut rng = Rng::new(seed);
         Ok(State {

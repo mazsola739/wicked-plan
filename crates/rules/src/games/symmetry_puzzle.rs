@@ -1,4 +1,4 @@
-//! Symmetry Puzzle (exile, a race for 1–4). Rules page: docs/games/symmetry-puzzle.md
+//! Symmetrical Puzzle (exile, a race for 1–4). Rules page: docs/games/symmetry-puzzle.md
 //!
 //! A coloured figure should be symmetric about the axis (or axes), but parts
 //! are missing. Paint the missing mirror cells. Seat 0 solves; the other seats
@@ -155,11 +155,11 @@ impl Game for Rules {
         GameInfo {
             id: "symmetry-puzzle",
             kind: "exile",
-            difficulty: "medium",
-            tags: &["logic", "speed"],
+            difficulty: "normal",
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 4,
-            name: "Symmetry Puzzle",
+            name: "Symmetrical Puzzle",
             short: "Paint the missing half so the figure mirrors itself across the axis, faster than the others.",
         }
     }

@@ -1,4 +1,4 @@
-# Fence Building
+# Loop Fence Puzzle
 
 Exile game, a race for 1–4 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/fence_building.rs`.
 

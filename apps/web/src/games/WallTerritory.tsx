@@ -1,4 +1,4 @@
-// Wall Territory: move a piece, build a wall, fence off the biggest area. Rules page: docs/games/wall-territory.md
+// Wall Go: move a piece, build a wall, fence off the biggest area. Rules page: docs/games/wall-territory.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -89,7 +89,7 @@ export default function WallTerritory({ view: raw }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Wall Territory"
+          title="Wall Go"
           step={`Turn ${view.turnNo}${view.yourTurn ? ' · your move' : ''}`}
           score={view.seats[view.me]?.area ?? 0}
         />

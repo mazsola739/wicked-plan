@@ -1,4 +1,4 @@
-// Spinning Puzzle Wheel: the wheel turns from player to player; place one piece each, finish the shapes.
+// Cooperative Puzzle: the wheel turns from player to player; place one piece each, finish the shapes.
 // Rules page: docs/games/spinning-puzzle-wheel.md
 
 import { useState } from 'react';
@@ -195,7 +195,7 @@ export default function SpinningPuzzleWheel({ view: raw }: ScreenProps) {
       top={
         <>
           <GameTop
-            title="Spinning Puzzle Wheel"
+            title="Cooperative Puzzle"
             step={view.yourTurn ? 'Your turn: quick!' : `${who(view.turn)}'s turn · ${view.turnsLeft} turns left`}
             score={view.score}
           />

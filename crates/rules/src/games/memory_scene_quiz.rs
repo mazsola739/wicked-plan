@@ -1,4 +1,4 @@
-//! Memory Scene Quiz (Team mini game, 1–4 players). Rules page: docs/games/memory-scene-quiz.md
+//! Fragments of Memory (Team mini game, 1–4 players). Rules page: docs/games/memory-scene-quiz.md
 //!
 //! Study a scene of coloured shapes, then answer 10 questions about it in
 //! turn. One wrong answer fails the whole team.
@@ -252,18 +252,18 @@ impl Game for MemorySceneQuiz {
         GameInfo {
             id: "memory-scene-quiz",
             kind: "mini-team",
-            difficulty: "medium",
-            tags: &["memory", "alliance"],
+            difficulty: "normal",
+            tags: &["memory-observation"],
             min_players: 1,
             max_players: 4,
-            name: "Memory Scene Quiz",
+            name: "Fragments of Memory",
             short: "Study a scene, then answer 10 questions in turn. One wrong answer fails the team.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<State, String> {
         if !(1..=4).contains(&players.len()) {
-            return Err("Memory Scene Quiz is for 1–4 players".into());
+            return Err("Fragments of Memory is for 1–4 players".into());
         }
         let mut rng = Rng::new(seed);
         let objects = generate_scene(&mut rng);

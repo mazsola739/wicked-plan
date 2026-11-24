@@ -224,7 +224,7 @@ impl Game for LayTheGrass {
             id: "lay-the-grass",
             kind: "mini-solo",
             difficulty: "medium",
-            tags: &["board"],
+            tags: &["logic-puzzles", "strategy-territory"],
             min_players: 1,
             max_players: 4,
             name: "Lay the Grass",

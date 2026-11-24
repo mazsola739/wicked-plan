@@ -1,4 +1,4 @@
-# Tiger and Goat
+# Bagh Chal
 
 Final duel, 2 players. Code: `crates/rules/src/games/tiger_and_goat.rs`, screen: `apps/web/src/games/TigerAndGoat.tsx`.
 
@@ -12,6 +12,8 @@ Final duel, 2 players. Code: `crates/rules/src/games/tiger_and_goat.rs`, screen:
 - Tigers win a board with **5 captures**; goats win by leaving the tigers no move.
 - Every step you make one move. Switch boards with the board buttons, tap a piece, then where it goes.
 - Points: as tigers 50 per capture and +250 for a win; as goats 50 per capture short of 5 and +250 for a win.
+
+**On the show:** In the final, both finalists played two boards at the same time, as the tigers on one and the goats on the other. Player A won the game by being the first to win one of the boards (here both boards are played to the end and the points decide).
 
 ## Rules in detail
 

@@ -1,4 +1,4 @@
-# Big or Small
+# Big Small
 
 Final duel, 2 players. Code: `crates/rules/src/games/big_or_small.rs`, screen: `apps/web/src/games/BigOrSmall.tsx`.
 

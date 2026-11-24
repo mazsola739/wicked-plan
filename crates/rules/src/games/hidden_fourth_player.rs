@@ -1,4 +1,4 @@
-//! Hidden Fourth Player (mini team game, 3 players). Rules page: docs/games/hidden-fourth-player.md
+//! Four Player Three in a Row (mini team game, 3 players). Rules page: docs/games/hidden-fourth-player.md
 //!
 //! Three players and the Shadow (run by the rules) place stones on a 7×7 board.
 //! Three in a row is a line. Players score their own lines, but if the Shadow
@@ -203,16 +203,16 @@ impl Game for HiddenFourthPlayer {
             id: "hidden-fourth-player",
             kind: "mini-team",
             difficulty: "hard",
-            tags: &["board", "alliance"],
+            tags: &["bluff-deduction"],
             min_players: 3,
             max_players: 3,
-            name: "Hidden Fourth Player",
+            name: "Four Player Three in a Row",
             short: "Three in a row for three players, against a fourth that plays itself. Block it together or all lose.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<HiddenState, String> {
-        let [a, b, c] = players else { return Err("Hidden Fourth Player is for 3 players".into()) };
+        let [a, b, c] = players else { return Err("Four Player Three in a Row is for 3 players".into()) };
         let mut rng = Rng::new(seed);
         let mut board = [EMPTY; CELLS];
         // The opening Shadow stone: somewhere in the middle 5×5.

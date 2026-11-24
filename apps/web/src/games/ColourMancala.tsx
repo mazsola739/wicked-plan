@@ -1,4 +1,4 @@
-// Colour Mancala: a ring of pits, stones in three colours; your weakest colour counts.
+// Balance Mancala: a ring of pits, stones in three colours; your weakest colour counts.
 // Rules page: docs/games/colour-mancala.md
 
 import { type CSSProperties, useState } from 'react';
@@ -136,7 +136,7 @@ export default function ColourMancala({ view: raw }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Colour Mancala"
+          title="Balance Mancala"
           step={view.yourTurn ? 'Your turn' : `${nameOf(view.players[view.turn]!)} to move`}
           score={view.points[you] ?? 0}
         />

@@ -205,7 +205,7 @@ impl Game for Rules {
             id: "auction-bingo",
             kind: "main",
             difficulty: "medium",
-            tags: &["bidding"],
+            tags: &["auction-economy", "speed-risk"],
             min_players: 3,
             max_players: 8,
             name: "Auction Bingo",

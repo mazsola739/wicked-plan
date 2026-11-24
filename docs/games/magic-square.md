@@ -1,4 +1,4 @@
-# Magic Square
+# Divine Test
 
 Hidden game, solo; our take on the exile's "trial" (a 7×7 square in an hour). Code: `crates/rules/src/games/magic_square.rs`.
 

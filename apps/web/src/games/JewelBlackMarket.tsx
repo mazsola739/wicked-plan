@@ -1,4 +1,4 @@
-// Jewel Black Market. Rules page: docs/games/jewel-black-market.md
+// Gem Black Market. Rules page: docs/games/jewel-black-market.md
 
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './JewelBlackMarket.css';
@@ -166,7 +166,7 @@ export default function JewelBlackMarket({ view: raw }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Jewel Black Market"
+          title="Gem Black Market"
           step={`Round ${view.round} of ${view.rounds} · swap ${view.swapRound} of 2`}
           score={view.scores[view.me] ?? 0}
         />

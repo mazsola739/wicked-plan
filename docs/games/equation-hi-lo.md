@@ -1,4 +1,4 @@
-# Equation Hi-Lo
+# Equation High-Low
 
 Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/equation_hi_lo.rs`.
 

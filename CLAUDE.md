@@ -92,10 +92,12 @@ bun run hooks          # turn on the pre-commit checks once per clone
 4. **Every rules module ships with tests and a bot**, including the "1,000 random bot games:
    nothing crashes, every game ends" test (`testing::bot_games` for solo, `testing::bot_games_with`
    for several seats). Puzzle games get a generator + solver first. Bots play sensibly, not randomly.
-5. **Original branding only.** The games follow the show's genre and mechanics, but names, art,
-   texts and look are our own. No names, logos, music or footage from TV shows or other games;
-   the one exception is the credit line under the picker title ("Inspired by the Netflix show …"),
-   and the same credit in `README.md` and the GitHub description.
+5. **The show's game names, our own everything else.** Each game carries the show's official English
+   name (as Netflix uses it; the English Wikipedia article on the show lists them). Art, texts, rules
+   wording and look are our own: no logos, music, footage or copied text from TV shows or other
+   games, and no real contestant names (examples from the show say Player A, B …). The credit line
+   under the picker title ("Inspired by the Netflix show …") and the same credit in `README.md` and
+   the GitHub description stay.
 
 ## Changing or adding a game
 
@@ -104,7 +106,9 @@ A game lives in its own files; a change to one game touches only these:
 1. `docs/games/<id>.md` — the rules page: first a `## How to play` section for players (a **Goal:** line
    and short bullets; only paragraphs, `- ` bullets and `**bold**`), shown in the game by `HowTo.tsx`;
    then `## Rules in detail`, the spec: seats, rounds, timers, scoring, moves, view, bot, and a
-   **Replay moments** line (the game's big moments, rare, never revealing a secret). A timer only
+   **Replay moments** line (the game's big moments, rare, never revealing a secret). The How to play
+   of a complex game for several players ends with an `**On the show:**` paragraph: one round as it
+   went on the show, in our own words, the contestants called Player A, B …. A timer only
    where the game's line in `docs/games.md` gives a time limit or a race; otherwise a phase ends
    when everyone has moved.
 2. `crates/rules/src/games/<id_snake>.rs` — the rules: `pub struct Rules;` implementing `Game`.

@@ -13,6 +13,8 @@ Main game, 4–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/s
 - A wrong guess costs you 5, but tells you whether their number is higher or lower.
 - At the end, everyone whose number was never shown scores +40. The highest total wins.
 
+**On the show:** A large alliance saw Player A as a threat and plotted to knock Player A out, with help from Player B, who had allied with Player A. The plan worked and Player A was eliminated (here nobody is knocked out: a right guess costs its target 30 points). Player C, another of Player A's allies, also went out because of Player B's betrayal.
+
 ## Rules in detail
 
 - Everyone gets a **different secret number from 1 to 100**.

@@ -221,8 +221,8 @@ impl Game for Rules {
         GameInfo {
             id: "russian-roulette",
             kind: "prison",
-            difficulty: "hard",
-            tags: &["numbers"],
+            difficulty: "expert",
+            tags: &["bluff-deduction", "speed-risk"],
             min_players: 3,
             max_players: 6,
             name: "Russian Roulette",

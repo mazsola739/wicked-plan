@@ -134,7 +134,7 @@ impl Game for Hexagon {
             id: "hexagon",
             kind: "final-duel",
             difficulty: "medium",
-            tags: &["memory", "numbers"],
+            tags: &["strategy-territory"],
             min_players: 1,
             max_players: 1,
             name: "Hexagon",

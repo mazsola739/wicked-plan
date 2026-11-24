@@ -338,7 +338,7 @@ impl Game for NineMensMorris {
             id: "nine-mens-morris",
             kind: "final-duel",
             difficulty: "medium",
-            tags: &["board"],
+            tags: &["strategy-territory"],
             min_players: 2,
             max_players: 2,
             name: "Nine Men's Morris",

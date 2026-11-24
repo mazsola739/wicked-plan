@@ -13,7 +13,10 @@ pick one and play. Solo puzzles are played alone; games for several players are 
 - **Rules in Rust:** one `crates/rules` crate, run in the browser through WebAssembly.
 - **Bots:** in games for several players the other seats are bots that move by themselves
   (seats: the game's minimum, or 4 when it allows more).
-- **Original names and look:** the show's games are not copied one to one; we write our own versions.
+- **The show's names, our own versions** (decided 2026-11-24): each game carries the show's official
+  English name, as Netflix uses it (source: the English Wikipedia article on the show); the digital
+  rules, texts, art and look are our own. The How to play of the complex games for several players
+  ends with one round from the show, the contestants called Player A, B … (no real names).
 - **All 51 catalogue games have a digital version** (done 2026-11-23).
 - **Timers only where the game's rules give one** (decided 2026-11-24): a time limit, a race
   ("as fast as you can", "the fastest right answer wins") or time as the resource, as the game's
@@ -36,7 +39,7 @@ pick one and play. Solo puzzles are played alone; games for several players are 
   the Observer (a flicker at each switch).
 - **Palette:** near-black background, dark violet-grey surfaces, **cyan** for highlights and the main
   action, **violet** for fills and the second action, **silver** for the title and line art.
-  Difficulty keeps green / yellow / red.
+  Difficulty has five levels (from the owner's catalogue brief, 2026-11-24): green easy, blue normal, yellow medium, red hard, purple expert; the pill also says the level as n/5.
 - **Type:** Cinzel (bundled, `@fontsource/cinzel`) for the title and headings; the system sans for
   everything else; tiny labels in letter-spaced capitals.
 - **Shapes:** long hexagonal buttons (pointed ends); filter chips, step badges and difficulty pills
@@ -51,14 +54,14 @@ pick one and play. Solo puzzles are played alone; games for several players are 
     dark glass with a coloured edge. Dark glass is for neutral things: number cards, playing cards.
   - **Seats** use one order everywhere: `--seat-0` is you (cyan), then violet, pink, yellow, green,
     orange, blue, white (`--seat-1`…`--seat-7`).
-  - **Icons are faceted** (decided 2026-11-23, with the faceted animals of Animal Tile Auction
+  - **Icons are faceted** (decided 2026-11-23, with the faceted animals of Zoo
     as the reference): every pictogram a game draws (animals, card suits,
     jewels, monsters, pieces, objects) is a low-poly SVG in its colour, like a cut gem: a bold
     silhouette split into angular facets, lit from the top left (white overlays at 10–50%
     opacity on the upper-left facets, black at 12–35% on the lower-right), dark cut-outs in the
     page's near-black (`eye`), and one or two tiny white diamond glints. It must still read at
     about 25 px. Board squares that *are* a colour can be cut stones in CSS too (a flat table and
-    four lit bevels; Hidden Rules Race), and pieces small cut gems. Grid lines, charts, numbers
+    four lit bevels; Unknown), and pieces small cut gems. Grid lines, charts, numbers
     and text stay as they are.
   - **Surfaces:** no felt, wood, soil or sand; boards are `--board` (near-black) with thin silver
     `--board-line` lines. Cards and tiles are dark glass (`--glass`, edge `--glass-edge`) with light

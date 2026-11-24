@@ -1,4 +1,4 @@
-# Word Block Tower
+# Word Tower
 
 Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 `crates/rules/src/games/word_block_tower.rs`.

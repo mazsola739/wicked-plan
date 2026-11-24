@@ -291,8 +291,8 @@ impl Game for Rules {
         GameInfo {
             id: "piggy-bank",
             kind: "prison",
-            difficulty: "medium",
-            tags: &["bluff", "numbers"],
+            difficulty: "hard",
+            tags: &["bluff-deduction", "memory-observation"],
             min_players: 3,
             max_players: 6,
             name: "Piggy Bank",

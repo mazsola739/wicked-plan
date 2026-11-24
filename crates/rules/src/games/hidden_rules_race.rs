@@ -1,4 +1,4 @@
-//! Hidden Rules Race (main game). Rules page: docs/games/hidden-rules-race.md
+//! Unknown (main game). Rules page: docs/games/hidden-rules-race.md
 //!
 //! Race a cube over a 7×7 board of five colours to the centre. Each colour has
 //! a secret movement rule (step one, step two, backwards, turn right, turn
@@ -278,17 +278,17 @@ impl Game for Rules {
             id: "hidden-rules-race",
             kind: "main",
             difficulty: "hard",
-            tags: &["logic", "board"],
+            tags: &["bluff-deduction"],
             min_players: 4,
             max_players: 8,
-            name: "Hidden Rules Race",
+            name: "Unknown",
             short: "Race a cube to the centre of a coloured board while you work out each colour's secret movement rule.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<HrrState, String> {
         if players.len() < 4 || players.len() > 8 {
-            return Err("Hidden Rules Race needs 4 to 8 players".into());
+            return Err("Unknown needs 4 to 8 players".into());
         }
         let mut rng = Rng::new(seed);
         let mut board: Vec<usize> = (0..(SIZE * SIZE) as usize).map(|i| i % 5).collect();

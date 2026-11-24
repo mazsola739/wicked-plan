@@ -1,4 +1,4 @@
-# Symmetry Puzzle
+# Symmetrical Puzzle
 
 Exile game, a race for 1–4 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/symmetry_puzzle.rs`.
 

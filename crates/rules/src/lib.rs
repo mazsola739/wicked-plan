@@ -139,8 +139,7 @@ mod tests {
         assert_eq!(ids.len(), all.len());
         let kinds = ["main", "mini-solo", "mini-team", "prison", "hidden", "exile", "final-duel"];
         assert!(all.iter().all(|g| kinds.contains(&g.kind)));
-        let levels = ["easy", "medium", "hard"];
-        assert!(all.iter().all(|g| levels.contains(&g.difficulty)), "every game needs a difficulty");
+        assert!(all.iter().all(|g| game::LEVELS.contains(&g.difficulty)), "every game needs a difficulty");
         for g in &all {
             assert!((1..=3).contains(&g.tags.len()), "{} needs 1-3 categories", g.id);
             assert!(g.tags.iter().all(|t| game::CATEGORIES.contains(t)), "{} has an unknown category", g.id);

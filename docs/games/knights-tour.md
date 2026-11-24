@@ -1,4 +1,4 @@
-# Knight's Tour
+# The Knight's Tour
 
 Hidden game, solo. Code: `crates/rules/src/games/knights_tour.rs`.
 

@@ -135,8 +135,8 @@ impl Game for CountTheCubes {
         GameInfo {
             id: "count-the-cubes",
             kind: "mini-solo",
-            difficulty: "easy",
-            tags: &["numbers", "speed"],
+            difficulty: "normal",
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 1,
             name: "Count the Cubes",

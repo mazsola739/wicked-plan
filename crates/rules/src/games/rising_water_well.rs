@@ -188,8 +188,8 @@ impl Game for Rules {
         GameInfo {
             id: "rising-water-well",
             kind: "hidden",
-            difficulty: "hard",
-            tags: &["numbers", "logic"],
+            difficulty: "medium",
+            tags: &["logic-puzzles", "speed-risk"],
             min_players: 1,
             max_players: 1,
             name: "Rising Water Well",

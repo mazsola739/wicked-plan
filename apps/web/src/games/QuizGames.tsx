@@ -1,4 +1,4 @@
-// Count the Cubes, Count the Rectangles and Equation Target: rounds of one question.
+// Count the Cubes, Count the Rectangles and Equation Pyramid: rounds of one question.
 
 import { useState } from 'react';
 import type { CubesPuzzle, EquationAnswer, EquationPuzzle, Op, QuizView, RectanglesPuzzle } from '../types';
@@ -174,7 +174,7 @@ export function RectanglesGame({ view }: { view: QuizView<RectanglesPuzzle, numb
   );
 }
 
-// --- Equation Target -------------------------------------------------------
+// --- Equation Pyramid -------------------------------------------------------
 
 const OPS: Op[] = ['+', '-', '*'];
 const OP_SIGN: Record<Op, string> = { '+': '+', '-': '−', '*': '×' };
@@ -211,7 +211,7 @@ export function EquationGame({ view }: { view: QuizView<EquationPuzzle, Equation
   });
   return (
     <QuizFrame
-      title="Equation Target"
+      title="Equation Pyramid"
       view={view}
       stage={
         p && (

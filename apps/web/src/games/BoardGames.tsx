@@ -1,4 +1,4 @@
-// Hexagon, Knight's Tour and Magic Square.
+// Hexagon, The Knight's Tour and Divine Test.
 
 import { useRef, useState } from 'react';
 import type { HexView, KnightView, MagicView } from '../types';
@@ -110,7 +110,7 @@ export function HexagonGame({ view }: { view: HexView }) {
   );
 }
 
-// --- Knight's Tour ---------------------------------------------------------
+// --- The Knight's Tour ---------------------------------------------------------
 
 /**
  * The knight, a faceted horse head in the square's colour (docs/design.md, "Icons are faceted"):
@@ -154,7 +154,11 @@ export function KnightGame({ view }: { view: KnightView }) {
     <Play
       top={
         <>
-          <GameTop title="Knight's Tour" step={`Board ${view.board} of ${view.boards} · ${view.size}×${view.size}`} score={view.score} />
+          <GameTop
+            title="The Knight's Tour"
+            step={`Board ${view.board} of ${view.boards} · ${view.size}×${view.size}`}
+            score={view.score}
+          />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.totalTimeMs} />
         </>
       }
@@ -200,7 +204,7 @@ export function KnightGame({ view }: { view: KnightView }) {
   );
 }
 
-// --- Magic Square ----------------------------------------------------------
+// --- Divine Test ----------------------------------------------------------
 
 export function MagicGame({ view }: { view: MagicView }) {
   const [sel, setSel] = useState<number | null>(null);
@@ -249,7 +253,7 @@ export function MagicGame({ view }: { view: MagicView }) {
     <Play
       top={
         <>
-          <GameTop title="Magic Square" step={`Board ${view.board} of ${view.boards} · ${n}×${n}`} score={view.score} />
+          <GameTop title="Divine Test" step={`Board ${view.board} of ${view.boards} · ${n}×${n}`} score={view.score} />
           <RoundDots results={view.solved} total={view.boards} />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.boardTimeMs} />
         </>

@@ -1,4 +1,4 @@
-//! Fence Building (exile, a race for 1–4). Rules page: docs/games/fence-building.md
+//! Loop Fence Puzzle (exile, a race for 1–4). Rules page: docs/games/fence-building.md
 //!
 //! One closed fence along the grid lines; a number in a plot is how many of
 //! its sides are fenced. The fence is the border of a fenced-in area, so the
@@ -484,10 +484,10 @@ impl Game for Rules {
             id: "fence-building",
             kind: "exile",
             difficulty: "medium",
-            tags: &["logic", "speed"],
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 4,
-            name: "Fence Building",
+            name: "Loop Fence Puzzle",
             short: "Build one closed fence; each number says how many sides of its plot are fenced. A race.",
         }
     }

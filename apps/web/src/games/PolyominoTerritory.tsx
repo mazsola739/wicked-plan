@@ -1,4 +1,4 @@
-// Polyomino Territory: grow your territory with polyomino pieces; key squares give encores and leaps.
+// Laying Grass: grow your territory with polyomino pieces; key squares give encores and leaps.
 // Rules page: docs/games/polyomino-territory.md
 
 import { useState } from 'react';
@@ -124,7 +124,7 @@ export default function PolyominoTerritory({ view: raw }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Polyomino Territory"
+          title="Laying Grass"
           step={view.yourTurn ? (view.encore ? 'Encore: place again!' : 'Your turn') : `${who(view.turn)} to move`}
           score={(view.squares[you] ?? 0) * 10}
         />

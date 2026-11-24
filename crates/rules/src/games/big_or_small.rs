@@ -1,4 +1,4 @@
-//! Big or Small (final duel, 2 players). Rules page: docs/games/big-or-small.md
+//! Big Small (final duel, 2 players). Rules page: docs/games/big-or-small.md
 //!
 //! Both players hold the cards 1–9. Each round the dealer turns up a card;
 //! both secretly play one of their cards and bet whether the opponent's card
@@ -168,16 +168,16 @@ impl Game for BigOrSmall {
             id: "big-or-small",
             kind: "final-duel",
             difficulty: "easy",
-            tags: &["cards", "numbers"],
+            tags: &["speed-risk"],
             min_players: 2,
             max_players: 2,
-            name: "Big or Small",
+            name: "Big Small",
             short: "Play a card in secret and bet whether your opponent's card beats the dealer's. Nine rounds of chips.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<BigState, String> {
-        let [a, b] = players else { return Err("Big or Small is for 2 players".into()) };
+        let [a, b] = players else { return Err("Big Small is for 2 players".into()) };
         let mut rng = Rng::new(seed);
         let mut dealer: Vec<u8> = (1..=CARDS).collect();
         rng.shuffle(&mut dealer);

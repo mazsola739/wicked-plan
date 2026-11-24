@@ -1,4 +1,4 @@
-//! Word Block Tower (Team mini game, 1–4 players). Rules page: docs/games/word-block-tower.md
+//! Word Tower (Team mini game, 1–4 players). Rules page: docs/games/word-block-tower.md
 //!
 //! A pile of letter blocks made from one secret topic word per player. In
 //! turn, every player builds one topic word from the pile; the last word must
@@ -333,18 +333,18 @@ impl Game for WordBlockTower {
         GameInfo {
             id: "word-block-tower",
             kind: "mini-team",
-            difficulty: "easy",
-            tags: &["words", "alliance"],
+            difficulty: "medium",
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 4,
-            name: "Word Block Tower",
+            name: "Word Tower",
             short: "Use every letter block: one topic word per player, built in turn.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<State, String> {
         if !(1..=4).contains(&players.len()) {
-            return Err("Word Block Tower is for 1–4 players".into());
+            return Err("Word Tower is for 1–4 players".into());
         }
         let mut rng = Rng::new(seed);
         let mut topics: Vec<usize> = (0..TOPICS.len()).collect();

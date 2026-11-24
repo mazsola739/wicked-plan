@@ -15,6 +15,8 @@ Main game, 3–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/e
 - **Lone Wolf:** a two-way question. Anyone alone on their side gets +4.
 - After each round you see everyone's picks.
 
+**On the show:** Before the third mini-game, every player picked The Greater Good or Personal Gain. If 9 or more chose The Greater Good, a Prize Token worth 100 million won would go into the prize pool; each Personal Gain pick scored 5 points instead. Too few players chose The Greater Good, so the pool got nothing (the closest round here is Share or Grab, which scores differently).
+
 ## Rules in detail
 
 - **14 rounds:** 10 two-way questions ("Sunrise or sunset?") and **4 surprise mini rounds** dropped in

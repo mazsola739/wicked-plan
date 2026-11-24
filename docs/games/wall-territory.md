@@ -1,4 +1,4 @@
-# Wall Territory
+# Wall Go
 
 Prison game, 2–3 players (the page plays 3: you and two bots). Code: `crates/rules/src/games/wall_territory.rs`,
 screen: `apps/web/src/games/WallTerritory.tsx`.
@@ -12,6 +12,8 @@ screen: `apps/web/src/games/WallTerritory.tsx`.
 - Once no other player's piece can reach your pieces' area, you are **sealed in** and skip your turns.
 - The game ends when everyone is sealed in.
 - Your score is **100 + 20 per square** of the areas holding only your pieces. Most area wins.
+
+**On the show:** Three players took turns moving one of their pieces and building a wall beside it on a Go board (here the board is 7×7), until each player's pieces were walled off from everyone else's. Player A finished with the largest territory, won a prize and was safe from elimination. Player B and Player C then replayed the game by the same rules, and Player B, left with the smaller territory, was eliminated.
 
 ## Rules in detail
 

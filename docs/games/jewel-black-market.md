@@ -1,4 +1,4 @@
-# Jewel Black Market
+# Gem Black Market
 
 Main game, 4–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/jewel_black_market.rs`.
 

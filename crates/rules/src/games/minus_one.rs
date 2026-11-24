@@ -1,4 +1,4 @@
-//! Minus One (prison game, 3–6 seats). Rules page: docs/games/minus-one.md
+//! Remove One (prison game, 3–6 seats). Rules page: docs/games/minus-one.md
 //!
 //! Everyone shows two cards from 1–10, then keeps one; the lowest unique kept
 //! card scores the sum of all kept cards.
@@ -157,18 +157,18 @@ impl Game for Rules {
         GameInfo {
             id: "minus-one",
             kind: "prison",
-            difficulty: "easy",
-            tags: &["cards", "bluff"],
+            difficulty: "medium",
+            tags: &["strategy-territory", "bluff-deduction"],
             min_players: 3,
             max_players: 6,
-            name: "Minus One",
+            name: "Remove One",
             short: "Show two cards, keep one; the lowest unique card wins the round.",
         }
     }
 
     fn setup(players: &[String], _seed: u64) -> Result<MoState, String> {
         if !(3..=6).contains(&players.len()) {
-            return Err("Minus One needs 3–6 players".into());
+            return Err("Remove One needs 3–6 players".into());
         }
         let seats =
             players.iter().map(|id| Seat { id: id.clone(), hand: (1..=10).collect(), pair: None, kept: None, score: 0 }).collect();

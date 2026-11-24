@@ -1,4 +1,4 @@
-//! Virus Game (main game, hidden roles). Rules page: docs/games/virus-game.md
+//! The Virus Game (main game, hidden roles). Rules page: docs/games/virus-game.md
 //!
 //! Terrorists infect whoever they meet; the city (officer, journalist,
 //! researchers, citizens) meets, reports and votes people into quarantine.
@@ -388,10 +388,10 @@ impl Game for Rules {
             id: "virus-game",
             kind: "main",
             difficulty: "hard",
-            tags: &["secret-role", "bluff", "alliance"],
+            tags: &["social-alliances"],
             min_players: 6,
             max_players: 10,
-            name: "Virus Game",
+            name: "The Virus Game",
             short: "Hidden roles: terrorists spread a virus; the officer, journalist, researchers and citizens must quarantine them.",
         }
     }
@@ -399,7 +399,7 @@ impl Game for Rules {
     fn setup(players: &[String], seed: u64) -> Result<VirusState, String> {
         let n = players.len();
         if !(6..=10).contains(&n) {
-            return Err("Virus Game needs 6 to 10 players".into());
+            return Err("The Virus Game needs 6 to 10 players".into());
         }
         let mut rng = Rng::new(seed);
         let terrorists = if n >= 9 { 3 } else { 2 };

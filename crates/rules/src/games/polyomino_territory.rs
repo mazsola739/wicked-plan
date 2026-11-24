@@ -1,4 +1,4 @@
-//! Polyomino Territory (Main game, 2–4 players). Rules page: docs/games/polyomino-territory.md
+//! Laying Grass (Main game, 2–4 players). Rules page: docs/games/polyomino-territory.md
 //!
 //! Grow your territory on a 14×14 board with polyomino pieces that must touch
 //! it edge to edge. Key squares give an encore (place again) or a leap (one
@@ -373,11 +373,11 @@ impl Game for PolyominoTerritory {
         GameInfo {
             id: "polyomino-territory",
             kind: "main",
-            difficulty: "hard",
-            tags: &["board"],
+            difficulty: "medium",
+            tags: &["strategy-territory"],
             min_players: 2,
             max_players: 4,
-            name: "Polyomino Territory",
+            name: "Laying Grass",
             short: "Grow your territory with polyomino pieces; key squares give encores and leaps.",
         }
     }
@@ -385,7 +385,7 @@ impl Game for PolyominoTerritory {
     fn setup(players: &[String], seed: u64) -> Result<State, String> {
         let n = players.len();
         if !(2..=4).contains(&n) {
-            return Err("Polyomino Territory needs 2–4 players".into());
+            return Err("Laying Grass needs 2–4 players".into());
         }
         let mut rng = Rng::new(seed);
         let mut board = vec![-1i8; (SIZE * SIZE) as usize];

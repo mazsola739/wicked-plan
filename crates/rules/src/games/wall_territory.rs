@@ -1,4 +1,4 @@
-//! Wall Territory (prison, 2–3 players). Rules page: docs/games/wall-territory.md
+//! Wall Go (prison, 2–3 players). Rules page: docs/games/wall-territory.md
 //!
 //! 7×7 squares, two pieces each. A turn moves one piece 0–2 squares, then
 //! builds a wall on a side of its square. The game ends when no region (squares
@@ -408,17 +408,17 @@ impl Game for WallTerritory {
             id: "wall-territory",
             kind: "prison",
             difficulty: "hard",
-            tags: &["board"],
+            tags: &["strategy-territory"],
             min_players: 2,
             max_players: 3,
-            name: "Wall Territory",
+            name: "Wall Go",
             short: "Move a piece, build a wall: fence off the biggest area of the 7×7 board for yourself.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<WallState, String> {
         if !(2..=3).contains(&players.len()) {
-            return Err("Wall Territory is for 2 or 3 players".into());
+            return Err("Wall Go is for 2 or 3 players".into());
         }
         let mut sets: Vec<usize> = (0..players.len()).collect();
         Rng::new(seed).shuffle(&mut sets);

@@ -1,4 +1,4 @@
-//! Colour Mancala (Main game, 2–4 players). Rules page: docs/games/colour-mancala.md
+//! Balance Mancala (Main game, 2–4 players). Rules page: docs/games/colour-mancala.md
 //!
 //! A ring of pits: every player owns 5 pits and a store. Stones are red, green
 //! or blue; you sow a pit's stones starting with the colour you choose. Your
@@ -202,17 +202,17 @@ impl Game for ColourMancala {
             id: "colour-mancala",
             kind: "main",
             difficulty: "hard",
-            tags: &["board", "numbers"],
+            tags: &["strategy-territory"],
             min_players: 2,
             max_players: 4,
-            name: "Colour Mancala",
+            name: "Balance Mancala",
             short: "Round mancala with stones in three colours; only your weakest colour counts.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<State, String> {
         if !(2..=4).contains(&players.len()) {
-            return Err("Colour Mancala needs 2–4 players".into());
+            return Err("Balance Mancala needs 2–4 players".into());
         }
         let mut rng = Rng::new(seed);
         // One random row pattern, copied to every player.

@@ -1,4 +1,4 @@
-//! Equation Target (Prison, played solo here). Rules page: docs/games/equation-target.md
+//! Equation Pyramid (Prison, played solo here). Rules page: docs/games/equation-target.md
 //!
 //! Five rounds. Ten number cards (1–9) and a target are shown. Pick three
 //! different cards and two operators (+ − ×); the expression is worked out
@@ -138,10 +138,10 @@ impl Game for EquationTarget {
             id: "equation-target",
             kind: "prison",
             difficulty: "medium",
-            tags: &["numbers"],
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 1,
-            name: "Equation Target",
+            name: "Equation Pyramid",
             short: "Pick three of ten number cards and two operators to hit the target.",
         }
     }

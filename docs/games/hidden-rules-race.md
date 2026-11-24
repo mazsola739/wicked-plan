@@ -1,4 +1,4 @@
-# Hidden Rules Race
+# Unknown
 
 Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/src/games/hidden_rules_race.rs`.
 
@@ -12,6 +12,8 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 - Watch the last round's log: every piece's colour, direction and result is a clue. Tap a colour to note your guess.
 - After rounds 6, 12 and 18, one rule is revealed to everyone.
 - The race ends when a piece reaches the goal, or after 30 rounds. The closer to the goal, the better your place.
+
+**On the show:** Player A was the first to steer a cube onto the centre square and won 3 game tokens. Of the rest, the four whose cubes stopped on the highest-numbered squares got one token each (here the squares have no numbers, so everyone else is ranked by distance to the goal).
 
 ## Rules in detail
 

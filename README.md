@@ -6,9 +6,8 @@ bots. An unofficial fan project, inspired by the Netflix show _The Devil's Plan_
 **Live:** <https://mazsola739.github.io/wicked-plan/> · **Portfolio:** <https://mazsola739.github.io/mazsola739/>
 
 > Fan project. Not affiliated with, endorsed or sponsored by Netflix or the makers of
-> _The Devil's Plan_. The games follow the genre and some mechanics of the show's games; their
-> names, rules texts, art and look are my own. Classic board games (mill, gomoku, knight's tour)
-> keep their names.
+> _The Devil's Plan_. The games follow the genre and mechanics of the show's games and carry their
+> English names as the show uses them; the digital versions, rules texts, art and look are my own.
 
 ## Features
 

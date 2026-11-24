@@ -1,4 +1,4 @@
-//! Tiger and Goat (final duel, 2 players). Rules page: docs/games/tiger-and-goat.md
+//! Bagh Chal (final duel, 2 players). Rules page: docs/games/tiger-and-goat.md
 //!
 //! The hunt game on two boards at once: on board 0 the first player has the
 //! tigers, on board 1 the goats. In every step each player moves once, on the
@@ -295,16 +295,16 @@ impl Game for TigerAndGoat {
             id: "tiger-and-goat",
             kind: "final-duel",
             difficulty: "hard",
-            tags: &["board"],
+            tags: &["strategy-territory"],
             min_players: 2,
             max_players: 2,
-            name: "Tiger and Goat",
+            name: "Bagh Chal",
             short: "The hunt game on two boards at once: tigers on one, goats on the other.",
         }
     }
 
     fn setup(players: &[String], _seed: u64) -> Result<TigerState, String> {
-        let [a, b] = players else { return Err("Tiger and Goat is for 2 players".into()) };
+        let [a, b] = players else { return Err("Bagh Chal is for 2 players".into()) };
         Ok(TigerState {
             players: [a.clone(), b.clone()],
             boards: [Board::new(), Board::new()],

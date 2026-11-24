@@ -451,7 +451,7 @@ impl Game for Rules {
             id: "unknown-language",
             kind: "exile",
             difficulty: "hard",
-            tags: &["words", "logic"],
+            tags: &["logic-puzzles", "bluff-deduction"],
             min_players: 1,
             max_players: 1,
             name: "Unknown Language",

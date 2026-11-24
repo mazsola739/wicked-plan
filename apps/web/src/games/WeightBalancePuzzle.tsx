@@ -1,4 +1,4 @@
-// Weight Balance Puzzle: a team shares 12 weighings to find five secret weights.
+// Scale Game: a team shares 12 weighings to find five secret weights.
 // Rules page: docs/games/weight-balance-puzzle.md
 
 import { useState } from 'react';

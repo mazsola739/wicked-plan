@@ -254,7 +254,7 @@ impl Game for Rules {
             id: "secret-number",
             kind: "main",
             difficulty: "hard",
-            tags: &["logic", "numbers"],
+            tags: &["logic-puzzles", "bluff-deduction"],
             min_players: 4,
             max_players: 8,
             name: "Secret Number",

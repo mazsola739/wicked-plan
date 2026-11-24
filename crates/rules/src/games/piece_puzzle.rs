@@ -2,8 +2,8 @@
 //!
 //! Fill a target shape exactly with the given polyominoes (turned and flipped
 //! as you like). Seat 0 solves; the other seats are bots that "solve" at seeded
-//! times. `Race` below is the shared race clock, also used by Fence Building
-//! and Symmetry Puzzle.
+//! times. `Race` below is the shared race clock, also used by Loop Fence Puzzle
+//! and Symmetrical Puzzle.
 
 use serde::{Deserialize, Serialize};
 
@@ -452,8 +452,8 @@ impl Game for Rules {
         GameInfo {
             id: "piece-puzzle",
             kind: "exile",
-            difficulty: "medium",
-            tags: &["logic", "speed"],
+            difficulty: "normal",
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 4,
             name: "Piece Puzzle",

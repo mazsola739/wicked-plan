@@ -157,8 +157,8 @@ impl Game for CountTheRectangles {
         GameInfo {
             id: "count-the-rectangles",
             kind: "mini-solo",
-            difficulty: "easy",
-            tags: &["numbers", "speed"],
+            difficulty: "normal",
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 1,
             name: "Count the Rectangles",

@@ -1,4 +1,4 @@
-# Duplicate Picture Buzzer
+# Montage
 
 Team game, played as a race here: 1–4 seats (the page: you + 3 bots).
 Code: `crates/rules/src/games/duplicate_photo_buzzer.rs`.

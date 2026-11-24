@@ -1,4 +1,4 @@
-# Spinning Puzzle Wheel
+# Cooperative Puzzle
 
 Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 `crates/rules/src/games/spinning_puzzle_wheel.rs`.

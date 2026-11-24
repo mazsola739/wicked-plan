@@ -1,4 +1,4 @@
-# Polyomino Territory
+# Laying Grass
 
 Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/games/polyomino_territory.rs`.
 Our short version of the 30 × 30 original: a **14 × 14** board.

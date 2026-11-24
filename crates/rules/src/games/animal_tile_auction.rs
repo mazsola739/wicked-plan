@@ -1,4 +1,4 @@
-//! Animal Tile Auction (main game, 3–6 seats). Rules page: docs/games/animal-tile-auction.md
+//! Zoo (main game, 3–6 seats). Rules page: docs/games/animal-tile-auction.md
 //!
 //! A shared 5×5 grid; each auction offers one animal tile. Secret bids, the
 //! single highest bidder pays and places it. Everyone scores their own secret
@@ -282,17 +282,17 @@ impl Game for Rules {
             id: "animal-tile-auction",
             kind: "main",
             difficulty: "medium",
-            tags: &["bidding", "board"],
+            tags: &["strategy-territory", "auction-economy"],
             min_players: 3,
             max_players: 6,
-            name: "Animal Tile Auction",
+            name: "Zoo",
             short: "Bid chips for animal tiles and place them on a shared 5×5 grid to build your secret pattern.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<TileState, String> {
         if !(3..=6).contains(&players.len()) {
-            return Err("Animal Tile Auction needs 3–6 players".into());
+            return Err("Zoo needs 3–6 players".into());
         }
         let n = players.len();
         let mut rng = Rng::new(seed);

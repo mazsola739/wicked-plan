@@ -1,4 +1,4 @@
-# Equation Target
+# Equation Pyramid
 
 Prison game, played solo here. Code: `crates/rules/src/games/equation_target.rs`.
 

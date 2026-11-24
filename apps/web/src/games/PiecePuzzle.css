@@ -1,4 +1,4 @@
-/* The race bar is shared by the race games (Piece Puzzle, Fence Building, Symmetry Puzzle). */
+/* The race bar is shared by the race games (Piece Puzzle, Loop Fence Puzzle, Symmetrical Puzzle). */
 .race-bar {
   display: flex;
   flex-wrap: wrap;

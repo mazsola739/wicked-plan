@@ -1,4 +1,4 @@
-// Hidden Fourth Player: three in a row for three, against the Shadow. Rules page: docs/games/hidden-fourth-player.md
+// Four Player Three in a Row: three in a row for three, against the Shadow. Rules page: docs/games/hidden-fourth-player.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -52,7 +52,7 @@ export default function HiddenFourthPlayer({ view: raw }: ScreenProps) {
 
   return (
     <Play
-      top={<GameTop title="Hidden Fourth Player" step={`Round ${view.round}`} score={view.lines[view.me] ?? 0} />}
+      top={<GameTop title="Four Player Three in a Row" step={`Round ${view.round}`} score={view.lines[view.me] ?? 0} />}
       stage={
         <div className="hidden-fourth-player-board" style={{ gridTemplateColumns: `repeat(${n}, 1fr)` }}>
           {view.board

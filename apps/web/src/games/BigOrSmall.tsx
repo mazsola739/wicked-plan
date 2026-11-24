@@ -1,4 +1,4 @@
-// Big or Small: play a card in secret, bet on the opponent's card. Rules page: docs/games/big-or-small.md
+// Big Small: play a card in secret, bet on the opponent's card. Rules page: docs/games/big-or-small.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -72,7 +72,7 @@ export default function BigOrSmall({ view: raw }: ScreenProps) {
 
   return (
     <Play
-      top={<GameTop title="Big or Small" step={`Round ${view.round} of ${view.rounds}`} score={view.chips} />}
+      top={<GameTop title="Big Small" step={`Round ${view.round} of ${view.rounds}`} score={view.chips} />}
       stage={
         <div className="big-or-small-table">
           <div className="big-or-small-chips">

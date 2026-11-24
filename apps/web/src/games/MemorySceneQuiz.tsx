@@ -1,4 +1,4 @@
-// Memory Scene Quiz: study a scene, then the team answers 10 questions in turn.
+// Fragments of Memory: study a scene, then the team answers 10 questions in turn.
 // Rules page: docs/games/memory-scene-quiz.md
 
 import type { ReactNode } from 'react';

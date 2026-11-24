@@ -1,4 +1,4 @@
-// Word Block Tower: the team uses every letter block, one topic word per player.
+// Word Tower: the team uses every letter block, one topic word per player.
 // Rules page: docs/games/word-block-tower.md
 
 import { useState } from 'react';
@@ -76,7 +76,7 @@ export default function WordBlockTower({ view: raw }: ScreenProps) {
   const who = (seat: number) => (seat === you ? 'You' : nameOf(view.players[seat]!));
   return (
     <Play
-      top={<GameTop title="Word Block Tower" step={`Round ${view.round} of ${view.rounds}`} score={view.score} />}
+      top={<GameTop title="Word Tower" step={`Round ${view.round} of ${view.rounds}`} score={view.score} />}
       stage={
         <div className="card wbt-stage">
           <div className="wbt-topic">

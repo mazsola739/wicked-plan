@@ -1,4 +1,4 @@
-//! Equation Hi-Lo (main game, 3–6 seats). Rules page: docs/games/equation-hi-lo.md
+//! Equation High-Low (main game, 3–6 seats). Rules page: docs/games/equation-hi-lo.md
 //!
 //! Four number cards each (two face up), the symbols + − × ÷: build an equation
 //! with three of them and declare Low (near 1) or High (near 20). Fixed-limit
@@ -425,18 +425,18 @@ impl Game for Rules {
         GameInfo {
             id: "equation-hi-lo",
             kind: "main",
-            difficulty: "medium",
-            tags: &["numbers", "cards", "bluff"],
+            difficulty: "hard",
+            tags: &["logic-puzzles", "speed-risk"],
             min_players: 3,
             max_players: 6,
-            name: "Equation Hi-Lo",
+            name: "Equation High-Low",
             short: "Build an equation from four number cards and three symbols, then bet on being closest to 1 or to 20.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<HiLoState, String> {
         if !(3..=6).contains(&players.len()) {
-            return Err("Equation Hi-Lo needs 3–6 players".into());
+            return Err("Equation High-Low needs 3–6 players".into());
         }
         let n = players.len();
         let mut s = HiLoState {

@@ -1,4 +1,4 @@
-//! Find the Differences (exile game, a race). Rules page: docs/games/find-the-differences.md
+//! Spot the Difference (exile game, a race). Rules page: docs/games/find-the-differences.md
 //!
 //! Two generated pictures differ in a few shapes; tap the differences before
 //! the rivals find theirs. Rivals (the seats after the first) are played by the
@@ -264,17 +264,17 @@ impl Game for FindTheDifferences {
             id: "find-the-differences",
             kind: "exile",
             difficulty: "easy",
-            tags: &["speed"],
+            tags: &["memory-observation"],
             min_players: 1,
             max_players: 4,
-            name: "Find the Differences",
+            name: "Spot the Difference",
             short: "Two pictures, a handful of differences: tap them all before the rivals do.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<State, String> {
         if players.is_empty() || players.len() > 4 {
-            return Err("Find the Differences needs 1–4 players".into());
+            return Err("Spot the Difference needs 1–4 players".into());
         }
         let seats = players.iter().map(|id| Seat { id: id.clone(), points: 0, finds: Vec::new(), misses: 0 }).collect();
         let mut s = State {

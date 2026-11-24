@@ -1,4 +1,4 @@
-# Find the Differences
+# Spot the Difference
 
 Exile game, a race: 1–4 seats (the page: you + 3 bots). Code: `crates/rules/src/games/find_the_differences.rs`.
 

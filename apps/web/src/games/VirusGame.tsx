@@ -1,4 +1,4 @@
-// Virus Game: hidden roles, contacts, reports and quarantine votes. Rules: docs/games/virus-game.md
+// The Virus Game: hidden roles, contacts, reports and quarantine votes. Rules: docs/games/virus-game.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -91,7 +91,7 @@ export default function VirusGame({ view }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Virus Game"
+          title="The Virus Game"
           step={end ? 'Roles revealed' : `Round ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`}
           score={v.score}
         />

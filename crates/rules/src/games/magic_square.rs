@@ -1,4 +1,4 @@
-//! Magic Square Trial (Hidden, solo). Rules page: docs/games/magic-square.md
+//! Divine Test, the exile's magic square trial (Hidden, solo). Rules page: docs/games/magic-square.md
 //!
 //! Three boards: 3×3, 4×4, 5×5. Fill in 1 … n² once each so that every row,
 //! every column and both diagonals add up to the same number. A few numbers
@@ -183,16 +183,16 @@ impl Game for MagicSquare {
             id: "magic-square",
             kind: "hidden",
             difficulty: "hard",
-            tags: &["numbers", "logic"],
+            tags: &["logic-puzzles"],
             min_players: 1,
             max_players: 1,
-            name: "Magic Square",
+            name: "Divine Test",
             short: "Fill the grid so every row, column and diagonal has the same sum. 3×3, 4×4, 5×5.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<MagicState, String> {
-        let [player] = players else { return Err("Magic Square is a solo game".into()) };
+        let [player] = players else { return Err("Divine Test is a solo game".into()) };
         let mut s = MagicState {
             player: player.clone(),
             board: 0,

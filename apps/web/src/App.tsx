@@ -40,7 +40,9 @@ export function App() {
   );
 }
 
-const LEVELS = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+/** The five difficulty levels (docs/games.md); a game's level n of 5 is the n-th key. */
+const LEVELS = { easy: 'Easy', normal: 'Normal', medium: 'Medium', hard: 'Hard', expert: 'Expert' };
+const levelText = (d: keyof typeof LEVELS) => `${LEVELS[d]} ${Object.keys(LEVELS).indexOf(d) + 1}/5`;
 
 function seatsText(g: GameInfo): string {
   const seats = Math.max(g.minPlayers, Math.min(4, g.maxPlayers));
@@ -55,18 +57,13 @@ const STEPS: [string, string][] = [
 
 /** The categories (docs/games.md, Categories), in the order the filter shows them. */
 const CATEGORIES: [string, string][] = [
-  ['cards', 'Cards'],
-  ['bluff', 'Bluff'],
-  ['secret-role', 'Secret role'],
-  ['bidding', 'Bidding'],
-  ['memory', 'Memory'],
-  ['logic', 'Logic'],
-  ['numbers', 'Numbers'],
-  ['board', 'Board'],
-  ['dice', 'Dice'],
-  ['words', 'Words'],
-  ['speed', 'Speed'],
-  ['alliance', 'Alliance'],
+  ['logic-puzzles', 'Logic & Puzzles'],
+  ['strategy-territory', 'Strategy & Territory'],
+  ['bluff-deduction', 'Bluff & Deduction'],
+  ['social-alliances', 'Social & Alliances'],
+  ['auction-economy', 'Auction & Economy'],
+  ['memory-observation', 'Memory & Observation'],
+  ['speed-risk', 'Speed & Risk'],
 ];
 const CATEGORY_NAME = Object.fromEntries(CATEGORIES);
 
@@ -204,7 +201,7 @@ function Picker({ games }: { games: GameInfo[] }) {
                               <GameIcon id={g.id} className="name-icon" />
                               {g.name}
                             </strong>
-                            <span className="level">{LEVELS[g.difficulty]}</span>
+                            <span className="level">{levelText(g.difficulty)}</span>
                           </span>
                           <span className="game-short">{g.short}</span>
                           <em>{seatsText(g)}</em>
@@ -242,12 +239,7 @@ const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }
   {
     key: 'level',
     label: 'Difficulty',
-    options: [
-      ['all', 'All'],
-      ['easy', 'Easy'],
-      ['medium', 'Medium'],
-      ['hard', 'Hard'],
-    ],
+    options: [['all', 'All'], ...Object.entries(LEVELS).map(([k, l], i): [string, string] => [k, `${l} ${i + 1}`])],
   },
   {
     key: 'seats',

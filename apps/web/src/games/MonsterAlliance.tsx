@@ -1,4 +1,4 @@
-// Monster Alliance: bid for weapons, ally up, beat monsters together. Rules: docs/games/monster-alliance.md
+// Halloween Monster: bid for weapons, ally up, beat monsters together. Rules: docs/games/monster-alliance.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, NumberPad, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -42,7 +42,7 @@ function names(line: string): string {
 
 /**
  * The monster: a faceted (low-poly) horned head in red, lit from the top left like the animals of
- * Animal Tile Auction: white and black overlays make the facets, `eye` shapes are cut in the page's
+ * Zoo: white and black overlays make the facets, `eye` shapes are cut in the page's
  * near-black, with yellow slit pupils, white fangs and white glints.
  */
 function MonsterFace() {
@@ -108,7 +108,7 @@ export default function MonsterAlliance({ view }: ScreenProps) {
   const m = v.monster;
   return (
     <Play
-      top={<GameTop title="Monster Alliance" step={`Monster ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`} score={v.score} />}
+      top={<GameTop title="Halloween Monster" step={`Monster ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`} score={v.score} />}
       stage={
         <>
           {m && (

@@ -13,6 +13,8 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 - Group rules, such as **Bump**, apply to everyone. After every 3rd round, vote to switch one on or off, or tap **Keep them all**.
 - Tip: a well-chosen rule can push rivals back or send them to prison.
 
+**On the show:** While planning, the 12 players split into two camps, and the bigger camp's plan was to stockpile escape cards (here you can hold only one at a time). That plan paid off best, and luck settled the final order. The last three places cost game tokens: Player A came 10th and gave back one, Player B came 11th and gave back three, and Player C came last, gave back five and was out of the game (here you race 3 bots and every place just scores points).
+
 ## Rules in detail
 
 A race along a track of squares 0–18. Everyone writes one secret **personal rule** at the start; the

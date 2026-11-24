@@ -1,4 +1,4 @@
-# Dice Prediction
+# Triple Dice
 
 Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/games/dice_prediction.rs`.
 

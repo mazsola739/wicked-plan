@@ -1,4 +1,4 @@
-# Monster Alliance
+# Halloween Monster
 
 Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/src/games/monster_alliance.rs`.
 
@@ -12,6 +12,8 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 - **Attack:** tap the cards to throw, then tap **Attack**, or tap **Hold back**. Cards you play are used up.
 - If your alliance's total power reaches the monster's strength, it beats the monster. The strongest alliance that beats it takes the reward.
 - Inside the winning alliance, the reward is shared by how much power each member played.
+
+**On the show:** A monster's points went to whoever landed the final blow, and an alliance pooled its points and split them evenly (here the strongest alliance takes the reward and shares it by power played). Three players finished with the highest scores and shared the 6 game tokens set aside for the top, 2 each.
 
 ## Rules in detail
 

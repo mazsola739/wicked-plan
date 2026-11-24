@@ -1,4 +1,4 @@
-//! Duplicate Picture Buzzer (team game, a race here). Rules page: docs/games/duplicate-photo-buzzer.md
+//! Montage (team game, a race here). Rules page: docs/games/duplicate-photo-buzzer.md
 //!
 //! Generated pictures flash one after another; buzz when one repeats. Rivals
 //! (the seats after the first) are played by the rules with seeded reaction
@@ -248,17 +248,17 @@ impl Game for DuplicatePictureBuzzer {
             id: "duplicate-photo-buzzer",
             kind: "mini-team",
             difficulty: "easy",
-            tags: &["memory", "speed"],
+            tags: &["memory-observation", "speed-risk"],
             min_players: 1,
             max_players: 4,
-            name: "Duplicate Picture Buzzer",
+            name: "Montage",
             short: "Pictures flash by; buzz the moment one repeats, before the rivals do.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<State, String> {
         if players.is_empty() || players.len() > 4 {
-            return Err("Duplicate Picture Buzzer needs 1–4 players".into());
+            return Err("Montage needs 1–4 players".into());
         }
         let mut rng = Rng::new(seed);
         let stream = generate(&mut rng);

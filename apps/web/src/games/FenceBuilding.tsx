@@ -1,4 +1,4 @@
-// Fence Building: one closed fence, numbers count the fenced sides; a race. Rules page: docs/games/fence-building.md
+// Loop Fence Puzzle: one closed fence, numbers count the fenced sides; a race. Rules page: docs/games/fence-building.md
 
 import { GameTop, KeyHint, move, Play, type ScreenProps, TimerBar } from './common';
 import { RaceBar, type RaceView } from './PiecePuzzle';
@@ -41,7 +41,11 @@ export default function FenceBuilding({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Fence Building" step={`Round ${view.round} of ${view.rounds} · ${n}×${n}`} score={view.racers[0]?.score ?? 0} />
+          <GameTop
+            title="Loop Fence Puzzle"
+            step={`Round ${view.round} of ${view.rounds} · ${n}×${n}`}
+            score={view.racers[0]?.score ?? 0}
+          />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundTimeMs} />
           <RaceBar view={view} />
         </>

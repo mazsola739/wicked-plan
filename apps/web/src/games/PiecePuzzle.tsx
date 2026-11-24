@@ -1,5 +1,5 @@
 // Piece Puzzle: fill the shape with the pieces, a race. Rules page: docs/games/piece-puzzle.md
-// RaceBar (the racers and the last round) is also used by Fence Building and Symmetry Puzzle.
+// RaceBar (the racers and the last round) is also used by Loop Fence Puzzle and Symmetrical Puzzle.
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';

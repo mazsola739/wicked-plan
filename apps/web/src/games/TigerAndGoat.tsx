@@ -1,4 +1,4 @@
-// Tiger and Goat: the hunt game on two boards at once. Rules page: docs/games/tiger-and-goat.md
+// Bagh Chal: the hunt game on two boards at once. Rules page: docs/games/tiger-and-goat.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -49,7 +49,7 @@ const glint = (x: number, y: number, r: number) => `M${x},${y - r} ${x + r},${y}
 
 /**
  * A faceted (low-poly) tiger or goat head in the side's colour, lit from the top left (like the
- * animals of Animal Tile Auction): white and black overlays make the facets, `eye` shapes are cut
+ * animals of Zoo): white and black overlays make the facets, `eye` shapes are cut
  * in the page's near-black. Drawn in a 40-unit box, scaled to a board point at (x, y).
  */
 function Head({ tiger, x, y }: { tiger: boolean; x: number; y: number }) {
@@ -156,7 +156,7 @@ export default function TigerAndGoat({ view: raw }: ScreenProps) {
 
   return (
     <Play
-      top={<GameTop title="Tiger and Goat" step={`Step ${view.step} · ${them} ${view.theirScore}`} score={view.score} />}
+      top={<GameTop title="Bagh Chal" step={`Step ${view.step} · ${them} ${view.theirScore}`} score={view.score} />}
       stage={
         <svg className="drawing tiger-and-goat-board" viewBox="-0.6 -0.6 5.2 5.2" role="img" aria-label={`Board ${NAMES[shown]}`}>
           {LINES.map(([x1, y1, x2, y2]) => (

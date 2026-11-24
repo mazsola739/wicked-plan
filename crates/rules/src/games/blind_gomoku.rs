@@ -230,8 +230,8 @@ impl Game for BlindGomoku {
         GameInfo {
             id: "blind-gomoku",
             kind: "hidden",
-            difficulty: "hard",
-            tags: &["board", "memory"],
+            difficulty: "expert",
+            tags: &["strategy-territory", "memory-observation"],
             min_players: 1,
             max_players: 1,
             name: "Blind Gomoku",

@@ -439,8 +439,8 @@ impl Game for Rules {
         GameInfo {
             id: "sniper-holdem",
             kind: "prison",
-            difficulty: "medium",
-            tags: &["cards", "bluff"],
+            difficulty: "expert",
+            tags: &["speed-risk"],
             min_players: 2,
             max_players: 6,
             name: "Sniper Hold'em",

@@ -1,4 +1,4 @@
-# Memory Scene Quiz
+# Fragments of Memory
 
 Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 `crates/rules/src/games/memory_scene_quiz.rs`.

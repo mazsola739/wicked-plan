@@ -13,6 +13,8 @@ Main game, 3–6 players (on the page: you + 3 bots). Code: `crates/rules/src/ga
 - Dig points by distance (a diagonal step counts as one): **exact 500, one step 300, two 150, three 50**, farther 0.
 - Your score is your dig points **plus the coins you kept**, so don't overpay for clues.
 
+**On the show:** the board also had 81 squares, but fences, water and walls stood in the way (here there are none). Players won arrows at auction and placed them to connect red dots, which opened ten clue boxes worth points (here five boxes are auctioned, and an opened box shows an arrow toward the treasure). Player A found the treasure box and won the right to take 4 of the show's game tokens from any other player.
+
 ## Rules in detail
 
 - **The island:** a 9 × 9 grid (81 squares). The **treasure** is buried on one secret square.

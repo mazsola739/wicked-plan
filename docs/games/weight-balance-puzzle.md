@@ -1,4 +1,4 @@
-# Weight Balance Puzzle
+# Scale Game
 
 Team mini game, 1–2 players (on the page: you + 1 bot teammate). Code:
 `crates/rules/src/games/weight_balance_puzzle.rs`.

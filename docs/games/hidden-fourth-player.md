@@ -1,4 +1,4 @@
-# Hidden Fourth Player
+# Four Player Three in a Row
 
 Mini team game, 3 players (you and two bots). Code: `crates/rules/src/games/hidden_fourth_player.rs`,
 screen: `apps/web/src/games/HiddenFourthPlayer.tsx`.
@@ -14,6 +14,8 @@ screen: `apps/web/src/games/HiddenFourthPlayer.tsx`.
 - If the board fills with no Shadow line, the team survives: everyone gets 100, plus 100 per own line, plus a 300 bonus.
 - If the Shadow wins, everyone gets 100 plus only 50 per own line.
 - **Tip:** blocking pays more than your own lines. Squares where the Shadow could finish a line are marked as danger.
+
+**On the show:** Three players sat in separate rooms and played three-in-a-row against one another and an unknown fourth player, without being told how the colours were handed out. Their way to keep that fourth player from winning was to pick starting squares that only the three of them knew. In the end Player A wrongly took Player B for the impostor, and Player B was eliminated (here the Shadow always plays openly in its own colour, so nobody has to be unmasked).
 
 ## Rules in detail
 

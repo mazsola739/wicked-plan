@@ -1,4 +1,4 @@
-// Hidden Rules Race: race to the centre and work out each colour's secret rule. Rules: docs/games/hidden-rules-race.md
+// Unknown: race to the centre and work out each colour's secret rule. Rules: docs/games/hidden-rules-race.md
 
 import { useState } from 'react';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
@@ -82,7 +82,7 @@ export default function HiddenRulesRace({ view }: ScreenProps) {
     <Play
       top={
         <GameTop
-          title="Hidden Rules Race"
+          title="Unknown"
           step={v.phase === 'choose' ? `Round ${v.round} of ${v.maxRounds}` : 'The rules revealed'}
           score={v.score}
         />

@@ -1,4 +1,4 @@
-//! Monster Alliance (main game). Rules page: docs/games/monster-alliance.md
+//! Halloween Monster (main game). Rules page: docs/games/monster-alliance.md
 //!
 //! Six monsters, one per round: bid points for an extra weapon, form
 //! alliances of up to three by mutual choice, then play weapon cards in
@@ -311,17 +311,17 @@ impl Game for Rules {
             id: "monster-alliance",
             kind: "main",
             difficulty: "hard",
-            tags: &["alliance", "bidding", "cards"],
+            tags: &["social-alliances"],
             min_players: 4,
             max_players: 8,
-            name: "Monster Alliance",
+            name: "Halloween Monster",
             short: "Bid for weapons, form alliances of up to three and beat monsters together to share their reward.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<MaState, String> {
         if !(4..=8).contains(&players.len()) {
-            return Err("Monster Alliance needs 4 to 8 players".into());
+            return Err("Halloween Monster needs 4 to 8 players".into());
         }
         let mut rng = Rng::new(seed);
         let fighters = players

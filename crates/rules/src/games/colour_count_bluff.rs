@@ -1,4 +1,4 @@
-//! Colour Count Bluff (main game, 3–6 seats). Rules page: docs/games/colour-count-bluff.md
+//! Doubt and Bet (main game, 3–6 seats). Rules page: docs/games/colour-count-bluff.md
 //!
 //! Each player sees only their own 4 cards. Bet on how many cards of a colour
 //! are on the table, raise the bet, or call it: the loser of a call loses a life.
@@ -201,17 +201,17 @@ impl Game for Rules {
             id: "colour-count-bluff",
             kind: "main",
             difficulty: "medium",
-            tags: &["bluff", "cards"],
+            tags: &["bluff-deduction", "memory-observation"],
             min_players: 3,
             max_players: 6,
-            name: "Colour Count Bluff",
+            name: "Doubt and Bet",
             short: "Bet on how many cards of a colour are on the table, seeing only your own; raise or call the bluff.",
         }
     }
 
     fn setup(players: &[String], seed: u64) -> Result<BluffState, String> {
         if !(3..=6).contains(&players.len()) {
-            return Err("Colour Count Bluff needs 3–6 players".into());
+            return Err("Doubt and Bet needs 3–6 players".into());
         }
         let n = players.len();
         let mut s = BluffState {

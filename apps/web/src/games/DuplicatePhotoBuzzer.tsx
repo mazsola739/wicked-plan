@@ -1,4 +1,4 @@
-// Duplicate Picture Buzzer: buzz when a picture repeats. Rules page: docs/games/duplicate-photo-buzzer.md
+// Montage: buzz when a picture repeats. Rules page: docs/games/duplicate-photo-buzzer.md
 
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
 import './DuplicatePhotoBuzzer.css';
@@ -34,7 +34,7 @@ const COLOURS = [
   'var(--g-pink)',
   'var(--g-white)',
 ];
-/** Four grounds: the dark board, tinted a little (as in Find the Differences). */
+/** Four grounds: the dark board, tinted a little (as in Spot the Difference). */
 const GROUNDS = [
   'color-mix(in srgb, var(--violet) 16%, var(--board))',
   'color-mix(in srgb, var(--cyan) 10%, var(--board))',
@@ -171,7 +171,7 @@ export default function DuplicatePhotoBuzzer({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Duplicate Picture Buzzer" step={`Round ${view.round} of ${view.rounds}`} score={me?.points ?? 0} />
+          <GameTop title="Montage" step={`Round ${view.round} of ${view.rounds}`} score={me?.points ?? 0} />
           {r ? <TimerBar leftMs={view.revealLeftMs} totalMs={2500} /> : <TimerBar leftMs={view.frameLeftMs} totalMs={view.frameMs} />}
         </>
       }

@@ -291,8 +291,8 @@ h2 {
   gap: 8px;
 }
 
-/* A game card: a still preview of the game on top; the difficulty (green easy, yellow medium,
-   red hard) shows in its pill and the hover border; the button covers the whole card. */
+/* A game card: a still preview of the game on top; the difficulty (green easy, blue normal, yellow medium,
+   red hard, purple expert) shows in its pill and the hover border; the button covers the whole card. */
 .game-card {
   --level: var(--warn);
   position: relative;
@@ -312,8 +312,16 @@ h2 {
   --level: var(--ok);
 }
 
+.game-card.normal {
+  --level: var(--g-blue);
+}
+
 .game-card.hard {
   --level: var(--bad);
+}
+
+.game-card.expert {
+  --level: var(--g-purple);
 }
 
 .game-card:has(.game-btn:focus-visible) {
@@ -1400,8 +1408,16 @@ a.btn {
   --chip: var(--warn);
 }
 
+.chip.normal {
+  --chip: var(--g-blue);
+}
+
 .chip.hard {
   --chip: var(--bad);
+}
+
+.chip.expert {
+  --chip: var(--g-purple);
 }
 
 .chip[aria-pressed="true"] {

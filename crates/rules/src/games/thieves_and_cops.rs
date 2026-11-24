@@ -1,4 +1,4 @@
-//! Thieves and Cops (main game). Rules page: docs/games/thieves-and-cops.md
+//! Crooked Cops (main game). Rules page: docs/games/thieves-and-cops.md
 //!
 //! Thieves collect hidden pieces on a 17-station metro map; the police hunt
 //! them with only occasional sightings. One officer is secretly corrupt.
@@ -373,10 +373,10 @@ impl Game for Rules {
             id: "thieves-and-cops",
             kind: "main",
             difficulty: "hard",
-            tags: &["board", "secret-role", "alliance"],
+            tags: &["strategy-territory", "bluff-deduction", "social-alliances"],
             min_players: 4,
             max_players: 8,
-            name: "Thieves and Cops",
+            name: "Crooked Cops",
             short: "Thieves collect hidden pieces on a metro map while the police hunt them; one officer is secretly corrupt.",
         }
     }
@@ -384,7 +384,7 @@ impl Game for Rules {
     fn setup(players: &[String], seed: u64) -> Result<TcState, String> {
         let n = players.len();
         if !(4..=8).contains(&n) {
-            return Err("Thieves and Cops needs 4 to 8 players".into());
+            return Err("Crooked Cops needs 4 to 8 players".into());
         }
         let mut rng = Rng::new(seed);
         let thieves = match n {
