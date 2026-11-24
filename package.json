@@ -14,7 +14,7 @@
     "test": "cargo test --manifest-path crates/Cargo.toml",
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "biome lint .",
-    "format": "biome format --write .",
+    "format": "biome check --write --linter-enabled=false .",
     "hooks": "git config core.hooksPath .githooks",
     "precommit": "bun scripts/pre-commit.mjs",
     "tunnel": "cloudflared tunnel --url http://localhost:5173",

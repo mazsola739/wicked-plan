@@ -57,7 +57,8 @@ let ok = true;
 const partly = new Set(git(['diff', '--name-only', '-z']));
 const toFormat = staged.filter((f) => FORMATTABLE.test(f) && !partly.has(f));
 if (toFormat.length) {
-  ok = run('format', `${BIOME} format --write --no-errors-on-unmatched ${quote(toFormat)}`) && ok;
+  // Formats and sorts the imports (as `biome ci` in the deploy workflow checks), without lint fixes.
+  ok = run('format', `${BIOME} check --write --linter-enabled=false --no-errors-on-unmatched ${quote(toFormat)}`) && ok;
   spawnSync('git', ['add', '--', ...toFormat], { cwd: ROOT });
 }
 

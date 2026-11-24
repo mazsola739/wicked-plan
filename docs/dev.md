@@ -12,7 +12,7 @@ After a clone: `bun install`, then `bun run hooks`.
 | `bun run test` | `cargo test` for the rules and the wasm bridge (not `bun test`, which is bun's own test runner) |
 | `bun run typecheck` | TypeScript check of the page |
 | `bun run lint` | Biome lint |
-| `bun run format` | Biome format of the whole repo (rarely needed; the pre-commit formats changed files) |
+| `bun run format` | Biome format and import order of the whole repo (rarely needed; the pre-commit does it for changed files) |
 | `bun run build` | production build of the page |
 | `bun run tunnel` | public HTTPS address for the dev server (see below) |
 | `bun run map <folder>` | one line per file with its exports; cheaper than opening the files |
@@ -36,7 +36,8 @@ When the phone is not on the same Wi-Fi, or you need HTTPS (for example to send 
 
 After `bun run hooks`, `scripts/pre-commit.mjs` runs before every commit:
 
-1. formats the fully staged code files (`.ts`, `.tsx`, `.mjs`, `.json` …) with Biome and stages them again;
+1. formats the fully staged code files (`.ts`, `.tsx`, `.mjs`, `.json` …) with Biome, sorts their imports
+   (the deploy workflow's `biome ci` checks both) and stages them again;
 2. lints the changed code with Biome;
 3. typechecks every workspace with a changed file;
 4. when a Rust file under `crates/` changed: `cargo fmt --check` and `cargo test`.

@@ -1,7 +1,7 @@
 // Monster Alliance: bid for weapons, ally up, beat monsters together. Rules: docs/games/monster-alliance.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, NumberPad, Play, type ScreenProps, useKeys } from './common';
+import { GameTop, KeyHint, move, NumberPad, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './MonsterAlliance.css';
 
 interface Monster {
