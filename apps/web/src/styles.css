@@ -819,8 +819,8 @@ h2 {
   }
 
   .chip:hover:not([aria-pressed="true"]) {
-    --edge: color-mix(in srgb, var(--chip) 55%, #34304a);
-    color: var(--text);
+    --edge: color-mix(in srgb, var(--chip) 60%, #34304a);
+    color: color-mix(in srgb, var(--chip) 75%, var(--text));
   }
 
   .card-btn:hover {
@@ -1180,7 +1180,8 @@ a.btn {
   display: none;
 }
 
-/* The sidebar's list of the games found (desktop only): small icon and name, a click starts it. */
+/* The sidebar's list of the games found (desktop only): small icon and name, a click starts it.
+   It scrolls with the rest of the sidebar. */
 .side-list {
   display: none;
   list-style: none;
@@ -1224,17 +1225,20 @@ a.btn {
 
   .catalog-body {
     display: grid;
-    grid-template-columns: 236px minmax(0, 1fr);
+    grid-template-columns: 264px minmax(0, 1fr);
     gap: 28px;
     align-items: start;
   }
 
+  /* One scroll for the whole sidebar (filters, then the list), with a thin themed scrollbar. */
   .catalog-side {
     position: sticky;
     top: 16px;
     max-height: calc(100dvh - 32px);
     overflow-y: auto;
     gap: 14px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--cyan) 40%, transparent) transparent;
   }
 
   .filters-toggle {
@@ -1248,20 +1252,21 @@ a.btn {
     gap: 14px;
   }
 
+  /* The chips fill each row like justified text; the last row keeps its natural widths. */
   .catalog-side .chip {
-    min-height: 34px;
-    padding: 0 14px;
-    font-size: 0.8rem;
+    flex: 1 0 auto;
+    min-height: 30px;
+    padding: 0 12px;
+    font-size: 0.68rem;
   }
 
-  /* The list takes the room left in the sidebar and scrolls on its own. */
+  .catalog-side .chips::after {
+    content: "";
+    flex: 999 1 0;
+  }
+
   .side-list {
     display: block;
-    flex: 1 1 auto;
-    min-height: 140px;
-    overflow-y: auto;
-    margin-right: -4px;
-    padding-right: 4px;
     border-top: 1px solid var(--line);
     padding-top: 8px;
   }
@@ -1356,21 +1361,24 @@ a.btn {
   gap: 6px;
 }
 
-/* Filter chips are small hexagons, drawn the same way as .btn. */
+/* Filter chips are pills like the difficulty pill on the cards (.level): small hexagons with
+   uppercase text in their colour (cyan; green, yellow, red for the difficulties), dim until chosen. */
 .chip {
   --chip: var(--cyan);
-  --edge: #34304a;
+  --edge: color-mix(in srgb, var(--chip) 30%, #34304a);
   --fill: var(--panel);
   position: relative;
   isolation: isolate;
   min-height: 40px;
-  padding: 0 22px;
+  padding: 0 18px;
   border: none;
   background: var(--edge);
-  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
-  color: var(--muted);
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
+  clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%);
+  color: color-mix(in srgb, var(--chip) 45%, var(--muted));
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   cursor: pointer;
   transition: filter 0.15s;
 }
@@ -1397,9 +1405,10 @@ a.btn {
 }
 
 .chip[aria-pressed="true"] {
-  --edge: var(--chip);
+  --edge: color-mix(in srgb, var(--chip) 75%, transparent);
   --fill: color-mix(in srgb, var(--chip) 16%, var(--panel));
-  color: var(--text);
+  color: var(--chip);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--chip) 60%, transparent);
 }
 
 /* Hexagon controls clip their own outline away, so focus shows as a bright edge instead. */
