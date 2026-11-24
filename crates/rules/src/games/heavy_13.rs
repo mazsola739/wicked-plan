@@ -13,7 +13,6 @@ pub const HAND: usize = 8;
 pub const PASSES: u32 = 2;
 pub const LIMIT: u32 = 13;
 pub const FULL_BONUS: i64 = 3;
-pub const ROUND_MS: i64 = 20_000;
 pub const RESULT_MS: i64 = 5_000;
 pub const COLOUR_NAMES: [&str; 4] = ["red", "blue", "green", "gold"];
 
@@ -116,8 +115,6 @@ pub struct HvView {
     pub phase: Phase,
     pub round: usize,
     pub rounds: usize,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub stacks: [u32; 4],
     pub hand: Vec<Card>,
     pub rainbow: bool,
@@ -155,7 +152,6 @@ impl HvState {
             s.play = None;
         }
         self.phase = Phase::Play;
-        self.time_left_ms = ROUND_MS;
     }
 
     fn resolve(&mut self) {
@@ -295,29 +291,12 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut HvState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Result {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Play => {
-                for i in 0..s.seats.len() {
-                    if s.seats[i].play.is_none() && s.phase == Phase::Play {
-                        let mv = if s.seats[i].passes > 0 {
-                            HvMove::Pass
-                        } else {
-                            let low = *s.seats[i].hand.iter().min_by_key(|&&c| value(c)).expect("a card when no pass is left");
-                            HvMove::Play { card: low, stack: None }
-                        };
-                        let _ = s.choose(i, mv);
-                    }
-                }
-            }
-            Phase::Result => s.start_round(),
-            Phase::Over => {}
+        if s.time_left_ms <= 0 {
+            s.start_round();
         }
     }
 
@@ -327,12 +306,6 @@ impl Game for Rules {
             phase: s.phase,
             round: s.round,
             rounds: ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_ms: match s.phase {
-                Phase::Play => ROUND_MS,
-                Phase::Result => RESULT_MS,
-                Phase::Over => 0,
-            },
             stacks: s.stacks,
             hand: mine.map(|m| m.hand.clone()).unwrap_or_default(),
             rainbow: mine.is_some_and(|m| m.rainbow),
@@ -497,15 +470,14 @@ mod tests {
     }
 
     #[test]
-    fn timeout_passes_then_plays_the_lowest_card() {
+    fn the_round_waits_for_every_seat() {
         let mut s = Rules::setup(&ids(3), 3).unwrap();
-        for _ in 0..2 {
-            Rules::tick(&mut s, ROUND_MS as u64);
-            Rules::tick(&mut s, RESULT_MS as u64);
-        }
-        assert!(s.seats.iter().all(|x| x.passes == 0 && x.hand.len() == HAND));
-        Rules::tick(&mut s, ROUND_MS as u64);
-        assert!(s.seats.iter().all(|x| x.hand.len() == HAND - 1));
+        Rules::apply_move(&mut s, "p1", HvMove::Pass).unwrap();
+        Rules::apply_move(&mut s, "p2", HvMove::Pass).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.phase, s.round), (Phase::Play, 1));
+        assert_eq!(Rules::to_move(&s), vec!["p3".to_string()]);
+        assert_eq!((s.seats[2].passes, s.seats[2].hand.len()), (PASSES, HAND));
     }
 
     #[test]
@@ -556,7 +528,8 @@ mod tests {
     #[test]
     fn replay_moments_are_rare_but_happen() {
         let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
-        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        // Without timeouts there are no forced passes or lowest cards, so fewer last-round swings.
+        assert!(stats.with_any * 5 >= stats.games, "too rare: {stats:?}");
         assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
         assert!(stats.most <= 3, "too many in one game: {stats:?}");
     }

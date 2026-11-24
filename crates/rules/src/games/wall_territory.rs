@@ -12,7 +12,6 @@ use crate::rng::Rng;
 
 pub const N: usize = 7;
 const CELLS: usize = N * N;
-pub const TURN_MS: i64 = 60_000;
 pub const STEPS: usize = 2;
 
 const STARTS: [[(usize, usize); 2]; 3] = [[(1, 1), (5, 5)], [(5, 1), (1, 5)], [(3, 0), (3, 6)]];
@@ -320,7 +319,6 @@ pub struct WallState {
     sealed: Vec<bool>,
     last: Option<(usize, Turn)>,
     turn_no: u32,
-    time_left_ms: i64,
     over: bool,
     /// Replay moments: one wall sealing off 15 squares or more; a rival shut in with 4 or fewer.
     pub moments: Moments,
@@ -338,7 +336,6 @@ impl WallState {
     fn end_turn(&mut self) {
         self.sealed = self.board.sealed();
         self.turn_no += 1;
-        self.time_left_ms = TURN_MS;
         if self.sealed.iter().all(|&s| s) {
             self.over = true;
             return;
@@ -396,8 +393,6 @@ pub struct WallView {
     /// Last turn: seat, the square the piece ended on, the wall side.
     pub last: Option<(usize, usize, Dir)>,
     pub turn_no: u32,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub over: bool,
 }
 
@@ -436,7 +431,6 @@ impl Game for WallTerritory {
             turn: 0,
             last: None,
             turn_no: 1,
-            time_left_ms: TURN_MS,
             over: false,
             moments: Moments::default(),
         })
@@ -488,20 +482,6 @@ impl Game for WallTerritory {
         Ok(())
     }
 
-    fn tick(s: &mut WallState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            let p = s.players[s.turn].clone();
-            let mv = Self::bot_move(s, &p, u64::from(s.turn_no));
-            if Self::apply_move(s, &p, mv).is_err() {
-                s.end_turn();
-            }
-        }
-    }
-
     fn view_for(s: &WallState, player: &str) -> WallView {
         let me = s.seat(player).unwrap_or(0);
         let areas = s.board.areas();
@@ -530,8 +510,6 @@ impl Game for WallTerritory {
             reach: if your_turn { s.board.pieces[me].iter().map(|&c| s.board.reach(c)).collect() } else { Vec::new() },
             last: s.last.map(|(seat, t)| (seat, t.to, t.wall)),
             turn_no: s.turn_no,
-            time_left_ms: s.time_left_ms.max(0),
-            turn_ms: TURN_MS,
             over: s.over,
         }
     }
@@ -648,11 +626,11 @@ mod tests {
     }
 
     #[test]
-    fn time_up_plays_for_you() {
+    fn the_turn_waits_for_the_mover() {
         let mut s = two();
-        WallTerritory::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.turn, 1);
-        assert!(s.last.is_some());
+        WallTerritory::tick(&mut s, 600_000);
+        assert_eq!((s.turn, s.turn_no), (0, 1));
+        assert!(s.last.is_none());
     }
 
     // 300 games each instead of 1,000: the bot tries ~100 turns with two floods each, which

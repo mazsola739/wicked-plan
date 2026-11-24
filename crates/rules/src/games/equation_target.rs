@@ -2,7 +2,7 @@
 //!
 //! Five rounds. Ten number cards (1–9) and a target are shown. Pick three
 //! different cards and two operators (+ − ×); the expression is worked out
-//! left to right, ((a ∘ b) ∘ c), and must equal the target. 40 seconds a round.
+//! left to right, ((a ∘ b) ∘ c), and must equal the target.
 
 use serde::{Deserialize, Serialize};
 
@@ -10,10 +10,7 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::quiz::{QuizPuzzle, QuizState, QuizView};
 use crate::rng::Rng;
 
-pub const ROUND_MS: i64 = 40_000;
 pub const CARDS: usize = 10;
-/// A right answer in the last round with at least this much time left is a replay moment.
-pub const FAST_MS: i64 = 30_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Op {
@@ -119,7 +116,7 @@ impl QuizPuzzle for EquationPuzzle {
 #[derive(Clone, Debug)]
 pub struct TargetState {
     pub quiz: QuizState<EquationPuzzle>,
-    /// Replay moments: the last (biggest) target hit fast, and all five targets hit.
+    /// Replay moment: all five targets hit.
     pub moments: Moments,
 }
 
@@ -141,7 +138,7 @@ impl Game for EquationTarget {
             id: "equation-target",
             kind: "prison",
             difficulty: "medium",
-            tags: &["numbers", "speed"],
+            tags: &["numbers"],
             min_players: 1,
             max_players: 1,
             name: "Equation Target",
@@ -152,29 +149,18 @@ impl Game for EquationTarget {
     fn setup(players: &[String], seed: u64) -> Result<TargetState, String> {
         let mut rng = Rng::new(seed);
         let puzzles = (1..=5).map(|level| EquationPuzzle::generate(&mut rng, level)).collect();
-        Ok(TargetState { quiz: QuizState::new(players, puzzles, ROUND_MS, Self::info().name)?, moments: Moments::default() })
+        Ok(TargetState { quiz: QuizState::new(players, puzzles, 0, Self::info().name)?, moments: Moments::default() })
     }
 
     fn apply_move(s: &mut TargetState, player: &str, mv: QuizMove) -> Result<(), String> {
         let QuizMove::Answer { value } = mv;
-        let left = s.quiz.time_left_ms;
         s.quiz.answer(player, value)?;
-        // Replay moments, after the last round (a timeout is never right, so only an answer can make one).
+        // The replay moment, after the last round.
         let q = &s.quiz;
-        let last = &q.rounds[q.current - 1];
-        if q.over && last.correct {
-            if left >= FAST_MS {
-                s.moments.push(&q.player, format!("Target {} hit with {} s to spare", last.puzzle.target, left / 1000));
-            }
-            if q.rounds.iter().all(|r| r.correct) {
-                s.moments.push(&q.player, "All five targets hit");
-            }
+        if q.over && q.rounds.iter().all(|r| r.correct) {
+            s.moments.push(&q.player, "All five targets hit");
         }
         Ok(())
-    }
-
-    fn tick(s: &mut TargetState, ms: u64) {
-        s.quiz.tick(ms);
     }
 
     fn view_for(s: &TargetState, _player: &str) -> QuizView<EquationPuzzle> {
@@ -255,39 +241,59 @@ mod tests {
         EquationTarget::apply_move(s, "p1", QuizMove::Answer { value }).unwrap();
     }
 
+    /// The right cards with operators that miss the target.
+    fn answer_wrong(s: &mut TargetState) {
+        let right = s.quiz.current_solution().unwrap();
+        let puzzle = &s.quiz.rounds[s.quiz.current].puzzle;
+        let value = Op::ALL
+            .iter()
+            .flat_map(|&a| Op::ALL.iter().map(move |&b| EquationAnswer { picks: right.picks, ops: [a, b] }))
+            .find(|v| !puzzle.is_correct(v))
+            .unwrap();
+        EquationTarget::apply_move(s, "p1", QuizMove::Answer { value }).unwrap();
+    }
+
     #[test]
-    fn a_fast_last_target_and_a_perfect_run_are_replay_moments() {
+    fn a_round_waits_for_the_answer() {
         let ids = vec!["p1".to_string()];
-        // Five right answers, the last one with 37 s left.
+        let mut s = EquationTarget::setup(&ids, 7).unwrap();
+        EquationTarget::tick(&mut s, 3_600_000);
+        assert_eq!((s.quiz.current, s.quiz.time_left_ms), (0, 0));
+        assert!(!s.quiz.over);
+        answer_right(&mut s);
+        assert_eq!((s.quiz.current, s.quiz.rounds[0].points), (1, 100));
+    }
+
+    #[test]
+    fn a_perfect_run_is_a_replay_moment() {
+        let ids = vec!["p1".to_string()];
+        // Five right answers.
         let mut s = EquationTarget::setup(&ids, 7).unwrap();
         for _ in 0..4 {
-            EquationTarget::tick(&mut s, 20_000);
             answer_right(&mut s);
             assert!(EquationTarget::moments(&s, "p1").is_empty(), "only the end makes moments");
         }
-        EquationTarget::tick(&mut s, 3_000);
-        let target = s.quiz.rounds[4].puzzle.target;
         answer_right(&mut s);
         let m = EquationTarget::moments(&s, "p1");
-        assert_eq!(m.len(), 2);
-        assert_eq!((m[0].by.as_str(), m[0].text.clone()), ("p1", format!("Target {target} hit with 37 s to spare")));
-        assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p1", "All five targets hit"));
-        // A slow last answer after a missed round: nothing.
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "All five targets hit"));
+        assert_eq!(EquationTarget::results(&s)[0].points, 500);
+        // A missed round, then four right answers: nothing.
         let mut s = EquationTarget::setup(&ids, 7).unwrap();
-        EquationTarget::tick(&mut s, ROUND_MS as u64);
-        for _ in 0..3 {
+        answer_wrong(&mut s);
+        for _ in 0..4 {
             answer_right(&mut s);
         }
-        EquationTarget::tick(&mut s, 15_000);
-        answer_right(&mut s);
         assert!(s.quiz.over);
         assert!(EquationTarget::moments(&s, "p1").is_empty());
     }
 
     #[test]
     fn replay_moments_are_rare_but_happen() {
+        // The only moment is a perfect run. The bot is right about 75% of a round (a random miss can
+        // still hit), so about 0.75^5 ≈ 23% of games have it.
         let stats = crate::game::testing::moment_stats::<EquationTarget>(300, 1, 200);
-        assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
+        assert!(stats.with_any * 5 >= stats.games, "too rare: {stats:?}");
         assert!(stats.with_any * 5 <= stats.games * 4, "too common: {stats:?}");
         assert!(stats.most <= 2, "too many in one game: {stats:?}");
     }

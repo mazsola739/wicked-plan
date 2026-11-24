@@ -1,7 +1,7 @@
 // Secret Number. Rules page: docs/games/secret-number.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, NumberPad, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, NumberPad, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './SecretNumber.css';
 
 interface Seat {
@@ -22,8 +22,6 @@ interface SecretView {
   phase: 'trade' | 'guess' | 'over';
   seats: Seat[];
   acted: boolean;
-  timeLeftMs: number;
-  phaseMs: number;
   log: string[];
   notes: string[];
   numbers: number[] | null;
@@ -68,14 +66,11 @@ export default function SecretNumber({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Secret Number"
-            step={view.over ? 'Game over' : `Round ${view.round} of ${view.rounds} · ${view.phase}`}
-            score={view.seats[view.me]?.score ?? 0}
-          />
-          {!view.over && <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseMs} />}
-        </>
+        <GameTop
+          title="Secret Number"
+          step={view.over ? 'Game over' : `Round ${view.round} of ${view.rounds} · ${view.phase}`}
+          score={view.seats[view.me]?.score ?? 0}
+        />
       }
       stage={
         <>

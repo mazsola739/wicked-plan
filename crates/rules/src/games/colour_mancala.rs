@@ -11,7 +11,6 @@ use crate::rng::Rng;
 
 pub const PITS: usize = 5;
 pub const STONES_PER_PIT: u32 = 4;
-pub const TURN_MS: i64 = 20_000;
 pub const MAX_TURNS_EACH: u32 = 40;
 /// The smallest capture that is a replay moment.
 pub const BIG_CAPTURE: u32 = 10;
@@ -56,7 +55,6 @@ pub struct State {
     pub holes: Vec<Stones>,
     pub turn: usize,
     pub turns: u32,
-    pub time_left_ms: i64,
     pub last: Option<LastMove>,
     pub over: bool,
     /// Replay moments: a capture of 10 or more stones.
@@ -78,8 +76,6 @@ pub struct View {
     pub holes: Vec<Stones>,
     pub turn: usize,
     pub your_turn: bool,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub turns_left: u32,
     pub points: Vec<i64>,
     pub last: Option<LastMove>,
@@ -151,7 +147,6 @@ impl State {
             }
         }
         self.over = true;
-        self.time_left_ms = 0;
     }
 
     fn play(&mut self, seat: usize, pit: usize, first: usize) -> Result<(), String> {
@@ -167,7 +162,6 @@ impl State {
         if !extra {
             self.turn = (self.turn + 1) % self.players.len();
         }
-        self.time_left_ms = TURN_MS;
         if self.turns >= MAX_TURNS_EACH * self.players.len() as u32 || row_empty(&self.holes, self.turn) {
             self.finish();
         }
@@ -241,7 +235,6 @@ impl Game for ColourMancala {
             holes,
             turn: 0,
             turns: 0,
-            time_left_ms: TURN_MS,
             last: None,
             over: false,
             moments: Moments::default(),
@@ -260,17 +253,6 @@ impl Game for ColourMancala {
         s.play(seat, pit, first)
     }
 
-    fn tick(s: &mut State, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            let (pit, first) = best_move(&s.holes, s.turn, u64::from(s.turns));
-            let _ = s.play(s.turn, pit, first);
-        }
-    }
-
     fn view_for(s: &State, player: &str) -> View {
         let you = s.seat(player);
         let max = MAX_TURNS_EACH * s.players.len() as u32;
@@ -281,8 +263,6 @@ impl Game for ColourMancala {
             holes: s.holes.clone(),
             turn: s.turn,
             your_turn: !s.over && you == Some(s.turn),
-            time_left_ms: s.time_left_ms,
-            turn_ms: TURN_MS,
             turns_left: max.saturating_sub(s.turns),
             points: (0..s.players.len()).map(|k| points(&s.holes[store_of(k)])).collect(),
             last: s.last.clone(),
@@ -432,10 +412,11 @@ mod tests {
     }
 
     #[test]
-    fn time_out_makes_a_move() {
+    fn a_turn_waits_for_its_player() {
         let mut s = ColourMancala::setup(&players(2), 2).unwrap();
-        ColourMancala::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.turns, 1);
+        ColourMancala::tick(&mut s, 600_000);
+        assert_eq!(s.turns, 0);
+        assert_eq!(ColourMancala::to_move(&s), vec!["p1".to_string()]);
     }
 
     #[test]

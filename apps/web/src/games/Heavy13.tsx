@@ -1,7 +1,7 @@
 // Heavy 13: add cards to coloured stacks without going over 13. Rules: docs/games/heavy-13.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './Heavy13.css';
 
 type Phase = 'play' | 'result' | 'over';
@@ -17,8 +17,6 @@ interface HvView {
   phase: Phase;
   round: number;
   rounds: number;
-  timeLeftMs: number;
-  phaseMs: number;
   stacks: [number, number, number, number];
   hand: number[];
   rainbow: boolean;
@@ -83,12 +81,7 @@ export default function Heavy13({ view }: ScreenProps) {
   }
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Heavy 13" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
-        </>
-      }
+      top={<GameTop title="Heavy 13" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <div className="heavy-13-stacks">

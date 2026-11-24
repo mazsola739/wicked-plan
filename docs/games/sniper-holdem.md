@@ -7,12 +7,11 @@ Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
 **Goal:** finish 6 hands of poker with the most chips.
 
 - You start with 25 chips and pay 1 chip each hand. You get 2 private cards, and 4 shared cards lie face up. Your hand is the best five of your six cards.
-- There is one betting round (15 s a turn): **Check** or **Call**, **Raise +2**, or **Fold**.
-- Then everyone still in secretly snipes one hand rank, or taps **No snipe** (15 s).
+- There is one betting round: **Check** or **Call**, **Raise +2**, or **Fold**.
+- Then everyone still in secretly snipes one hand rank, or taps **No snipe**.
 - Every hand whose rank anyone sniped is knocked out, even by your own snipe. The best hand left wins the pot.
 - If every hand is knocked out, the pot carries over to the next hand.
 - Tip: snipe the rank you fear will beat you, not your own.
-- If time runs out while betting, you check, or fold when there is a bet to call.
 
 ## Rules in detail
 
@@ -23,11 +22,11 @@ Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
 - **Hand ranks** (low to high): high card, pair, two pair, three of a kind, straight (five values in a row,
   1 is only low), flush (five of one colour), full house, four of a kind, straight flush. Equal ranks
   compare the deciding values as in ordinary poker.
-- **Betting (15 s a turn):** one round, starting left of the dealer button: **check / call**, **raise**
+- **Betting:** one round, starting left of the dealer button: **check / call**, **raise**
   (+2 chips) or **fold**. At most 3 raises a hand. **Table limit:** nobody may bet more in a hand than the
-  smallest stack among the players in it had after the ante, so there are never side pots. Timeout:
-  check, or fold when there is something to call. If everyone else folds, the last player takes the pot.
-- **Snipe (15 s):** everyone still in secretly names **one hand rank, or none**. Then the snipes are
+  smallest stack among the players in it had after the ante, so there are never side pots. If everyone
+  else folds, the last player takes the pot.
+- **Snipe:** everyone still in secretly names **one hand rank, or none**. Then the snipes are
   revealed together.
 - **Showdown:** every hand whose rank was sniped by anyone (your own snipe included) is **knocked out**.
   The best hand that survives wins the pot; ties split it (the odd chip goes to the first in seat order).

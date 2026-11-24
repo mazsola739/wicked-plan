@@ -14,8 +14,6 @@ pub const COLS: usize = 4;
 pub const ROWS: usize = 3;
 pub const OBJECTS: usize = 8;
 pub const QUESTIONS: usize = 10;
-pub const STUDY_MS: i64 = 30_000;
-pub const QUESTION_MS: i64 = 15_000;
 pub const POINTS: i64 = 100;
 pub const BOT_RIGHT: f64 = 0.95;
 
@@ -63,10 +61,9 @@ pub struct State {
     pub questions: Vec<Question>,
     pub phase: Phase,
     pub ready: Vec<bool>,
-    /// The answers given so far (None = time ran out).
-    pub given: Vec<Option<usize>>,
+    /// The answers given so far.
+    pub given: Vec<usize>,
     pub failed: bool,
-    pub time_left_ms: i64,
     /// Replay moments: the tenth right answer that makes a perfect quiz.
     pub moments: Moments,
 }
@@ -84,7 +81,7 @@ pub struct Answered {
     pub text: String,
     pub options: Vec<String>,
     pub seat: usize,
-    pub given: Option<usize>,
+    pub given: usize,
     pub answer: usize,
     pub correct: bool,
 }
@@ -106,8 +103,6 @@ pub struct View {
     pub answerer: Option<usize>,
     pub your_turn: bool,
     pub history: Vec<Answered>,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub score: i64,
     pub failed: bool,
 }
@@ -220,17 +215,16 @@ impl State {
     }
 
     pub fn right_answers(&self) -> usize {
-        self.given.iter().zip(&self.questions).filter(|(g, q)| **g == Some(q.answer)).count()
+        self.given.iter().zip(&self.questions).filter(|(g, q)| **g == q.answer).count()
     }
 
     fn start_questions(&mut self) {
         self.phase = Phase::Questions;
-        self.time_left_ms = QUESTION_MS;
     }
 
-    fn answer(&mut self, choice: Option<usize>) {
+    fn answer(&mut self, choice: usize) {
         let q = &self.questions[self.given.len()];
-        let right = choice == Some(q.answer);
+        let right = choice == q.answer;
         self.given.push(choice);
         if !right {
             self.failed = true;
@@ -243,9 +237,6 @@ impl State {
                 self.moments.push(&by, format!("Question {} right: a perfect {points}", self.given.len()));
             }
             self.phase = Phase::Over;
-            self.time_left_ms = 0;
-        } else {
-            self.time_left_ms = QUESTION_MS;
         }
     }
 }
@@ -285,7 +276,6 @@ impl Game for MemorySceneQuiz {
             ready: vec![false; players.len()],
             given: Vec::new(),
             failed: false,
-            time_left_ms: STUDY_MS,
             moments: Moments::default(),
         })
     }
@@ -306,26 +296,12 @@ impl Game for MemorySceneQuiz {
                 if choice >= s.questions[s.given.len()].options.len() {
                     return Err("No such answer".into());
                 }
-                s.answer(Some(choice));
+                s.answer(choice);
             }
             (Phase::Over, _) => return Err("Game is over".into()),
             _ => return Err("Not now".into()),
         }
         Ok(())
-    }
-
-    fn tick(s: &mut State, ms: u64) {
-        if s.phase == Phase::Over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Study => s.start_questions(),
-            _ => s.answer(None),
-        }
     }
 
     fn view_for(s: &State, player: &str) -> View {
@@ -355,11 +331,9 @@ impl Game for MemorySceneQuiz {
                     seat: i % s.players.len(),
                     given: *g,
                     answer: q.answer,
-                    correct: *g == Some(q.answer),
+                    correct: *g == q.answer,
                 })
                 .collect(),
-            time_left_ms: s.time_left_ms,
-            phase_ms: if s.phase == Phase::Study { STUDY_MS } else { QUESTION_MS },
             score: s.right_answers() as i64 * POINTS,
             failed: s.failed,
         }
@@ -478,14 +452,21 @@ mod tests {
         assert!(MemorySceneQuiz::results(&s).iter().all(|r| r.points == 2 * POINTS && r.rank == 1));
     }
 
+    fn all_ready(s: &mut State) {
+        for p in team(s.players.len()) {
+            MemorySceneQuiz::apply_move(s, &p, Move::Ready).unwrap();
+        }
+    }
+
     #[test]
-    fn study_time_runs_out_and_so_does_answer_time() {
+    fn study_and_questions_wait_for_the_team() {
         let mut s = MemorySceneQuiz::setup(&team(2), 9).unwrap();
-        MemorySceneQuiz::tick(&mut s, STUDY_MS as u64);
-        assert_eq!(s.phase, Phase::Questions);
-        MemorySceneQuiz::tick(&mut s, QUESTION_MS as u64);
-        assert_eq!(s.phase, Phase::Over);
-        assert_eq!(s.right_answers(), 0);
+        MemorySceneQuiz::tick(&mut s, 3_600_000);
+        assert_eq!(s.phase, Phase::Study);
+        all_ready(&mut s);
+        MemorySceneQuiz::tick(&mut s, 3_600_000);
+        assert_eq!((s.phase, s.given.len()), (Phase::Questions, 0));
+        assert_eq!(MemorySceneQuiz::to_move(&s), vec!["p1".to_string()]);
     }
 
     #[test]
@@ -509,7 +490,7 @@ mod tests {
     #[test]
     fn a_perfect_quiz_is_a_replay_moment() {
         let mut s = MemorySceneQuiz::setup(&team(4), 3).unwrap();
-        MemorySceneQuiz::tick(&mut s, STUDY_MS as u64);
+        all_ready(&mut s);
         for i in 0..QUESTIONS {
             assert!(MemorySceneQuiz::moments(&s, "p1").is_empty());
             let choice = s.questions[i].answer;
@@ -521,16 +502,17 @@ mod tests {
         assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Question 10 right: a perfect 1000"));
         // A failed quiz is no moment.
         let mut s = MemorySceneQuiz::setup(&team(4), 3).unwrap();
-        MemorySceneQuiz::tick(&mut s, STUDY_MS as u64);
-        MemorySceneQuiz::tick(&mut s, QUESTION_MS as u64);
+        all_ready(&mut s);
+        let wrong = (s.questions[0].answer + 1) % 4;
+        MemorySceneQuiz::apply_move(&mut s, "p1", Move::Answer { choice: wrong }).unwrap();
+        assert_eq!(s.phase, Phase::Over);
         assert!(MemorySceneQuiz::moments(&s, "p1").is_empty());
     }
 
     #[test]
     fn replay_moments_are_rare_but_happen() {
         let stats = crate::game::testing::moment_stats::<MemorySceneQuiz>(300, 4, 2000);
-        // The test's long ticks run out many answer clocks (about a quarter of games stay perfect);
-        // bots on the page answer within 2 s, so a perfect quiz comes in about 60% of games.
+        // Bots are right 95% of the time, so a perfect quiz comes in about 0.95^10 ≈ 60% of games.
         assert!(stats.with_any * 5 >= stats.games, "too rare: {stats:?}");
         assert!(stats.with_any * 10 <= stats.games * 8, "too common: {stats:?}");
         assert!(stats.most <= 1, "too many in one game: {stats:?}");

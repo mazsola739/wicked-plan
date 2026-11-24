@@ -105,7 +105,9 @@ Every game already has its own files (stubs). Replace only these, never shared f
 1. `docs/games/<id>.md` — the rules page: first a `## How to play` section for players (a **Goal:** line
    and short bullets; only paragraphs, `- ` bullets and `**bold**`), shown in the game by `HowTo.tsx`;
    then `## Rules in detail`, the spec: seats, rounds, timers, scoring, moves, view, bot, and a
-   **Replay moments** line (the game's big moments, rare, never revealing a secret).
+   **Replay moments** line (the game's big moments, rare, never revealing a secret). A timer only
+   where the game's line in `docs/games.md` gives a time limit or a race; otherwise a phase ends
+   when everyone has moved.
 2. `crates/rules/src/games/<id_snake>.rs` — replace the `stub_game!` line with the real rules:
    `pub const READY: bool = true;`, `pub struct Rules;` implementing `Game` with the same `info()`
    id/kind/min/max as the stub (name and `short` may be improved). Several seats: implement `to_move`

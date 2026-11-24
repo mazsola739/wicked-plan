@@ -1,7 +1,7 @@
 // Animal Tile Auction. Rules page: docs/games/animal-tile-auction.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './AnimalTileAuction.css';
 
 interface Part {
@@ -22,8 +22,6 @@ interface TileView {
   myBid: number | null;
   bidDone: boolean[];
   placer: number | null;
-  timeLeftMs: number;
-  phaseMs: number;
   patternScore: number;
   log: string[];
   result: { patterns: Part[][]; scores: number[] } | null;
@@ -217,14 +215,11 @@ export default function AnimalTileAuction({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Animal Tile Auction"
-            step={view.phase === 'over' ? 'Game over' : `Auction ${view.auction} of ${view.auctions}`}
-            score={view.patternScore + (view.chips[view.me] ?? 0)}
-          />
-          {view.phase !== 'over' && <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseMs} />}
-        </>
+        <GameTop
+          title="Animal Tile Auction"
+          step={view.phase === 'over' ? 'Game over' : `Auction ${view.auction} of ${view.auctions}`}
+          score={view.patternScore + (view.chips[view.me] ?? 0)}
+        />
       }
       stage={
         <div className={`ata-grid${placing ? ' placing' : ''}`}>

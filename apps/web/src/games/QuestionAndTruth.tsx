@@ -1,7 +1,7 @@
 // Question and Truth: buy answers with tokens, then guess the opponent's row. Rules page: docs/games/question-and-truth.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './QuestionAndTruth.css';
 
 interface LogLine {
@@ -20,8 +20,6 @@ interface TruthView {
   theyGuessed: boolean;
   log: LogLine[];
   theirLog: LogLine[];
-  timeLeftMs: number;
-  turnMs: number;
   over: boolean;
 }
 
@@ -102,14 +100,11 @@ export default function QuestionAndTruth({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Question and Truth"
-            step={`Tokens: ${them} ${view.theirTokens}${view.theyGuessed ? ' · guessed' : ''}`}
-            score={view.tokens}
-          />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
-        </>
+        <GameTop
+          title="Question and Truth"
+          step={`Tokens: ${them} ${view.theirTokens}${view.theyGuessed ? ' · guessed' : ''}`}
+          score={view.tokens}
+        />
       }
       stage={
         <div className="question-and-truth-stage">

@@ -17,7 +17,6 @@ pub const PEEK: u32 = 3;
 pub const SPIN: u32 = 2;
 pub const TAMPER: u32 = 4;
 pub const PULLS_PER_PLAYER: usize = 6;
-pub const TURN_MS: i64 = 20_000;
 pub const SHOT_MS: i64 = 2_500;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -92,8 +91,6 @@ pub struct SeatView {
 #[serde(rename_all = "camelCase")]
 pub struct RrView {
     pub phase: Phase,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub my_turn: bool,
     pub lives: u32,
     pub credits: u32,
@@ -210,7 +207,6 @@ impl RrState {
         let n = self.seats.len();
         self.actor = (1..=n).map(|k| (self.actor + k) % n).find(|&j| self.seats[j].lives > 0).unwrap_or(self.actor);
         self.phase = Phase::Turn;
-        self.time_left_ms = TURN_MS;
     }
 }
 
@@ -252,7 +248,7 @@ impl Game for Rules {
             max_pulls: PULLS_PER_PLAYER * players.len(),
             actor,
             phase: Phase::Turn,
-            time_left_ms: TURN_MS,
+            time_left_ms: 0,
             log: Vec::new(),
             moments: Moments::default(),
         };
@@ -269,20 +265,12 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut RrState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Shot {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Turn => {
-                let actor = s.actor;
-                s.pull(actor);
-            }
-            Phase::Shot => s.next_turn(),
-            Phase::Over => {}
+        if s.time_left_ms <= 0 {
+            s.next_turn();
         }
     }
 
@@ -291,12 +279,6 @@ impl Game for Rules {
         let mine = me.map(|i| &s.seats[i]);
         RrView {
             phase: s.phase,
-            time_left_ms: s.time_left_ms,
-            phase_ms: match s.phase {
-                Phase::Turn => TURN_MS,
-                Phase::Shot => SHOT_MS,
-                Phase::Over => 0,
-            },
             my_turn: s.phase == Phase::Turn && me == Some(s.actor),
             lives: mine.map_or(0, |m| m.lives),
             credits: mine.map_or(0, |m| m.credits),
@@ -392,6 +374,9 @@ mod tests {
         assert!(Rules::apply_move(&mut s, "p2", RrMove::Pull).is_err());
         Rules::tick(&mut s, SHOT_MS as u64);
         assert_eq!(s.actor, 1);
+        // No time limit: the turn waits for p2 to pull.
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.phase, s.actor, s.log.len()), (Phase::Turn, 1, 1));
         Rules::apply_move(&mut s, "p2", RrMove::Pull).unwrap();
         assert_eq!(s.seats[1].lives, LIVES);
         assert_eq!(s.log.iter().map(|e| e.event).collect::<Vec<_>>(), vec![Event::Hit, Event::Click]);

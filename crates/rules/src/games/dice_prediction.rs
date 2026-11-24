@@ -10,8 +10,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 6;
-pub const BUILD_MS: i64 = 15_000;
-pub const PREDICT_MS: i64 = 15_000;
 pub const RESULT_MS: i64 = 6_000;
 /// Exact rank calls in a row for a replay moment.
 pub const STREAK: usize = 4;
@@ -125,8 +123,6 @@ pub struct DpView {
     pub phase: Phase,
     pub round: usize,
     pub rounds: usize,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub players: usize,
     pub open: u8,
     pub secret: u8,
@@ -156,7 +152,6 @@ impl DpState {
             s.prediction = None;
         }
         self.phase = Phase::Build;
-        self.time_left_ms = BUILD_MS;
     }
 
     fn build(&mut self, i: usize, reroll: bool) {
@@ -167,7 +162,6 @@ impl DpState {
         self.seats[i].built = true;
         if self.seats.iter().all(|s| s.built) {
             self.phase = Phase::Predict;
-            self.time_left_ms = PREDICT_MS;
         }
     }
 
@@ -275,24 +269,12 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut DpState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Result {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Build => {
-                for i in 0..s.seats.len() {
-                    if !s.seats[i].built {
-                        s.build(i, false);
-                    }
-                }
-            }
-            Phase::Predict => s.score_round(),
-            Phase::Result => s.start_round(),
-            Phase::Over => {}
+        if s.time_left_ms <= 0 {
+            s.start_round();
         }
     }
 
@@ -303,13 +285,6 @@ impl Game for Rules {
             phase: s.phase,
             round: s.round,
             rounds: ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_ms: match s.phase {
-                Phase::Build => BUILD_MS,
-                Phase::Predict => PREDICT_MS,
-                Phase::Result => RESULT_MS,
-                Phase::Over => 0,
-            },
             players: s.seats.len(),
             open: mine.map_or(0, |m| m.dice[0]),
             secret: mine.map_or(0, |m| m.dice[1]),
@@ -440,8 +415,11 @@ mod tests {
         assert!(Rules::apply_move(&mut s, "p1", DpMove::Predict { rank: 4 }).is_err());
         Rules::apply_move(&mut s, "p1", DpMove::Predict { rank: 1 }).unwrap();
         Rules::apply_move(&mut s, "p2", DpMove::Predict { rank: 3 }).unwrap();
-        Rules::tick(&mut s, PREDICT_MS as u64);
-        // p1 exact + best hand, p2 off by one, p3 defaulted to 2 (rank 3): off by one.
+        // No time limit: the round waits for p3.
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Predict);
+        Rules::apply_move(&mut s, "p3", DpMove::Predict { rank: 2 }).unwrap();
+        // p1 exact + best hand, p2 off by one, p3 predicts 2 (rank 3): off by one.
         assert_eq!(s.seats.iter().map(|x| x.score).collect::<Vec<_>>(), vec![4, 1, 1]);
         assert_eq!(s.phase, Phase::Result);
     }
@@ -479,7 +457,8 @@ mod tests {
     fn replay_moments_are_rare_but_happen() {
         let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 5_000);
         assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
-        assert!(stats.most <= 4, "too many in one game: {stats:?}");
+        // Without timeouts every seat predicts (no defaulted middle ranks), so a lucky game has a few more.
+        assert!(stats.most <= 6, "too many in one game: {stats:?}");
     }
 
     #[test]

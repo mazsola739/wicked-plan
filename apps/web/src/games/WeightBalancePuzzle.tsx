@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import './WeightBalancePuzzle.css';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 interface Load {
   left: number[];
@@ -14,7 +14,7 @@ interface Load {
 
 interface Weighing {
   seat: number;
-  load: Load | null;
+  load: Load;
   result: number;
 }
 
@@ -31,8 +31,6 @@ interface BalanceView {
   maxExtra: number;
   yourAnswer: number[] | null;
   answered: boolean[];
-  timeLeftMs: number;
-  phaseMs: number;
   score: number;
   weights: number[] | null;
   answers: (number[] | null)[] | null;
@@ -126,14 +124,10 @@ function Log({ view }: { view: BalanceView }) {
             <span className="muted">
               {n}. {w.seat === view.you ? 'You' : nameOf(view.players[w.seat]!)}
             </span>
-            {w.load ? (
-              <span>
-                {panText(w.load.left, w.load.leftExtra)} <b>vs</b> {panText(w.load.right, w.load.rightExtra)}:{' '}
-                <strong className="wb-res">{resultText(w.result)}</strong>
-              </span>
-            ) : (
-              <span className="muted">time ran out</span>
-            )}
+            <span>
+              {panText(w.load.left, w.load.leftExtra)} <b>vs</b> {panText(w.load.right, w.load.rightExtra)}:{' '}
+              <strong className="wb-res">{resultText(w.result)}</strong>
+            </span>
           </li>
         ))}
     </ol>
@@ -267,19 +261,14 @@ function AnswerControls({ view }: { view: BalanceView }) {
 export default function WeightBalancePuzzle({ view: raw }: ScreenProps) {
   const view = raw as BalanceView;
   const [load, setLoad] = useState<Load>(EMPTY);
-  const last = [...view.log].reverse().find((w) => w.load !== null);
+  const last = view.log[view.log.length - 1];
   const composing = view.yourTurn && load.left.length + load.right.length + load.leftExtra + load.rightExtra > 0;
-  const shown = composing || !last?.load ? load : last.load;
+  const shown = composing || !last ? load : last.load;
   const tilt = composing || !last ? null : last.result;
   const step = view.phase === 'weigh' ? `Weighing · ${view.weighingsLeft} of ${view.weighings} left` : 'Answer in secret';
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Weight Balance" step={step} score={view.score} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseMs} />
-        </>
-      }
+      top={<GameTop title="Weight Balance" step={step} score={view.score} />}
       stage={
         <>
           <Scale load={shown} tilt={tilt} />

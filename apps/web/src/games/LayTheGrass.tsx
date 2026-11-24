@@ -1,7 +1,7 @@
 // Lay the Grass: everyone lays the same piece each round. Rules page: docs/games/lay-the-grass.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './LayTheGrass.css';
 
 type Cell = [number, number];
@@ -16,8 +16,6 @@ interface LayTheGrassView {
   piece: Cell[] | null;
   next: Cell[] | null;
   turn: string | null;
-  turnLeftMs: number;
-  turnMs: number;
   last: Cell[];
   over: boolean;
 }
@@ -95,12 +93,7 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
   const me = view.seats[view.you];
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Lay the Grass" step={`Round ${view.round} of ${view.rounds}`} score={me?.score ?? 0} />
-          <TimerBar leftMs={view.turnLeftMs} totalMs={view.turnMs} />
-        </>
-      }
+      top={<GameTop title="Lay the Grass" step={`Round ${view.round} of ${view.rounds}`} score={me?.score ?? 0} />}
       stage={
         <div className="lg-field" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, gridTemplateRows: `repeat(${n}, 1fr)` }}>
           {view.cells.map((c, i) => {

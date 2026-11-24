@@ -12,8 +12,6 @@ use crate::rng::Rng;
 pub const SIZE: i32 = 9;
 pub const START_COINS: i64 = 100;
 pub const AUCTIONS: usize = 5;
-pub const BID_MS: i64 = 20_000;
-pub const DIG_MS: i64 = 30_000;
 pub const DIG_POINTS: [i64; 4] = [500, 300, 150, 50];
 
 pub type Square = (i32, i32);
@@ -59,7 +57,6 @@ pub struct State {
     pub bids: Vec<Option<i64>>,
     pub history: Vec<Auction>,
     pub digs: Vec<Option<Square>>,
-    pub time_left_ms: i64,
     /// Replay moments: a dig right on the treasure with only the private clue, or as the only one.
     pub moments: Moments,
 }
@@ -101,8 +98,6 @@ pub struct View {
     pub history: Vec<Auction>,
     pub your_dig: Option<Square>,
     pub dug: Vec<bool>,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     /// Only at the end.
     pub treasure: Option<Square>,
     pub digs: Option<Vec<Option<Square>>>,
@@ -160,20 +155,11 @@ impl State {
         self.bids = vec![None; self.players.len()];
         if self.round >= AUCTIONS {
             self.phase = Phase::Dig;
-            self.time_left_ms = DIG_MS;
-        } else {
-            self.time_left_ms = BID_MS;
         }
     }
 
     fn finish(&mut self) {
-        for k in 0..self.players.len() {
-            if self.digs[k].is_none() {
-                self.digs[k] = Some(best_dig(&self.possible(k)));
-            }
-        }
         self.phase = Phase::Over;
-        self.time_left_ms = 0;
         // Replay moments: everything is shown at the end, so they are public.
         let exact: Vec<usize> = (0..self.players.len()).filter(|&k| self.digs[k] == Some(self.treasure)).collect();
         for &k in &exact {
@@ -273,7 +259,6 @@ impl Game for TreasureIsland {
             bids: vec![None; n],
             history: Vec::new(),
             digs: vec![None; n],
-            time_left_ms: BID_MS,
             moments: Moments::default(),
         })
     }
@@ -311,20 +296,6 @@ impl Game for TreasureIsland {
         Ok(())
     }
 
-    fn tick(s: &mut State, ms: u64) {
-        if s.phase == Phase::Over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Auction => s.settle_auction(),
-            _ => s.finish(),
-        }
-    }
-
     fn view_for(s: &State, player: &str) -> View {
         let you = s.seat(player);
         let over = s.phase == Phase::Over;
@@ -353,8 +324,6 @@ impl Game for TreasureIsland {
             history: s.history.clone(),
             your_dig: you.and_then(|k| s.digs[k]),
             dug: s.digs.iter().map(Option::is_some).collect(),
-            time_left_ms: s.time_left_ms,
-            phase_ms: if s.phase == Phase::Dig { DIG_MS } else { BID_MS },
             treasure: over.then_some(s.treasure),
             digs: over.then(|| s.digs.clone()),
             scores: over.then(|| s.scores()),
@@ -460,8 +429,13 @@ mod tests {
         // Only your own private box is in your view.
         assert_eq!(v3.boxes.iter().filter(|b| b.auction.is_none()).count(), 1);
         assert_eq!((v3.boxes[0].x, v3.boxes[0].y), s.starters[2]);
-        // Nobody bids: the box stays shut and time moves on.
-        TreasureIsland::tick(&mut s, BID_MS as u64);
+        // The auction waits for every bid, however long it takes.
+        TreasureIsland::tick(&mut s, 600_000);
+        assert_eq!(s.round, 1);
+        // Everyone bids 0: the box stays shut.
+        for p in players(3) {
+            TreasureIsland::apply_move(&mut s, &p, Move::Bid { amount: 0 }).unwrap();
+        }
         assert!(s.history[1].winners.is_empty());
         assert_eq!(s.round, 2);
     }
@@ -470,12 +444,16 @@ mod tests {
     fn dig_scores_closeness_plus_coins() {
         let mut s = TreasureIsland::setup(&players(3), 7).unwrap();
         for _ in 0..AUCTIONS {
-            TreasureIsland::tick(&mut s, BID_MS as u64);
+            for p in players(3) {
+                TreasureIsland::apply_move(&mut s, &p, Move::Bid { amount: 0 }).unwrap();
+            }
         }
         assert_eq!(s.phase, Phase::Dig);
         let (tx, ty) = s.treasure;
         TreasureIsland::apply_move(&mut s, "p1", Move::Dig { x: tx, y: ty }).unwrap();
-        TreasureIsland::tick(&mut s, DIG_MS as u64);
+        for p in ["p2", "p3"] {
+            TreasureIsland::apply_move(&mut s, p, Move::Dig { x: (tx + 4) % SIZE, y: ty }).unwrap();
+        }
         assert_eq!(s.phase, Phase::Over);
         let r = TreasureIsland::results(&s);
         assert_eq!(r[0].points, 600);

@@ -21,7 +21,7 @@ function QuizFrame<P, A>({
         <>
           <GameTop title={title} step={`Round ${view.round} of ${view.rounds}`} score={view.score} />
           <RoundDots results={view.history.map((h) => h.correct)} total={view.rounds} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundTimeMs} />
+          {view.roundTimeMs > 0 && <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundTimeMs} />}
         </>
       }
       stage={stage}

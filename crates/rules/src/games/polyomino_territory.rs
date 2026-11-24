@@ -11,7 +11,6 @@ use crate::rng::Rng;
 
 pub const SIZE: i32 = 14;
 pub const HAND: usize = 3;
-pub const TURN_MS: i64 = 30_000;
 pub const MAX_TURNS_EACH: u32 = 40;
 pub const POINTS_PER_SQUARE: i64 = 10;
 
@@ -130,7 +129,6 @@ pub struct State {
     /// The player to move is on an encore.
     pub on_encore: bool,
     pub turns: Vec<u32>,
-    pub time_left_ms: i64,
     pub last: Option<Placement>,
     pub over: bool,
     /// Replay moments: a leap that lands on a key square.
@@ -165,8 +163,6 @@ pub struct View {
     pub your_turn: bool,
     pub encore: bool,
     pub turns_left: u32,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub last: Option<Placement>,
     pub over: bool,
 }
@@ -308,7 +304,6 @@ impl State {
             self.encores = 0;
             self.turn = (self.turn + 1) % self.players.len();
         }
-        self.time_left_ms = TURN_MS;
         self.settle();
     }
 
@@ -323,7 +318,6 @@ impl State {
             self.turn = (self.turn + 1) % self.players.len();
         }
         self.over = true;
-        self.time_left_ms = 0;
     }
 
     /// The bot's placement for `seat`, if it has one.
@@ -432,7 +426,6 @@ impl Game for PolyominoTerritory {
             encores: 0,
             on_encore: false,
             turns: vec![0; n],
-            time_left_ms: TURN_MS,
             last: None,
             over: false,
             moments: Moments::default(),
@@ -454,21 +447,6 @@ impl Game for PolyominoTerritory {
         Ok(())
     }
 
-    fn tick(s: &mut State, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            let seat = s.turn;
-            let seed = u64::from(s.turns[seat]) * 31 + seat as u64;
-            match s.bot_choice(seat, seed) {
-                Some((piece, cells, leap)) => s.place(seat, piece, cells, leap),
-                None => s.settle(),
-            }
-        }
-    }
-
     fn view_for(s: &State, player: &str) -> View {
         let you = s.seat(player);
         View {
@@ -484,8 +462,6 @@ impl Game for PolyominoTerritory {
             your_turn: !s.over && you == Some(s.turn),
             encore: s.on_encore,
             turns_left: you.map_or(0, |k| MAX_TURNS_EACH.saturating_sub(s.turns[k])),
-            time_left_ms: s.time_left_ms,
-            turn_ms: TURN_MS,
             last: s.last.clone(),
             over: s.over,
         }
@@ -601,6 +577,14 @@ mod tests {
         let r = PolyominoTerritory::results(&s);
         assert_eq!(r[1].rank, 1);
         assert_eq!(r[1].points, (SIZE * SIZE - 1) as i64 * POINTS_PER_SQUARE);
+    }
+
+    #[test]
+    fn a_turn_waits_for_its_player() {
+        let mut s = PolyominoTerritory::setup(&players(2), 5).unwrap();
+        PolyominoTerritory::tick(&mut s, 600_000);
+        assert_eq!(s.turns, vec![0, 0]);
+        assert_eq!(PolyominoTerritory::to_move(&s), vec!["p1".to_string()]);
     }
 
     #[test]

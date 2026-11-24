@@ -7,25 +7,24 @@ Main game, 4–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/s
 **Goal:** guess the other players' secret numbers while keeping yours hidden.
 
 - Everyone has a different secret number from 1 to 100. There are 5 rounds.
-- **Trade (20 s):** tap a player to swap clues, or tap **Skip the trade**. You learn something about their number, and they learn the same kind of thing about yours.
-- **Guess (25 s):** tap a player and type their number on the keypad, or tap **Pass**.
+- **Trade:** tap a player to swap clues, or tap **Skip the trade**. You learn something about their number, and they learn the same kind of thing about yours.
+- **Guess:** tap a player and type their number on the keypad, or tap **Pass**.
 - A right guess scores +50, costs them 30, and shows their number to everyone.
 - A wrong guess costs you 5, but tells you whether their number is higher or lower.
-- No answer in time means skip or pass. At the end, everyone whose number was never shown scores +40. The highest total wins.
+- At the end, everyone whose number was never shown scores +40. The highest total wins.
 
 ## Rules in detail
 
 - Everyone gets a **different secret number from 1 to 100**.
 - **5 rounds**, each in two secret, simultaneous steps:
-  1. **Trade** (20 s): pick another player, or skip. A trade is a swap of clues: **you get a clue about
+  1. **Trade**: pick another player, or skip. A trade is a swap of clues: **you get a clue about
      their number and they get the same kind of clue about yours**. The table sees who traded with whom.
      Clue kinds: odd or even · higher than X or not · the tens digit · the last digit · divisible by 3 or not.
-  2. **Guess** (25 s): guess one other player's exact number, or pass.
+  2. **Guess**: guess one other player's exact number, or pass.
      - Right: you score **+50**, they lose **30** and their number is **exposed** (public; nobody can
        guess it again).
      - Wrong: you lose **5**, and you are told privately whether their number is **higher or lower**.
      The table sees who guessed whom and whether it was right.
-- Timeouts: skip the trade, pass the guess.
 - At the end every player whose number was never exposed scores **+40**.
 - Results: total score, ranked; points 1000 for first down to 100 for last.
 - Moves: `{type:"trade", seat}`, `{type:"skip"}`, `{type:"guess", seat, number}`, `{type:"pass"}`.

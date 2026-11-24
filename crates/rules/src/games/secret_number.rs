@@ -10,8 +10,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 5;
-pub const TRADE_MS: i64 = 20_000;
-pub const GUESS_MS: i64 = 25_000;
 pub const RIGHT: i64 = 50;
 pub const CAUGHT: i64 = -30;
 pub const WRONG: i64 = -5;
@@ -91,7 +89,6 @@ pub struct SecretState {
     pub round: usize,
     pub phase: Phase,
     pub actions: Vec<Option<Action>>,
-    pub time_left_ms: i64,
     pub log: Vec<String>,
     pub notes: Vec<Vec<String>>,
     pub over: bool,
@@ -134,8 +131,6 @@ pub struct SecretView {
     pub phase: &'static str,
     pub seats: Vec<Seat>,
     pub acted: bool,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub log: Vec<String>,
     pub notes: Vec<String>,
     /// Every number, after the game.
@@ -168,7 +163,6 @@ impl SecretState {
             self.log.push(format!("{} traded clues with {}.", self.players[seat], self.players[other]));
         }
         self.phase = Phase::Guess;
-        self.time_left_ms = GUESS_MS;
         self.actions = vec![None; n];
     }
 
@@ -213,7 +207,6 @@ impl SecretState {
         self.round += 1;
         self.actions = vec![None; n];
         self.phase = Phase::Trade;
-        self.time_left_ms = TRADE_MS;
         if self.round >= ROUNDS || (0..n).filter(|&o| !self.exposed[o]).count() <= 1 {
             for o in 0..n {
                 if !self.exposed[o] {
@@ -221,7 +214,6 @@ impl SecretState {
                 }
             }
             self.over = true;
-            self.time_left_ms = 0;
             self.log.push("Game over: every hidden number scores +40.".into());
         } else {
             self.log.push(format!("Round {} begins.", self.round + 1));
@@ -288,7 +280,6 @@ impl Game for Rules {
             round: 0,
             phase: Phase::Trade,
             actions: vec![None; n],
-            time_left_ms: TRADE_MS,
             log: vec!["Round 1 begins.".into()],
             notes: vec![Vec::new(); n],
             over: false,
@@ -320,21 +311,6 @@ impl Game for Rules {
         s.actions[seat] = Some(action);
         s.after_move();
         Ok(())
-    }
-
-    fn tick(s: &mut SecretState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        let default = if s.phase == Phase::Trade { Action::Skip } else { Action::Pass };
-        for a in &mut s.actions {
-            a.get_or_insert(default);
-        }
-        s.after_move();
     }
 
     fn view_for(s: &SecretState, player: &str) -> SecretView {
@@ -369,8 +345,6 @@ impl Game for Rules {
             },
             seats,
             acted: s.actions[me].is_some(),
-            time_left_ms: s.time_left_ms,
-            phase_ms: if s.phase == Phase::Trade { TRADE_MS } else { GUESS_MS },
             log: s.log[s.log.len().saturating_sub(10)..].to_vec(),
             notes: notes[notes.len().saturating_sub(10)..].to_vec(),
             numbers: s.over.then(|| s.numbers.clone()),
@@ -437,6 +411,14 @@ mod tests {
         (1..=n).map(|i| format!("p{i}")).collect()
     }
 
+    /// Everyone who has not moved yet skips the trade or passes the guess.
+    fn rest_pass(s: &mut SecretState) {
+        let trade = s.phase == Phase::Trade;
+        for p in Rules::to_move(s) {
+            Rules::apply_move(s, &p, if trade { SecretMove::Skip } else { SecretMove::Pass }).unwrap();
+        }
+    }
+
     #[test]
     fn numbers_are_different() {
         for seed in 1..30 {
@@ -481,19 +463,19 @@ mod tests {
     #[test]
     fn guesses_score_and_expose() {
         let mut s = Rules::setup(&ids(4), 2).unwrap();
-        Rules::tick(&mut s, TRADE_MS as u64);
+        rest_pass(&mut s);
         let target = s.numbers[1];
         let wrong = if target == 100 { 99 } else { target + 1 };
         Rules::apply_move(&mut s, "p1", SecretMove::Guess { seat: 1, number: target }).unwrap();
         Rules::apply_move(&mut s, "p3", SecretMove::Guess { seat: 3, number: wrong }).unwrap();
-        Rules::tick(&mut s, GUESS_MS as u64);
+        rest_pass(&mut s);
         assert_eq!(s.scores[0], RIGHT);
         assert_eq!(s.scores[1], CAUGHT);
         assert!(s.exposed[1]);
         assert_eq!(Rules::view_for(&s, "p4").seats[1].exposed, Some(target));
         assert_eq!(s.phase, Phase::Trade);
         assert_eq!(s.round, 1);
-        Rules::tick(&mut s, TRADE_MS as u64);
+        rest_pass(&mut s);
         assert!(Rules::apply_move(&mut s, "p3", SecretMove::Guess { seat: 1, number: target }).is_err(), "already exposed");
     }
 
@@ -501,9 +483,9 @@ mod tests {
     fn wrong_guess_says_higher_or_lower() {
         let mut s = Rules::setup(&ids(4), 3).unwrap();
         s.numbers = vec![10, 50, 70, 90];
-        Rules::tick(&mut s, TRADE_MS as u64);
+        rest_pass(&mut s);
         Rules::apply_move(&mut s, "p1", SecretMove::Guess { seat: 1, number: 40 }).unwrap();
-        Rules::tick(&mut s, GUESS_MS as u64);
+        rest_pass(&mut s);
         assert_eq!(s.scores[0], WRONG);
         let c = s.candidates(0, 1);
         assert!(c.iter().all(|&v| v > 40));
@@ -514,7 +496,7 @@ mod tests {
     fn hidden_numbers_score_at_the_end() {
         let mut s = Rules::setup(&ids(4), 4).unwrap();
         for _ in 0..ROUNDS * 2 {
-            Rules::tick(&mut s, GUESS_MS as u64);
+            rest_pass(&mut s);
         }
         assert!(s.over);
         assert_eq!(s.scores, vec![SAFE; 4]);
@@ -531,6 +513,15 @@ mod tests {
     }
 
     #[test]
+    fn no_timer_a_step_waits_for_everyone() {
+        let mut s = Rules::setup(&ids(4), 6).unwrap();
+        Rules::apply_move(&mut s, "p1", SecretMove::Skip).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Trade);
+        assert_eq!(Rules::to_move(&s), vec!["p2", "p3", "p4"]);
+    }
+
+    #[test]
     fn thousand_bot_games() {
         for n in [4, 8] {
             bot_games_with::<Rules>(500, n, 3000);
@@ -541,19 +532,19 @@ mod tests {
     fn an_early_crack_and_a_private_long_shot_are_replay_moments() {
         let mut s = Rules::setup(&ids(4), 3).unwrap();
         s.numbers = vec![10, 50, 70, 90];
-        Rules::tick(&mut s, TRADE_MS as u64);
+        rest_pass(&mut s);
         // p1 and p3 both crack p2's number in round 1: one moment, for p1.
         Rules::apply_move(&mut s, "p1", SecretMove::Guess { seat: 1, number: 50 }).unwrap();
         Rules::apply_move(&mut s, "p3", SecretMove::Guess { seat: 1, number: 50 }).unwrap();
-        Rules::tick(&mut s, GUESS_MS as u64);
+        rest_pass(&mut s);
         let m = Rules::moments(&s, "p4");
         assert_eq!(m.len(), 1);
         assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "{p2}'s number 50 cracked in round 1"));
         // Round 3: p1 guesses p4's number knowing nothing but the exposed 50 and its own 10.
         s.round = 2;
-        Rules::tick(&mut s, TRADE_MS as u64);
+        rest_pass(&mut s);
         Rules::apply_move(&mut s, "p1", SecretMove::Guess { seat: 3, number: 90 }).unwrap();
-        Rules::tick(&mut s, GUESS_MS as u64);
+        rest_pass(&mut s);
         let m = Rules::moments(&s, "p1");
         assert_eq!(m.len(), 2);
         assert_eq!((m[1].by.as_str(), m[1].text.as_str()), ("p1", "Long shot: {p4}'s 90 out of 98 possible"));

@@ -1,7 +1,7 @@
 // Nine Men's Morris: place, slide and fly; mills remove pieces. Rules page: docs/games/nine-mens-morris.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './NineMensMorris.css';
 
 interface MorrisView {
@@ -18,8 +18,6 @@ interface MorrisView {
   last: [number, number] | null;
   lastRemoved: number | null;
   turnNo: number;
-  timeLeftMs: number;
-  turnMs: number;
   over: boolean;
 }
 
@@ -77,14 +75,11 @@ export default function NineMensMorris({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Nine Men's Morris"
-            step={`Turn ${view.turnNo}${view.yourTurn ? ' · your move' : ''}`}
-            score={view.onBoard + view.hand}
-          />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
-        </>
+        <GameTop
+          title="Nine Men's Morris"
+          step={`Turn ${view.turnNo}${view.yourTurn ? ' · your move' : ''}`}
+          score={view.onBoard + view.hand}
+        />
       }
       stage={
         <svg className="drawing nine-mens-morris-board" viewBox="-0.6 -0.6 7.2 7.2" role="img" aria-label="Morris board">

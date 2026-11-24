@@ -13,8 +13,6 @@ pub const BLOCKS: usize = 5;
 pub const MAX_WEIGHT: u32 = 9;
 pub const WEIGHINGS: u32 = 12;
 pub const MAX_EXTRA: u32 = 20;
-pub const TURN_MS: i64 = 40_000;
-pub const ANSWER_MS: i64 = 120_000;
 pub const BLOCK_POINTS: i64 = 150;
 pub const SPARE_POINTS: i64 = 50;
 /// All five right with at least this many weighings unused is a replay moment.
@@ -77,8 +75,7 @@ impl Load {
 #[serde(rename_all = "camelCase")]
 pub struct Weighing {
     pub seat: usize,
-    /// None when the turn ran out.
-    pub load: Option<Load>,
+    pub load: Load,
     pub result: i8,
 }
 
@@ -98,7 +95,6 @@ pub struct State {
     pub turn: usize,
     pub log: Vec<Weighing>,
     pub answers: Vec<Option<Weights>>,
-    pub time_left_ms: i64,
     /// Every weight set that fits the log so far (public knowledge, kept for the bot).
     pub possible: Vec<Weights>,
     /// Replay moments: all five right with 3 or more weighings to spare.
@@ -133,8 +129,6 @@ pub struct View {
     pub max_extra: u32,
     pub your_answer: Option<Weights>,
     pub answered: Vec<bool>,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub score: i64,
     /// Only at the end.
     pub weights: Option<Weights>,
@@ -228,7 +222,6 @@ impl State {
 
     fn next_turn(&mut self) {
         self.turn = (self.turn + 1) % self.players.len();
-        self.time_left_ms = TURN_MS;
         if self.weighings_left() == 0 {
             self.start_answers();
         }
@@ -236,27 +229,23 @@ impl State {
 
     fn start_answers(&mut self) {
         self.phase = Phase::Answer;
-        self.time_left_ms = ANSWER_MS;
     }
 
-    fn weigh(&mut self, seat: usize, load: Option<Load>) {
-        let result = load.as_ref().map_or(0, |l| l.outcome(&self.weights));
-        if let Some(l) = &load {
-            let (f, d) = l.factors();
-            self.possible.retain(|w| tilt(&f, d, w) == result);
-        }
+    fn weigh(&mut self, seat: usize, load: Load) {
+        let result = load.outcome(&self.weights);
+        let (f, d) = load.factors();
+        self.possible.retain(|w| tilt(&f, d, w) == result);
         self.log.push(Weighing { seat, load, result });
         self.next_turn();
     }
 
     fn end(&mut self) {
         self.phase = Phase::Over;
-        self.time_left_ms = 0;
         // A replay moment (everything is shown at the end): a full solve with weighings to spare,
         // credited to whoever made the last weighing, the one that cracked it.
         let spare = self.weighings_left();
         if self.score() >= BLOCKS as i64 * BLOCK_POINTS && spare >= MOMENT_SPARE {
-            let seat = self.log.iter().rev().find(|w| w.load.is_some()).map_or(0, |w| w.seat);
+            let seat = self.log.last().map_or(0, |w| w.seat);
             self.moments.push(&self.players[seat].clone(), format!("All five weights right, {spare} weighings to spare"));
         }
     }
@@ -309,7 +298,6 @@ impl Game for WeightBalancePuzzle {
             turn: 0,
             log: Vec::new(),
             answers: vec![None; players.len()],
-            time_left_ms: TURN_MS,
             possible: ALL_SETS.get_or_init(all_weight_sets).clone(),
             moments: Moments::default(),
         })
@@ -323,7 +311,7 @@ impl Game for WeightBalancePuzzle {
                     return Err("Not your turn".into());
                 }
                 load.check()?;
-                s.weigh(seat, Some(load));
+                s.weigh(seat, load);
             }
             (Phase::Weigh, Move::Answer) => {
                 if seat != s.turn {
@@ -349,20 +337,6 @@ impl Game for WeightBalancePuzzle {
         Ok(())
     }
 
-    fn tick(s: &mut State, ms: u64) {
-        if s.phase == Phase::Over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Weigh => s.weigh(s.turn, None),
-            _ => s.end(),
-        }
-    }
-
     fn view_for(s: &State, player: &str) -> View {
         let you = s.seat(player);
         let over = s.phase == Phase::Over;
@@ -379,8 +353,6 @@ impl Game for WeightBalancePuzzle {
             max_extra: MAX_EXTRA,
             your_answer: you.and_then(|k| s.answers[k]),
             answered: s.answers.iter().map(Option::is_some).collect(),
-            time_left_ms: s.time_left_ms,
-            phase_ms: if s.phase == Phase::Answer { ANSWER_MS } else { TURN_MS },
             score: s.score(),
             weights: over.then_some(s.weights),
             answers: over.then(|| s.answers.clone()),
@@ -464,16 +436,18 @@ mod tests {
     }
 
     #[test]
-    fn turns_alternate_and_time_out_loses_a_weighing() {
+    fn turns_alternate() {
         let mut s = WeightBalancePuzzle::setup(&duo(), 1).unwrap();
         let load = Load { left: vec![0], right: vec![1], left_extra: 0, right_extra: 0 };
         assert!(WeightBalancePuzzle::apply_move(&mut s, "p2", Move::Weigh { load: load.clone() }).is_err());
-        WeightBalancePuzzle::apply_move(&mut s, "p1", Move::Weigh { load }).unwrap();
+        WeightBalancePuzzle::apply_move(&mut s, "p1", Move::Weigh { load: load.clone() }).unwrap();
         assert_eq!(s.turn, 1);
-        WeightBalancePuzzle::tick(&mut s, TURN_MS as u64);
+        // No turn timer: a long wait changes nothing, the game waits for p2.
+        WeightBalancePuzzle::tick(&mut s, 600_000);
+        assert_eq!((s.turn, s.weighings_left()), (1, WEIGHINGS - 1));
+        WeightBalancePuzzle::apply_move(&mut s, "p2", Move::Weigh { load }).unwrap();
         assert_eq!(s.turn, 0);
         assert_eq!(s.weighings_left(), WEIGHINGS - 2);
-        assert!(s.log[1].load.is_none());
     }
 
     #[test]

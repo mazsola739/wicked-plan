@@ -1,6 +1,6 @@
 // Sniper Hold'em: poker where a snipe knocks out every hand of one rank. Rules: docs/games/sniper-holdem.md
 
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './SniperHoldem.css';
 
 type Phase = 'betting' | 'snipe' | 'result' | 'over';
@@ -18,8 +18,6 @@ interface ShView {
   phase: Phase;
   hand: number;
   hands: number;
-  timeLeftMs: number;
-  phaseMs: number;
   cards: number[];
   community: number[];
   myRank: Rank | null;
@@ -159,12 +157,7 @@ export default function SniperHoldem({ view }: ScreenProps) {
   }
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Sniper Hold'em" step={`Hand ${v.hand} of ${v.hands}`} score={me?.chips ?? 0} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
-        </>
-      }
+      top={<GameTop title="Sniper Hold'em" step={`Hand ${v.hand} of ${v.hands}`} score={me?.chips ?? 0} />}
       stage={
         <div className="card">
           <div className="sniper-holdem-table">

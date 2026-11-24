@@ -1,6 +1,6 @@
 // Dice Prediction: three dice, one hidden from you; predict your own rank. Rules: docs/games/dice-prediction.md
 
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './DicePrediction.css';
 
 type Phase = 'build' | 'predict' | 'result' | 'over';
@@ -10,8 +10,6 @@ interface DpView {
   phase: Phase;
   round: number;
   rounds: number;
-  timeLeftMs: number;
-  phaseMs: number;
   players: number;
   open: number;
   secret: number;
@@ -94,12 +92,7 @@ export default function DicePrediction({ view }: ScreenProps) {
   else if (mine) ask = `Your hand: ${KINDS[mine.kind]}, ranked ${ORD[mine.rank]} (you said ${ORD[mine.prediction]}): +${mine.points}.`;
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Dice Prediction" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
-        </>
-      }
+      top={<GameTop title="Dice Prediction" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <ul className="list">

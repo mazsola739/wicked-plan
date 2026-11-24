@@ -12,9 +12,6 @@ use crate::rng::Rng;
 pub const TRACK: i64 = 18;
 pub const MAX_ROUNDS: u32 = 15;
 pub const VOTE_EVERY: u32 = 3;
-pub const WRITE_MS: i64 = 40_000;
-pub const TURN_MS: i64 = 12_000;
-pub const VOTE_MS: i64 = 20_000;
 
 pub const BUMP: usize = 0;
 pub const STRICT: usize = 1;
@@ -123,7 +120,6 @@ pub struct RaceState {
     pub phase: Phase,
     pub turn: usize,
     pub round: u32,
-    pub time_left_ms: i64,
     pub group: [bool; 4],
     pub rng: Rng,
     pub last_roll: Option<(usize, Face)>,
@@ -181,8 +177,6 @@ pub struct RaceView {
     pub track: i64,
     pub round: u32,
     pub max_rounds: u32,
-    pub time_left_ms: i64,
-    pub phase_time_ms: i64,
     pub racers: Vec<RacerView>,
     pub current: Option<String>,
     pub last_roll: Option<String>,
@@ -322,7 +316,6 @@ impl RaceState {
                 self.moments.push(&self.name(w), format!("Reaches the goal on {{{roller}}}'s roll"));
             }
             self.phase = Phase::Over;
-            self.time_left_ms = 0;
             return;
         }
         self.next_turn();
@@ -364,19 +357,16 @@ impl RaceState {
 
     fn next_turn(&mut self) {
         self.turn += 1;
-        self.time_left_ms = TURN_MS;
         if self.turn < self.racers.len() {
             return;
         }
         self.turn = 0;
         if self.round >= MAX_ROUNDS {
             self.phase = Phase::Over;
-            self.time_left_ms = 0;
             return;
         }
         if self.round.is_multiple_of(VOTE_EVERY) {
             self.phase = Phase::Vote;
-            self.time_left_ms = VOTE_MS;
             for r in &mut self.racers {
                 r.vote = None;
             }
@@ -385,16 +375,8 @@ impl RaceState {
     }
 
     fn finish_write(&mut self) {
-        for i in 0..self.racers.len() {
-            if self.racers[i].rule.is_none() {
-                let c = *self.rng.pick(&Cond::ALL);
-                let e = *self.rng.pick(&Effect::ALL);
-                self.racers[i].rule = Some((c, e));
-            }
-        }
         self.phase = Phase::Turn;
         self.turn = 0;
-        self.time_left_ms = TURN_MS;
         self.say("Everyone has a secret rule. The race is on!".into());
     }
 
@@ -420,7 +402,6 @@ impl RaceState {
         }
         self.phase = Phase::Turn;
         self.turn = 0;
-        self.time_left_ms = TURN_MS;
     }
 }
 
@@ -457,7 +438,6 @@ impl Game for Rules {
             phase: Phase::Write,
             turn: 0,
             round: 1,
-            time_left_ms: WRITE_MS,
             group: [true, false, false, false],
             rng: Rng::new(seed),
             last_roll: None,
@@ -504,27 +484,6 @@ impl Game for Rules {
         }
     }
 
-    fn tick(s: &mut RaceState, ms: u64) {
-        if s.phase == Phase::Over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Write => s.finish_write(),
-            Phase::Turn => s.roll(),
-            Phase::Vote => {
-                for r in &mut s.racers {
-                    r.vote.get_or_insert(None);
-                }
-                s.finish_vote();
-            }
-            Phase::Over => {}
-        }
-    }
-
     fn view_for(s: &RaceState, player: &str) -> RaceView {
         let racers = s
             .racers
@@ -553,13 +512,6 @@ impl Game for Rules {
             track: TRACK,
             round: s.round,
             max_rounds: MAX_ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_time_ms: match s.phase {
-                Phase::Write => WRITE_MS,
-                Phase::Turn => TURN_MS,
-                Phase::Vote => VOTE_MS,
-                Phase::Over => 1,
-            },
             racers,
             current: (s.phase == Phase::Turn).then(|| s.racers[s.turn].id.clone()),
             last_roll: s.last_roll.map(|(i, f)| format!("{} rolled {}", s.racers[i].id, f.text())),
@@ -703,16 +655,15 @@ mod tests {
     }
 
     #[test]
-    fn timers_keep_the_game_going() {
+    fn no_timer_the_game_waits_for_every_seat() {
         let mut s = Rules::setup(&players(5), 6).unwrap();
-        let mut guard = 0;
-        while !Rules::is_over(&s) {
-            Rules::tick(&mut s, 60_000);
-            guard += 1;
-            assert!(guard < 500);
-        }
-        let r = Rules::results(&s);
-        assert!(r.iter().any(|r| r.rank == 1 && r.points == 1000));
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Write);
+        assert_eq!(Rules::to_move(&s).len(), 5);
+        write_all(&mut s, Cond::RollsOne, Effect::ThemBack2);
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.turn, 0);
+        assert!(s.last_roll.is_none());
     }
 
     #[test]

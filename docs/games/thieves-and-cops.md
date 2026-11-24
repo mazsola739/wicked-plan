@@ -7,7 +7,7 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 **Goal:** as a thief, collect hidden pieces without getting caught; as police, catch the thieves. One officer is secretly corrupt and helps the thieves.
 
 - Everyone knows who the thieves are. Thieves and the corrupt officer know where the pieces are and always see the thieves.
-- Each of the **12 rounds**, everyone moves at once: tap a lit station to move one stop, or **Stay**. No choice in **20 seconds** means you stay.
+- Each of the **12 rounds**, everyone moves at once: tap a lit station to move one stop, or **Stay**.
 - An honest officer catches a thief by ending on the same station, or by passing them on the same stretch of line.
 - Thieves take pieces by stepping on them. Honest police see the thieves only after rounds 2, 4, 6, 8 and 10, or where a piece is taken.
 - The thieves' side wins by keeping **5 pieces**; otherwise the police win.
@@ -35,7 +35,7 @@ is secretly **corrupt** and works for the thieves.
 
 ## Rounds (12)
 
-- Everyone chooses at once (**20 s**): stay, or move one stop. No choice in time: stay.
+- Everyone chooses at once: stay, or move one stop.
 - All move together. A thief is **caught** if an honest officer ends on the same station, or they pass
   each other on the same stretch of line. The corrupt officer never catches anyone. A caught thief is
   out and the pieces they took are lost.
@@ -44,7 +44,7 @@ is secretly **corrupt** and works for the thieves.
 - **Sightings:** after rounds 2, 4, 6, 8 and 10 every free thief's station is shown to all.
 - The game ends when the thieves have kept **5 pieces** together, when every thief is caught, or after round 12.
 
-## Unmask (20 s)
+## Unmask
 
 At the end every police officer (the corrupt one too) names one other officer as corrupt. If the
 corrupt officer gets the most votes (no tie), they are **unmasked**. Then everything is shown

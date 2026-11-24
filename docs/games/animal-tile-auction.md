@@ -8,9 +8,9 @@ Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/a
 
 - You get a secret pattern of three animals in a line or an L shape. It may appear turned, but not mirrored.
 - You start with 15 chips. There are 12 auctions, each for the next tile shown to everyone.
-- Set your bid with − and + or the quick buttons, then tap **Bid**. Bids are secret; you have 15 seconds (no bid counts as 0).
+- Set your bid with − and + or the quick buttons, then tap **Bid**. Bids are secret.
 - Only the single highest bidder pays and wins the tile. A tie for the top bid: nobody gets it and the tile is lost.
-- If you win, tap any empty cell to place the tile (15 seconds).
+- If you win, tap any empty cell to place the tile.
 - You score 25 for every complete copy of your pattern, 5 per animal in your best partial match, and 1 per chip left.
 - Others may place tiles to block you, so a cheap tile can matter as much as a dear one.
 
@@ -21,10 +21,10 @@ Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/a
 - Everyone gets a **secret pattern**: three animals in a line or an L shape, e.g. fox–owl–fox.
   A pattern may appear turned (any of 4 rotations, no mirror image). Everyone starts with **15 chips**.
 - **12 auctions.** Each shows the next tile from the deck to everyone, then:
-  1. **Bid** (secret, simultaneous, 15 s): 0 up to all your chips. Timeout: 0.
+  1. **Bid** (secret, simultaneous): 0 up to all your chips.
   2. The **single highest bidder** pays and wins the tile (the table sees who and for how much).
      A tie for the highest bid: nobody wins and the tile is lost.
-  3. The winner **places** it on any empty cell (15 s; timeout: the best cell for their own pattern).
+  3. The winner **places** it on any empty cell.
 - **Score:** **25** per place on the grid where your whole pattern appears, **5** per animal in your best
   partial match (the most cells of your pattern that match anywhere), **+1** per chip left.
   All patterns are shown at the end. Points: 1000 for first down to 100 for last.

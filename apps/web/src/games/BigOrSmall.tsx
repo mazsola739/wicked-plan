@@ -1,7 +1,7 @@
 // Big or Small: play a card in secret, bet on the opponent's card. Rules page: docs/games/big-or-small.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './BigOrSmall.css';
 
 type Guess = 'bigger' | 'smaller' | 'equal';
@@ -26,8 +26,6 @@ interface BigView {
   chosen: boolean;
   theyChose: boolean;
   maxStake: number;
-  timeLeftMs: number;
-  turnMs: number;
   history: { dealer: number; mine: Side; theirs: Side }[];
   over: boolean;
 }
@@ -74,12 +72,7 @@ export default function BigOrSmall({ view: raw }: ScreenProps) {
 
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Big or Small" step={`Round ${view.round} of ${view.rounds}`} score={view.chips} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
-        </>
-      }
+      top={<GameTop title="Big or Small" step={`Round ${view.round} of ${view.rounds}`} score={view.chips} />}
       stage={
         <div className="big-or-small-table">
           <div className="big-or-small-chips">

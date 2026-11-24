@@ -11,7 +11,6 @@ use crate::rng::Rng;
 
 pub const ROUNDS: usize = 7;
 pub const BANK_MS: i64 = 100_000;
-pub const READY_MS: i64 = 15_000;
 pub const COUNTDOWN_MS: i64 = 5_000;
 pub const RESULT_MS: i64 = 4_000;
 
@@ -108,7 +107,7 @@ impl TaState {
         }
         self.round += 1;
         self.phase = Phase::Ready;
-        self.time_left_ms = READY_MS;
+        self.time_left_ms = 0;
         for s in &mut self.seats {
             s.holding = false;
             s.bidding = false;
@@ -273,7 +272,7 @@ impl Game for Rules {
         let mut ms = ms as i64;
         while ms > 0 {
             match s.phase {
-                Phase::Over => return,
+                Phase::Over | Phase::Ready => return,
                 Phase::Bidding => {
                     for seat in s.seats.iter_mut().filter(|x| x.holding) {
                         let take = ms.min(seat.bank_ms);
@@ -288,7 +287,7 @@ impl Game for Rules {
                     }
                     return;
                 }
-                Phase::Ready | Phase::Countdown | Phase::Result => {
+                Phase::Countdown | Phase::Result => {
                     let step = ms.min(s.time_left_ms);
                     s.time_left_ms -= step;
                     ms -= step;
@@ -296,7 +295,6 @@ impl Game for Rules {
                         return;
                     }
                     match s.phase {
-                        Phase::Ready => s.start_countdown(),
                         Phase::Countdown => s.start_bidding(),
                         _ => s.start_round(),
                     }
@@ -314,7 +312,6 @@ impl Game for Rules {
             rounds: ROUNDS,
             time_left_ms: s.time_left_ms,
             phase_ms: match s.phase {
-                Phase::Ready => READY_MS,
                 Phase::Countdown => COUNTDOWN_MS,
                 Phase::Result => RESULT_MS,
                 _ => 0,
@@ -434,11 +431,21 @@ mod tests {
     }
 
     #[test]
-    fn ready_timeout_leaves_the_slow_ones_out_and_hides_holders_later() {
+    fn ready_waits_for_everyone_and_hides_holders_later() {
         let mut s = Rules::setup(&ids(3), 3).unwrap();
         Rules::apply_move(&mut s, "p1", TaMove::Press).unwrap();
         assert_eq!(Rules::view_for(&s, "p2").seats[0].ready, Some(true));
-        Rules::tick(&mut s, (READY_MS + COUNTDOWN_MS) as u64);
+        // No time limit: a long wait changes nothing, the round waits for p2 and p3.
+        Rules::tick(&mut s, 60_000);
+        assert_eq!(s.phase, Phase::Ready);
+        assert_eq!(Rules::to_move(&s), vec!["p2".to_string(), "p3".to_string()]);
+        Rules::apply_move(&mut s, "p2", TaMove::Press).unwrap();
+        Rules::apply_move(&mut s, "p3", TaMove::Press).unwrap();
+        assert_eq!(s.phase, Phase::Countdown);
+        // p2 and p3 pass in the countdown.
+        Rules::apply_move(&mut s, "p2", TaMove::Release).unwrap();
+        Rules::apply_move(&mut s, "p3", TaMove::Release).unwrap();
+        Rules::tick(&mut s, COUNTDOWN_MS as u64);
         assert_eq!(s.phase, Phase::Bidding);
         assert!(Rules::view_for(&s, "p2").seats.iter().all(|x| x.ready.is_none()));
         assert_eq!(Rules::to_move(&s), vec!["p1".to_string()]);

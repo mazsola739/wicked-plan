@@ -13,7 +13,6 @@ pub const SIZE: usize = 5;
 pub const GOATS: u8 = 20;
 pub const CAPTURES_TO_WIN: u8 = 5;
 pub const MAX_PLIES: u32 = 100;
-pub const STEP_MS: i64 = 60_000;
 pub const WIN_BONUS: i64 = 250;
 pub const PER_GOAT: i64 = 50;
 
@@ -188,7 +187,6 @@ pub struct TigerState {
     /// Which boards have had their move in this step.
     moved: [bool; 2],
     step: u32,
-    time_left_ms: i64,
     /// Replay moments: every tiger trapped; a board held for all 100 turns; a fifth capture
     /// once all 20 goats are on the board.
     pub moments: Moments,
@@ -239,7 +237,6 @@ impl TigerState {
         if (0..2).all(|b| !self.waiting(b)) {
             self.moved = [false; 2];
             self.step += 1;
-            self.time_left_ms = STEP_MS;
         }
     }
     fn points(&self, seat: usize) -> i64 {
@@ -283,8 +280,6 @@ pub struct TigerView {
     pub step: u32,
     pub score: i64,
     pub their_score: i64,
-    pub time_left_ms: i64,
-    pub step_ms: i64,
     pub over: bool,
 }
 
@@ -315,7 +310,6 @@ impl Game for TigerAndGoat {
             boards: [Board::new(), Board::new()],
             moved: [false; 2],
             step: 0,
-            time_left_ms: STEP_MS,
             moments: Moments::default(),
         })
     }
@@ -339,26 +333,6 @@ impl Game for TigerAndGoat {
         s.moved[b] = true;
         s.after_move();
         Ok(())
-    }
-
-    fn tick(s: &mut TigerState, ms: u64) {
-        if s.over() {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            for b in 0..2 {
-                if s.waiting(b) {
-                    let mut rng = Rng::new(u64::from(s.step) * 2 + b as u64 + 1);
-                    match best_move(&s.boards[b], &mut rng) {
-                        Some((f, t)) => s.play(b, f, t),
-                        None => s.boards[b].ended = true,
-                    }
-                    s.moved[b] = true;
-                }
-            }
-            s.after_move();
-        }
     }
 
     fn view_for(s: &TigerState, player: &str) -> TigerView {
@@ -395,8 +369,6 @@ impl Game for TigerAndGoat {
             step: s.step + 1,
             score: s.points(me),
             their_score: s.points(1 - me),
-            time_left_ms: s.time_left_ms.max(0),
-            step_ms: STEP_MS,
             over: s.over(),
         }
     }
@@ -533,12 +505,13 @@ mod tests {
     }
 
     #[test]
-    fn time_up_moves_for_both() {
+    fn no_clock_the_step_waits_for_both() {
         let mut s = new();
-        TigerAndGoat::tick(&mut s, STEP_MS as u64);
-        assert_eq!(s.step, 1);
-        assert_eq!(s.boards[0].hand, GOATS - 1);
-        assert_eq!(s.boards[1].hand, GOATS - 1);
+        TigerAndGoat::tick(&mut s, 600_000);
+        assert_eq!(s.step, 0);
+        assert_eq!(s.boards[0].hand, GOATS);
+        assert_eq!(s.boards[1].hand, GOATS);
+        assert_eq!(TigerAndGoat::to_move(&s).len(), 2);
     }
 
     #[test]

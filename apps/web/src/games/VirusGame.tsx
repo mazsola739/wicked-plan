@@ -1,7 +1,7 @@
 // Virus Game: hidden roles, contacts, reports and quarantine votes. Rules: docs/games/virus-game.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './VirusGame.css';
 
 type Role = 'terrorist' | 'officer' | 'journalist' | 'researcher' | 'citizen';
@@ -21,8 +21,6 @@ interface VirusView {
   phase: 'contact' | 'report' | 'vote' | 'reveal' | 'over';
   round: number;
   rounds: number;
-  timeLeftMs: number;
-  phaseTimeMs: number;
   me: number;
   role: Role;
   roleText: string;
@@ -92,14 +90,11 @@ export default function VirusGame({ view }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Virus Game"
-            step={end ? 'Roles revealed' : `Round ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`}
-            score={v.score}
-          />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseTimeMs} />
-        </>
+        <GameTop
+          title="Virus Game"
+          step={end ? 'Roles revealed' : `Round ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`}
+          score={v.score}
+        />
       }
       stage={
         <>

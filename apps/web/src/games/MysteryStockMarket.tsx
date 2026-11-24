@@ -1,7 +1,7 @@
 // Mystery Stock Market: trade seven stocks with secret price rules. Rules: docs/games/mystery-stock-market.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './MysteryStockMarket.css';
 
 interface StockView {
@@ -18,8 +18,6 @@ interface MarketView {
   phase: 'trade' | 'reveal' | 'over';
   round: number;
   rounds: number;
-  timeLeftMs: number;
-  phaseTimeMs: number;
   stocks: StockView[];
   cash: number;
   shares: number[];
@@ -75,12 +73,7 @@ export default function MysteryStockMarket({ view }: ScreenProps) {
   const ranked = [...v.traders].sort((a, b) => (b.worth ?? 0) - (a.worth ?? 0));
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Mystery Stock Market" step={end ? 'Market closed' : `Round ${v.round} of ${v.rounds}`} score={v.score} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseTimeMs} />
-        </>
-      }
+      top={<GameTop title="Mystery Stock Market" step={end ? 'Market closed' : `Round ${v.round} of ${v.rounds}`} score={v.score} />}
       stage={
         <div className="msm-board">
           {v.stocks.map((s, k) => {

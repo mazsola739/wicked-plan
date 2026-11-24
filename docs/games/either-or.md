@@ -6,20 +6,20 @@ Main game, 3–8 seats (the page: you + 3 bots). Code: `crates/rules/src/games/e
 
 **Goal:** score the most points over 14 rounds by guessing how the others will pick.
 
-- Most rounds ask a question with two answers. Everyone picks in secret at the same time. Tap your answer within 15 seconds.
+- Most rounds ask a question with two answers. Everyone picks in secret at the same time. Tap your answer.
 - The round tells you its rule first. **Majority:** everyone on the bigger side gets +1. **Minority:** everyone on the smaller side gets +2. A tie scores nothing.
 - Four surprise rounds show up once each, between the questions.
 - **Lowest Unique:** pick 1–5. The lowest number nobody else picked scores +3.
 - **Share or Grab:** if all share, everyone gets +2. If exactly one grabs, they get +5. If two or more grab, each grabber loses 1.
 - **Point the Finger:** name another player. The single most-named player loses 3, and everyone who named them gets +1.
 - **Lone Wolf:** a two-way question. Anyone alone on their side gets +4.
-- If time runs out, a random answer is picked for you. After each round you see everyone's picks.
+- After each round you see everyone's picks.
 
 ## Rules in detail
 
 - **14 rounds:** 10 two-way questions ("Sunrise or sunset?") and **4 surprise mini rounds** dropped in
   between them at random places (never before the first question). Every round is a secret,
-  simultaneous pick with **15 seconds**; when time runs out a random answer is picked for you.
+  simultaneous pick.
 - **Question rounds** say their rule up front:
   - **Majority:** everyone on the bigger side scores **+1**.
   - **Minority:** everyone on the smaller side scores **+2**.

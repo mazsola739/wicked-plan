@@ -1,7 +1,7 @@
 // Equation Hi-Lo. Rules page: docs/games/equation-hi-lo.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './EquationHiLo.css';
 
 type Side = 'low' | 'high';
@@ -40,8 +40,6 @@ interface HiLoView {
   canRaise: boolean;
   pot: number;
   build: Build | null;
-  timeLeftMs: number;
-  phaseMs: number;
   log: string[];
   last: Showdown | null;
   over: boolean;
@@ -179,14 +177,11 @@ export default function EquationHiLo({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Equation Hi-Lo"
-            step={view.over ? 'Game over' : `Hand ${view.hand} of ${view.hands} · ${steps[view.phase]}`}
-            score={me?.chips ?? 0}
-          />
-          {!view.over && <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseMs} />}
-        </>
+        <GameTop
+          title="Equation Hi-Lo"
+          step={view.over ? 'Game over' : `Hand ${view.hand} of ${view.hands} · ${steps[view.phase]}`}
+          score={me?.chips ?? 0}
+        />
       }
       stage={
         <>

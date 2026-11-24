@@ -1,7 +1,7 @@
 // Hidden Rules Race: race to the centre and work out each colour's secret rule. Rules: docs/games/hidden-rules-race.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './HiddenRulesRace.css';
 
 type Dir = 'up' | 'right' | 'down' | 'left';
@@ -25,8 +25,6 @@ interface HrrView {
   pieces: { id: string; pos: Pos; chosen: boolean; distance: number }[];
   round: number;
   maxRounds: number;
-  timeLeftMs: number;
-  phaseTimeMs: number;
   known: { colour: number; rule: string }[];
   history: Step[][];
   myChoice: Dir | null;
@@ -83,14 +81,11 @@ export default function HiddenRulesRace({ view }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Hidden Rules Race"
-            step={v.phase === 'choose' ? `Round ${v.round} of ${v.maxRounds}` : 'The rules revealed'}
-            score={v.score}
-          />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseTimeMs} />
-        </>
+        <GameTop
+          title="Hidden Rules Race"
+          step={v.phase === 'choose' ? `Round ${v.round} of ${v.maxRounds}` : 'The rules revealed'}
+          score={v.score}
+        />
       }
       stage={
         <div className="hrr-board" style={{ gridTemplateColumns: `repeat(${v.size}, 1fr)` }}>

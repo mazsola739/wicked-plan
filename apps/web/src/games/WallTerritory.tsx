@@ -1,7 +1,7 @@
 // Wall Territory: move a piece, build a wall, fence off the biggest area. Rules page: docs/games/wall-territory.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './WallTerritory.css';
 
 type Dir = 'n' | 'e' | 's' | 'w';
@@ -19,8 +19,6 @@ interface WallView {
   reach: number[][];
   last: [number, number, Dir] | null;
   turnNo: number;
-  timeLeftMs: number;
-  turnMs: number;
   over: boolean;
 }
 
@@ -90,14 +88,11 @@ export default function WallTerritory({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Wall Territory"
-            step={`Turn ${view.turnNo}${view.yourTurn ? ' · your move' : ''}`}
-            score={view.seats[view.me]?.area ?? 0}
-          />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
-        </>
+        <GameTop
+          title="Wall Territory"
+          step={`Turn ${view.turnNo}${view.yourTurn ? ' · your move' : ''}`}
+          score={view.seats[view.me]?.area ?? 0}
+        />
       }
       stage={
         <svg className="drawing wall-territory-board" viewBox={`-0.1 -0.1 ${n + 0.2} ${n + 0.2}`} role="img" aria-label="Wall board">

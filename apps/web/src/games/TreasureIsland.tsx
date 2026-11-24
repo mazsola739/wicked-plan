@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import './TreasureIsland.css';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 type Square = [number, number];
 
@@ -36,8 +36,6 @@ interface IslandView {
   history: Auction[];
   yourDig: Square | null;
   dug: boolean[];
-  timeLeftMs: number;
-  phaseMs: number;
   treasure: Square | null;
   digs: (Square | null)[] | null;
   scores: number[] | null;
@@ -232,14 +230,11 @@ export default function TreasureIsland({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Treasure Island"
-            step={view.phase === 'auction' ? `Auction ${view.round} of ${view.auctions}` : 'Dig for the treasure'}
-            score={view.coins[you] ?? 0}
-          />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseMs} />
-        </>
+        <GameTop
+          title="Treasure Island"
+          step={view.phase === 'auction' ? `Auction ${view.round} of ${view.auctions}` : 'Dig for the treasure'}
+          score={view.coins[you] ?? 0}
+        />
       }
       stage={
         <>

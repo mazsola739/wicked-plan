@@ -12,7 +12,6 @@ screen: `apps/web/src/games/WallTerritory.tsx`.
 - Once no other player's piece can reach your pieces' area, you are **sealed in** and skip your turns.
 - The game ends when everyone is sealed in.
 - Your score is **100 + 20 per square** of the areas holding only your pieces. Most area wins.
-- You have **60 seconds** per turn, or a move is made for you.
 
 ## Rules in detail
 
@@ -31,12 +30,11 @@ screen: `apps/web/src/games/WallTerritory.tsx`.
 - **End:** when every player is sealed in (no region holds pieces of two players).
 - **Score:** the area (number of squares) of the regions that hold only your pieces. Regions without
   pieces count for nobody. Points: **100 + 20 × area**; most area wins, equal area shares the rank.
-- Turn timer: **60 s**; when it runs out, the bot plays your turn.
 - Moves: `{type:"turn", piece, x, y, wall:"n"|"e"|"s"|"w"}` (piece 0 or 1; x, y the square it ends on);
   `{type:"pass"}` only when no turn is possible (cannot happen in practice).
 - View: the board size, every piece with its owner, the walls (east and south side of each square), who
   owns each square's region (only when exactly one player has pieces there), each player's secured area
-  and whether they are sealed in, whose turn, your pieces' reachable squares, the last turn, the timer.
+  and whether they are sealed in, whose turn, your pieces' reachable squares, the last turn.
 - Bot: tries every move and wall and keeps the one with the best territory estimate: each square belongs
   to the player with the strictly nearest piece (walking around walls), plus a bonus for area already
   sealed; it compares its own share with the best opponent's.

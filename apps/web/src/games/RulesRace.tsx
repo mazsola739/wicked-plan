@@ -1,7 +1,7 @@
 // Rules Race: race to square 18, secret personal rules, group rules by vote. Rules: docs/games/rules-race.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './RulesRace.css';
 
 interface RuleView {
@@ -30,8 +30,6 @@ interface RaceView {
   track: number;
   round: number;
   maxRounds: number;
-  timeLeftMs: number;
-  phaseTimeMs: number;
   racers: RacerView[];
   current: string | null;
   lastRoll: string | null;
@@ -74,12 +72,7 @@ export default function RulesRace({ view }: ScreenProps) {
   const step = v.phase === 'write' ? 'Write your rule' : v.phase === 'vote' ? 'Group vote' : `Round ${v.round} of ${v.maxRounds}`;
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Rules Race" step={step} score={v.score} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseTimeMs} />
-        </>
-      }
+      top={<GameTop title="Rules Race" step={step} score={v.score} />}
       stage={
         <>
           <svg

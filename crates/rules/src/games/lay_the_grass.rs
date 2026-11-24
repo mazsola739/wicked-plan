@@ -10,7 +10,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 7;
-pub const TURN_MS: i64 = 30_000;
 pub const ROCK: i8 = -2;
 pub const EMPTY: i8 = -1;
 
@@ -76,7 +75,6 @@ pub struct State {
     pub round: usize,
     /// Turns taken in this round (0..players).
     pub step: usize,
-    pub turn_left_ms: i64,
     pub last: Vec<Cell>,
     pub over: bool,
     /// Replay moments: the first 3×3 square on the field, any 4×4 square.
@@ -109,8 +107,6 @@ pub struct View {
     pub piece: Option<Vec<Cell>>,
     pub next: Option<Vec<Cell>>,
     pub turn: Option<String>,
-    pub turn_left_ms: i64,
-    pub turn_ms: i64,
     pub last: Vec<Cell>,
     pub over: bool,
 }
@@ -209,7 +205,6 @@ impl State {
                 break;
             }
         }
-        self.turn_left_ms = TURN_MS;
     }
 
     fn scores(&self) -> Vec<Tally> {
@@ -261,7 +256,6 @@ impl Game for LayTheGrass {
             pieces,
             round: 0,
             step: 0,
-            turn_left_ms: TURN_MS,
             last: Vec::new(),
             over: false,
             moments: Moments::default(),
@@ -303,17 +297,6 @@ impl Game for LayTheGrass {
         Ok(())
     }
 
-    fn tick(s: &mut State, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.turn_left_ms -= ms as i64;
-        if s.turn_left_ms <= 0 {
-            s.last.clear();
-            s.advance();
-        }
-    }
-
     fn view_for(s: &State, player: &str) -> View {
         let scores = s.scores();
         View {
@@ -326,8 +309,6 @@ impl Game for LayTheGrass {
             piece: (!s.over).then(|| s.pieces[s.round].clone()),
             next: s.pieces.get(s.round + 1).filter(|_| !s.over).cloned(),
             turn: (!s.over).then(|| s.players[s.seat_to_move()].clone()),
-            turn_left_ms: s.turn_left_ms.max(0),
-            turn_ms: TURN_MS,
             last: s.last.clone(),
             over: s.over,
         }
@@ -433,10 +414,11 @@ mod tests {
     }
 
     #[test]
-    fn a_lost_turn_passes_on() {
+    fn a_turn_waits_for_the_move() {
         let mut s = LayTheGrass::setup(&players(3), 2).unwrap();
-        LayTheGrass::tick(&mut s, TURN_MS as u64);
-        assert_eq!(LayTheGrass::to_move(&s), vec!["p2".to_string()]);
+        LayTheGrass::tick(&mut s, 3_600_000);
+        assert_eq!(LayTheGrass::to_move(&s), vec!["p1".to_string()]);
+        assert_eq!((s.round, s.step), (0, 0));
     }
 
     #[test]

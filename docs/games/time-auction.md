@@ -7,7 +7,7 @@ Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
 **Goal:** win the most tokens by paying with time from your **100-second** bank.
 
 - There are **7 rounds** and one token each round.
-- Press and hold the **HOLD** button to join the round. If you are not holding within 15 seconds, you sit it out.
+- Press and hold the **HOLD** button to join the round. The round starts when everyone with time left is holding.
 - A **5-second** countdown follows: letting go now means you pass and pay nothing.
 - Then the clock runs. Every second you keep holding comes out of your bank. Let go to stop.
 - The longest hold wins the token, but everyone pays the time they held. An exact tie wins nothing.
@@ -17,8 +17,8 @@ Prison game, 2–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
 ## Rules in detail
 
 - Everyone starts with a **time bank of 100 seconds** and no tokens. **7 rounds**, one token each.
-- **Ready (15 s):** everyone with time left presses and holds the button. The round starts as soon as
-  all of them hold it; when the 15 seconds run out, whoever is not holding sits the round out.
+- **Ready:** everyone with time left presses and holds the button; the round starts as soon as all of
+  them hold it. There is no time limit; to sit a round out, let go during the countdown.
 - **Countdown (5 s):** letting go now means you pass the round and pay nothing.
 - **Bidding:** the clock runs. Every holder pays from their bank for as long as they hold; let go to
   stop. An empty bank lets go by itself. You never see who else is still holding.

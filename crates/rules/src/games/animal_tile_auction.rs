@@ -16,8 +16,6 @@ pub const PER_ANIMAL: usize = 7;
 pub const START_TILES: usize = 5;
 pub const AUCTIONS: usize = 12;
 pub const CHIPS: i64 = 15;
-pub const BID_MS: i64 = 15_000;
-pub const PLACE_MS: i64 = 15_000;
 pub const FULL: i64 = 25;
 pub const PER_MATCH: i64 = 5;
 /// The smallest all-in winning bid that is a replay moment.
@@ -151,7 +149,6 @@ pub struct TileState {
     pub auction: usize,
     pub phase: Phase,
     pub bids: Vec<Option<i64>>,
-    pub time_left_ms: i64,
     pub log: Vec<String>,
     pub over: bool,
     /// Replay moments: a tile won with every chip (public), a placement that completes the
@@ -189,8 +186,6 @@ pub struct TileView {
     pub my_bid: Option<i64>,
     pub bid_done: Vec<bool>,
     pub placer: Option<usize>,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     /// Your pattern score on the grid as it is now.
     pub pattern_score: i64,
     pub log: Vec<String>,
@@ -210,10 +205,8 @@ impl TileState {
         self.auction += 1;
         self.phase = Phase::Bid;
         self.bids = vec![None; self.players.len()];
-        self.time_left_ms = BID_MS;
         if self.auction >= AUCTIONS || self.grid.iter().all(Option::is_some) {
             self.over = true;
-            self.time_left_ms = 0;
             self.log.push("Game over: patterns are scored.".into());
         }
     }
@@ -232,7 +225,6 @@ impl TileState {
             self.chips[w] -= top;
             self.log.push(format!("{} wins the {animal} for {top}.", self.players[w]));
             self.phase = Phase::Place(w);
-            self.time_left_ms = PLACE_MS;
         } else {
             self.log.push(format!("Tie at {top}: the {animal} is lost."));
             self.next_auction();
@@ -330,7 +322,6 @@ impl Game for Rules {
             auction: 0,
             phase: Phase::Bid,
             bids: vec![None; n],
-            time_left_ms: BID_MS,
             log: Vec::new(),
             over: false,
             moments: Moments::default(),
@@ -361,28 +352,6 @@ impl Game for Rules {
         }
     }
 
-    fn tick(s: &mut TileState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Bid => {
-                for b in &mut s.bids {
-                    b.get_or_insert(0);
-                }
-                s.resolve_bids();
-            }
-            Phase::Place(w) => {
-                let (cell, _) = best_cell(&s.grid, &s.places[w], s.tile());
-                let _ = s.place(w, cell);
-            }
-        }
-    }
-
     fn view_for(s: &TileState, player: &str) -> TileView {
         let me = s.players.iter().position(|p| p == player).unwrap_or(0);
         TileView {
@@ -405,8 +374,6 @@ impl Game for Rules {
                 Phase::Place(w) if !s.over => Some(w),
                 _ => None,
             },
-            time_left_ms: s.time_left_ms,
-            phase_ms: if s.phase == Phase::Bid { BID_MS } else { PLACE_MS },
             pattern_score: score_in(&s.grid, &s.places[me]),
             log: s.log[s.log.len().saturating_sub(10)..].to_vec(),
             result: s.over.then(|| Final { patterns: s.patterns.clone(), scores: (0..s.players.len()).map(|i| s.score(i)).collect() }),
@@ -515,19 +482,26 @@ mod tests {
     fn tie_loses_the_tile() {
         let mut s = Rules::setup(&ids(3), 2).unwrap();
         let filled = s.grid.iter().filter(|c| c.is_some()).count();
-        Rules::tick(&mut s, BID_MS as u64);
+        for (p, chips) in [("p1", 2), ("p2", 2), ("p3", 0)] {
+            Rules::apply_move(&mut s, p, TileMove::Bid { chips }).unwrap();
+        }
         assert_eq!(s.auction, 1);
         assert_eq!(s.grid.iter().filter(|c| c.is_some()).count(), filled);
     }
 
     #[test]
-    fn timeout_places_for_the_winner() {
+    fn no_timer_the_game_waits_for_bids_and_the_placer() {
         let mut s = Rules::setup(&ids(3), 3).unwrap();
         Rules::apply_move(&mut s, "p2", TileMove::Bid { chips: 1 }).unwrap();
-        Rules::tick(&mut s, BID_MS as u64);
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Bid);
+        assert_eq!(Rules::to_move(&s), vec!["p1".to_string(), "p3".to_string()]);
+        Rules::apply_move(&mut s, "p1", TileMove::Bid { chips: 0 }).unwrap();
+        Rules::apply_move(&mut s, "p3", TileMove::Bid { chips: 0 }).unwrap();
         assert_eq!(s.phase, Phase::Place(1));
-        Rules::tick(&mut s, PLACE_MS as u64);
-        assert_eq!(s.grid.iter().filter(|c| c.is_some()).count(), START_TILES + 1);
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Place(1));
+        assert_eq!(s.grid.iter().filter(|c| c.is_some()).count(), START_TILES);
     }
 
     #[test]
@@ -605,6 +579,7 @@ mod tests {
     fn replay_moments_are_rare_but_happen() {
         let stats = crate::game::testing::moment_stats::<Rules>(300, 4, 3_000);
         assert!(stats.with_any * 4 >= stats.games, "too rare: {stats:?}");
-        assert!(stats.most <= 4, "too many in one game: {stats:?}");
+        // Without timeouts every bid is a real one: about 1 game in 150 holds 5 (no game holds more).
+        assert!(stats.most <= 5, "too many in one game: {stats:?}");
     }
 }

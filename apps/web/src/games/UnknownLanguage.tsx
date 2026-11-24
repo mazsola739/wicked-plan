@@ -1,6 +1,6 @@
 // Unknown Language: crack a picture script from examples. Rules page: docs/games/unknown-language.md
 
-import { GameTop, KeyHint, move, Play, RoundDots, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, Play, RoundDots, type ScreenProps, useKeys } from './common';
 import './UnknownLanguage.css';
 
 interface ScriptWord {
@@ -20,11 +20,9 @@ interface LangView {
   questions: number;
   examples: { script: ScriptWord[]; english: string }[];
   current: Question | null;
-  last: { question: Question; given: number | null; solution: number; correct: boolean; points: number } | null;
+  last: { question: Question; given: number; solution: number; correct: boolean; points: number } | null;
   results: boolean[];
   score: number;
-  timeLeftMs: number;
-  questionTimeMs: number;
   over: boolean;
 }
 
@@ -100,7 +98,6 @@ export default function UnknownLanguage({ view: raw }: ScreenProps) {
             score={view.score}
           />
           <RoundDots results={view.results} total={view.questions} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.questionTimeMs} />
         </>
       }
       stage={
@@ -133,7 +130,7 @@ export default function UnknownLanguage({ view: raw }: ScreenProps) {
           )}
           {last && (
             <div className={`last ${last.correct ? 'ok' : 'bad'}`}>
-              {last.correct ? `Right, +${last.points}` : last.given === null ? 'Out of time. ' : 'Not right. '}
+              {last.correct ? `Right, +${last.points}` : 'Not right. '}
               {!last.correct && (
                 <>
                   It was: <OptionBody q={last.question} i={last.solution} />

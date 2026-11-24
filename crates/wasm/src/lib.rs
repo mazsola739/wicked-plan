@@ -66,8 +66,9 @@ mod tests {
         let mut g = LocalGame::new("hexagon", 7).unwrap_or_else(|_| panic!("setup"));
         g.apply(r#"{"type":"ready"}"#).unwrap_or_else(|_| panic!("ready"));
         assert!(g.view().contains("\"studying\":false"));
-        for _ in 0..10 {
-            g.tick(30_000);
+        // No round clock: any three different cells end a round.
+        for _ in 0..5 {
+            g.apply(r#"{"type":"answer","cells":[0,1,2]}"#).unwrap_or_else(|_| panic!("answer"));
         }
         assert!(g.is_over());
         assert!(g.results().contains("\"playerId\":\"you\""));

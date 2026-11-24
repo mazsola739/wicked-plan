@@ -12,15 +12,14 @@ Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
 - The **lowest kept card that nobody else kept** wins the round. Its owner scores the sum of all kept cards.
 - If every kept card matches someone else's, nobody scores.
 - Your kept card is used up, and the other card goes back to your hand. Save your low cards for big pots.
-- Timeouts: **20 seconds** to show (your two lowest cards are shown for you) and **15 seconds** to keep (your lower card is kept for you).
 
 ## Rules in detail
 
 - Everyone holds the same ten cards, **1 to 10**. **7 rounds.**
-- **Show (20 s):** everyone secretly picks **two different cards** from their hand. Then all pairs are
-  shown at once. Timeout: your two lowest cards.
-- **Keep (15 s):** looking at everyone's pair, everyone secretly keeps **one** of their two cards
-  ("minus one"). Timeout: the lower card.
+- **Show:** everyone secretly picks **two different cards** from their hand. When everyone has picked,
+  all pairs are shown at once.
+- **Keep:** looking at everyone's pair, everyone secretly keeps **one** of their two cards
+  ("minus one").
 - **Result (5 s):** the kept cards are revealed. The **lowest card that nobody else kept** wins the round:
   its owner scores the **pot = the sum of all kept cards**. If no kept card is unique, nobody scores.
 - Kept cards are spent; the other card of the pair goes back to the hand. So low cards are precious:
@@ -34,5 +33,5 @@ Prison game, 3–6 seats (on the page: you + 3 bots). Code: `crates/rules/src/ga
   weighs each of its two cards: the chance it ends up the lowest unique card (others assumed to keep
   their lower card 60% of the time) times the pot, minus the value of spending a low card.
 - Desktop: number keys 1–9 and 0 (for 10) pick cards, Enter confirms.
-- **Replay moments:** a kept 1 or 2 that takes a pot of 20 or more ("A lone 1 takes the pot of 25").
+- **Replay moments:** a kept 1 or 2 that takes a pot of 22 or more ("A lone 1 takes the pot of 25").
   Public: every kept card is revealed anyway.

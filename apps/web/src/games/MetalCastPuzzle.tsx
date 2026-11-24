@@ -1,6 +1,6 @@
 // Metal Cast Puzzle: slide every ring off the metal loop. Rules page: docs/games/metal-cast-puzzle.md
 
-import { GameTop, KeyHint, move, Play, RoundDots, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, Play, RoundDots, type ScreenProps, useKeys } from './common';
 import './MetalCastPuzzle.css';
 
 interface CastView {
@@ -12,8 +12,6 @@ interface CastView {
   best: number;
   solved: boolean[];
   score: number;
-  timeLeftMs: number;
-  levelTimeMs: number;
   over: boolean;
 }
 
@@ -42,7 +40,6 @@ export default function MetalCastPuzzle({ view: raw }: ScreenProps) {
         <>
           <GameTop title="Metal Cast Puzzle" step={`Level ${view.level} of ${view.levels} · ${n} rings`} score={view.score} />
           <RoundDots results={view.solved} total={view.levels} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.levelTimeMs} />
         </>
       }
       stage={

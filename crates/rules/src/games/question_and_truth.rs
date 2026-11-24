@@ -12,7 +12,6 @@ use crate::rng::Rng;
 
 pub const CARDS: usize = 8;
 pub const TOKENS: u32 = 10;
-pub const TURN_MS: i64 = 60_000;
 
 /// A row: `row[i]` is the card (1–8) at position i + 1.
 pub type Row = [u8; CARDS];
@@ -138,7 +137,6 @@ struct Seat {
 pub struct TruthState {
     seats: [Seat; 2],
     turn: usize,
-    time_left_ms: i64,
     /// Replay moments: a row cracked with tokens to spare; a lucky whole-row guess.
     pub moments: Moments,
 }
@@ -154,7 +152,6 @@ impl TruthState {
         if self.seats[1 - self.turn].guess.is_none() {
             self.turn = 1 - self.turn;
         }
-        self.time_left_ms = TURN_MS;
     }
     /// How many positions of `i`'s guess are right.
     fn right(&self, i: usize) -> usize {
@@ -234,8 +231,6 @@ pub struct TruthView {
     pub log: Vec<LogLine>,
     /// Their questions about your row.
     pub their_log: Vec<LogLine>,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub over: bool,
     /// After the end: their row, your guess, how many were right.
     pub their_row: Option<Row>,
@@ -272,7 +267,7 @@ impl Game for QuestionAndTruth {
             Seat { id: id.clone(), row, tokens: TOKENS, log: Vec::new(), guess: None, candidates: all_rows().to_vec() }
         };
         let seats = [seat(a), seat(b)];
-        Ok(TruthState { seats, turn: 0, time_left_ms: TURN_MS, moments: Moments::default() })
+        Ok(TruthState { seats, turn: 0, moments: Moments::default() })
     }
 
     fn apply_move(s: &mut TruthState, player: &str, mv: TruthMove) -> Result<(), String> {
@@ -328,20 +323,6 @@ impl Game for QuestionAndTruth {
         Ok(())
     }
 
-    fn tick(s: &mut TruthState, ms: u64) {
-        if s.over() {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            let p = s.seats[s.turn].id.clone();
-            let mv = Self::bot_move(s, &p, s.time_left_ms.unsigned_abs() + 1);
-            if Self::apply_move(s, &p, mv).is_err() {
-                s.next_turn();
-            }
-        }
-    }
-
     fn view_for(s: &TruthState, player: &str) -> TruthView {
         let i = s.seat(player).unwrap_or(0);
         let o = 1 - i;
@@ -359,8 +340,6 @@ impl Game for QuestionAndTruth {
             they_guessed: s.seats[o].guess.is_some(),
             log: lines(&s.seats[i].log),
             their_log: lines(&s.seats[o].log),
-            time_left_ms: s.time_left_ms.max(0),
-            turn_ms: TURN_MS,
             over,
             their_row: over.then_some(s.seats[o].row),
             your_guess: if over { s.seats[i].guess } else { None },
@@ -481,11 +460,12 @@ mod tests {
     }
 
     #[test]
-    fn time_up_plays_for_you() {
+    fn no_clock_the_turn_waits_for_you() {
         let mut s = new();
-        QuestionAndTruth::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.turn, 1);
-        assert!(!s.seats[0].log.is_empty() || s.seats[0].guess.is_some());
+        QuestionAndTruth::tick(&mut s, 600_000);
+        assert_eq!(s.turn, 0);
+        assert!(s.seats[0].log.is_empty() && s.seats[0].guess.is_none());
+        assert_eq!(s.seats[0].tokens, TOKENS);
     }
 
     #[test]

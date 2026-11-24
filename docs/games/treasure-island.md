@@ -8,8 +8,8 @@ Main game, 3–6 players (on the page: you + 3 bots). Code: `crates/rules/src/ga
 
 - The island is a 9 × 9 grid. You start with **100 coins** and one private clue box only you can see.
 - An opened box shows an arrow pointing toward the treasure. Squares that still fit your arrows are lit.
-- **5 auctions:** each one offers a box. Set your bid with the buttons and tap **Bid**; you have **20 seconds**. The highest bid pays and sees the arrow; tied top bids all pay and all see it.
-- Then tap a square and **Dig**, once only, within **30 seconds**.
+- **5 auctions:** each one offers a box. Set your bid with the buttons and tap **Bid**. The highest bid pays and sees the arrow; tied top bids all pay and all see it.
+- Then tap a square and **Dig**, once only.
 - Dig points by distance (a diagonal step counts as one): **exact 500, one step 300, two 150, three 50**, farther 0.
 - Your score is your dig points **plus the coins you kept**, so don't overpay for clues.
 
@@ -22,10 +22,10 @@ Main game, 3–6 players (on the page: you + 3 bots). Code: `crates/rules/src/ga
 - **Start:** every player gets **100 coins** and one **private box** of their own, already opened; nobody
   else sees where it is or what it says.
 - **5 auctions:** all five auction boxes are on the map from the start. Each round one box is up; everyone
-  bids **in secret** (0 up to their coins), **20 seconds**, no bid = 0. The highest bid wins: the winner pays
+  bids **in secret** (0 up to their coins). The highest bid wins: the winner pays
   and opens the box, and only they see its arrow. **Tied highest bids all pay and all see it.** If every
   bid is 0, the box stays closed. After each auction all bids are shown.
-- **Dig:** then every player secretly picks one square to dig (**30 seconds**; no pick = the bot's pick).
+- **Dig:** then every player secretly picks one square to dig.
 - **Score:** dig points by the distance to the treasure (in king steps: diagonal counts as one):
   **0 → 500, 1 → 300, 2 → 150, 3 → 50**, farther → 0; **plus the coins you kept**.
   Highest total wins; equal totals share a rank.

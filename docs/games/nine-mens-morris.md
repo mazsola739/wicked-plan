@@ -11,7 +11,6 @@ Final duel, 2 players. Code: `crates/rules/src/games/nine_mens_morris.rs`, scree
 - **Moving:** then, on each turn, tap one of your pieces and then a neighbouring empty point along a line.
 - **Flying:** when you are down to 3 pieces, a piece can jump to any empty point.
 - **Mill:** three of your pieces in a row along a line. Making a mill lets you tap one glowing enemy piece to remove it.
-- You have **60 seconds** a turn. If the time runs out, a bot plays your turn for you.
 - Points: **100 + 50** for each piece you still have, plus **400** for a win. A draw gives each player **150** extra.
 
 ## Rules in detail
@@ -26,12 +25,11 @@ The classic mill game on 24 points (three nested squares joined at the middles o
   (the same turn) that is not in a mill, unless all of them are in mills.
 - **Win:** the opponent is down to 2 pieces, or cannot move on their turn.
 - **Draw:** 200 turns in all, or 60 turns in a row without a removal once both hands are empty.
-- Turn timer: **60 s**; when it runs out, the bot plays your turn (including a removal).
 - Points: **100 + 50 × your pieces** (on the board and in hand) **+ 400 for the win** (+150 each for a draw).
 - Moves: `{type:"place", to}`, `{type:"move", from, to}`, `{type:"remove", at}`. Points are numbered 0–23:
   outer square 0–7, middle 8–15, inner 16–23, each clockwise from the top-left corner.
 - View: the board (1 yours, −1 theirs, 0 empty), pieces in hand and on the board, whose turn, the phase
-  (`place`, `move`, `fly`, `remove`, `wait`), your legal moves and removable pieces, the last move, the timer.
+  (`place`, `move`, `fly`, `remove`, `wait`), your legal moves and removable pieces, the last move.
 - Bot: a two-ply search (its turn and the reply, removals included) on pieces, open twos (two in a line with
   the third point empty) and mobility.
 - **Replay moments:** the winning move, by a mill ("Mill closed: {opponent} is down to 2 pieces") or by a

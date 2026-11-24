@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import './PolyominoTerritory.css';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 type Cell = [number, number];
 
@@ -33,8 +33,6 @@ interface PolyView {
   yourTurn: boolean;
   encore: boolean;
   turnsLeft: number;
-  timeLeftMs: number;
-  turnMs: number;
   last: Placement | null;
   over: boolean;
 }
@@ -125,14 +123,11 @@ export default function PolyominoTerritory({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Polyomino Territory"
-            step={view.yourTurn ? (view.encore ? 'Encore: place again!' : 'Your turn') : `${who(view.turn)} to move`}
-            score={(view.squares[you] ?? 0) * 10}
-          />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
-        </>
+        <GameTop
+          title="Polyomino Territory"
+          step={view.yourTurn ? (view.encore ? 'Encore: place again!' : 'Your turn') : `${who(view.turn)} to move`}
+          score={(view.squares[you] ?? 0) * 10}
+        />
       }
       stage={
         <svg className="drawing pt-board" viewBox={`-2 -2 ${n * C + 4} ${n * C + 4}`} role="img" aria-label="Territory board">

@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, speed_points};
+use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 /// Thing, action, quality of every root.
@@ -30,7 +30,7 @@ pub const ROOTS: [(&str, &str, &str); 16] = [
     ("ice", "freezes", "cold"),
 ];
 
-pub const QUESTION_MS: i64 = 75_000;
+pub const RIGHT_POINTS: i64 = 100;
 pub const STAGES: usize = 3;
 pub const PER_STAGE: usize = 3;
 /// Examples shown in stage 1, and from stage 2 on.
@@ -358,7 +358,7 @@ pub struct ExampleView {
 #[serde(rename_all = "camelCase")]
 pub struct LastView {
     pub question: QuestionView,
-    pub given: Option<usize>,
+    pub given: usize,
     pub solution: usize,
     pub correct: bool,
     pub points: i64,
@@ -370,7 +370,6 @@ pub struct LangState {
     pub course: Course,
     pub current: usize,
     pub score: i64,
-    pub time_left_ms: i64,
     pub last: Option<LastView>,
     /// Right or wrong, per question answered.
     pub results: Vec<bool>,
@@ -400,16 +399,15 @@ impl LangState {
         }
     }
 
-    fn finish(&mut self, given: Option<usize>) {
+    fn finish(&mut self, given: usize) {
         let (q, solution) = self.course.questions[self.current].clone();
-        let correct = given == Some(solution);
-        let points = if correct { speed_points(self.time_left_ms, QUESTION_MS) / 2 } else { 0 };
+        let correct = given == solution;
+        let points = if correct { RIGHT_POINTS } else { 0 };
         self.score += points;
         self.results.push(correct);
         self.last = Some(LastView { question: self.question_view(&q), given, solution, correct, points });
         self.current += 1;
         self.over = self.current >= self.course.questions.len();
-        self.time_left_ms = if self.over { 0 } else { QUESTION_MS };
         if self.over {
             let player = self.player.clone();
             if self.results.iter().all(|&r| r) {
@@ -438,8 +436,6 @@ pub struct LangView {
     pub last: Option<LastView>,
     pub results: Vec<bool>,
     pub score: i64,
-    pub time_left_ms: i64,
-    pub question_time_ms: i64,
     pub over: bool,
 }
 
@@ -470,7 +466,6 @@ impl Game for Rules {
             course: make_course(&mut Rng::new(seed)),
             current: 0,
             score: 0,
-            time_left_ms: QUESTION_MS,
             last: None,
             results: Vec::new(),
             over: false,
@@ -489,19 +484,8 @@ impl Game for Rules {
         if option >= 4 {
             return Err("Pick one of the four options".into());
         }
-        s.finish(Some(option));
+        s.finish(option);
         Ok(())
-    }
-
-    fn tick(s: &mut LangState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            s.time_left_ms = 0;
-            s.finish(None);
-        }
     }
 
     fn view_for(s: &LangState, _player: &str) -> LangView {
@@ -518,8 +502,6 @@ impl Game for Rules {
             last: s.last.clone(),
             results: s.results.clone(),
             score: s.score,
-            time_left_ms: s.time_left_ms,
-            question_time_ms: QUESTION_MS,
             over: s.over,
         }
     }
@@ -609,14 +591,19 @@ mod tests {
     }
 
     #[test]
-    fn answers_score_and_time_runs_out() {
+    fn right_and_wrong_answers_score() {
         let mut s = Rules::setup(&[P.into()], 3).unwrap();
         let right = s.course.questions[0].1;
         Rules::apply_move(&mut s, P, LangMove::Answer { option: right }).unwrap();
-        assert_eq!(s.score, 100);
+        assert_eq!(s.score, RIGHT_POINTS);
         assert!(Rules::apply_move(&mut s, P, LangMove::Answer { option: 4 }).is_err());
-        Rules::tick(&mut s, QUESTION_MS as u64);
+        // Time does nothing: the question waits for an answer.
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.current, 1);
+        let wrong = (s.course.questions[1].1 + 1) % 4;
+        Rules::apply_move(&mut s, P, LangMove::Answer { option: wrong }).unwrap();
         assert_eq!(s.current, 2);
+        assert_eq!(s.score, RIGHT_POINTS);
         assert!(!s.last.as_ref().unwrap().correct);
         let v = serde_json::to_value(Rules::view_for(&s, P)).unwrap();
         assert_eq!(v["examples"].as_array().unwrap().len(), 4);

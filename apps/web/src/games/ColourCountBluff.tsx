@@ -1,7 +1,7 @@
 // Colour Count Bluff. Rules page: docs/games/colour-count-bluff.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './ColourCountBluff.css';
 
 interface Bet {
@@ -28,8 +28,6 @@ interface BluffView {
   totalCards: number;
   bet: Bet | null;
   turn: number | null;
-  timeLeftMs: number;
-  turnMs: number;
   log: string[];
   last: Showdown | null;
   over: boolean;
@@ -107,12 +105,7 @@ export default function ColourCountBluff({ view: raw }: ScreenProps) {
       : `${nameOf(view.players[view.turn ?? 0] ?? '')} is thinking…`;
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Colour Count Bluff" step={`Round ${view.round} of ${view.maxRounds}`} score={view.lives[view.me] ?? 0} />
-          {!view.over && <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />}
-        </>
-      }
+      top={<GameTop title="Colour Count Bluff" step={`Round ${view.round} of ${view.maxRounds}`} score={view.lives[view.me] ?? 0} />}
       stage={
         <>
           <ul className="ccb-seats">

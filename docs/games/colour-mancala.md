@@ -11,7 +11,6 @@ Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/ga
 - You drop its stones one by one around the ring: the chosen colour first, then the next colours in order. You skip other players' stores.
 - If your last stone lands in your own store, you move again.
 - If it lands in an empty pit of your own and the facing pit has stones, you capture both into your store.
-- You have 20 seconds per turn, or a move is made for you.
 - **The catch:** only your weakest colour really counts. Points are 50 × your lowest colour total plus all your stones.
 
 ## Rules in detail
@@ -26,7 +25,6 @@ Main game, 2–4 players (on the page: you + 3 bots). Code: `crates/rules/src/ga
 - **Extra turn:** if the last stone lands in your own store, you move again.
 - **Capture:** if the last stone lands in an **empty pit of your own** and the facing pit (counting pits 1–5,
   pit 6 − i of the next player's row) has stones, both pits go into your store.
-- **Turn timer:** 20 seconds; then a default move (the bot's choice) is made for you.
 - **End:** when the player to move has no stones left in their pits, or after **40 turns per player**.
   Every player then moves the stones left in their own pits into their own store.
 - **Score:** your **lowest colour total** in the store counts. Points = **50 × lowest colour + total stones**

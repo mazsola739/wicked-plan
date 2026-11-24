@@ -7,12 +7,11 @@ Final duel, 2 players. Code: `crates/rules/src/games/big_or_small.rs`, screen: `
 **Goal:** finish with more chips than your opponent.
 
 - You both hold the cards 1–9 and start with 10 chips. There are 9 rounds.
-- Each round the dealer turns up a card. Then you both choose in secret, within 45 seconds.
+- Each round the dealer turns up a card. Then you both choose in secret; take your time.
 - Tap one of your cards to play face down. Each card can be played only once.
 - Bet on your **opponent's** card against the dealer's: tap **Smaller**, **Equal ×2** or **Bigger**.
 - Pick a stake of 1–3 chips, then tap **Play**.
 - When both have chosen, the cards are shown. A right bet wins its stake (equal pays double); a wrong bet loses it.
-- If time runs out, a choice is made for you.
 - Tip: count the cards your opponent has already played; the last rounds can be worked out.
 
 ## Rules in detail
@@ -26,11 +25,10 @@ Final duel, 2 players. Code: `crates/rules/src/games/big_or_small.rs`, screen: `
     with a stake of **1–3 chips** (0 only when you have no chips left).
 - When both have chosen, the cards are shown. A right bet wins its stake (**equal pays double**), a wrong
   bet loses it.
-- Turn timer: **45 s** per round; whoever has not chosen gets an automatic choice (the bot's).
 - End: after round 9. Points: **100 + 20 × chips**. Most chips wins; equal chips share the rank.
 - Moves: `{type:"play", card, guess:"bigger"|"smaller"|"equal", stake}`.
 - View (seat "you"): round, dealer card, your hand, the opponent's remaining hand, both chip counts, who has
-  chosen, the timer, and every finished round (dealer card, both cards, bets and chip changes). The
+  chosen, and every finished round (dealer card, both cards, bets and chip changes). The
   opponent's choice stays secret until both have chosen.
 - Bot: counts the opponent's remaining cards and bets on the outcome with the best expected value, staking
   more when it is sure. It plays a card whose relation to the dealer's card is the rarest in its own hand,

@@ -118,7 +118,7 @@ Every game has 1 to 3 categories (in its `GameInfo` as `tags`); the page filters
 | **Board** (`board`) | placing or moving pieces on a board or map | Animal Tile Auction, Blind Gomoku, Colour Mancala, Hidden Fourth Player, Hidden Rules Race, Knight's Tour, Lay the Grass, Nine Men's Morris, Polyomino Territory, Thieves and Cops, Tiger and Goat, Wall Territory |
 | **Dice** (`dice`) | dice are central | Dice Prediction, Rules Race, Secret Code |
 | **Words** (`words`) | words, letters or language | Either Or, Unknown Language, Word Block Tower |
-| **Speed** (`speed`) | speed or reflexes decide | Count the Cubes, Count the Rectangles, Duplicate Picture Buzzer, Equation Target, Fence Building, Find the Differences, Piece Puzzle, Symmetry Puzzle |
+| **Speed** (`speed`) | speed or reflexes decide | Count the Cubes, Count the Rectangles, Duplicate Picture Buzzer, Fence Building, Find the Differences, Piece Puzzle, Symmetry Puzzle |
 | **Alliance** (`alliance`) | teams, cooperation, negotiation | Either Or, Hidden Fourth Player, Memory Scene Quiz, Monster Alliance, Spinning Puzzle Wheel, Thieves and Cops, Virus Game, Weight Balance Puzzle, Word Block Tower |
 
 ## Still missing

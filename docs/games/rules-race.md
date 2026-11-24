@@ -6,11 +6,11 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 
 **Goal:** be the first to reach square 18, or be furthest ahead after 15 rounds.
 
-- At the start, pick one condition and one effect, then tap **Write my secret rule** (40 s). Your rule fires whenever another player's roll meets the condition, and it stays secret until it first fires.
-- On your turn, tap **Roll the die** (12 s, or it rolls itself). The die has 1, 2, 3, 3, prison and escape.
+- At the start, pick one condition and one effect, then tap **Write my secret rule**. Your rule fires whenever another player's roll meets the condition, and it stays secret until it first fires.
+- On your turn, tap **Roll the die**. The die has 1, 2, 3, 3, prison and escape.
 - Numbers move you forward. Prison locks your piece unless you hold an escape card; escape gives you a card.
 - In prison you skip turns until you roll escape or have sat out two turns.
-- Group rules, such as **Bump**, apply to everyone. After every 3rd round, vote to switch one on or off, or tap **Keep them all** (20 s).
+- Group rules, such as **Bump**, apply to everyone. After every 3rd round, vote to switch one on or off, or tap **Keep them all**.
 - Tip: a well-chosen rule can push rivals back or send them to prison.
 
 ## Rules in detail
@@ -26,8 +26,7 @@ A race along a track of squares 0–18. Everyone writes one secret **personal ru
 ## Setup
 
 - All pieces start on square 0.
-- **Write (40 s):** everyone builds a personal rule from one condition and one effect, in secret.
-  No choice in time: a random rule.
+- **Write:** everyone builds a personal rule from one condition and one effect, in secret.
 - A personal rule stays secret until it fires for the first time; then everyone sees it.
 
 Conditions (always about **another** player's roll):
@@ -62,7 +61,7 @@ Six sides: **1, 2, 3, 3, prison, escape**.
 
 ## A turn
 
-Seats take turns in order (**12 s** to roll; then the die rolls itself). After the roll and its move,
+Seats take turns in order. After the roll and its move,
 the personal rules of the other players are checked, in seat order starting after the roller; every
 rule whose condition holds fires once. Effects do not set off further rules.
 
@@ -75,7 +74,7 @@ rule whose condition holds fires once. Effects do not set off further rules.
 | **Exact finish:** overshooting 18 bounces you back by the extra steps. | off |
 | **Big three:** a 3 moves 4. | off |
 
-After every 3rd round there is a **vote (20 s)**: everyone secretly picks one group rule to switch,
+After every 3rd round there is a **vote**: everyone secretly picks one group rule to switch,
 or *keep*. The option with the most votes wins; a tie changes nothing. Votes are shown afterwards.
 
 ## End and scoring

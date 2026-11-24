@@ -1,7 +1,7 @@
 // Auction Bingo. Rules page: docs/games/auction-bingo.md
 
 import { type CSSProperties, useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './AuctionBingo.css';
 
 interface Board {
@@ -20,8 +20,6 @@ interface BingoView {
   myBid: number | null;
   counts: [number, number, number] | null;
   done: boolean[];
-  timeLeftMs: number;
-  phaseMs: number;
   score: number;
   log: string[];
   result: { boards: Board[]; coins: number[]; scores: number[] } | null;
@@ -162,14 +160,11 @@ export default function AuctionBingo({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Auction Bingo"
-            step={view.phase === 'over' ? 'Game over' : `Round ${view.round} of ${view.rounds} · ${view.phase}`}
-            score={view.score}
-          />
-          {view.phase !== 'over' && <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseMs} />}
-        </>
+        <GameTop
+          title="Auction Bingo"
+          step={view.phase === 'over' ? 'Game over' : `Round ${view.round} of ${view.rounds} · ${view.phase}`}
+          score={view.score}
+        />
       }
       stage={
         <>

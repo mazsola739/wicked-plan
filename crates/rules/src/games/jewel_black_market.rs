@@ -10,7 +10,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 3;
-pub const TURN_MS: i64 = 20_000;
 pub const BUYER: usize = 3;
 /// A card scoring this much or more at a reveal is a replay moment.
 const BIG_SCORE: i64 = 6;
@@ -78,7 +77,6 @@ pub struct JewelState {
     /// Seats in turn order for this round: forward, then reverse.
     pub queue: Vec<usize>,
     pub pos: usize,
-    pub time_left_ms: i64,
     pub scores: Vec<i64>,
     /// Per seat: the public log of this round plus what that seat saw.
     pub logs: Vec<Vec<String>>,
@@ -108,8 +106,6 @@ pub struct JewelView {
     pub swap_round: usize,
     pub turn: Option<usize>,
     pub my_card: Card,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub scores: Vec<i64>,
     pub log: Vec<String>,
     pub last: Option<Reveal>,
@@ -128,7 +124,6 @@ impl JewelState {
         let forward: Vec<usize> = (0..n).map(|i| (first + i) % n).collect();
         self.queue = forward.iter().chain(forward.iter().rev()).copied().collect();
         self.pos = 0;
-        self.time_left_ms = TURN_MS;
         self.logs = vec![vec![format!("Round {} dealt.", self.round + 1)]; n];
     }
 
@@ -186,7 +181,6 @@ impl JewelState {
 
     fn advance(&mut self) {
         self.pos += 1;
-        self.time_left_ms = TURN_MS;
         if self.pos < self.queue.len() {
             return;
         }
@@ -214,7 +208,6 @@ impl JewelState {
         self.round += 1;
         if self.round >= ROUNDS {
             self.over = true;
-            self.time_left_ms = 0;
         } else {
             self.deal();
         }
@@ -267,7 +260,6 @@ impl Game for Rules {
             discard: deck()[0],
             queue: Vec::new(),
             pos: 0,
-            time_left_ms: TURN_MS,
             scores: vec![0; n],
             logs: Vec::new(),
             last: None,
@@ -289,23 +281,6 @@ impl Game for Rules {
         s.do_move(seat, mv)
     }
 
-    fn tick(s: &mut JewelState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        let seat = s.queue[s.pos];
-        let mv = if s.hands[seat].kind == Kind::Bomb {
-            JewelMove::SwapPlayer { seat: (seat + 1) % s.players.len() }
-        } else {
-            JewelMove::Keep
-        };
-        let _ = s.do_move(seat, mv);
-    }
-
     fn view_for(s: &JewelState, player: &str) -> JewelView {
         let me = s.players.iter().position(|p| p == player).unwrap_or(0);
         let log = &s.logs[me];
@@ -317,8 +292,6 @@ impl Game for Rules {
             swap_round: if s.pos < s.players.len() { 1 } else { 2 },
             turn: s.turn(),
             my_card: s.hands[me],
-            time_left_ms: s.time_left_ms,
-            turn_ms: TURN_MS,
             scores: s.scores.clone(),
             log: log[log.len().saturating_sub(12)..].to_vec(),
             last: s.last.clone(),
@@ -422,12 +395,12 @@ mod tests {
     }
 
     #[test]
-    fn timeout_keeps_or_passes_the_bomb() {
+    fn a_turn_waits_for_its_player() {
         let mut s = Rules::setup(&ids(4), 3).unwrap();
         s.hands[0] = card(Kind::Bomb, -6);
-        Rules::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.hands[1], card(Kind::Bomb, -6));
-        assert_eq!(s.pos, 1);
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.hands[0], card(Kind::Bomb, -6));
+        assert_eq!(s.pos, 0);
     }
 
     #[test]

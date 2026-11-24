@@ -1,6 +1,6 @@
 // Jewel Black Market. Rules page: docs/games/jewel-black-market.md
 
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './JewelBlackMarket.css';
 
 type Kind = 'diamond' | 'gold' | 'silver' | 'bronze' | 'bomb';
@@ -23,8 +23,6 @@ interface JewelView {
   swapRound: number;
   turn: number | null;
   myCard: Card;
-  timeLeftMs: number;
-  turnMs: number;
   scores: number[];
   log: string[];
   last: Reveal | null;
@@ -167,14 +165,11 @@ export default function JewelBlackMarket({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Jewel Black Market"
-            step={`Round ${view.round} of ${view.rounds} · swap ${view.swapRound} of 2`}
-            score={view.scores[view.me] ?? 0}
-          />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
-        </>
+        <GameTop
+          title="Jewel Black Market"
+          step={`Round ${view.round} of ${view.rounds} · swap ${view.swapRound} of 2`}
+          score={view.scores[view.me] ?? 0}
+        />
       }
       stage={
         <div className="jbm-table">

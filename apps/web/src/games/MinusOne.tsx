@@ -1,7 +1,7 @@
 // Minus One: show two cards, keep one; the lowest unique card wins. Rules: docs/games/minus-one.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './MinusOne.css';
 
 type Phase = 'show' | 'keep' | 'result' | 'over';
@@ -10,8 +10,6 @@ interface MoView {
   phase: Phase;
   round: number;
   rounds: number;
-  timeLeftMs: number;
-  phaseMs: number;
   hand: number[];
   myPair: [number, number] | null;
   myKept: number | null;
@@ -59,12 +57,7 @@ export default function MinusOne({ view }: ScreenProps) {
       : 'No unique card: nobody scores.';
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Minus One" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
-        </>
-      }
+      top={<GameTop title="Minus One" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <ul className="list">

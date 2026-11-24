@@ -10,7 +10,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const PIECES: u8 = 9;
-pub const TURN_MS: i64 = 60_000;
 pub const MAX_PLIES: u32 = 200;
 pub const QUIET_PLIES: u32 = 60;
 
@@ -265,7 +264,6 @@ pub struct MorrisState {
     quiet: u32,
     last: Option<(Option<usize>, usize)>,
     last_removed: Option<usize>,
-    time_left_ms: i64,
     over: bool,
     winner: Option<usize>,
     /// Replay moments: the winning move, two mills closed with one piece.
@@ -281,7 +279,6 @@ impl MorrisState {
         self.plies += 1;
         self.quiet = if removed || self.pos.hand != [0, 0] { 0 } else { self.quiet + 1 };
         self.turn = 1 - self.turn;
-        self.time_left_ms = TURN_MS;
         if self.pos.lost(self.turn) {
             self.over = true;
             self.winner = Some(1 - self.turn);
@@ -326,8 +323,6 @@ pub struct MorrisView {
     pub last: Option<[i32; 2]>,
     pub last_removed: Option<usize>,
     pub turn_no: u32,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub over: bool,
 }
 
@@ -362,7 +357,6 @@ impl Game for NineMensMorris {
             quiet: 0,
             last: None,
             last_removed: None,
-            time_left_ms: TURN_MS,
             over: false,
             winner: None,
             moments: Moments::default(),
@@ -401,7 +395,6 @@ impl Game for NineMensMorris {
         s.last_removed = None;
         if s.pos.step(p, from, to) {
             s.pending_remove = true;
-            s.time_left_ms = TURN_MS;
             if POINT_MILLS[to].iter().all(|&m| MILLS[m].iter().all(|&j| s.pos.board[j] == p as i8)) {
                 s.moments.push(player, "Two mills closed with one piece");
             }
@@ -409,21 +402,6 @@ impl Game for NineMensMorris {
             s.end_turn(false);
         }
         Ok(())
-    }
-
-    fn tick(s: &mut MorrisState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            let p = s.players[s.turn].clone();
-            let mv = Self::bot_move(s, &p, u64::from(s.plies) + 1);
-            if Self::apply_move(s, &p, mv).is_err() {
-                // Cannot happen with a legal bot move; never stall.
-                s.end_turn(false);
-            }
-        }
     }
 
     fn view_for(s: &MorrisState, player: &str) -> MorrisView {
@@ -461,8 +439,6 @@ impl Game for NineMensMorris {
             last: s.last.map(|(f, t)| [f.map_or(-1, |f| f as i32), t as i32]),
             last_removed: s.last_removed,
             turn_no: s.plies / 2 + 1,
-            time_left_ms: s.time_left_ms.max(0),
-            turn_ms: TURN_MS,
             over: s.over,
         }
     }
@@ -614,11 +590,11 @@ mod tests {
     }
 
     #[test]
-    fn time_up_plays_for_you() {
+    fn no_clock_the_turn_waits_for_you() {
         let mut s = new();
-        NineMensMorris::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.turn, 1);
-        assert_eq!(s.pos.hand[0], PIECES - 1);
+        NineMensMorris::tick(&mut s, 600_000);
+        assert_eq!(s.turn, 0);
+        assert_eq!(s.pos.hand[0], PIECES);
     }
 
     #[test]

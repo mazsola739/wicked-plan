@@ -14,7 +14,6 @@ pub const ROUNDS: u32 = 24;
 pub const START_PRICE: i64 = 10_000;
 pub const FLOOR: i64 = 100;
 pub const START_CASH: i64 = 100_000;
-pub const TRADE_MS: i64 = 30_000;
 pub const REVEAL_MS: i64 = 20_000;
 pub const PUBLIC_CLUES: [u32; 2] = [8, 16];
 pub const NAMES: [(&str, &str); STOCKS] = [
@@ -216,8 +215,6 @@ pub struct MarketView {
     pub phase: &'static str,
     pub round: u32,
     pub rounds: u32,
-    pub time_left_ms: i64,
-    pub phase_time_ms: i64,
     pub stocks: Vec<StockView>,
     pub cash: i64,
     pub shares: [i64; STOCKS],
@@ -316,7 +313,6 @@ impl MarketState {
             }
         } else {
             self.round += 1;
-            self.time_left_ms = TRADE_MS;
         }
     }
 
@@ -455,7 +451,7 @@ impl Game for Rules {
             public_clues: Vec::new(),
             round: 1,
             phase: Phase::Trade,
-            time_left_ms: TRADE_MS,
+            time_left_ms: 0,
             log: vec!["The market opens. Every stock costs 10,000.".into()],
             rng,
             moments: Moments::default(),
@@ -500,16 +496,12 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut MarketState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Reveal {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Trade => s.end_round(),
-            _ => s.phase = Phase::Over,
+        if s.time_left_ms <= 0 {
+            s.phase = Phase::Over;
         }
     }
 
@@ -525,8 +517,6 @@ impl Game for Rules {
             },
             round: s.round,
             rounds: ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_time_ms: if end { REVEAL_MS } else { TRADE_MS },
             stocks: (0..STOCKS)
                 .map(|k| StockView {
                     name: NAMES[k].0,
@@ -631,6 +621,20 @@ mod tests {
         assert_eq!(s.prices[1], [10_500, 12_000, 11_200, 12_000, 9_500, 9_000, 9_400]);
         assert_eq!(s.round, 2);
         assert_eq!(apply_pct(105, -60), FLOOR);
+    }
+
+    #[test]
+    fn a_round_waits_for_everyone_and_the_reveal_closes_by_itself() {
+        let mut s = Rules::setup(&players(3), 4).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.round, s.phase), (1, Phase::Trade));
+        assert_eq!(Rules::to_move(&s).len(), 3);
+        for _ in 0..ROUNDS {
+            all_done(&mut s);
+        }
+        assert_eq!(s.phase, Phase::Reveal);
+        Rules::tick(&mut s, REVEAL_MS as u64);
+        assert_eq!(s.phase, Phase::Over);
     }
 
     #[test]

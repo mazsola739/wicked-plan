@@ -14,8 +14,6 @@ pub const CHIPS: i64 = 20;
 pub const ANTE: i64 = 1;
 pub const RAISE: i64 = 2;
 pub const MAX_RAISES: usize = 2;
-pub const BET_MS: i64 = 20_000;
-pub const BUILD_MS: i64 = 60_000;
 pub const LOW: f64 = 1.0;
 pub const HIGH: f64 = 20.0;
 pub const SYMBOLS: [char; 4] = ['+', '-', '*', '/'];
@@ -156,10 +154,9 @@ pub struct HiLoState {
     pub acted: Vec<bool>,
     pub turn: usize,
     pub builds: Vec<Option<Build>>,
-    /// Best Low and High equation per seat for this hand (for bots and timeouts).
+    /// Best Low and High equation per seat for this hand (for bots).
     pub best: Vec<(Build, f64, Build, f64)>,
     pub pot: i64,
-    pub time_left_ms: i64,
     pub log: Vec<String>,
     pub last: Option<Showdown>,
     pub over: bool,
@@ -204,8 +201,6 @@ pub struct HiLoView {
     pub can_raise: bool,
     pub pot: i64,
     pub build: Option<Build>,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub log: Vec<String>,
     pub last: Option<Showdown>,
     pub over: bool,
@@ -221,7 +216,6 @@ impl HiLoState {
         let seats: Vec<usize> = (0..n).filter(|&s| self.chips[s] >= ANTE).collect();
         if seats.len() < 2 || self.hand >= HANDS {
             self.over = true;
-            self.time_left_ms = 0;
             self.log.push("Game over.".into());
             return;
         }
@@ -252,7 +246,6 @@ impl HiLoState {
         self.raises = 0;
         self.acted = vec![false; n];
         self.turn = self.dealer;
-        self.time_left_ms = BET_MS;
         self.advance_turn();
     }
 
@@ -267,13 +260,11 @@ impl HiLoState {
             let s = (self.turn + i) % n;
             if self.live[s] && (!self.acted[s] || self.put_round[s] < self.level) {
                 self.turn = s;
-                self.time_left_ms = BET_MS;
                 return;
             }
         }
         if self.phase == Phase::Bet1 {
             self.phase = Phase::Build;
-            self.time_left_ms = BUILD_MS;
         } else {
             self.showdown();
         }
@@ -468,7 +459,6 @@ impl Game for Rules {
             builds: vec![None; n],
             best: Vec::new(),
             pot: 0,
-            time_left_ms: BET_MS,
             log: Vec::new(),
             last: None,
             over: false,
@@ -507,28 +497,6 @@ impl Game for Rules {
         s.bet_move(seat, mv)
     }
 
-    fn tick(s: &mut HiLoState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        if s.phase == Phase::Build {
-            for seat in 0..s.n() {
-                if s.live[seat] && s.builds[seat].is_none() {
-                    s.builds[seat] = Some(s.auto_build(seat));
-                }
-            }
-            s.after_build();
-        } else {
-            let seat = s.turn;
-            let mv = if s.level > s.put_round[seat] { HiLoMove::Fold } else { HiLoMove::Call };
-            let _ = s.bet_move(seat, mv);
-        }
-    }
-
     fn view_for(s: &HiLoState, player: &str) -> HiLoView {
         let me = s.players.iter().position(|p| p == player).unwrap_or(0);
         let betting = !s.over && s.phase != Phase::Build;
@@ -559,8 +527,6 @@ impl Game for Rules {
             can_raise: betting && s.turn == me && s.can_raise(me),
             pot: s.pot,
             build: s.builds[me].clone(),
-            time_left_ms: s.time_left_ms,
-            phase_ms: if s.phase == Phase::Build { BUILD_MS } else { BET_MS },
             log: s.log[s.log.len().saturating_sub(10)..].to_vec(),
             last: s.last.clone(),
             over: s.over,
@@ -712,12 +678,19 @@ mod tests {
     }
 
     #[test]
-    fn timeouts_keep_it_moving() {
+    fn no_timer_the_game_waits_and_chips_add_up() {
         let mut s = Rules::setup(&ids(3), 6).unwrap();
-        for _ in 0..200 {
-            Rules::tick(&mut s, BUILD_MS as u64);
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Bet1);
+        assert_eq!(s.turn, 1);
+        let mut k = 0u64;
+        while !s.over {
+            for p in Rules::to_move(&s) {
+                k += 1;
+                let mv = Rules::bot_move(&s, &p, k);
+                Rules::apply_move(&mut s, &p, mv).unwrap();
+            }
         }
-        assert!(s.over);
         assert_eq!(s.chips.iter().sum::<i64>(), 60);
     }
 

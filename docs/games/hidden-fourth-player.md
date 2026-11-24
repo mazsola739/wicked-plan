@@ -8,7 +8,7 @@ screen: `apps/web/src/games/HiddenFourthPlayer.tsx`.
 **Goal:** make your own lines of three, while the team stops the Shadow from making one.
 
 - You and two bots play on a 7×7 board, each in your own colour. The Shadow, run by the game, plays too.
-- Each round you place a stone first, then each bot, then the Shadow. Tap an empty square. You have 30 seconds, or the stone is placed for you.
+- Each round you place a stone first, then each bot, then the Shadow. Tap an empty square.
 - Three of one colour in a row (across, down or diagonal) is a line. Four in a row counts as 2 lines.
 - If the Shadow makes a line, the game ends at once.
 - If the board fills with no Shadow line, the team survives: everyone gets 100, plus 100 per own line, plus a 300 bonus.
@@ -29,7 +29,6 @@ controls: **the Shadow**, run by the rules. Its plan is unknown; all you see is 
 - **The team survives** when the board is full without a Shadow line.
 - **The Shadow's play:** complete a line if it can; otherwise the square that gives it the most open
   twos (two Shadow stones and an empty square in a 3-stretch), ties dealt by the seed.
-- Turn timer: **30 s**; when it runs out, the bot plays your stone.
 - **Replay moments:** a stone that makes two or more own lines at once ("2 lines with one stone"), and a
   stone that blocks a Shadow line and makes an own line ("One stone: Shadow blocked, line made"). Public:
   the whole board is open.
@@ -46,8 +45,8 @@ last player before the Shadow is the one who must cover the threats the others l
 
 - Moves: `{type:"place", x, y}` (0–6 from the top-left).
 - View: the board (0 empty, 1–3 the seats in order, 4 the Shadow), your seat, each seat's lines, whose turn,
-  the squares where the Shadow would complete a line now (danger), the last stones played, the round, the
-  timer, and at the end whether the team survived.
+  the squares where the Shadow would complete a line now (danger), the last stones played, the round, and
+  at the end whether the team survived.
 - Bot: scores every empty square: blocking a Shadow line (a must when the threats outnumber the players
   still to move before the Shadow), blocking squares where the Shadow would make two threats at once, its
   own lines and open twos, a little for blocking the other players, and a little for the centre.

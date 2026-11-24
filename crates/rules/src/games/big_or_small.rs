@@ -12,7 +12,6 @@ use crate::rng::Rng;
 pub const CARDS: u8 = 9;
 pub const START_CHIPS: i64 = 10;
 pub const MAX_STAKE: i64 = 3;
-pub const TURN_MS: i64 = 45_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -68,7 +67,6 @@ pub struct BigState {
     chips: [i64; 2],
     picks: [Option<Pick>; 2],
     history: Vec<RoundLog>,
-    time_left_ms: i64,
     over: bool,
     /// Replay moments: an exact "equal" call, a six-chip swing, the lead stolen in the last round.
     pub moments: Moments,
@@ -120,7 +118,6 @@ impl BigState {
         self.history.push(RoundLog { dealer, sides });
         self.picks = [None, None];
         self.round += 1;
-        self.time_left_ms = TURN_MS;
         if self.round >= CARDS as usize {
             self.over = true;
         }
@@ -155,8 +152,6 @@ pub struct BigView {
     pub chosen: bool,
     pub they_chose: bool,
     pub max_stake: i64,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub history: Vec<LogView>,
     pub over: bool,
 }
@@ -194,7 +189,6 @@ impl Game for BigOrSmall {
             chips: [START_CHIPS; 2],
             picks: [None, None],
             history: Vec::new(),
-            time_left_ms: TURN_MS,
             over: false,
             moments: Moments::default(),
         })
@@ -222,23 +216,6 @@ impl Game for BigOrSmall {
         Ok(())
     }
 
-    fn tick(s: &mut BigState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            for i in 0..2 {
-                if s.picks[i].is_none() {
-                    let p = s.players[i].clone();
-                    let BigMove::Play { card, guess, stake } = Self::bot_move(s, &p, s.round as u64 + 1);
-                    s.picks[i] = Some(Pick { card, guess, stake });
-                }
-            }
-            s.resolve();
-        }
-    }
-
     fn view_for(s: &BigState, player: &str) -> BigView {
         let i = s.seat(player).unwrap_or(0);
         let o = 1 - i;
@@ -254,8 +231,6 @@ impl Game for BigOrSmall {
             chosen: s.picks[i].is_some(),
             they_chose: s.picks[o].is_some(),
             max_stake: MAX_STAKE,
-            time_left_ms: s.time_left_ms.max(0),
-            turn_ms: TURN_MS,
             history: s.history.iter().map(|r| LogView { dealer: r.dealer, mine: r.sides[i], theirs: r.sides[o] }).collect(),
             over: s.over,
         }
@@ -370,18 +345,25 @@ mod tests {
     }
 
     #[test]
-    fn time_up_chooses_for_you() {
+    fn the_round_waits_for_both_choices() {
         let mut s = new();
-        BigOrSmall::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.round, 1);
-        assert_eq!(s.history.len(), 1);
+        BigOrSmall::tick(&mut s, 600_000);
+        assert_eq!(s.round, 0);
+        assert_eq!(BigOrSmall::to_move(&s).len(), 2);
+        BigOrSmall::apply_move(&mut s, "a", play(3, Guess::Bigger, 1)).unwrap();
+        BigOrSmall::tick(&mut s, 600_000);
+        assert_eq!(s.round, 0);
+        assert_eq!(BigOrSmall::to_move(&s), vec!["b".to_string()]);
     }
 
     #[test]
     fn the_last_card_is_a_sure_bet_for_the_bot() {
         let mut s = new();
         for _ in 0..8 {
-            BigOrSmall::tick(&mut s, TURN_MS as u64);
+            for p in ["a", "b"] {
+                let mv = BigOrSmall::bot_move(&s, p, 1);
+                BigOrSmall::apply_move(&mut s, p, mv).unwrap();
+            }
         }
         let BigMove::Play { guess, .. } = BigOrSmall::bot_move(&s, "a", 1);
         let last = s.hands[1][0];

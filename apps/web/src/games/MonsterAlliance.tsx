@@ -1,7 +1,7 @@
 // Monster Alliance: bid for weapons, ally up, beat monsters together. Rules: docs/games/monster-alliance.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, NumberPad, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, NumberPad, Play, type ScreenProps, useKeys } from './common';
 import './MonsterAlliance.css';
 
 interface Monster {
@@ -23,8 +23,6 @@ interface MaView {
   phase: 'bid' | 'ally' | 'attack' | 'over';
   round: number;
   rounds: number;
-  timeLeftMs: number;
-  phaseTimeMs: number;
   me: number;
   monster: Monster | null;
   fighters: { index: number; id: string; points: number; cards: number; done: boolean }[];
@@ -110,12 +108,7 @@ export default function MonsterAlliance({ view }: ScreenProps) {
   const m = v.monster;
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Monster Alliance" step={`Monster ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`} score={v.score} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseTimeMs} />
-        </>
-      }
+      top={<GameTop title="Monster Alliance" step={`Monster ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`} score={v.score} />}
       stage={
         <>
           {m && (

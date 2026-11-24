@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import './WordBlockTower.css';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 interface Block {
   letter: string;
@@ -14,7 +14,6 @@ interface RoundResult {
   topic: string;
   words: (string | null)[];
   takeBacks: number;
-  timeouts: number;
   points: number;
 }
 
@@ -32,8 +31,6 @@ interface TowerView {
   lastWord: boolean;
   canTakeBack: boolean;
   takeBacks: number;
-  timeLeftMs: number;
-  turnMs: number;
   results: RoundResult[];
   score: number;
   over: boolean;
@@ -79,12 +76,7 @@ export default function WordBlockTower({ view: raw }: ScreenProps) {
   const who = (seat: number) => (seat === you ? 'You' : nameOf(view.players[seat]!));
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Word Block Tower" step={`Round ${view.round} of ${view.rounds}`} score={view.score} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
-        </>
-      }
+      top={<GameTop title="Word Block Tower" step={`Round ${view.round} of ${view.rounds}`} score={view.score} />}
       stage={
         <div className="card wbt-stage">
           <div className="wbt-topic">

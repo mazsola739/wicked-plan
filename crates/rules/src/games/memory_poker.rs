@@ -11,8 +11,6 @@ use crate::rng::Rng;
 pub const ROUNDS: usize = 3;
 pub const GRID: usize = 16;
 pub const SHARED: usize = 3;
-pub const STUDY_MS: i64 = 15_000;
-pub const PICK_MS: i64 = 20_000;
 pub const SHOW_MS: i64 = 6_000;
 pub const BEST_BONUS: i64 = 60;
 pub const HAND_POINTS: [i64; 9] = [20, 50, 90, 130, 180, 200, 250, 320, 400];
@@ -96,6 +94,7 @@ pub struct State {
     pub taken: Vec<Option<usize>>,
     pub shared: Vec<Card>,
     pub phase: Phase,
+    /// Time left of the showdown (study and picks have no clock).
     pub time_left_ms: i64,
     /// Seat indices in pick order for this round; `pick` is the position in it.
     pub order: Vec<usize>,
@@ -138,8 +137,6 @@ pub struct View {
     pub phase: Phase,
     pub round: usize,
     pub rounds: usize,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub grid: Vec<GridCell>,
     pub shared: Vec<Face>,
     pub seats: Vec<SeatView>,
@@ -174,7 +171,6 @@ impl State {
             s.round_points = 0;
         }
         self.phase = Phase::Study;
-        self.time_left_ms = STUDY_MS;
     }
 
     fn hand_of(&self, seat: usize) -> Vec<Card> {
@@ -183,7 +179,6 @@ impl State {
 
     fn start_pick(&mut self) {
         self.phase = Phase::Pick;
-        self.time_left_ms = PICK_MS;
     }
 
     fn take(&mut self, cell: usize) {
@@ -191,7 +186,6 @@ impl State {
         self.taken[cell] = Some(seat);
         self.seats[seat].picks.push(cell);
         self.pick += 1;
-        self.time_left_ms = PICK_MS;
         if self.pick >= self.order.len() {
             self.showdown();
         }
@@ -261,7 +255,7 @@ impl Game for MemoryPoker {
             taken: Vec::new(),
             shared: Vec::new(),
             phase: Phase::Study,
-            time_left_ms: STUDY_MS,
+            time_left_ms: 0,
             order: Vec::new(),
             pick: 0,
             over: false,
@@ -303,20 +297,12 @@ impl Game for MemoryPoker {
     }
 
     fn tick(s: &mut State, ms: u64) {
-        if s.over {
+        if s.over || s.phase != Phase::Show {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Study => s.start_pick(),
-            Phase::Pick => {
-                let cell = s.taken.iter().position(Option::is_none).expect("a free square");
-                s.take(cell);
-            }
-            Phase::Show => s.end_show(),
+        if s.time_left_ms <= 0 {
+            s.end_show();
         }
     }
 
@@ -327,12 +313,6 @@ impl Game for MemoryPoker {
             phase: s.phase,
             round: (s.round + 1).min(ROUNDS),
             rounds: ROUNDS,
-            time_left_ms: s.time_left_ms.max(0),
-            phase_ms: match s.phase {
-                Phase::Study => STUDY_MS,
-                Phase::Pick => PICK_MS,
-                Phase::Show => SHOW_MS,
-            },
             grid: (0..GRID)
                 .map(|c| GridCell {
                     card: (open || s.taken[c] == Some(me)).then(|| face(s.grid[c])),
@@ -433,6 +413,12 @@ mod tests {
         (1..=n).map(|i| format!("p{i}")).collect()
     }
 
+    fn all_ready(s: &mut State) {
+        for id in players(s.seats.len()) {
+            MemoryPoker::apply_move(s, &id, Move::Ready).unwrap();
+        }
+    }
+
     /// Card from rank (2–14) and suit (0–3).
     fn c(rank: u8, suit: u8) -> Card {
         (rank - 2) * 4 + suit
@@ -473,7 +459,7 @@ mod tests {
     #[test]
     fn snake_order_and_showdown_points() {
         let mut s = MemoryPoker::setup(&players(2), 2).unwrap();
-        MemoryPoker::tick(&mut s, STUDY_MS as u64);
+        all_ready(&mut s);
         for (p, cell) in [("p1", 0), ("p2", 1), ("p2", 2), ("p1", 3)] {
             MemoryPoker::apply_move(&mut s, p, Move::Pick { cell }).unwrap();
         }
@@ -488,17 +474,20 @@ mod tests {
         assert_eq!(s.seats[1].points, HAND_POINTS[h2.0] + bonus(&h2, &h1));
         MemoryPoker::apply_move(&mut s, "p1", Move::Next).unwrap();
         // Round 2 starts with the second seat.
-        MemoryPoker::tick(&mut s, STUDY_MS as u64);
+        all_ready(&mut s);
         assert_eq!(MemoryPoker::to_move(&s), vec!["p2".to_string()]);
     }
 
     #[test]
-    fn a_slow_pick_takes_the_first_free_square() {
-        let mut s = MemoryPoker::setup(&players(1), 3).unwrap();
-        MemoryPoker::tick(&mut s, STUDY_MS as u64);
+    fn study_and_picks_wait_for_the_players() {
+        let mut s = MemoryPoker::setup(&players(2), 3).unwrap();
+        MemoryPoker::tick(&mut s, 3_600_000);
+        assert_eq!(s.phase, Phase::Study);
+        all_ready(&mut s);
         MemoryPoker::apply_move(&mut s, "p1", Move::Pick { cell: 0 }).unwrap();
-        MemoryPoker::tick(&mut s, PICK_MS as u64);
-        assert_eq!(s.seats[0].picks, vec![0, 1]);
+        MemoryPoker::tick(&mut s, 3_600_000);
+        assert_eq!((s.phase, s.pick), (Phase::Pick, 1));
+        assert_eq!(MemoryPoker::to_move(&s), vec!["p2".to_string()]);
     }
 
     #[test]
@@ -506,7 +495,7 @@ mod tests {
         let (mut bot, mut random) = (0, 0);
         for seed in 1..=200 {
             let mut s = MemoryPoker::setup(&players(1), seed).unwrap();
-            MemoryPoker::tick(&mut s, STUDY_MS as u64);
+            all_ready(&mut s);
             let mv = MemoryPoker::bot_move(&s, "p1", seed);
             MemoryPoker::apply_move(&mut s, "p1", mv).unwrap();
             let mv = MemoryPoker::bot_move(&s, "p1", seed);
@@ -528,7 +517,7 @@ mod tests {
         let mut s = MemoryPoker::setup(&players(2), 4).unwrap();
         s.shared = vec![c(10, 0), c(11, 0), c(12, 1)];
         s.grid[..4].copy_from_slice(&[c(13, 2), c(2, 3), c(7, 2), c(14, 3)]);
-        MemoryPoker::tick(&mut s, STUDY_MS as u64);
+        all_ready(&mut s);
         for (p, cell) in [("p1", 0), ("p2", 1), ("p2", 2)] {
             MemoryPoker::apply_move(&mut s, p, Move::Pick { cell }).unwrap();
         }

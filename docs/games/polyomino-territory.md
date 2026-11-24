@@ -12,7 +12,7 @@ Our short version of the 30 × 30 original: a **14 × 14** board.
 - A piece must cover empty squares and touch your own squares edge to edge.
 - Cover a **⟳ Encore** square and you place again at once.
 - Cover a **↗ Leap** square to earn a leap. Tap **↗ Leap** before placing, and that piece may go anywhere empty.
-- You have 30 seconds a turn; then a move is made for you. If you cannot place any piece, you are skipped.
+- If you cannot place any piece, you are skipped.
 - The game ends when nobody can place, or after 40 turns each. Every square you own is worth 10 points; the highest score wins.
 
 ## Rules in detail
@@ -28,7 +28,6 @@ Our short version of the 30 × 30 original: a **14 × 14** board.
   - **↗ Leap:** cover it and you gain a leap: one later piece may go **anywhere** empty, touching nothing.
 - **Stuck:** a player who cannot place any piece is skipped. The game ends when **nobody** can place, or
   after **40 turns** per player.
-- **Turn timer:** 30 seconds; then a default move (the bot's choice) is made for you.
 - **Score:** **10 points per square** you own. Highest wins; equal scores share a rank.
 - **View:** the board, the key squares left, everyone's leaps and squares, your own hand.
 - **Moves:** `{type:"place", piece, cells:[[x,y]…], leap}`: `piece` is the hand index, `cells` the board

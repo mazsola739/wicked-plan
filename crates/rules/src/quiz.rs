@@ -1,7 +1,9 @@
-//! Shared engine for the timed solo puzzles that are "rounds of one question":
+//! Shared engine for the solo puzzles that are "rounds of one question":
 //! Count the Cubes, Count the Rectangles, Equation Target.
-//! Each round shows a puzzle; answer before the timer runs out. A correct
-//! answer scores `speed_points`; a wrong one or a timeout scores 0.
+//! Each round shows a puzzle. Timed games (`round_ms > 0`) must answer before
+//! the timer runs out, and a correct answer scores `speed_points`. Untimed
+//! games (`round_ms == 0`) wait for the answer, and a correct one scores 100.
+//! A wrong answer or a timeout scores 0.
 
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -35,6 +37,7 @@ pub struct QuizState<P: QuizPuzzle> {
     pub rounds: Vec<QuizRound<P>>,
     pub current: usize,
     pub time_left_ms: i64,
+    /// 0: untimed, the round waits for the answer.
     pub round_ms: i64,
     pub over: bool,
 }
@@ -78,7 +81,13 @@ impl<P: QuizPuzzle> QuizState<P> {
         let round_ms = self.round_ms;
         let round = &mut self.rounds[self.current];
         round.correct = given.as_ref().is_some_and(|a| round.puzzle.is_correct(a));
-        round.points = if round.correct { speed_points(time_left, round_ms) } else { 0 };
+        round.points = if !round.correct {
+            0
+        } else if round_ms > 0 {
+            speed_points(time_left, round_ms)
+        } else {
+            100
+        };
         round.given = Some(given);
         self.current += 1;
         self.over = self.current >= self.rounds.len();
@@ -98,7 +107,7 @@ impl<P: QuizPuzzle> QuizState<P> {
     }
 
     pub fn tick(&mut self, ms: u64) {
-        if self.over {
+        if self.over || self.round_ms == 0 {
             return;
         }
         self.time_left_ms -= ms as i64;

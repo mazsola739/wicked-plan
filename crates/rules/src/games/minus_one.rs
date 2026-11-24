@@ -9,8 +9,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 7;
-pub const SHOW_MS: i64 = 20_000;
-pub const KEEP_MS: i64 = 15_000;
 pub const RESULT_MS: i64 = 5_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -46,9 +44,10 @@ pub struct MoState {
     pub seats: Vec<Seat>,
     pub phase: Phase,
     pub round: usize,
+    /// The Result pause.
     pub time_left_ms: i64,
     pub log: Vec<RoundLog>,
-    /// Replay moments: a 1 or a 2 that takes a pot of 20 or more.
+    /// Replay moments: a 1 or a 2 that takes a pot of 22 or more.
     pub moments: Moments,
 }
 
@@ -79,8 +78,6 @@ pub struct MoView {
     pub phase: Phase,
     pub round: usize,
     pub rounds: usize,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub hand: Vec<u8>,
     pub my_pair: Option<[u8; 2]>,
     pub my_kept: Option<u8>,
@@ -111,15 +108,11 @@ impl MoState {
             s.kept = None;
         }
         self.phase = Phase::Show;
-        self.time_left_ms = SHOW_MS;
     }
 
     fn after_move(&mut self) {
         match self.phase {
-            Phase::Show if self.seats.iter().all(|s| s.pair.is_some()) => {
-                self.phase = Phase::Keep;
-                self.time_left_ms = KEEP_MS;
-            }
+            Phase::Show if self.seats.iter().all(|s| s.pair.is_some()) => self.phase = Phase::Keep,
             Phase::Keep if self.seats.iter().all(|s| s.kept.is_some()) => self.score_round(),
             _ => {}
         }
@@ -131,9 +124,9 @@ impl MoState {
         let winner = lowest_unique(&kept);
         if let Some(w) = winner {
             self.seats[w].score += pot;
-            // A replay moment: a 1 or a 2 snatching a pot of 20 or more (every kept card is public now).
+            // A replay moment: a 1 or a 2 snatching a pot of 22 or more (every kept card is public now).
             let card = i64::from(kept[w]);
-            if card <= 2 && pot >= 20 {
+            if card <= 2 && pot >= 22 {
                 self.moments.push(&self.seats[w].id.clone(), format!("A lone {card} takes the pot of {pot}"));
             }
         }
@@ -150,29 +143,6 @@ impl MoState {
         });
         self.phase = Phase::Result;
         self.time_left_ms = RESULT_MS;
-    }
-
-    fn timeout(&mut self) {
-        match self.phase {
-            Phase::Show => {
-                for s in self.seats.iter_mut().filter(|s| s.pair.is_none()) {
-                    let mut h = s.hand.clone();
-                    h.sort();
-                    s.pair = Some([h[0], h[1]]);
-                }
-                self.after_move();
-            }
-            Phase::Keep => {
-                for s in &mut self.seats {
-                    if s.kept.is_none() {
-                        s.kept = s.pair.map(|[a, b]| a.min(b));
-                    }
-                }
-                self.score_round();
-            }
-            Phase::Result => self.start_round(),
-            Phase::Over => {}
-        }
     }
 }
 
@@ -236,12 +206,12 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut MoState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Result {
             return;
         }
         s.time_left_ms -= ms as i64;
         if s.time_left_ms <= 0 {
-            s.timeout();
+            s.start_round();
         }
     }
 
@@ -252,13 +222,6 @@ impl Game for Rules {
             phase: s.phase,
             round: s.round,
             rounds: ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_ms: match s.phase {
-                Phase::Show => SHOW_MS,
-                Phase::Keep => KEEP_MS,
-                Phase::Result => RESULT_MS,
-                Phase::Over => 0,
-            },
             hand: me.map(|m| m.hand.clone()).unwrap_or_default(),
             my_pair: me.and_then(|m| m.pair),
             my_kept: me.and_then(|m| m.kept),
@@ -398,13 +361,20 @@ mod tests {
         assert!(Rules::view_for(&s, "p2").seats[0].pair.is_none());
         assert!(Rules::apply_move(&mut s, "p2", MoMove::Show { cards: [2, 2] }).is_err());
         assert!(Rules::apply_move(&mut s, "p2", MoMove::Keep { card: 2 }).is_err());
-        Rules::tick(&mut s, SHOW_MS as u64);
+        // No time limit: a long wait changes nothing, the round waits for p2 and p3.
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Show);
+        assert_eq!(Rules::to_move(&s), vec!["p2".to_string(), "p3".to_string()]);
+        Rules::apply_move(&mut s, "p2", MoMove::Show { cards: [1, 2] }).unwrap();
+        Rules::apply_move(&mut s, "p3", MoMove::Show { cards: [1, 2] }).unwrap();
         assert_eq!(s.phase, Phase::Keep);
         assert_eq!(Rules::view_for(&s, "p2").seats[0].pair, Some([2, 6]));
         assert_eq!(s.seats[1].pair, Some([1, 2]));
         assert!(Rules::view_for(&s, "p2").seats[0].kept.is_none());
-        Rules::tick(&mut s, KEEP_MS as u64);
-        // Everyone kept their lower card: 2, 1, 1 → 2 is the lowest unique one.
+        for (p, card) in [("p1", 2), ("p2", 1), ("p3", 1)] {
+            Rules::apply_move(&mut s, p, MoMove::Keep { card }).unwrap();
+        }
+        // Kept 2, 1, 1 → 2 is the lowest unique one.
         assert_eq!(s.seats[0].score, 4);
     }
 

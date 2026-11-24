@@ -11,7 +11,7 @@ Exile game, solo. Code: `crates/rules/src/games/unknown_language.rs`.
 - Study the example carvings: they show the word order and which mark means what.
 - There are **9 questions** in three stages. Each one asks you to pick the right translation or the right script out of 4.
 - Stage 1 uses things and actions, stage 2 adds qualities, stage 3 shows known roots with a new mark.
-- You have **75 seconds** per question. A right answer is worth 50, plus up to 50 for speed. Wrong or too slow: 0.
+- Take your time. A right answer is worth 100, a wrong one 0.
 - Watch for near misses: swapped subject and object, a changed word, or another word order. (Keys 1–4 on desktop.)
 
 ## Rules in detail
@@ -36,7 +36,7 @@ translation. Work out the script from those examples, then read and write it.
 
 ## Play
 
-- **Three stages, three questions each** (9 questions), **75 seconds** per question.
+- **Three stages, three questions each** (9 questions).
   1. Four example sentences with things and actions. Questions: read a sentence (pick the translation
      out of 4) or write one (pick the script out of 4).
   2. Three more examples, now with qualities. Questions as before, with qualities.
@@ -44,13 +44,11 @@ translation. Work out the script from those examples, then read and write it.
      it mean (4 choices)? The third is a sentence that uses such a word.
 - The wrong choices are near misses: subject and object swapped, the words in another order, one word
   changed, or the root read with its old mark.
-- **Points** per right answer: 50, plus up to 50 for speed (time left ÷ 75 s). Wrong or out of time: 0.
-  Most: 900.
+- **Points** per right answer: 100. Wrong: 0. Most: 900.
 - Moves: `{type:"answer", option}` (0-based).
 - View: `stage`, `question` (1–9), `questions`, `examples` (each: `script` words and `english`), `current`
   (`kind`: `read` with `script` + `options` text, `write` with `english` + `options` scripts, or `word` with
   `word` + `options` text), `last` (the previous question, your choice, the right one, points), `score`,
-  `timeLeftMs`, `questionTimeMs`, `over`. A script word is `{strokes: [[x1,y1,x2,y2]…], mark}`; the view
-  never says which mark means what.
+  `over`. A script word is `{strokes: [[x1,y1,x2,y2]…], mark}`; the view never says which mark means what.
 - Bot: right three times out of four.
 - Desktop: keys 1–4 pick an option.

@@ -7,9 +7,9 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 **Goal:** finish with the most points by helping to beat monsters and sharing in their rewards.
 
 - You start with **20 points** and **8 secret weapon cards** of strength 1 to 6. Six monsters come, one each round.
-- **Bid (15 s):** enter how many points you will pay for an extra weapon card, then tap **OK**. The highest bid wins it, but if the top bids are tied, nobody gets the card.
-- **Alliance (20 s):** tap up to two partners, then tap **Ask them**, or tap **Fight alone**. An alliance forms only if they pick you too.
-- **Attack (20 s):** tap the cards to throw, then tap **Attack**, or tap **Hold back**. Cards you play are used up.
+- **Bid:** enter how many points you will pay for an extra weapon card, then tap **OK**. The highest bid wins it, but if the top bids are tied, nobody gets the card.
+- **Alliance:** tap up to two partners, then tap **Ask them**, or tap **Fight alone**. An alliance forms only if they pick you too.
+- **Attack:** tap the cards to throw, then tap **Attack**, or tap **Hold back**. Cards you play are used up.
 - If your alliance's total power reaches the monster's strength, it beats the monster. The strongest alliance that beats it takes the reward.
 - Inside the winning alliance, the reward is shared by how much power each member played.
 
@@ -18,9 +18,11 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 Six monsters attack one by one. Bid points for extra weapons, form alliances of up to three, and
 throw weapon cards at the monster. The strongest alliance that beats it shares the reward.
 
-- **Replay moments:** a player fighting alone is the only one to beat the monster and takes the whole
-  reward ("Beat Rustjaw alone: all 27 points"). Public: the alliances and every played card are shown
-  after the attack.
+- **Replay moments:** a player fighting alone beats the monster with the single highest power and
+  takes the whole reward ("Beat Rustjaw alone: all 27 points"). And an alliance that takes the
+  reward of a monster of strength 16 or more alone (the single highest power, no tie), credited to
+  the member who played the most ("Beat Hollow King,
+  strength 17, with {bot-2}"). Public: the alliances and every played card are shown after the attack.
 
 ## Setup
 
@@ -31,13 +33,13 @@ throw weapon cards at the monster. The strongest alliance that beats it shares t
 
 ## A round
 
-1. **Bid (15 s).** One extra weapon card (strength 4–7) is up for auction. Everyone bids points in
+1. **Bid.** One extra weapon card (strength 4–7) is up for auction. Everyone bids points in
    secret (0 up to what they have). The highest bid wins the card and pays its bid; a tie for the top
-   means nobody gets it. No bid in time: 0.
-2. **Alliance (20 s).** Everyone picks up to two partners in secret. Alliances form where the wish is
+   means nobody gets it.
+2. **Alliance.** Everyone picks up to two partners in secret. Alliances form where the wish is
    mutual: first groups of three where all three picked each other, then pairs who picked each other.
-   Everyone else fights alone. The alliances are then shown to all. No choice in time: alone.
-3. **Attack (20 s).** Everyone secretly plays any number of their weapon cards (also none). Played cards
+   Everyone else fights alone. The alliances are then shown to all.
+3. **Attack.** Everyone secretly plays any number of their weapon cards (also none). Played cards
    are used up. An alliance's power is the sum of its cards.
    - Alliances whose power reaches the monster's strength beat it; the **strongest** of them takes the
      reward (equal power: those alliances split it equally between all their members).

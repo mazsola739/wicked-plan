@@ -12,9 +12,8 @@ use crate::rng::Rng;
 pub const ROUNDS: usize = 6;
 pub const START_POINTS: i64 = 20;
 pub const HAND: usize = 8;
-pub const BID_MS: i64 = 15_000;
-pub const ALLY_MS: i64 = 20_000;
-pub const ATTACK_MS: i64 = 20_000;
+/// An alliance's win is a replay moment from this monster strength up.
+const STRONG_MOMENT: i64 = 16;
 const NAMES: [&str; 8] = ["Gloomtusk", "Rustjaw", "Mirebeast", "Thornback", "Hollow King", "Ashwing", "Sludgemaw", "Ironhide"];
 
 #[derive(Clone, Debug, Serialize)]
@@ -63,11 +62,11 @@ pub struct MaState {
     pub monsters: Vec<Monster>,
     pub round: usize,
     pub phase: Phase,
-    pub time_left_ms: i64,
     pub groups: Vec<Vec<usize>>,
     pub last: Vec<Outcome>,
     pub log: Vec<String>,
-    /// Replay moments: a monster beaten alone, the whole reward to one player.
+    /// Replay moments: a monster beaten alone, the whole reward to one player; a strong monster
+    /// (strength 16 or more) beaten by an alliance.
     pub moments: Moments,
 }
 
@@ -95,8 +94,6 @@ pub struct MaView {
     pub phase: &'static str,
     pub round: usize,
     pub rounds: usize,
-    pub time_left_ms: i64,
-    pub phase_time_ms: i64,
     pub me: usize,
     pub monster: Option<Monster>,
     pub fighters: Vec<FighterView>,
@@ -213,7 +210,6 @@ impl MaState {
             f.bid = None;
         }
         self.phase = Phase::Ally;
-        self.time_left_ms = ALLY_MS;
     }
 
     fn resolve_alliances(&mut self) {
@@ -231,7 +227,6 @@ impl MaState {
             .collect();
         self.say(if text.is_empty() { "No alliances: everyone fights alone.".into() } else { format!("Alliances: {}.", text.join("; ")) });
         self.phase = Phase::Attack;
-        self.time_left_ms = ATTACK_MS;
     }
 
     fn resolve_attack(&mut self) {
@@ -265,10 +260,16 @@ impl MaState {
                 let rest = reward - o.shares.iter().sum::<i64>();
                 let lead = (0..o.members.len()).max_by_key(|&m| (o.played[m].iter().sum::<i64>(), std::cmp::Reverse(m))).unwrap_or(0);
                 o.shares[lead] += rest;
-                // A replay moment: one player alone beats the monster (played cards are shown to all).
+                // Replay moments (alliances and played cards are shown to all): one player alone
+                // beats the monster, or an alliance beats a strong one, credited to its lead.
                 if let [solo] = o.members[..] {
                     let by = self.fighters[solo].id.clone();
                     self.moments.push(&by, format!("Beat {name} alone: all {reward} points"));
+                } else if strength >= STRONG_MOMENT {
+                    let by = self.fighters[o.members[lead]].id.clone();
+                    let with: Vec<String> =
+                        o.members.iter().filter(|&&m| m != o.members[lead]).map(|&m| format!("{{{}}}", self.fighters[m].id)).collect();
+                    self.moments.push(&by, format!("Beat {name}, strength {strength}, with {}", with.join(" and ")));
                 }
             } else {
                 let members: i64 = top.iter().map(|&k| outcomes[k].members.len() as i64).sum();
@@ -294,13 +295,7 @@ impl MaState {
         self.last = outcomes;
         self.groups.clear();
         self.round += 1;
-        if self.round >= ROUNDS {
-            self.phase = Phase::Over;
-            self.time_left_ms = 0;
-        } else {
-            self.phase = Phase::Bid;
-            self.time_left_ms = BID_MS;
-        }
+        self.phase = if self.round >= ROUNDS { Phase::Over } else { Phase::Bid };
     }
 }
 
@@ -354,7 +349,6 @@ impl Game for Rules {
             monsters,
             round: 0,
             phase: Phase::Bid,
-            time_left_ms: BID_MS,
             groups: Vec::new(),
             last: Vec::new(),
             log: vec!["A monster approaches. Bid for the extra weapon.".into()],
@@ -414,22 +408,6 @@ impl Game for Rules {
         }
     }
 
-    fn tick(s: &mut MaState, ms: u64) {
-        if s.phase == Phase::Over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Bid => s.resolve_bids(),
-            Phase::Ally => s.resolve_alliances(),
-            Phase::Attack => s.resolve_attack(),
-            Phase::Over => {}
-        }
-    }
-
     fn view_for(s: &MaState, player: &str) -> MaView {
         let me = s.fighters.iter().position(|f| f.id == player).unwrap_or(0);
         let done = |f: &Fighter| match s.phase {
@@ -447,12 +425,6 @@ impl Game for Rules {
             },
             round: (s.round + 1).min(ROUNDS),
             rounds: ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_time_ms: match s.phase {
-                Phase::Bid => BID_MS,
-                Phase::Ally => ALLY_MS,
-                _ => ATTACK_MS,
-            },
             me,
             monster: s.monsters.get(s.round).cloned(),
             fighters: s
@@ -599,6 +571,15 @@ mod tests {
     }
 
     #[test]
+    fn no_timer_the_bid_waits_for_everyone() {
+        let mut s = Rules::setup(&players(4), 4).unwrap();
+        Rules::apply_move(&mut s, "p1", MaMove::Bid { amount: 3 }).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Bid);
+        assert_eq!(Rules::to_move(&s), vec!["p2", "p3", "p4"]);
+    }
+
+    #[test]
     fn thousand_bot_games() {
         bot_games_with::<Rules>(1000, 4, 3000);
         bot_games_with::<Rules>(200, 8, 6000);
@@ -631,6 +612,24 @@ mod tests {
         let s = attack(vec![vec![0], vec![1], vec![2, 3]], [vec![0, 1], vec![], vec![0], vec![1]]);
         assert!(s.last.iter().filter(|o| o.won).count() == 2);
         assert!(Rules::moments(&s, "p1").is_empty());
+    }
+
+    #[test]
+    fn a_strong_monster_beaten_by_an_alliance_is_a_replay_moment() {
+        let mut s = Rules::setup(&players(4), 1).unwrap();
+        s.monsters[0] = Monster { name: "Hollow King", strength: 16, reward: 24, bonus: 5 };
+        for f in &mut s.fighters {
+            f.hand = vec![6, 4, 2, 1];
+        }
+        s.phase = Phase::Attack;
+        s.groups = vec![vec![0, 1], vec![2], vec![3]];
+        // p1 + p2 play 10 + 6; p3 alone only reaches 12.
+        for (p, cards) in players(4).iter().zip([vec![0, 1], vec![1, 2], vec![0, 1, 2], vec![]]) {
+            Rules::apply_move(&mut s, p, MaMove::Attack { cards }).unwrap();
+        }
+        let m = Rules::moments(&s, "p4");
+        assert_eq!(m.len(), 1);
+        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p1", "Beat Hollow King, strength 16, with {p2}"));
     }
 
     #[test]

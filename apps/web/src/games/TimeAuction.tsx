@@ -103,10 +103,10 @@ export default function TimeAuction({ view }: ScreenProps) {
       top={
         <>
           <GameTop title="Time Auction" step={step} score={me?.tokens ?? 0} />
-          {v.phaseMs > 0 ? (
-            <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
-          ) : (
+          {v.phase === 'bidding' ? (
             <div className="timer time-auction-live">Clock running</div>
+          ) : (
+            v.phaseMs > 0 && <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
           )}
         </>
       }

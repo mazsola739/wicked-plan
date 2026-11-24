@@ -47,7 +47,7 @@ export function HexagonGame({ view }: { view: HexView }) {
         <>
           <GameTop title="Hexagon" step={view.studying ? 'Memorise!' : `Round ${view.round} of ${view.rounds}`} score={view.score} />
           <RoundDots results={view.history.map((h) => h.correct)} total={view.rounds} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseTimeMs} />
+          {view.studying && <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseTimeMs} />}
         </>
       }
       stage={

@@ -13,7 +13,6 @@ use crate::rng::Rng;
 
 pub const RINGS: [usize; 3] = [4, 5, 6];
 pub const MIN_DISTANCE: [u32; 3] = [0, 12, 24];
-pub const LEVEL_MS: [i64; 3] = [3 * 60_000, 4 * 60_000, 6 * 60_000];
 pub const LEVEL_POINTS: [i64; 3] = [150, 250, 400];
 
 /// Can ring `ring` (0-based) slide in state `mask`?
@@ -48,7 +47,6 @@ pub struct CastState {
     pub moves: u32,
     pub solved: Vec<bool>,
     pub score: i64,
-    pub time_left_ms: i64,
     pub over: bool,
     /// Replay moments: a mixed level (5 or 6 rings) solved in the fewest moves.
     pub moments: Moments,
@@ -74,8 +72,6 @@ pub struct CastView {
     pub best: u32,
     pub solved: Vec<bool>,
     pub score: i64,
-    pub time_left_ms: i64,
-    pub level_time_ms: i64,
     pub over: bool,
 }
 
@@ -98,14 +94,13 @@ impl CastState {
         self.mask = start;
         self.best = dist[start as usize];
         self.moves = 0;
-        self.time_left_ms = LEVEL_MS[self.level];
     }
 
     fn next_level(&mut self, solved: bool) {
         if solved {
             let base = LEVEL_POINTS[self.level];
             let moves = i64::from(self.moves.max(self.best).max(1));
-            self.score += (base * i64::from(self.best) + moves / 2) / moves + self.time_left_ms / 2000;
+            self.score += (base * i64::from(self.best) + moves / 2) / moves;
             if self.level > 0 && self.moves == self.best {
                 let text = format!("{} rings off in {} moves, the fewest possible", self.n(), self.moves);
                 self.moments.push(&self.player.clone(), text);
@@ -115,7 +110,6 @@ impl CastState {
         self.level += 1;
         if self.level >= RINGS.len() {
             self.over = true;
-            self.time_left_ms = 0;
         } else {
             self.load_level();
         }
@@ -153,7 +147,6 @@ impl Game for Rules {
             moves: 0,
             solved: Vec::new(),
             score: 0,
-            time_left_ms: 0,
             over: false,
             moments: Moments::default(),
             seed,
@@ -189,17 +182,6 @@ impl Game for Rules {
         Ok(())
     }
 
-    fn tick(s: &mut CastState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            s.time_left_ms = 0;
-            s.next_level(false);
-        }
-    }
-
     fn view_for(s: &CastState, _player: &str) -> CastView {
         CastView {
             level: (s.level + 1).min(RINGS.len()),
@@ -209,8 +191,6 @@ impl Game for Rules {
             best: s.best,
             solved: s.solved.clone(),
             score: s.score,
-            time_left_ms: s.time_left_ms,
-            level_time_ms: LEVEL_MS[s.level.min(RINGS.len() - 1)],
             over: s.over,
         }
     }
@@ -285,9 +265,12 @@ mod tests {
                 Rules::apply_move(&mut s, P, CastMove::Toggle { ring: r + 1 }).unwrap();
             }
             assert_eq!(s.solved, vec![true]);
-            assert_eq!(s.score, 150 + LEVEL_MS[0] / 2000);
+            assert_eq!(s.score, 150);
             assert!(s.best >= MIN_DISTANCE[1]);
-            Rules::tick(&mut s, LEVEL_MS[1] as u64);
+            // No level timer: a long wait changes nothing.
+            Rules::tick(&mut s, 3_600_000);
+            assert_eq!((s.level, s.moves), (1, 0));
+            Rules::apply_move(&mut s, P, CastMove::Skip).unwrap();
             assert!(s.best >= MIN_DISTANCE[2] && s.n() == 6);
         }
     }

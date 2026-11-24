@@ -14,8 +14,6 @@ pub const START_CHIPS: i64 = 25;
 pub const ANTE: i64 = 1;
 pub const RAISE: i64 = 2;
 pub const MAX_RAISES: u32 = 3;
-pub const TURN_MS: i64 = 15_000;
-pub const SNIPE_MS: i64 = 15_000;
 pub const RESULT_MS: i64 = 6_000;
 
 /// A card: colour * 10 + (value - 1).
@@ -236,8 +234,6 @@ pub struct ShView {
     pub phase: Phase,
     pub hand: usize,
     pub hands: usize,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub cards: Vec<Card>,
     pub community: Vec<Card>,
     pub my_rank: Option<Rank>,
@@ -304,7 +300,6 @@ impl ShState {
         self.cap = self.seats.iter().filter(|s| s.in_hand).map(|s| s.chips).min().unwrap_or(0);
         self.phase = Phase::Betting;
         self.actor = self.next_in_hand(self.dealer);
-        self.time_left_ms = TURN_MS;
     }
 
     fn next_in_hand(&self, from: usize) -> usize {
@@ -362,10 +357,8 @@ impl ShState {
         let bet = self.current_bet();
         if left.iter().all(|&j| self.seats[j].acted && self.seats[j].bet == bet) {
             self.phase = Phase::Snipe;
-            self.time_left_ms = SNIPE_MS;
         } else {
             self.actor = self.next_in_hand(i);
-            self.time_left_ms = TURN_MS;
         }
         Ok(())
     }
@@ -522,27 +515,12 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut ShState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Result {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Betting => {
-                let mv = if s.to_call(s.actor) == 0 { ShMove::Call } else { ShMove::Fold };
-                let actor = s.actor;
-                let _ = s.act(actor, &mv);
-            }
-            Phase::Snipe => {
-                for seat in s.seats.iter_mut().filter(|x| x.in_hand && x.snipe.is_none()) {
-                    seat.snipe = Some(None);
-                }
-                s.showdown();
-            }
-            Phase::Result => s.start_hand(),
-            Phase::Over => {}
+        if s.time_left_ms <= 0 {
+            s.start_hand();
         }
     }
 
@@ -559,13 +537,6 @@ impl Game for Rules {
             phase: s.phase,
             hand: s.hand,
             hands: HANDS,
-            time_left_ms: s.time_left_ms,
-            phase_ms: match s.phase {
-                Phase::Betting => TURN_MS,
-                Phase::Snipe => SNIPE_MS,
-                Phase::Result => RESULT_MS,
-                Phase::Over => 0,
-            },
             cards,
             community: s.community.clone(),
             my_rank,
@@ -776,10 +747,20 @@ mod tests {
     }
 
     #[test]
-    fn timeouts_check_or_fold() {
+    fn betting_and_snipes_wait_for_the_players() {
         let mut s = Rules::setup(&ids(2), 4).unwrap();
-        Rules::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.seats.iter().filter(|x| x.last == Some(Action::Check)).count(), 1);
+        let actor = s.actor;
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.phase, s.actor), (Phase::Betting, actor));
+        assert!(s.seats.iter().all(|x| x.last == Some(Action::Ante)));
+        for _ in 0..2 {
+            let actor = s.seats[s.actor].id.clone();
+            Rules::apply_move(&mut s, &actor, ShMove::Call).unwrap();
+        }
+        Rules::apply_move(&mut s, "p1", ShMove::Snipe { rank: None }).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Snipe);
+        assert_eq!(Rules::to_move(&s), vec!["p2".to_string()]);
     }
 
     #[test]

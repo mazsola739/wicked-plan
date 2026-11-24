@@ -12,7 +12,6 @@ use crate::rng::Rng;
 pub const SIZE: i32 = 7;
 pub const GOAL: (i32, i32) = (3, 3);
 pub const MAX_ROUNDS: u32 = 30;
-pub const ROUND_MS: i64 = 20_000;
 pub const REVEAL_MS: i64 = 15_000;
 pub const CLUE_ROUNDS: [u32; 3] = [6, 12, 18];
 pub const COLOURS: [&str; 5] = ["red", "blue", "green", "yellow", "purple"];
@@ -167,8 +166,6 @@ pub struct HrrView {
     pub pieces: Vec<PieceView>,
     pub round: u32,
     pub max_rounds: u32,
-    pub time_left_ms: i64,
-    pub phase_time_ms: i64,
     pub known: Vec<KnownRule>,
     /// Newest round first, at most 12 rounds.
     pub history: Vec<Vec<Step>>,
@@ -230,7 +227,6 @@ impl HrrState {
             self.time_left_ms = REVEAL_MS;
         } else {
             self.round += 1;
-            self.time_left_ms = ROUND_MS;
         }
     }
 }
@@ -306,7 +302,7 @@ impl Game for Rules {
             pieces,
             round: 1,
             phase: Phase::Choose,
-            time_left_ms: ROUND_MS,
+            time_left_ms: 0,
             revealed: Vec::new(),
             history: Vec::new(),
             rng,
@@ -338,24 +334,13 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut HrrState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Reveal {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Choose => {
-                for p in &mut s.pieces {
-                    p.choice.get_or_insert(None);
-                }
-                s.resolve();
-            }
-            _ => {
-                s.phase = Phase::Over;
-                s.time_left_ms = 0;
-            }
+        if s.time_left_ms <= 0 {
+            s.phase = Phase::Over;
+            s.time_left_ms = 0;
         }
     }
 
@@ -381,8 +366,6 @@ impl Game for Rules {
                 .collect(),
             round: s.round,
             max_rounds: MAX_ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_time_ms: if s.phase == Phase::Choose { ROUND_MS } else { REVEAL_MS },
             known,
             history: s.history.iter().rev().take(12).cloned().collect(),
             my_choice: me.and_then(|p| p.choice.flatten()),
@@ -454,8 +437,15 @@ mod tests {
         }
         assert_eq!(s.round, 2);
         assert_eq!(s.history.len(), 1);
+        // No round timer: the round waits for every piece.
+        Rules::apply_move(&mut s, "p1", HrrMove::Go { dir: Dir::Down }).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.round, s.phase), (2, Phase::Choose));
+        assert_eq!(Rules::to_move(&s).len(), 3);
         s.round = MAX_ROUNDS;
-        Rules::tick(&mut s, ROUND_MS as u64);
+        for p in ["p2", "p3", "p4"] {
+            Rules::apply_move(&mut s, p, HrrMove::Go { dir: Dir::Down }).unwrap();
+        }
         assert_eq!(s.phase, Phase::Reveal);
         assert_eq!(Rules::view_for(&s, "p1").known.len(), 5);
         Rules::apply_move(&mut s, "p2", HrrMove::Close).unwrap();

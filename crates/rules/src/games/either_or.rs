@@ -9,7 +9,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const QUESTIONS: usize = 10;
-pub const ROUND_MS: i64 = 15_000;
 
 const PROMPTS: [(&str, &str, &str); 16] = [
     ("Which would you rather keep?", "Sunrise", "Sunset"),
@@ -68,12 +67,10 @@ pub struct Outcome {
 #[derive(Clone, Debug)]
 pub struct EitherState {
     pub players: Vec<String>,
-    pub rng: Rng,
     pub rounds: Vec<Round>,
     pub current: usize,
     pub picks: Vec<Option<i64>>,
     pub scores: Vec<i64>,
-    pub time_left_ms: i64,
     pub last: Option<Outcome>,
     pub over: bool,
     /// Replay moments: a lone grab, and the lead stolen in the last round.
@@ -97,8 +94,6 @@ pub struct EitherView {
     pub my_pick: Option<i64>,
     pub done: Vec<bool>,
     pub scores: Vec<i64>,
-    pub time_left_ms: i64,
-    pub round_ms: i64,
     pub last: Option<Outcome>,
     pub over: bool,
 }
@@ -124,17 +119,6 @@ impl EitherState {
             Kind::LowestUnique => (1..=5).contains(&value),
             Kind::Finger => value >= 0 && (value as usize) < self.players.len() && value as usize != seat,
             _ => value == 0 || value == 1,
-        }
-    }
-
-    fn random_pick(&mut self, seat: usize) -> i64 {
-        match self.rounds[self.current].kind {
-            Kind::LowestUnique => self.rng.int(1, 5),
-            Kind::Finger => {
-                let n = self.players.len();
-                ((seat + 1 + self.rng.index(n - 1)) % n) as i64
-            }
-            _ => self.rng.int(0, 1),
         }
     }
 
@@ -240,10 +224,8 @@ impl EitherState {
         });
         self.current += 1;
         self.picks = vec![None; n];
-        self.time_left_ms = ROUND_MS;
         if self.current >= self.rounds.len() {
             self.over = true;
-            self.time_left_ms = 0;
         }
     }
 }
@@ -313,12 +295,10 @@ impl Game for Rules {
         }
         Ok(EitherState {
             players: players.to_vec(),
-            rng,
             rounds,
             current: 0,
             picks: vec![None; n],
             scores: vec![0; n],
-            time_left_ms: ROUND_MS,
             last: None,
             over: false,
             moments: Moments::default(),
@@ -344,23 +324,6 @@ impl Game for Rules {
         Ok(())
     }
 
-    fn tick(s: &mut EitherState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        for seat in 0..s.players.len() {
-            if s.picks[seat].is_none() {
-                let v = s.random_pick(seat);
-                s.picks[seat] = Some(v);
-            }
-        }
-        s.resolve();
-    }
-
     fn view_for(s: &EitherState, player: &str) -> EitherView {
         let me = s.players.iter().position(|p| p == player).unwrap_or(0);
         EitherView {
@@ -372,8 +335,6 @@ impl Game for Rules {
             my_pick: s.picks[me],
             done: s.picks.iter().map(Option::is_some).collect(),
             scores: s.scores.clone(),
-            time_left_ms: s.time_left_ms,
-            round_ms: ROUND_MS,
             last: s.last.clone(),
             over: s.over,
         }
@@ -492,13 +453,14 @@ mod tests {
     }
 
     #[test]
-    fn timeout_picks_for_you_and_hides_the_lean() {
+    fn no_timer_and_the_lean_stays_hidden() {
         let mut s = Rules::setup(&ids(3), 4).unwrap();
         let v = serde_json::to_string(&Rules::view_for(&s, "p1")).unwrap();
         assert!(!v.contains("lean"));
-        Rules::tick(&mut s, ROUND_MS as u64);
-        assert_eq!(s.current, 1);
-        assert_eq!(s.last.as_ref().unwrap().picks.len(), 3);
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.current, 0);
+        assert!(s.last.is_none());
+        assert_eq!(Rules::to_move(&s).len(), 3);
     }
 
     #[test]

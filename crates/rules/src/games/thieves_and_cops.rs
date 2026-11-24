@@ -9,8 +9,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: u32 = 12;
-pub const MOVE_MS: i64 = 20_000;
-pub const UNMASK_MS: i64 = 20_000;
 pub const REVEAL_MS: i64 = 15_000;
 pub const PIECES: usize = 7;
 pub const TO_WIN: u32 = 5;
@@ -178,8 +176,6 @@ pub struct TcView {
     pub phase: &'static str,
     pub round: u32,
     pub rounds: u32,
-    pub time_left_ms: i64,
-    pub phase_time_ms: i64,
     pub me: usize,
     pub role: Role,
     pub stations: Vec<StationView>,
@@ -314,10 +310,8 @@ impl TcState {
             self.say(line.into());
             self.say("Unmask: name the officer you think is corrupt.".into());
             self.phase = Phase::Unmask;
-            self.time_left_ms = UNMASK_MS;
         } else {
             self.round += 1;
-            self.time_left_ms = MOVE_MS;
         }
     }
 
@@ -433,7 +427,7 @@ impl Game for Rules {
             sighted: Vec::new(),
             round: 1,
             phase: Phase::Move,
-            time_left_ms: MOVE_MS,
+            time_left_ms: 0,
             unmasked: false,
             log: vec!["Round 1: everyone moves at once.".into()],
             rng,
@@ -486,17 +480,12 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut TcState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Reveal {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Move => s.resolve_moves(),
-            Phase::Unmask => s.resolve_unmask(),
-            _ => s.phase = Phase::Over,
+        if s.time_left_ms <= 0 {
+            s.phase = Phase::Over;
         }
     }
 
@@ -543,12 +532,6 @@ impl Game for Rules {
             },
             round: s.round,
             rounds: ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_time_ms: match s.phase {
-                Phase::Move => MOVE_MS,
-                Phase::Unmask => UNMASK_MS,
-                _ => REVEAL_MS,
-            },
             me,
             role: mine.role,
             stations: STATIONS.iter().map(|&(name, x, y)| StationView { name, x, y }).collect(),
@@ -770,6 +753,14 @@ mod tests {
             eprintln!("{n} players: thieves won {thieves} of {games}");
             assert!(thieves > games as usize / 5 && thieves < games as usize * 4 / 5, "{n} players: thieves won {thieves} of {games}");
         }
+    }
+
+    #[test]
+    fn no_timer_a_round_waits_for_every_mover() {
+        let mut s = Rules::setup(&players(4), 4).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.phase, s.round), (Phase::Move, 1));
+        assert_eq!(Rules::to_move(&s).len(), 4);
     }
 
     #[test]

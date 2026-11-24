@@ -1,6 +1,6 @@
 // Thieves and Cops: a chase on a metro map with a secret corrupt officer. Rules: docs/games/thieves-and-cops.md
 
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './ThievesAndCops.css';
 
 type Role = 'thief' | 'cop' | 'corrupt';
@@ -21,8 +21,6 @@ interface TcView {
   phase: 'move' | 'unmask' | 'reveal' | 'over';
   round: number;
   rounds: number;
-  timeLeftMs: number;
-  phaseTimeMs: number;
   me: number;
   role: Role;
   stations: { name: string; x: number; y: number }[];
@@ -105,14 +103,11 @@ export default function ThievesAndCops({ view }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Thieves and Cops"
-            step={end ? 'Everything revealed' : v.phase === 'unmask' ? 'Unmask the corrupt officer' : `Round ${v.round} of ${v.rounds}`}
-            score={v.score}
-          />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseTimeMs} />
-        </>
+        <GameTop
+          title="Thieves and Cops"
+          step={end ? 'Everything revealed' : v.phase === 'unmask' ? 'Unmask the corrupt officer' : `Round ${v.round} of ${v.rounds}`}
+          score={v.score}
+        />
       }
       stage={
         <svg className="drawing tc-map" viewBox="20 30 560 550" role="img" aria-label="Metro map">

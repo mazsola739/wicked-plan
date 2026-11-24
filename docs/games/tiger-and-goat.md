@@ -11,7 +11,6 @@ Final duel, 2 players. Code: `crates/rules/src/games/tiger_and_goat.rs`, screen:
 - Tigers: slide one step, or jump over a goat to the empty point right behind it to capture it.
 - Tigers win a board with **5 captures**; goats win by leaving the tigers no move.
 - Every step you make one move. Switch boards with the board buttons, tap a piece, then where it goes.
-- You have **60 seconds** per step, or a move is made for you.
 - Points: as tigers 50 per capture and +250 for a win; as goats 50 per capture short of 5 and +250 for a win.
 
 ## Rules in detail
@@ -42,7 +41,7 @@ directly.
 - Play goes in **steps**. In even steps the goats move on both boards, in odd steps the tigers: so in every
   step each player makes exactly one move (the opponent on the other board at the same time). A finished
   board is skipped.
-- Step timer: **60 s**; when it runs out, the bot moves for whoever has not moved.
+- No timer: a step ends once every board still in play has had its move.
 - The game ends when both boards have ended.
 
 ## Points
@@ -60,7 +59,7 @@ Range about 100–1100; more points wins.
   Points are `y × 5 + x`, boards 0 (A) and 1 (B).
 - View: for each board its points (0 empty, 1 tiger, 2 goat), your side, goats in hand, goats captured,
   whose turn, whether it has ended and who won, your legal moves there, and the last move; your points so
-  far, the step and the timer.
+  far and the step.
 - Bot: one ply with lookahead built into the evaluation. Tigers take a capture when they can, otherwise
   maximise open jumps and mobility; goats avoid leaving any goat jumpable (the tigers move next) and
   squeeze the tigers' mobility.

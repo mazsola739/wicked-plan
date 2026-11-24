@@ -11,8 +11,6 @@ use crate::rng::Rng;
 
 pub const ROUNDS: usize = 7;
 pub const COINS: i64 = 20;
-pub const PICK_MS: i64 = 20_000;
-pub const BID_MS: i64 = 20_000;
 pub const SHAPES: [&str; 3] = ["circle", "triangle", "star"];
 
 /// Rows, columns and diagonals of a 3×3 board.
@@ -45,14 +43,12 @@ pub enum Phase {
 #[derive(Clone, Debug)]
 pub struct BingoState {
     pub players: Vec<String>,
-    pub rng: Rng,
     pub boards: Vec<Board>,
     pub coins: Vec<i64>,
     pub round: usize,
     pub phase: Phase,
     pub picks: Vec<Option<usize>>,
     pub bids: Vec<Option<i64>>,
-    pub time_left_ms: i64,
     pub logs: Vec<Vec<String>>,
     pub over: bool,
     /// Replay moments: a won cell that completes a line (only the winner sees it).
@@ -91,8 +87,6 @@ pub struct BingoView {
     pub counts: Option<[usize; 3]>,
     /// Who has already moved in this step.
     pub done: Vec<bool>,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub score: i64,
     pub log: Vec<String>,
     pub result: Option<Final>,
@@ -111,10 +105,7 @@ impl BingoState {
 
     fn after_move(&mut self) {
         match self.phase {
-            Phase::Pick if self.picks.iter().all(Option::is_some) => {
-                self.phase = Phase::Bid;
-                self.time_left_ms = BID_MS;
-            }
+            Phase::Pick if self.picks.iter().all(Option::is_some) => self.phase = Phase::Bid,
             Phase::Bid if self.bids.iter().all(Option::is_some) => self.resolve(),
             _ => {}
         }
@@ -168,10 +159,8 @@ impl BingoState {
         self.picks = vec![None; n];
         self.bids = vec![None; n];
         self.phase = Phase::Pick;
-        self.time_left_ms = PICK_MS;
         if self.round >= ROUNDS || self.boards.iter().all(|b| b.marked.iter().all(|&m| m)) {
             self.over = true;
-            self.time_left_ms = 0;
         }
     }
 
@@ -239,14 +228,12 @@ impl Game for Rules {
             .collect();
         Ok(BingoState {
             players: players.to_vec(),
-            rng,
             boards,
             coins: vec![COINS; n],
             round: 0,
             phase: Phase::Pick,
             picks: vec![None; n],
             bids: vec![None; n],
-            time_left_ms: PICK_MS,
             logs: vec![Vec::new(); n],
             over: false,
             moments: Moments::default(),
@@ -283,27 +270,6 @@ impl Game for Rules {
         Ok(())
     }
 
-    fn tick(s: &mut BingoState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        for seat in 0..s.players.len() {
-            match s.phase {
-                Phase::Pick if s.picks[seat].is_none() => {
-                    let empty: Vec<usize> = (0..9).filter(|&c| !s.boards[seat].marked[c]).collect();
-                    s.picks[seat] = Some(*s.rng.pick(&empty));
-                }
-                Phase::Bid if s.bids[seat].is_none() => s.bids[seat] = Some(0),
-                _ => {}
-            }
-        }
-        s.after_move();
-    }
-
     fn view_for(s: &BingoState, player: &str) -> BingoView {
         let me = s.players.iter().position(|p| p == player).unwrap_or(0);
         let log = &s.logs[me];
@@ -325,8 +291,6 @@ impl Game for Rules {
             my_bid: s.bids[me],
             counts: (s.phase == Phase::Bid && !s.over).then(|| s.counts()),
             done: (0..s.players.len()).map(|i| if s.phase == Phase::Pick { s.picks[i].is_some() } else { s.bids[i].is_some() }).collect(),
-            time_left_ms: s.time_left_ms,
-            phase_ms: if s.phase == Phase::Pick { PICK_MS } else { BID_MS },
             score: s.score(me),
             log: log[log.len().saturating_sub(16)..].to_vec(),
             result: s.over.then(|| Final {
@@ -443,13 +407,26 @@ mod tests {
     fn counts_show_in_the_bid_step_only() {
         let mut s = Rules::setup(&ids(3), 4).unwrap();
         assert!(Rules::view_for(&s, "p1").counts.is_none());
-        Rules::tick(&mut s, PICK_MS as u64);
+        for p in ["p1", "p2", "p3"] {
+            Rules::apply_move(&mut s, p, BingoMove::Pick { cell: 0 }).unwrap();
+        }
         assert_eq!(s.phase, Phase::Bid);
         let c = Rules::view_for(&s, "p1").counts.unwrap();
         assert_eq!(c.iter().sum::<usize>(), 3);
         assert!(Rules::apply_move(&mut s, "p1", BingoMove::Bid { coins: 21 }).is_err());
-        Rules::tick(&mut s, BID_MS as u64);
+        for p in ["p1", "p2", "p3"] {
+            Rules::apply_move(&mut s, p, BingoMove::Bid { coins: 0 }).unwrap();
+        }
         assert_eq!(s.round, 1);
+    }
+
+    #[test]
+    fn no_clock_the_step_waits_for_everyone() {
+        let mut s = Rules::setup(&ids(3), 5).unwrap();
+        Rules::apply_move(&mut s, "p1", BingoMove::Pick { cell: 0 }).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Pick);
+        assert_eq!(Rules::to_move(&s), vec!["p2".to_string(), "p3".to_string()]);
     }
 
     #[test]

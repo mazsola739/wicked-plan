@@ -10,10 +10,8 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult};
 use crate::rng::Rng;
 
 pub const ROUNDS: usize = 3;
-pub const TURN_MS: i64 = 30_000;
 pub const ROUND_POINTS: i64 = 300;
 pub const TAKE_BACK_COST: i64 = 30;
-pub const TIMEOUT_COST: i64 = 60;
 pub const MIN_ROUND_POINTS: i64 = 50;
 /// Most blocks in a pile for several players.
 const MAX_BLOCKS: usize = 20;
@@ -127,7 +125,6 @@ pub struct RoundResult {
     pub topic: &'static str,
     pub words: Vec<Option<String>>,
     pub take_backs: u32,
-    pub timeouts: u32,
     pub points: i64,
 }
 
@@ -144,12 +141,10 @@ pub struct State {
     pub order: Vec<usize>,
     pub built: usize,
     pub take_backs: u32,
-    pub timeouts: u32,
-    pub time_left_ms: i64,
     pub results: Vec<RoundResult>,
     pub over: bool,
     seed: u64,
-    /// Replay moments: a seven-letter word; the last word of a round built with 3 s or less left.
+    /// Replay moments: a seven-letter word.
     pub moments: Moments,
 }
 
@@ -176,8 +171,6 @@ pub struct View {
     pub last_word: bool,
     pub can_take_back: bool,
     pub take_backs: u32,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub results: Vec<RoundResult>,
     pub score: i64,
     pub over: bool,
@@ -235,8 +228,6 @@ impl State {
         self.order = (0..n).map(|k| (k + self.round) % n).collect();
         self.built = 0;
         self.take_backs = 0;
-        self.timeouts = 0;
-        self.time_left_ms = TURN_MS;
     }
 
     fn check_word(&self, word: &str) -> Result<Letters, String> {
@@ -260,14 +251,9 @@ impl State {
     }
 
     fn build(&mut self, seat: usize, word: String) {
-        // Replay moments (built words and the turn timer are public): the longest words there
-        // are, and a pile emptied at the last second (not by a timed-out turn).
-        let id = self.players[seat].clone();
+        // A replay moment (built words are public): the longest words there are.
         if word.len() == 7 {
-            self.moments.push(&id, format!("Seven letters in one word: {word}"));
-        }
-        if self.built + 1 == self.order.len() && (1..=3_000).contains(&self.time_left_ms) {
-            self.moments.push(&id, format!("Pile emptied with {} s left", (self.time_left_ms + 999) / 1000));
+            self.moments.push(&self.players[seat], format!("Seven letters in one word: {word}"));
         }
         for c in word.chars() {
             if let Some(b) = self.blocks.iter_mut().find(|b| b.used_by.is_none() && b.letter == c) {
@@ -276,7 +262,6 @@ impl State {
         }
         self.words[seat] = Some(word);
         self.built += 1;
-        self.time_left_ms = TURN_MS;
         if self.built == self.order.len() {
             self.finish_round();
         }
@@ -293,24 +278,20 @@ impl State {
             b.used_by = None;
         }
         self.take_backs += 1;
-        self.time_left_ms = TURN_MS;
         Ok(())
     }
 
     fn finish_round(&mut self) {
-        let points =
-            (ROUND_POINTS - TAKE_BACK_COST * i64::from(self.take_backs) - TIMEOUT_COST * i64::from(self.timeouts)).max(MIN_ROUND_POINTS);
+        let points = (ROUND_POINTS - TAKE_BACK_COST * i64::from(self.take_backs)).max(MIN_ROUND_POINTS);
         self.results.push(RoundResult {
             topic: TOPICS[self.topics[self.round]].0,
             words: self.words.clone(),
             take_backs: self.take_backs,
-            timeouts: self.timeouts,
             points,
         });
         self.round += 1;
         if self.round >= ROUNDS {
             self.over = true;
-            self.time_left_ms = 0;
         } else {
             self.start_round();
         }
@@ -379,8 +360,6 @@ impl Game for WordBlockTower {
             order: Vec::new(),
             built: 0,
             take_backs: 0,
-            timeouts: 0,
-            time_left_ms: TURN_MS,
             results: Vec::new(),
             over: false,
             seed,
@@ -409,24 +388,6 @@ impl Game for WordBlockTower {
         }
     }
 
-    fn tick(s: &mut State, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        s.timeouts += 1;
-        let seat = s.order[s.built];
-        match s.bot_choice(u64::from(s.timeouts) + s.round as u64 * 100) {
-            Move::Word { word } => s.build(seat, word),
-            Move::TakeBack => {
-                let _ = s.take_back();
-            }
-        }
-    }
-
     fn view_for(s: &State, player: &str) -> View {
         let you = s.seat(player);
         let turn = s.turn();
@@ -444,8 +405,6 @@ impl Game for WordBlockTower {
             last_word: s.built + 1 == s.order.len(),
             can_take_back: s.built > 0,
             take_backs: s.take_backs,
-            time_left_ms: s.time_left_ms,
-            turn_ms: TURN_MS,
             results: s.results.clone(),
             score: s.score(),
             over: s.over,
@@ -543,7 +502,7 @@ mod tests {
     }
 
     #[test]
-    fn bots_always_finish_and_time_outs_cost_points() {
+    fn bots_always_finish() {
         for seed in 0..40 {
             let mut s = WordBlockTower::setup(&team(4), seed).unwrap();
             let mut steps = 0;
@@ -555,10 +514,13 @@ mod tests {
             }
             assert_eq!(s.score(), 900, "seed {seed}");
         }
+    }
+
+    #[test]
+    fn a_turn_waits_for_the_move() {
         let mut s = WordBlockTower::setup(&team(2), 3).unwrap();
-        WordBlockTower::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.timeouts, 1);
-        assert_eq!(s.built, 1);
+        WordBlockTower::tick(&mut s, 3_600_000);
+        assert_eq!((s.built, s.turn()), (0, Some(0)));
     }
 
     #[test]
@@ -579,18 +541,6 @@ mod tests {
         let m = WordBlockTower::moments(&s, "p1");
         assert_eq!(m.len(), 1);
         assert_eq!((m[0].by.as_str(), m[0].text.clone()), ("p1", format!("Seven letters in one word: {word}")));
-    }
-
-    #[test]
-    fn emptying_the_pile_at_the_last_second_is_a_replay_moment() {
-        let mut s = WordBlockTower::setup(&team(2), 1).unwrap();
-        let (first, second) = (s.targets[0].clone(), s.targets[1].clone());
-        WordBlockTower::apply_move(&mut s, "p1", Move::Word { word: first }).unwrap();
-        WordBlockTower::tick(&mut s, (TURN_MS - 2_000) as u64);
-        WordBlockTower::apply_move(&mut s, "p2", Move::Word { word: second }).unwrap();
-        let m: Vec<Moment> = WordBlockTower::moments(&s, "p1").into_iter().filter(|m| m.text.starts_with("Pile")).collect();
-        assert_eq!(m.len(), 1);
-        assert_eq!((m[0].by.as_str(), m[0].text.as_str()), ("p2", "Pile emptied with 2 s left"));
     }
 
     #[test]

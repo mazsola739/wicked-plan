@@ -1,6 +1,6 @@
 // Russian Roulette: a paint drum goes round; spend credits to peek, spin or tamper. Rules: docs/games/russian-roulette.md
 
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './RussianRoulette.css';
 
 type Phase = 'turn' | 'shot' | 'over';
@@ -8,8 +8,6 @@ type Event = 'spin' | 'click' | 'hit' | 'reload';
 
 interface RrView {
   phase: Phase;
-  timeLeftMs: number;
-  phaseMs: number;
   myTurn: boolean;
   lives: number;
   credits: number;
@@ -157,12 +155,7 @@ export default function RussianRoulette({ view }: ScreenProps) {
   else if (v.phase === 'over') ask = 'The show is over.';
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Russian Roulette" step={`Pull ${Math.min(v.pulls + 1, v.maxPulls)} of ${v.maxPulls}`} score={v.credits} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
-        </>
-      }
+      top={<GameTop title="Russian Roulette" step={`Pull ${Math.min(v.pulls + 1, v.maxPulls)} of ${v.maxPulls}`} score={v.credits} />}
       stage={
         <div className="card">
           <div className="russian-roulette-top">

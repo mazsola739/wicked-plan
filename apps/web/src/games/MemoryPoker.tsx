@@ -1,6 +1,6 @@
 // Memory Poker: study 16 cards, take two blind. Rules page: docs/games/memory-poker.md
 
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './MemoryPoker.css';
 
 interface Face {
@@ -12,8 +12,6 @@ interface MemoryPokerView {
   phase: 'study' | 'pick' | 'show';
   round: number;
   rounds: number;
-  timeLeftMs: number;
-  phaseMs: number;
   grid: { card: Face | null; takenBy: string | null }[];
   shared: Face[];
   seats: { id: string; ready: boolean; cards: (Face | null)[]; hand: string | null; points: number; roundPoints: number }[];
@@ -143,7 +141,7 @@ export default function MemoryPoker({ view: raw }: ScreenProps) {
     view.phase === 'study'
       ? me?.ready
         ? 'Waiting for the others…'
-        : 'The cards turn face down when the time runs out.'
+        : 'Tap Ready when you have them memorised.'
       : view.phase === 'pick'
         ? myTurn
           ? 'Your pick: tap a face-down card.'
@@ -151,12 +149,7 @@ export default function MemoryPoker({ view: raw }: ScreenProps) {
         : 'Two cards + the shared three make each hand.';
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Memory Poker" step={`Round ${view.round} of ${view.rounds} · ${step}`} score={me?.points ?? 0} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseMs} />
-        </>
-      }
+      top={<GameTop title="Memory Poker" step={`Round ${view.round} of ${view.rounds} · ${step}`} score={me?.points ?? 0} />}
       stage={
         <div className="mp-table">
           <div className="mp-shared">

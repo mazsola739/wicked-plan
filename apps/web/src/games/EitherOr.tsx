@@ -1,6 +1,6 @@
 // Either Or. Rules page: docs/games/either-or.md
 
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './EitherOr.css';
 
 type Kind = 'majority' | 'minority' | 'lowestUnique' | 'shareGrab' | 'finger' | 'loneWolf';
@@ -24,8 +24,6 @@ interface EitherView {
   myPick: number | null;
   done: boolean[];
   scores: number[];
-  timeLeftMs: number;
-  roundMs: number;
   last: Outcome | null;
   over: boolean;
 }
@@ -76,14 +74,11 @@ export default function EitherOr({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Either Or"
-            step={view.over ? 'Game over' : `Round ${view.number} of ${view.total}`}
-            score={view.scores[view.me] ?? 0}
-          />
-          {!view.over && <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundMs} />}
-        </>
+        <GameTop
+          title="Either Or"
+          step={view.over ? 'Game over' : `Round ${view.number} of ${view.total}`}
+          score={view.scores[view.me] ?? 0}
+        />
       }
       stage={
         <>

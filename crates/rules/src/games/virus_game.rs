@@ -10,9 +10,6 @@ use crate::game::{Game, GameInfo, Moment, Moments, PlayerResult, rank_by_score};
 use crate::rng::Rng;
 
 pub const ROUNDS: u32 = 4;
-pub const CONTACT_MS: i64 = 25_000;
-pub const REPORT_MS: i64 = 20_000;
-pub const VOTE_MS: i64 = 20_000;
 pub const REVEAL_MS: i64 = 15_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -117,7 +114,6 @@ pub struct VirusState {
     pub revealed: Vec<(usize, bool)>,
     pub new_infections: Vec<u32>,
     pub log: Vec<String>,
-    pub rng: Rng,
     /// Replay moments: the last terrorist quarantined; more than half the city newly infected
     /// in one round (only the terrorists see that one).
     pub moments: Moments,
@@ -153,8 +149,6 @@ pub struct VirusView {
     pub phase: &'static str,
     pub round: u32,
     pub rounds: u32,
-    pub time_left_ms: i64,
-    pub phase_time_ms: i64,
     pub me: usize,
     pub role: Role,
     pub role_text: &'static str,
@@ -194,11 +188,7 @@ impl VirusState {
         let active = self.active();
         let mut targets: Vec<Option<usize>> = vec![None; n];
         for &a in &active {
-            let chosen = self.agents[a].contact.flatten().filter(|t| active.contains(t) && *t != a);
-            targets[a] = chosen.or_else(|| {
-                let others: Vec<usize> = active.iter().copied().filter(|&t| t != a).collect();
-                (!others.is_empty()).then(|| *self.rng.pick(&others))
-            });
+            targets[a] = self.agents[a].contact.flatten().filter(|t| active.contains(t) && *t != a);
         }
         let before: Vec<bool> = self.agents.iter().map(|a| a.infected).collect();
         for (a, &target) in targets.iter().enumerate() {
@@ -269,7 +259,6 @@ impl VirusState {
             agent.contact = None;
         }
         self.phase = Phase::Report;
-        self.time_left_ms = REPORT_MS;
     }
 
     fn resolve_reports(&mut self) {
@@ -283,7 +272,6 @@ impl VirusState {
         }
         self.say(if lines.is_empty() { "Nobody accuses anyone.".into() } else { format!("Reports: {}.", lines.join("; ")) });
         self.phase = Phase::Vote;
-        self.time_left_ms = VOTE_MS;
     }
 
     fn resolve_votes(&mut self) {
@@ -332,7 +320,6 @@ impl VirusState {
         } else {
             self.round += 1;
             self.phase = Phase::Contact;
-            self.time_left_ms = CONTACT_MS;
         }
     }
 
@@ -450,13 +437,12 @@ impl Game for Rules {
             agents,
             round: 1,
             phase: Phase::Contact,
-            time_left_ms: CONTACT_MS,
+            time_left_ms: 0,
             reports: Vec::new(),
             votes: Vec::new(),
             revealed: Vec::new(),
             new_infections: Vec::new(),
             log: vec!["Round 1: choose whom to meet.".into()],
-            rng,
             moments: Moments::default(),
         })
     }
@@ -517,18 +503,12 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut VirusState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Reveal {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        match s.phase {
-            Phase::Contact => s.resolve_contacts(),
-            Phase::Report => s.resolve_reports(),
-            Phase::Vote => s.resolve_votes(),
-            _ => s.phase = Phase::Over,
+        if s.time_left_ms <= 0 {
+            s.phase = Phase::Over;
         }
     }
 
@@ -569,13 +549,6 @@ impl Game for Rules {
             },
             round: s.round,
             rounds: ROUNDS,
-            time_left_ms: s.time_left_ms,
-            phase_time_ms: match s.phase {
-                Phase::Contact => CONTACT_MS,
-                Phase::Report => REPORT_MS,
-                Phase::Vote => VOTE_MS,
-                _ => REVEAL_MS,
-            },
             me,
             role: mine.role,
             role_text: mine.role.text(),
@@ -774,6 +747,14 @@ mod tests {
             eprintln!("{n} players: terrorists won {terror} of {games}");
             assert!(terror > games as usize / 5 && terror < games as usize * 4 / 5, "{n} players: terrorists won {terror} of {games}");
         }
+    }
+
+    #[test]
+    fn no_timer_the_game_waits_for_every_contact() {
+        let mut s = Rules::setup(&players(6), 5).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Contact);
+        assert_eq!(Rules::to_move(&s).len(), 6);
     }
 
     #[test]

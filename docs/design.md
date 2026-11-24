@@ -17,6 +17,11 @@ The earlier base-building mobile game was dropped on 2026-11-22.
   (seats: the game's minimum, or 4 when it allows more).
 - **Original names and look:** the show's games are not copied one to one; we write our own versions.
 - **All 51 catalogue games get a digital version** (decided 2026-11-23), built in groups.
+- **Timers only where the game's rules give one** (decided 2026-11-24): a time limit, a race
+  ("as fast as you can", "the fastest right answer wins") or time as the resource, as the game's
+  line in `docs/games.md` says. Everywhere else you take your time: a phase ends when everyone has
+  moved (bots move by themselves). Short result pauses stay, without a countdown bar. Spinning
+  Puzzle Wheel keeps 12 s for the catalogue's 5, so a piece can be turned by touch.
 
 ## Visual identity (2026-11-23, from the user's key art)
 

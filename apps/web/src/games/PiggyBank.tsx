@@ -1,7 +1,7 @@
 // Piggy Bank: drop coins, claim what is inside, doubt the others. Rules: docs/games/piggy-bank.md
 
 import { useState } from 'react';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './PiggyBank.css';
 
 type Phase = 'drop' | 'claim' | 'doubt' | 'result' | 'over';
@@ -25,8 +25,6 @@ interface PbView {
   round: number;
   rounds: number;
   colour: Colour;
-  timeLeftMs: number;
-  phaseMs: number;
   myTurn: boolean;
   coins: number;
   drops: [string, number][];
@@ -165,12 +163,7 @@ export default function PiggyBank({ view }: ScreenProps) {
   }
   return (
     <Play
-      top={
-        <>
-          <GameTop title="Piggy Bank" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />
-          <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
-        </>
-      }
+      top={<GameTop title="Piggy Bank" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <div className="piggy-bank-top">

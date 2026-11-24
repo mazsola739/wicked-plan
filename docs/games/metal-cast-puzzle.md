@@ -10,10 +10,10 @@ Prison game, solo; our digital take on a cast-metal disentanglement puzzle. Code
 - Tap a ring, or its number button, to slide it on or off.
 - **Ring 1 can always move.** Any other ring can move only when the ring just below it is **on** and every ring below that one is **off**.
 - If a ring is blocked it doesn't move, and this costs you nothing.
-- There are three levels: 4 rings in **3 minutes**, 5 in **4 minutes** and 6 in **6 minutes**.
-- A solved level is worth **150, 250 or 400** points. You get the full amount for the fewest possible moves, and less for each extra move. You also get 1 point for every 2 seconds left.
+- There are three levels: 4, 5 and 6 rings.
+- A solved level is worth **150, 250 or 400** points. You get the full amount for the fewest possible moves, and less for each extra move.
 - **Reset level** puts the rings back to the start, but your moves still count.
-- **Give up**, or run out of time, and the level scores 0.
+- **Give up** and the level scores 0.
 
 ## Rules in detail
 
@@ -24,15 +24,15 @@ Ring 1 sits at the free end of the loop, the highest ring at the handle.
   ring *k − 1* is **on** and every ring below *k − 1* is **off**. A blocked ring does not move (the move
   is refused, it costs nothing).
 - **Goal.** Take every ring off the loop.
-- Three levels: **4, 5 and 6 rings**, with **3, 4 and 6 minutes**. Level 1 starts with all rings on;
+- Three levels: **4, 5 and 6 rings**. Level 1 starts with all rings on;
   levels 2 and 3 start from a seeded mix that is at least 12 and 24 moves from the goal.
 - The fewest moves for each start is known (the solver walks the whole state space, at most 2⁶ states).
-- **Points** per solved level: base **150, 250, 400** × (fewest moves ÷ your moves), plus 1 point for
-  every 2 seconds left. Run out of time or give up: 0 points, next level.
+- **Points** per solved level: base **150, 250, 400** × (fewest moves ÷ your moves). Give up: 0 points,
+  next level.
 - **Reset** puts the level back to its start; the moves made so far still count.
 - Moves: `{type:"toggle", ring}` (ring is 1-based), `{type:"reset"}`, `{type:"skip"}`.
 - View: `level`, `levels`, `rings` (true = on, index 0 is ring 1), `moves`, `best` (the fewest moves
-  from the start), `solved` per level, `score`, `timeLeftMs`, `levelTimeMs`, `over`.
+  from the start), `solved` per level, `score`, `over`.
 - Bot: follows the shortest path, with a wrong turn now and then.
 - Desktop: keys 1–6 slide that ring, Backspace resets.
 - **Replay moments:** level 2 or 3 (the mixed starts) solved in the fewest possible moves ("6 rings off

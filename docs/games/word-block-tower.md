@@ -11,8 +11,7 @@ Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 - Players take turns, one word each. Tap blocks to spell a word from the topic (3–7 letters), then tap **Build**. **⌫** and **Clear** fix mistakes.
 - The last player's word must use **every block that is left**.
 - If the blocks left can't make a word, take back the word built just before yours instead of building.
-- You have **30 seconds** per turn, or a word is chosen for you.
-- Each round scores **300, minus 30 per take-back and 60 per timed-out turn**, at least 50.
+- Each round scores **300, minus 30 per take-back**, at least 50.
 
 ## Rules in detail
 
@@ -26,9 +25,8 @@ Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 - **Take back:** instead of building, the player whose turn it is may take back the word built just before
   (its blocks return, that player builds again). Use it when the blocks left cannot finish the tower.
 - **Turn order:** seat order, starting one seat later each round (so everyone gets to be first and last).
-- **Turn timer:** 30 seconds; then a default move is made for you (the bot's choice).
-- **Score (team), per round:** **300 − 30 per take-back − 60 per timed-out turn**, at least 50. Three rounds:
-  up to 900. Every player gets the team's points and shares rank 1.
+- **Score (team), per round:** **300 − 30 per take-back**, at least 50. Three rounds: up to 900. Every
+  player gets the team's points and shares rank 1.
 - **View:** topic, the blocks (and who used which), every built word, whose turn it is. The secret words are
   never sent.
 - **Moves:** `{type:"word", word}`, `{type:"takeBack"}`.
@@ -37,5 +35,4 @@ Team mini game, 1–4 players (on the page: you + 3 bot teammates). Code:
 - **Screen:** blocks as tiles; tap tiles to spell, ⌫ and Clear, Build. Desktop keys: type letters,
   Backspace, Enter builds.
 - **Replay moments:** a seven-letter word, the longest there is ("Seven letters in one word:
-  TORNADO"), and a round's last word built with 3 seconds or less on the turn timer, not by a timed-out
-  turn ("Pile emptied with 2 s left"). Public: built words and the timer are shown to the whole team.
+  TORNADO"). Public: built words are shown to the whole team.

@@ -7,7 +7,7 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 **Goal:** get your piece closest to the goal in the centre of the board.
 
 - The 7×7 board has squares in five colours. Each colour has its own secret movement rule: step one, step two, backwards, turn right, or turn left.
-- Each round, tap a direction (up, right, down or left) in secret within 20 seconds. Then all pieces move at once. If you don't choose, your piece stays.
+- Each round, tap a direction (up, right, down or left) in secret. When everyone has chosen, all pieces move at once.
 - The rule used is the one of the square your piece starts on. A move off the board does not happen.
 - Watch the last round's log: every piece's colour, direction and result is a clue. Tap a colour to note your guess.
 - After rounds 6, 12 and 18, one rule is revealed to everyone.
@@ -45,8 +45,7 @@ you work them out from what happens to everyone's pieces.
 
 ## Rounds
 
-- Up to **30 rounds**. Each round everyone picks a direction in secret (**20 s**; no choice = the
-  piece stays). Then all pieces move at once.
+- Up to **30 rounds**. Each round everyone picks a direction in secret; then all pieces move at once.
 - After each round everyone sees every piece's colour, chosen direction and result (the log).
 - **Clues:** after rounds 6, 12 and 18 one rule is revealed to all (a colour not yet revealed).
 - The race ends after the round in which a piece reaches the goal, or after round 30.

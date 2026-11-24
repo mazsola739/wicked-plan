@@ -11,9 +11,6 @@ use crate::rng::Rng;
 
 pub const ROUNDS: usize = 6;
 pub const FULL: u32 = 10;
-pub const DROP_MS: i64 = 15_000;
-pub const CLAIM_MS: i64 = 20_000;
-pub const DOUBT_MS: i64 = 10_000;
 pub const RESULT_MS: i64 = 5_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -127,8 +124,6 @@ pub struct PbView {
     pub round: usize,
     pub rounds: usize,
     pub colour: Colour,
-    pub time_left_ms: i64,
-    pub phase_ms: i64,
     pub my_turn: bool,
     pub coins: u32,
     /// (seat, coins) for every drop this round.
@@ -184,7 +179,6 @@ impl PbState {
         }
         self.holder = starter;
         self.phase = Phase::Drop;
-        self.time_left_ms = DROP_MS;
     }
 
     fn drop_coins(&mut self, i: usize, white: u32, black: u32) -> Result<(), String> {
@@ -194,7 +188,6 @@ impl PbState {
         self.drops.push(Drop { seat: i, white, black });
         self.holder = (i + 1) % self.seats.len();
         self.phase = Phase::Claim;
-        self.time_left_ms = CLAIM_MS;
         Ok(())
     }
 
@@ -209,7 +202,6 @@ impl PbState {
             s.choice = None;
         }
         self.phase = Phase::Doubt;
-        self.time_left_ms = DOUBT_MS;
         Ok(())
     }
 
@@ -224,7 +216,6 @@ impl PbState {
             self.accepted = self.claims.last().map_or(0, |c| c.1);
             self.holder = claimer;
             self.phase = Phase::Drop;
-            self.time_left_ms = DROP_MS;
         }
     }
 
@@ -359,30 +350,14 @@ impl Game for Rules {
     }
 
     fn tick(s: &mut PbState, ms: u64) {
-        if s.phase == Phase::Over {
+        if s.phase != Phase::Result {
             return;
         }
         s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
+        if s.time_left_ms <= 0 {
+            let holder = s.holder;
+            s.start_round(holder);
         }
-        let holder = s.holder;
-        let _ = match s.phase {
-            Phase::Drop => s.drop_coins(holder, 1, 0),
-            Phase::Claim => {
-                let count = (s.accepted + s.seen_colour()).min(s.coins());
-                s.claim(holder, count)
-            }
-            Phase::Doubt => {
-                s.resolve_doubts();
-                Ok(())
-            }
-            Phase::Result => {
-                s.start_round(holder);
-                Ok(())
-            }
-            Phase::Over => Ok(()),
-        };
     }
 
     fn view_for(s: &PbState, player: &str) -> PbView {
@@ -395,14 +370,6 @@ impl Game for Rules {
             round: s.round,
             rounds: ROUNDS,
             colour: s.colour,
-            time_left_ms: s.time_left_ms,
-            phase_ms: match s.phase {
-                Phase::Drop => DROP_MS,
-                Phase::Claim => CLAIM_MS,
-                Phase::Doubt => DOUBT_MS,
-                Phase::Result => RESULT_MS,
-                Phase::Over => 0,
-            },
             my_turn: match s.phase {
                 Phase::Drop | Phase::Claim => me == Some(s.holder),
                 Phase::Doubt => me.is_some_and(|i| i != claimer && s.seats[i].choice.is_none()),
@@ -541,7 +508,7 @@ mod tests {
         let doubts = (0..20).filter(|&k| s.bot_doubts(0, &mut Rng::new(k))).count();
         assert!(doubts >= 12);
         Rules::apply_move(&mut s, "p1", PbMove::Doubt).unwrap();
-        Rules::tick(&mut s, DOUBT_MS as u64);
+        Rules::apply_move(&mut s, "p3", PbMove::Trust).unwrap();
         assert_eq!(s.seats[1].score, -1);
 
         let mut s = table();
@@ -549,19 +516,25 @@ mod tests {
         s.holder = 2;
         Rules::apply_move(&mut s, "p3", PbMove::Drop { white: 1, black: 0 }).unwrap();
         Rules::apply_move(&mut s, "p1", PbMove::Claim { count: 6 }).unwrap();
-        Rules::tick(&mut s, DOUBT_MS as u64);
+        Rules::apply_move(&mut s, "p2", PbMove::Trust).unwrap();
+        Rules::apply_move(&mut s, "p3", PbMove::Trust).unwrap();
         assert!(s.log[0].full);
         assert!(s.log[0].losers.is_empty());
     }
 
     #[test]
-    fn timeouts_keep_the_game_going() {
+    fn the_game_waits_for_every_move() {
         let mut s = table();
-        Rules::tick(&mut s, DROP_MS as u64);
-        Rules::tick(&mut s, CLAIM_MS as u64);
-        assert_eq!(s.claims[0].1, 1, "the honest default claim");
-        Rules::tick(&mut s, DOUBT_MS as u64);
-        assert_eq!((s.phase, s.holder), (Phase::Drop, 1));
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.phase, s.holder), (Phase::Drop, 0));
+        Rules::apply_move(&mut s, "p1", PbMove::Drop { white: 1, black: 0 }).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.phase, s.holder), (Phase::Claim, 1));
+        Rules::apply_move(&mut s, "p2", PbMove::Claim { count: 1 }).unwrap();
+        Rules::apply_move(&mut s, "p1", PbMove::Trust).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!(s.phase, Phase::Doubt);
+        assert_eq!(Rules::to_move(&s), vec!["p3".to_string()]);
     }
 
     #[test]
@@ -570,7 +543,8 @@ mod tests {
         Rules::apply_move(&mut s, "p1", PbMove::Drop { white: 1, black: 1 }).unwrap();
         // p2 saw one white and one black but claims 2 whites, and nobody doubts.
         Rules::apply_move(&mut s, "p2", PbMove::Claim { count: 2 }).unwrap();
-        Rules::tick(&mut s, DOUBT_MS as u64);
+        Rules::apply_move(&mut s, "p1", PbMove::Trust).unwrap();
+        Rules::apply_move(&mut s, "p3", PbMove::Trust).unwrap();
         Rules::apply_move(&mut s, "p2", PbMove::Drop { white: 0, black: 1 }).unwrap();
         // p3 trusts the chain: 2 + 0 = 2. p2 believes 1.
         Rules::apply_move(&mut s, "p3", PbMove::Claim { count: 2 }).unwrap();

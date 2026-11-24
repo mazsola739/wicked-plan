@@ -13,7 +13,6 @@ pub const PER_COLOUR: usize = 10;
 pub const HAND: usize = 4;
 pub const LIVES: i64 = 3;
 pub const MAX_ROUNDS: usize = 12;
-pub const TURN_MS: i64 = 20_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -51,7 +50,6 @@ pub struct BluffState {
     pub round: usize,
     pub turn: usize,
     pub bet: Option<Bet>,
-    pub time_left_ms: i64,
     pub log: Vec<String>,
     pub last: Option<Showdown>,
     pub over: bool,
@@ -79,8 +77,6 @@ pub struct BluffView {
     pub total_cards: usize,
     pub bet: Option<Bet>,
     pub turn: Option<usize>,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub log: Vec<String>,
     pub last: Option<Showdown>,
     pub over: bool,
@@ -115,7 +111,6 @@ impl BluffState {
         }
         self.turn = if self.alive(starter) { starter } else { self.next_alive(starter) };
         self.bet = None;
-        self.time_left_ms = TURN_MS;
         self.log.push(format!("Round {}: {} starts.", self.round + 1, self.players[self.turn]));
     }
 
@@ -132,7 +127,6 @@ impl BluffState {
                 self.log.push(format!("{} bets {count} {}.", self.players[seat], COLOURS[colour]));
                 self.bet = Some(bet);
                 self.turn = self.next_alive(seat);
-                self.time_left_ms = TURN_MS;
             }
             BluffMove::Call => {
                 let Some(bet) = self.bet else { return Err("There is no bet to call yet".into()) };
@@ -163,7 +157,6 @@ impl BluffState {
                 let left = (0..self.players.len()).filter(|&s| self.alive(s)).count();
                 if left <= 1 || self.round >= MAX_ROUNDS {
                     self.over = true;
-                    self.time_left_ms = 0;
                     self.log.push("Game over.".into());
                 } else {
                     self.deal(loser);
@@ -230,7 +223,6 @@ impl Game for Rules {
             round: 0,
             turn: 0,
             bet: None,
-            time_left_ms: TURN_MS,
             log: Vec::new(),
             last: None,
             over: false,
@@ -251,24 +243,6 @@ impl Game for Rules {
         s.do_move(seat, mv)
     }
 
-    fn tick(s: &mut BluffState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms > 0 {
-            return;
-        }
-        let seat = s.turn;
-        let mv = if s.bet.is_some() {
-            BluffMove::Call
-        } else {
-            let colour = (0..COLOURS.len()).max_by_key(|&c| s.hands[seat].iter().filter(|&&x| x == c).count()).unwrap_or(0);
-            BluffMove::Bet { count: 1, colour }
-        };
-        let _ = s.do_move(seat, mv);
-    }
-
     fn view_for(s: &BluffState, player: &str) -> BluffView {
         let me = s.players.iter().position(|p| p == player).unwrap_or(0);
         BluffView {
@@ -282,8 +256,6 @@ impl Game for Rules {
             total_cards: s.total_cards(),
             bet: s.bet,
             turn: (!s.over).then_some(s.turn),
-            time_left_ms: s.time_left_ms,
-            turn_ms: TURN_MS,
             log: s.log[s.log.len().saturating_sub(10)..].to_vec(),
             last: s.last.clone(),
             over: s.over,
@@ -401,12 +373,14 @@ mod tests {
     }
 
     #[test]
-    fn timeout_calls_or_opens() {
+    fn no_timer_the_turn_waits_for_the_player() {
         let mut s = Rules::setup(&ids(4), 5).unwrap();
-        Rules::tick(&mut s, TURN_MS as u64);
-        assert!(s.bet.is_some_and(|b| b.count == 1));
-        Rules::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.round, 1);
+        Rules::tick(&mut s, 600_000);
+        assert!(s.bet.is_none());
+        assert_eq!((s.round, s.turn), (0, 0));
+        Rules::apply_move(&mut s, "p1", BluffMove::Bet { count: 1, colour: 0 }).unwrap();
+        Rules::tick(&mut s, 600_000);
+        assert_eq!((s.round, s.turn), (0, 1));
     }
 
     #[test]

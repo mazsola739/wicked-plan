@@ -10,7 +10,7 @@ Final duel, 2 players. Code: `crates/rules/src/games/question_and_truth.rs`, scr
 - On your turn, ask one question about their row and pay its cost: the card at a position or where a card is (3 tokens), the sum of two positions (2), or a yes/no question (1).
 - Pick a question, tap the numbers it needs, then tap the ask button. Every answer is true.
 - Build your guess by tapping a slot, then a card. Tap **Final guess**, then tap again to confirm. After that you ask no more questions.
-- With no tokens left, you can only guess. You have 60 seconds a turn, or the bot plays it for you.
+- With no tokens left, you can only guess.
 - You score 100 per right position, +100 for the whole row, and 10 per token left when you guessed. More points wins.
 
 ## Rules in detail
@@ -33,14 +33,13 @@ Final duel, 2 players. Code: `crates/rules/src/games/question_and_truth.rs`, scr
 - Both players see every question and answer, also the ones about their own row.
 - **Final guess:** the whole row at once. After guessing you stop; the opponent goes on alone until they
   guess. With no tokens left, the only move is the guess.
-- Turn timer: **60 s**; when it runs out the bot plays your turn (a question or the guess).
 - End: when both have guessed. Points: **100 per position right**, **+100** for a fully right row, and
   **10 per token left** at the time of the guess (about 0–1000). More points wins.
 - Moves: `{type:"ask", question:{kind:"cardAt", pos}}`, `{kind:"whereIs", card}`, `{kind:"sum", a, b}`
   (positions), `{kind:"leftOf", a, b}` (cards), `{kind:"bigger", a, b}` (positions), `{kind:"leftHalf", card}`;
   `{type:"guess", order:[8 cards]}`. Positions and cards are 1–8.
-- View: your row, both token counts, whose turn, both question logs with answers, who has guessed, the
-  timer; after the end the opponent's row and both guesses.
+- View: your row, both token counts, whose turn, both question logs with answers, who has guessed; after
+  the end the opponent's row and both guesses.
 - Bot: keeps every row (of the 40,320) that fits the answers so far, asks the question with the most
   expected information per token, and guesses as soon as one row is left (or the tokens run out, then the
   row that agrees most with the remaining ones).

@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import './MemorySceneQuiz.css';
-import { GameTop, KeyHint, move, nameOf, Play, RoundDots, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, RoundDots, type ScreenProps, useKeys } from './common';
 
 interface SceneObject {
   shape: string;
@@ -23,7 +23,7 @@ interface Answered {
   text: string;
   options: string[];
   seat: number;
-  given: number | null;
+  given: number;
   answer: number;
   correct: boolean;
 }
@@ -42,8 +42,6 @@ interface SceneView {
   answerer: number | null;
   yourTurn: boolean;
   history: Answered[];
-  timeLeftMs: number;
-  phaseMs: number;
   score: number;
   failed: boolean;
 }
@@ -206,7 +204,6 @@ export default function MemorySceneQuiz({ view: raw }: ScreenProps) {
             score={view.score}
           />
           <RoundDots results={view.history.map((h) => h.correct)} total={view.questions} />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseMs} />
         </>
       }
       stage={<Scene view={view} />}
@@ -226,8 +223,7 @@ export default function MemorySceneQuiz({ view: raw }: ScreenProps) {
           <>
             {last && (
               <p className={`last ${last.correct ? 'ok' : 'bad'}`}>
-                {who(last.seat)}: {last.given === null ? 'no answer' : last.options[last.given]}{' '}
-                {last.correct ? '✓' : `✗ (it was ${last.options[last.answer]})`}
+                {who(last.seat)}: {last.options[last.given]} {last.correct ? '✓' : `✗ (it was ${last.options[last.answer]})`}
               </p>
             )}
             {view.question && (

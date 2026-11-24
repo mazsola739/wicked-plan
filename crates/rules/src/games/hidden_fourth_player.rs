@@ -11,7 +11,6 @@ use crate::rng::Rng;
 
 pub const N: usize = 7;
 const CELLS: usize = N * N;
-pub const TURN_MS: i64 = 30_000;
 pub const SHADOW: u8 = 4;
 const EMPTY: u8 = 0;
 pub const SURVIVE_BONUS: i64 = 300;
@@ -118,7 +117,6 @@ pub struct HiddenState {
     round: u32,
     /// The stones of the last round: (colour, square).
     last: Vec<(u8, usize)>,
-    time_left_ms: i64,
     shadow_won: bool,
     over: bool,
     /// Replay moments: two lines with one stone, a stone that blocks the Shadow and makes a line.
@@ -140,7 +138,6 @@ impl HiddenState {
         self.last.push((colour, c));
     }
     fn after_player(&mut self) {
-        self.time_left_ms = TURN_MS;
         if self.full() {
             self.over = true;
             return;
@@ -190,8 +187,6 @@ pub struct HiddenView {
     pub danger: Vec<usize>,
     pub last: Vec<(u8, usize)>,
     pub round: u32,
-    pub time_left_ms: i64,
-    pub turn_ms: i64,
     pub over: bool,
     pub shadow_won: bool,
 }
@@ -230,7 +225,6 @@ impl Game for HiddenFourthPlayer {
             rng,
             round: 1,
             last: vec![(SHADOW, y * N + x)],
-            time_left_ms: TURN_MS,
             shadow_won: false,
             over: false,
             moments: Moments::default(),
@@ -264,20 +258,6 @@ impl Game for HiddenFourthPlayer {
         Ok(())
     }
 
-    fn tick(s: &mut HiddenState, ms: u64) {
-        if s.over {
-            return;
-        }
-        s.time_left_ms -= ms as i64;
-        if s.time_left_ms <= 0 {
-            let p = s.players[s.turn].clone();
-            let mv = Self::bot_move(s, &p, u64::from(s.round));
-            if Self::apply_move(s, &p, mv).is_err() {
-                s.after_player();
-            }
-        }
-    }
-
     fn view_for(s: &HiddenState, player: &str) -> HiddenView {
         let me = s.seat(player).unwrap_or(0);
         HiddenView {
@@ -292,8 +272,6 @@ impl Game for HiddenFourthPlayer {
             danger: if s.over { Vec::new() } else { completing(&s.board, SHADOW) },
             last: s.last.clone(),
             round: s.round,
-            time_left_ms: s.time_left_ms.max(0),
-            turn_ms: TURN_MS,
             over: s.over,
             shadow_won: s.shadow_won,
         }
@@ -407,10 +385,12 @@ mod tests {
     }
 
     #[test]
-    fn time_up_plays_for_you() {
+    fn the_game_waits_for_the_player() {
         let mut s = new();
-        HiddenFourthPlayer::tick(&mut s, TURN_MS as u64);
-        assert_eq!(s.turn, 1);
+        HiddenFourthPlayer::tick(&mut s, 600_000);
+        assert_eq!(s.turn, 0);
+        assert!(s.board.iter().all(|&c| c == EMPTY));
+        assert_eq!(HiddenFourthPlayer::to_move(&s), vec!["a".to_string()]);
     }
 
     #[test]

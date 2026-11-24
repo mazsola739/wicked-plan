@@ -3,7 +3,7 @@
 
 import { type CSSProperties, useState } from 'react';
 import './ColourMancala.css';
-import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
+import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 type Stones = [number, number, number];
 
@@ -23,8 +23,6 @@ interface MancalaView {
   holes: Stones[];
   turn: number;
   yourTurn: boolean;
-  timeLeftMs: number;
-  turnMs: number;
   turnsLeft: number;
   points: number[];
   last: LastMove | null;
@@ -137,14 +135,11 @@ export default function ColourMancala({ view: raw }: ScreenProps) {
   return (
     <Play
       top={
-        <>
-          <GameTop
-            title="Colour Mancala"
-            step={view.yourTurn ? 'Your turn' : `${nameOf(view.players[view.turn]!)} to move`}
-            score={view.points[you] ?? 0}
-          />
-          <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
-        </>
+        <GameTop
+          title="Colour Mancala"
+          step={view.yourTurn ? 'Your turn' : `${nameOf(view.players[view.turn]!)} to move`}
+          score={view.points[you] ?? 0}
+        />
       }
       stage={<Ring view={view} />}
       controls={
