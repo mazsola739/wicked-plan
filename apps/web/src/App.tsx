@@ -58,17 +58,18 @@ const STEPS: [string, string][] = [
   ['Outsmart the table', 'Solo puzzles test your head, a few against the clock. Everything else is you against bots that bluff back.'],
 ];
 
-/** The categories (docs/games.md, Categories), in the order the filter shows them. */
-const CATEGORIES: [string, string][] = [
-  ['logic-puzzles', 'Logic & Puzzles'],
-  ['strategy-territory', 'Strategy & Territory'],
-  ['bluff-deduction', 'Bluff & Deduction'],
-  ['social-alliances', 'Social & Alliances'],
-  ['auction-economy', 'Auction & Economy'],
-  ['memory-observation', 'Memory & Observation'],
-  ['speed-risk', 'Speed & Risk'],
+/** The categories (docs/games.md, Categories), in the order the filter shows them: id, full name
+    (searched, and the chip's tooltip), one-word chip label. */
+const CATEGORIES: [string, string, string][] = [
+  ['logic-puzzles', 'Logic & Puzzles', 'Logic'],
+  ['strategy-territory', 'Strategy & Territory', 'Strategy'],
+  ['bluff-deduction', 'Bluff & Deduction', 'Bluff'],
+  ['social-alliances', 'Social & Alliances', 'Social'],
+  ['auction-economy', 'Auction & Economy', 'Auction'],
+  ['memory-observation', 'Memory & Observation', 'Memory'],
+  ['speed-risk', 'Speed & Risk', 'Speed'],
 ];
-const CATEGORY_NAME = Object.fromEntries(CATEGORIES);
+const CATEGORY_NAME: Record<string, string> = Object.fromEntries(CATEGORIES.map(([id, name]) => [id, name]));
 
 type Filter = { tag: string; level: string; seats: string; season: string; stage: string; query: string };
 const ANY: Filter = { tag: 'all', level: 'all', seats: 'all', season: 'all', stage: 'all', query: '' };
@@ -350,7 +351,7 @@ const tint = (key: 'season' | 'stage', value: string) =>
 // No "All" chip: a filter is off until a chip is picked, and picking the pressed chip again turns
 // it off.
 const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }[] = [
-  { key: 'tag', label: 'Category', options: CATEGORIES },
+  { key: 'tag', label: 'Category', options: CATEGORIES.map(([id, , short]): [string, string] => [id, short]) },
 ];
 
 /** Where the game was on the show, on its card: the season in its colour, the day in its shade. */
@@ -394,6 +395,7 @@ function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; on
                 key={value}
                 type="button"
                 className="chip"
+                title={f.key === 'tag' ? t(CATEGORY_NAME[value] ?? '') : undefined}
                 aria-pressed={filter[f.key] === value}
                 onClick={() => onChange({ ...filter, [f.key]: filter[f.key] === value ? 'all' : value })}
               >

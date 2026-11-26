@@ -87,6 +87,13 @@ const hu: Locale = {
     'Auction & Economy': 'Licit és gazdaság',
     'Memory & Observation': 'Memória és megfigyelés',
     'Speed & Risk': 'Gyorsaság és kockázat',
+    Logic: 'Logika',
+    Strategy: 'Stratégia',
+    Bluff: 'Blöff',
+    Social: 'Társas',
+    Auction: 'Licit',
+    Memory: 'Memória',
+    Speed: 'Gyorsaság',
     'No game fits these filters.': 'Egyik játék sem felel meg ezeknek a szűrőknek.',
 
     // Game view, How to play, results.

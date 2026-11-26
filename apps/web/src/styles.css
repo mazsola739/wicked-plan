@@ -1719,14 +1719,10 @@ a.btn {
   gap: 6px;
 }
 
-/* The filters sit on one grid: two equal chips a row, the long category names one a row. */
+/* The filters sit on one grid: two equal chips a row. */
 .filters .chips {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.filters .filter-tag .chips {
-  grid-template-columns: 1fr;
 }
 
 /* Filter chips are pills like the difficulty pill on the cards (.level): small hexagons with
