@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { GameIcon } from '../GameIcon';
+import { huName, t } from '../i18n';
 
 export { move } from '../play';
 
@@ -13,7 +14,7 @@ const BOT_NAMES = ['Rex', 'Ivy', 'Max', 'Zoe', 'Kai', 'Lou', 'Nia', 'Oto', 'Pip'
 
 /** Display name of a seat: "you" → "You", "bot-1" → "Rex", … */
 export function nameOf(id: string): string {
-  if (id === 'you') return 'You';
+  if (id === 'you') return t('You');
   const n = Number(id.replace('bot-', ''));
   return BOT_NAMES[(n - 1) % BOT_NAMES.length] ?? id;
 }
@@ -77,7 +78,10 @@ export function GameTop({ title, step, score }: { title: string; step: string; s
         {id && <GameIcon id={id} className="title-icon" />}
         <div>
           <div className="label">{step}</div>
-          <h2>{title}</h2>
+          <h2>
+            {title}
+            {id && huName(id) && <span className="name-hu">({huName(id)})</span>}
+          </h2>
         </div>
       </div>
       <div className="score big">{score}</div>
@@ -129,10 +133,10 @@ export function NumberPad({ round, onSubmit }: { round: number; onSubmit: (n: nu
           0
         </button>
         <button type="button" className="key ok" disabled={value === ''} onClick={() => onSubmit(Number(value))}>
-          OK
+          {t('OK')}
         </button>
       </div>
-      <KeyHint>Or type the number and press Enter.</KeyHint>
+      <KeyHint>{t('Or type the number and press Enter.')}</KeyHint>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 // Secret Code: crack four dice from exact / near hints. Rules page: docs/games/secret-code.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
 import './SecretCode.css';
 
@@ -67,7 +68,7 @@ const PIPS: Record<number, [number, number][]> = {
  */
 function Die({ face }: { face: number | null }) {
   return (
-    <svg className={`sc-die${face ? '' : ' empty'}`} viewBox="0 0 40 40" aria-label={face ? `${face}` : 'empty'} role="img">
+    <svg className={`sc-die${face ? '' : ' empty'}`} viewBox="0 0 40 40" aria-label={face ? `${face}` : t('empty')} role="img">
       {face ? (
         <>
           <path className="sc-die-body" d="M7,2 33,2 38,7 38,33 33,38 7,38 2,33 2,7Z" />
@@ -94,7 +95,7 @@ function Die({ face }: { face: number | null }) {
 
 function Hint({ exact, near }: { exact: number; near: number }) {
   return (
-    <div className="sc-hint" title={`${exact} exact, ${near} near`}>
+    <div className="sc-hint" title={t('{exact} exact, {near} near', { exact, near })}>
       <span className="sc-exact">{exact}</span>
       <span className="sc-near">{near}</span>
     </div>
@@ -126,7 +127,7 @@ export default function SecretCode({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Secret Code" step={`Code ${view.round} of ${view.rounds}`} score={me?.points ?? 0} />
+          <GameTop title="Secret Code" step={t('Code {n} of {total}', { n: view.round, total: view.rounds })} score={me?.points ?? 0} />
           <TimerBar leftMs={view.revealing ? view.revealLeftMs : view.timeLeftMs} totalMs={view.revealing ? 4000 : view.roundMs} />
         </>
       }
@@ -144,7 +145,7 @@ export default function SecretCode({ view: raw }: ScreenProps) {
               <div className="sc-hidden">? ? ? ?</div>
             )}
             <div className="sc-total">
-              Total <strong>{view.total}</strong> pips
+              {t('Total')} <strong>{view.total}</strong> {t('pips')}
             </div>
           </div>
           <ol className="sc-guesses">
@@ -170,19 +171,20 @@ export default function SecretCode({ view: raw }: ScreenProps) {
                       key={i}
                       type="button"
                       className="sc-slot"
-                      aria-label={`Remove die ${i + 1}`}
+                      aria-label={t('Remove die {n}', { n: i + 1 })}
                       onClick={() => setEntry((e) => e.filter((_, j) => j !== i))}
                     >
                       <Die face={entry[i] ?? null} />
                     </button>
                   ))}
                 </div>
-                <span className="sc-left muted small">{left} left</span>
+                <span className="sc-left muted small">{t('{n} left', { n: left })}</span>
               </li>
             )}
           </ol>
           <p className="muted small center">
-            <span className="sc-exact">n</span> right face, right place · <span className="sc-near">n</span> right face, wrong place
+            <span className="sc-exact">n</span> {t('right face, right place')} · <span className="sc-near">n</span>{' '}
+            {t('right face, wrong place')}
           </p>
         </div>
       }
@@ -194,12 +196,12 @@ export default function SecretCode({ view: raw }: ScreenProps) {
                 {view.scores.map((s) => (
                   <li key={s.id} className={s === me ? 'me' : ''}>
                     <span>{nameOf(s.id)}</span>
-                    <span className="score">{s.roundPoints > 0 ? `+${s.roundPoints}` : 'not solved'}</span>
+                    <span className="score">{s.roundPoints > 0 ? `+${s.roundPoints}` : t('not solved')}</span>
                   </li>
                 ))}
               </ol>
               <button type="button" className="btn primary" onClick={() => move({ type: 'next' })}>
-                {view.round < view.rounds ? 'Next code' : 'Finish'}
+                {view.round < view.rounds ? t('Next code') : t('Finish')}
               </button>
             </>
           ) : (
@@ -216,7 +218,7 @@ export default function SecretCode({ view: raw }: ScreenProps) {
                   ⌫
                 </button>
                 <button type="button" className="btn primary" disabled={!canGuess || entry.length !== 4} onClick={submit}>
-                  Guess
+                  {t('Guess')}
                 </button>
               </div>
             </>
@@ -227,14 +229,16 @@ export default function SecretCode({ view: raw }: ScreenProps) {
                 <li key={r.id}>
                   <span>{nameOf(r.id)}</span>
                   <span className="muted small">
-                    {r.solved ? `cracked it in ${r.guesses}` : `${r.guesses} guess${r.guesses === 1 ? '' : 'es'}`}
+                    {r.solved
+                      ? t('cracked it in {n}', { n: r.guesses })
+                      : t(r.guesses === 1 ? '{n} guess' : '{n} guesses', { n: r.guesses })}
                   </span>
                   <span className="score">{view.scores.find((s) => s.id === r.id)?.points ?? 0}</span>
                 </li>
               ))}
             </ul>
           )}
-          <KeyHint>Keys: 1–6 add a die, Backspace removes, Enter guesses.</KeyHint>
+          <KeyHint>{t('Keys: 1–6 add a die, Backspace removes, Enter guesses.')}</KeyHint>
         </>
       }
     />

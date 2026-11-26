@@ -1006,7 +1006,6 @@ h2 {
     text-shadow: 0 0 8px var(--chip);
   }
 
-
   .card-btn:hover {
     border-color: var(--accent-2);
   }
@@ -1093,7 +1092,7 @@ a.btn {
   text-decoration: none;
 }
 
-/* The top bar: an angled ribbon with a cyan-to-violet edge, the crown mark and two anchors. */
+/* The top bar: an angled ribbon with a cyan-to-violet edge, the grin mark and two anchors. */
 .topbar {
   position: relative;
   display: flex;
@@ -1136,14 +1135,76 @@ a.btn {
   font-size: 0.85rem;
 }
 
-.brand-crown {
-  width: 30px;
-  color: var(--silver);
+.brand-grin {
+  width: 34px;
+  height: auto;
 }
 
 .topnav {
   display: flex;
+  align-items: center;
   gap: 4px;
+}
+
+/* EN / HU in the top bar: two small letters, the chosen one lit in cyan. */
+.lang-switch {
+  display: inline-flex;
+  min-width: 0;
+  margin: 0 0 0 6px;
+  padding: 0 0 0 8px;
+  border: none;
+  border-left: 1px solid var(--line);
+}
+
+.lang-btn {
+  min-width: 40px;
+  min-height: var(--touch);
+  padding: 0 6px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+/* On a narrow phone the two in-page links give way, so the brand and EN / HU fit in the bar. */
+@media (max-width: 559px) {
+  .topbar .topnav a {
+    display: none;
+  }
+
+  .topbar .lang-switch {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+  }
+}
+
+.lang-btn[aria-pressed="true"] {
+  color: var(--cyan);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--cyan) 60%, transparent);
+}
+
+/* In Hungarian a name gets its Hungarian one under it, in brackets and smaller. */
+.title-hu,
+.name-hu {
+  display: block;
+  font-family: inherit;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.title-hu {
+  font-size: 0.45em;
+  margin-top: 4px;
+}
+
+.name-hu {
+  font-size: 0.72em;
+  font-family: system-ui, sans-serif;
 }
 
 .topnav a {
@@ -1303,26 +1364,6 @@ a.btn {
   max-width: 980px;
 }
 
-/* Every jump button is one width, the width of the longest name; three a row on a phone. */
-.kind-nav .chip {
-  width: 132px;
-  padding: 0 8px;
-}
-
-@media (max-width: 719px) {
-  .kind-nav .chip {
-    width: calc((100% - 12px) / 3);
-    padding: 0 4px;
-    font-size: 0.64rem;
-  }
-}
-
-.kind-nav .chip:disabled {
-  --chip: var(--muted);
-  opacity: 0.35;
-  cursor: default;
-}
-
 .game-group {
   scroll-margin-top: 16px;
 }
@@ -1454,6 +1495,12 @@ a.btn {
   pointer-events: none;
 }
 
+.side-list .game-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+}
+
 /* The glass band. */
 .side-list button::before {
   inset: 0;
@@ -1530,12 +1577,6 @@ a.btn {
   .side-list button:focus-visible .game-icon {
     transform: none;
   }
-}
-
-.side-list .game-icon {
-  flex: none;
-  width: 30px;
-  height: 30px;
 }
 
 @media (min-width: 1024px) {
@@ -1726,6 +1767,26 @@ a.btn {
   text-shadow: 0 0 8px color-mix(in srgb, var(--chip) 60%, transparent);
 }
 
+/* Every jump button is one width, the width of the longest name; three a row on a phone. */
+.kind-nav .chip {
+  width: 132px;
+  padding: 0 8px;
+}
+
+@media (max-width: 719px) {
+  .kind-nav .chip {
+    width: calc((100% - 12px) / 3);
+    padding: 0 4px;
+    font-size: 0.64rem;
+  }
+}
+
+.kind-nav .chip:disabled {
+  --chip: var(--muted);
+  opacity: 0.35;
+  cursor: default;
+}
+
 /* Hexagon controls clip their own outline away, so focus shows as a bright edge instead. */
 .btn:focus-visible,
 .chip:focus-visible {
@@ -1750,9 +1811,10 @@ a.btn {
   text-align: center;
 }
 
-.footer-crown {
-  width: 34px;
-  color: var(--muted);
+.footer-grin {
+  width: 36px;
+  height: auto;
+  opacity: 0.8;
 }
 
 .footer-links {

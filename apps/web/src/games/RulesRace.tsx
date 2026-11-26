@@ -1,6 +1,7 @@
 // Rules Race: race to square 18, secret personal rules, group rules by vote. Rules: docs/games/rules-race.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './RulesRace.css';
 
@@ -69,7 +70,12 @@ export default function RulesRace({ view }: ScreenProps) {
     return true;
   });
   const rows = Math.ceil((v.track + 1) / COLS);
-  const step = v.phase === 'write' ? 'Write your rule' : v.phase === 'vote' ? 'Group vote' : `Round ${v.round} of ${v.maxRounds}`;
+  const step =
+    v.phase === 'write'
+      ? t('Write your rule')
+      : v.phase === 'vote'
+        ? t('Group vote')
+        : t('Round {n} of {total}', { n: v.round, total: v.maxRounds });
   return (
     <Play
       top={<GameTop title="Rules Race" step={step} score={v.score} />}
@@ -79,7 +85,7 @@ export default function RulesRace({ view }: ScreenProps) {
             className="drawing rules-race-track"
             viewBox={`-4 -4 ${COLS * CELL + 8} ${rows * CELL + 8}`}
             role="img"
-            aria-label="Race track"
+            aria-label={t('Race track')}
           >
             {Array.from({ length: v.track + 1 }, (_, n) => {
               const [x, y] = cellXY(n);
@@ -89,7 +95,7 @@ export default function RulesRace({ view }: ScreenProps) {
                 <g key={n}>
                   <rect x={x + 3} y={y + 3} width={CELL - 6} height={CELL - 6} rx={12} className={`rules-race-cell${cls}`} />
                   <text x={x + 12} y={y + 24} className="rules-race-num">
-                    {n === v.track ? 'GOAL' : n}
+                    {n === v.track ? t('GOAL') : n}
                   </text>
                 </g>
               );
@@ -118,7 +124,7 @@ export default function RulesRace({ view }: ScreenProps) {
             })}
           </svg>
           <div className="rules-race-prison">
-            <span className="label">Prison</span>
+            <span className="label">{t('Prison')}</span>
             {v.racers
               .filter((r) => r.inPrison)
               .map((r) => (
@@ -133,9 +139,9 @@ export default function RulesRace({ view }: ScreenProps) {
                 <span>
                   <span className="rules-race-dot" style={{ background: SEAT_COLOURS[i] }} />
                   {nameOf(r.id)} · {r.pos}
-                  {r.escape ? ' · escape card' : ''}
+                  {r.escape ? ` · ${t('escape card')}` : ''}
                 </span>
-                <small className="muted">{r.rule ? r.rule.text : r.written ? 'secret rule' : 'writing…'}</small>
+                <small className="muted">{r.rule ? t(r.rule.text) : r.written ? t('secret rule') : t('writing…')}</small>
               </li>
             ))}
           </ul>
@@ -144,23 +150,23 @@ export default function RulesRace({ view }: ScreenProps) {
       controls={
         <>
           {v.phase === 'write' && me && !me.written && <WriteRule view={v} />}
-          {v.phase === 'write' && me?.written && <p className="muted center">Waiting for the others to write their rules…</p>}
+          {v.phase === 'write' && me?.written && <p className="muted center">{t('Waiting for the others to write their rules…')}</p>}
           {v.phase === 'turn' && (
             <>
-              {v.lastRoll && <p className="last">{names(v.lastRoll)}</p>}
+              {v.lastRoll && <p className="last">{names(t(v.lastRoll))}</p>}
               <button type="button" className="btn primary" disabled={!myTurn} onClick={() => move({ type: 'roll' })}>
-                {myTurn ? 'Roll the die' : `${nameOf(v.current ?? '')} is rolling…`}
+                {myTurn ? t('Roll the die') : t('{name} is rolling…', { name: nameOf(v.current ?? '') })}
               </button>
-              <KeyHint>Space or Enter rolls.</KeyHint>
+              <KeyHint>{t('Space or Enter rolls.')}</KeyHint>
             </>
           )}
           {v.phase === 'vote' && <Vote view={v} voted={!!me?.voted} />}
           <div>
-            <div className="label">Group rules</div>
+            <div className="label">{t('Group rules')}</div>
             <ol className="rules-race-group">
               {v.group.map((g) => (
                 <li key={g.text} className={g.on ? 'on' : 'off'}>
-                  <strong>{g.on ? 'ON' : 'off'}</strong> {g.text}
+                  <strong>{g.on ? t('ON') : t('off')}</strong> {t(g.text)}
                 </li>
               ))}
             </ol>
@@ -172,7 +178,7 @@ export default function RulesRace({ view }: ScreenProps) {
               .map((line, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows at the end
                 <p key={i} className="small">
-                  {names(line)}
+                  {names(t(line))}
                 </p>
               ))}
           </div>
@@ -187,16 +193,16 @@ function WriteRule({ view }: { view: RaceView }) {
   const [effect, setEffect] = useState<string | null>(null);
   return (
     <div className="rules-race-write">
-      <div className="label">When…</div>
+      <div className="label">{t('When…')}</div>
       {view.conditions.map((c) => (
         <button key={c.id} type="button" className={`btn small${cond === c.id ? ' primary' : ''}`} onClick={() => setCond(c.id)}>
-          {c.text}
+          {t(c.text)}
         </button>
       ))}
-      <div className="label">then…</div>
+      <div className="label">{t('then…')}</div>
       {view.effects.map((e) => (
         <button key={e.id} type="button" className={`btn small${effect === e.id ? ' primary' : ''}`} onClick={() => setEffect(e.id)}>
-          {e.text}
+          {t(e.text)}
         </button>
       ))}
       <button
@@ -205,24 +211,24 @@ function WriteRule({ view }: { view: RaceView }) {
         disabled={!cond || !effect}
         onClick={() => move({ type: 'write', condition: cond, effect })}
       >
-        Write my secret rule
+        {t('Write my secret rule')}
       </button>
     </div>
   );
 }
 
 function Vote({ view, voted }: { view: RaceView; voted: boolean }) {
-  if (voted) return <p className="muted center">Vote sent. Waiting for the others…</p>;
+  if (voted) return <p className="muted center">{t('Vote sent. Waiting for the others…')}</p>;
   return (
     <div className="rules-race-write">
-      <div className="label">Switch one group rule?</div>
+      <div className="label">{t('Switch one group rule?')}</div>
       {view.group.map((g, k) => (
         <button key={g.text} type="button" className="btn small" onClick={() => move({ type: 'vote', rule: k })}>
-          Switch {k + 1} {g.on ? 'off' : 'on'}
+          {g.on ? t('Switch {n} off', { n: k + 1 }) : t('Switch {n} on', { n: k + 1 })}
         </button>
       ))}
       <button type="button" className="btn primary" onClick={() => move({ type: 'vote', rule: null })}>
-        Keep them all
+        {t('Keep them all')}
       </button>
     </div>
   );

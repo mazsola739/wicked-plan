@@ -1,6 +1,7 @@
 // Question and Truth: buy answers with tokens, then guess the opponent's row. Rules page: docs/games/question-and-truth.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './QuestionAndTruth.css';
 
@@ -27,12 +28,24 @@ type Kind = 'cardAt' | 'whereIs' | 'sum' | 'leftOf' | 'bigger' | 'leftHalf';
 
 /** The question menu: what the one or two numbers mean, and the cost. */
 const MENU: { kind: Kind; label: string; cost: number; args: ('position' | 'card')[]; text: (a: number, b: number) => string }[] = [
-  { kind: 'cardAt', label: 'Card at…', cost: 3, args: ['position'], text: (a) => `Which card is at position ${a}?` },
-  { kind: 'whereIs', label: 'Where is…', cost: 3, args: ['card'], text: (a) => `Where is card ${a}?` },
-  { kind: 'sum', label: 'Sum of two', cost: 2, args: ['position', 'position'], text: (a, b) => `Sum of positions ${a} and ${b}?` },
-  { kind: 'leftOf', label: 'Left of?', cost: 1, args: ['card', 'card'], text: (a, b) => `Is card ${a} left of card ${b}?` },
-  { kind: 'bigger', label: 'Bigger?', cost: 1, args: ['position', 'position'], text: (a, b) => `Is position ${a} bigger than ${b}?` },
-  { kind: 'leftHalf', label: 'Left half?', cost: 1, args: ['card'], text: (a) => `Is card ${a} in the left half?` },
+  { kind: 'cardAt', label: 'Card at…', cost: 3, args: ['position'], text: (a) => t('Which card is at position {a}?', { a }) },
+  { kind: 'whereIs', label: 'Where is…', cost: 3, args: ['card'], text: (a) => t('Where is card {a}?', { a }) },
+  {
+    kind: 'sum',
+    label: 'Sum of two',
+    cost: 2,
+    args: ['position', 'position'],
+    text: (a, b) => t('Sum of positions {a} and {b}?', { a, b }),
+  },
+  { kind: 'leftOf', label: 'Left of?', cost: 1, args: ['card', 'card'], text: (a, b) => t('Is card {a} left of card {b}?', { a, b }) },
+  {
+    kind: 'bigger',
+    label: 'Bigger?',
+    cost: 1,
+    args: ['position', 'position'],
+    text: (a, b) => t('Is position {a} bigger than {b}?', { a, b }),
+  },
+  { kind: 'leftHalf', label: 'Left half?', cost: 1, args: ['card'], text: (a) => t('Is card {a} in the left half?', { a }) },
 ];
 
 const NUMS = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -92,30 +105,30 @@ export default function QuestionAndTruth({ view: raw }: ScreenProps) {
   });
 
   const status = view.guessed
-    ? `You have guessed. ${view.theyGuessed ? '' : `${them} goes on…`}`
+    ? `${t('You have guessed.')} ${view.theyGuessed ? '' : t('{name} goes on…', { name: them })}`
     : view.yourTurn
-      ? 'Your turn: ask a question or make your final guess.'
-      : `${them} is asking…`;
+      ? t('Your turn: ask a question or make your final guess.')
+      : t('{name} is asking…', { name: them });
 
   return (
     <Play
       top={
         <GameTop
           title="Question and Truth"
-          step={`Tokens: ${them} ${view.theirTokens}${view.theyGuessed ? ' · guessed' : ''}`}
+          step={`${t('Tokens: {name} {n}', { name: them, n: view.theirTokens })}${view.theyGuessed ? ` · ${t('guessed')}` : ''}`}
           score={view.tokens}
         />
       }
       stage={
         <div className="question-and-truth-stage">
-          <div className="label">Your secret row</div>
+          <div className="label">{t('Your secret row')}</div>
           <div className="question-and-truth-row mine">
             {view.row.map((c, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: positions are fixed
               <span key={i}>{c}</span>
             ))}
           </div>
-          <div className="label">Your guess of {them}&apos;s row (tap a slot, then a card)</div>
+          <div className="label">{t("Your guess of {name}'s row (tap a slot, then a card)", { name: them })}</div>
           <div className="question-and-truth-row">
             {guess.map((c, i) => (
               <button
@@ -137,8 +150,8 @@ export default function QuestionAndTruth({ view: raw }: ScreenProps) {
               </button>
             ))}
           </div>
-          <Log title="Your questions" lines={view.log} empty="No questions yet." />
-          <Log title={`${them}'s questions about your row`} lines={view.theirLog} empty="None yet." />
+          <Log title={t('Your questions')} lines={view.log} empty={t('No questions yet.')} />
+          <Log title={t("{name}'s questions about your row", { name: them })} lines={view.theirLog} empty={t('None yet.')} />
         </div>
       }
       controls={
@@ -155,7 +168,7 @@ export default function QuestionAndTruth({ view: raw }: ScreenProps) {
                     disabled={m.cost > view.tokens}
                     onClick={() => pickKind(m.kind)}
                   >
-                    {m.label} <span className="question-and-truth-cost">{m.cost}</span>
+                    {t(m.label)} <span className="question-and-truth-cost">{m.cost}</span>
                   </button>
                 ))}
               </div>
@@ -164,7 +177,7 @@ export default function QuestionAndTruth({ view: raw }: ScreenProps) {
                 const set = k === 0 ? setA : setB;
                 return (
                   <div key={`${kind}-${arg}-${k === 0 ? 'a' : 'b'}`}>
-                    <div className="label">{arg}</div>
+                    <div className="label">{t(arg)}</div>
                     <div className="question-and-truth-row">
                       {NUMS.map((n) => (
                         <button key={n} type="button" className={`key${value === n ? ' ok' : ''}`} onClick={() => set(n)}>
@@ -176,7 +189,8 @@ export default function QuestionAndTruth({ view: raw }: ScreenProps) {
                 );
               })}
               <button type="button" className="btn primary" disabled={!ready} onClick={ask}>
-                {a !== null && (!two || b !== null) ? item.text(a, b ?? 0) : 'Ask'} · {item.cost} token{item.cost > 1 ? 's' : ''}
+                {a !== null && (!two || b !== null) ? item.text(a, b ?? 0) : t('Ask')} ·{' '}
+                {item.cost > 1 ? t('{n} tokens', { n: item.cost }) : t('{n} token', { n: item.cost })}
               </button>
               <button
                 type="button"
@@ -184,11 +198,11 @@ export default function QuestionAndTruth({ view: raw }: ScreenProps) {
                 disabled={!view.yourTurn || !full}
                 onClick={() => (sure ? move({ type: 'guess', order: guess }) : setSure(true))}
               >
-                {sure ? 'Tap again: no more questions after this' : 'Final guess'}
+                {sure ? t('Tap again: no more questions after this') : t('Final guess')}
               </button>
             </>
           )}
-          <KeyHint>Keys: 1–8 fill the guess slot, ← → move, Backspace clears.</KeyHint>
+          <KeyHint>{t('Keys: 1–8 fill the guess slot, ← → move, Backspace clears.')}</KeyHint>
         </>
       }
     />
@@ -206,8 +220,8 @@ function Log({ title, lines, empty }: { title: string; lines: LogLine[]; empty: 
           {lines.map((l, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows
             <li key={i}>
-              <span>{l.question}</span>
-              <strong>{l.answer}</strong>
+              <span>{t(l.question)}</span>
+              <strong>{t(l.answer)}</strong>
             </li>
           ))}
         </ul>

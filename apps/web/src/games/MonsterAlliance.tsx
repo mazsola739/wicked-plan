@@ -1,6 +1,7 @@
 // Halloween Monster: bid for weapons, ally up, beat monsters together. Rules: docs/games/monster-alliance.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, NumberPad, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './MonsterAlliance.css';
 
@@ -47,7 +48,7 @@ function names(line: string): string {
  */
 function MonsterFace() {
   return (
-    <svg viewBox="0 0 40 40" role="img" aria-label="Monster">
+    <svg viewBox="0 0 40 40" role="img" aria-label={t('Monster')}>
       <path d="M9,12.5 5.5,7 4,1 9.5,5 15,9Z M31,12.5 34.5,7 36,1 30.5,5 25,9Z" />
       <path fill="#fff" fillOpacity=".35" d="M9,12.5 5.5,7 4,1 12,10.7Z" />
       <path fill="#fff" fillOpacity=".12" d="M4,1 9.5,5 15,9 12,10.7Z M36,1 30.5,5 25,9 28,10.7Z" />
@@ -108,7 +109,13 @@ export default function MonsterAlliance({ view }: ScreenProps) {
   const m = v.monster;
   return (
     <Play
-      top={<GameTop title="Halloween Monster" step={`Monster ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`} score={v.score} />}
+      top={
+        <GameTop
+          title="Halloween Monster"
+          step={`${t('Monster {n} of {total}', { n: v.round, total: v.rounds })} · ${t(PHASE[v.phase] ?? '')}`}
+          score={v.score}
+        />
+      }
       stage={
         <>
           {m && (
@@ -117,13 +124,13 @@ export default function MonsterAlliance({ view }: ScreenProps) {
                 <MonsterFace />
               </div>
               <div>
-                <h3>{m.name}</h3>
+                <h3>{t(m.name)}</h3>
                 <p>
-                  Strength <strong>{m.strength}</strong> · Reward <strong>{m.reward}</strong>
+                  {t('Strength')} <strong>{m.strength}</strong> · {t('Reward')} <strong>{m.reward}</strong>
                 </p>
                 {v.phase === 'bid' && (
                   <p className="small muted">
-                    Extra weapon for auction: <strong className="ma-bonus">{m.bonus}</strong>
+                    {t('Extra weapon for auction:')} <strong className="ma-bonus">{m.bonus}</strong>
                   </p>
                 )}
               </div>
@@ -139,7 +146,7 @@ export default function MonsterAlliance({ view }: ScreenProps) {
                     {g && g.length > 1 && (
                       <small className="ma-ally">
                         {' '}
-                        with{' '}
+                        {t('with')}{' '}
                         {g
                           .filter((x) => x !== f.index)
                           .map((x) => nameOf(v.fighters[x]?.id ?? ''))
@@ -148,7 +155,7 @@ export default function MonsterAlliance({ view }: ScreenProps) {
                     )}
                   </span>
                   <span className="small">
-                    {f.points} pts · {f.cards} cards {f.done ? '✓' : '…'}
+                    {t('{points} pts · {cards} cards', { points: f.points, cards: f.cards })} {f.done ? '✓' : '…'}
                   </span>
                 </li>
               );
@@ -156,11 +163,11 @@ export default function MonsterAlliance({ view }: ScreenProps) {
           </ul>
           {v.last.length > 0 && (
             <div>
-              <div className="label">Last attack</div>
+              <div className="label">{t('Last attack')}</div>
               <ul className="ma-last small">
                 {v.last.map((o) => (
                   <li key={o.members.join('-')} className={o.won ? 'won' : ''}>
-                    {o.members.map((x) => nameOf(v.fighters[x]?.id ?? '')).join(' + ')}: power {o.power} [
+                    {o.members.map((x) => nameOf(v.fighters[x]?.id ?? '')).join(' + ')}: {t('power {n}', { n: o.power })} [
                     {o.played.map((c) => c.join('+') || '0').join(' | ')}]{o.won ? ` → +${o.shares.join(' / +')}` : ''}
                   </li>
                 ))}
@@ -171,16 +178,16 @@ export default function MonsterAlliance({ view }: ScreenProps) {
       }
       controls={
         <>
-          {v.acted && v.phase !== 'over' && <p className="muted center">Waiting for the others…</p>}
+          {v.acted && v.phase !== 'over' && <p className="muted center">{t('Waiting for the others…')}</p>}
           {!v.acted && v.phase === 'bid' && (
             <>
-              <p className="muted small center">Bid points for the extra weapon (you have {me?.points ?? 0}).</p>
+              <p className="muted small center">{t('Bid points for the extra weapon (you have {n}).', { n: me?.points ?? 0 })}</p>
               <NumberPad round={v.round} onSubmit={(amount) => move({ type: 'bid', amount })} />
             </>
           )}
           {!v.acted && v.phase === 'ally' && (
             <>
-              <p className="muted small center">Pick up to two partners. An alliance forms only if they pick you too.</p>
+              <p className="muted small center">{t('Pick up to two partners. An alliance forms only if they pick you too.')}</p>
               <div className="ma-choices">
                 {v.fighters
                   .filter((f) => f.index !== v.me)
@@ -191,23 +198,23 @@ export default function MonsterAlliance({ view }: ScreenProps) {
                       className={`btn${picked.includes(f.index) ? ' primary' : ''}`}
                       onClick={() => toggle(f.index, 2)}
                     >
-                      {nameOf(f.id)} · {f.cards} cards
+                      {nameOf(f.id)} · {t('{n} cards', { n: f.cards })}
                     </button>
                   ))}
               </div>
               <button type="button" className="btn primary" onClick={confirm}>
-                {picked.length ? 'Ask them' : 'Fight alone'}
+                {picked.length ? t('Ask them') : t('Fight alone')}
               </button>
-              <KeyHint>Keys: 1–7 pick players, Enter confirms.</KeyHint>
+              <KeyHint>{t('Keys: 1–7 pick players, Enter confirms.')}</KeyHint>
             </>
           )}
           {!v.acted && v.phase === 'attack' && (
             <>
               <p className="muted small center">
                 {myGroup.length > 1
-                  ? `Your alliance: ${myGroup.map((x) => nameOf(v.fighters[x]?.id ?? '')).join(' + ')}.`
-                  : 'You fight alone.'}{' '}
-                The monster's strength is {m?.strength ?? 0}.
+                  ? t('Your alliance: {names}.', { names: myGroup.map((x) => nameOf(v.fighters[x]?.id ?? '')).join(' + ') })
+                  : t('You fight alone.')}{' '}
+                {t("The monster's strength is {n}.", { n: m?.strength ?? 0 })}
               </p>
               <div className="cards ma-hand">
                 {v.hand.map((c, i) => (
@@ -224,14 +231,14 @@ export default function MonsterAlliance({ view }: ScreenProps) {
                 ))}
               </div>
               <button type="button" className="btn primary" onClick={confirm}>
-                {picked.length ? `Attack with ${power}` : 'Hold back'}
+                {picked.length ? t('Attack with {n}', { n: power }) : t('Hold back')}
               </button>
-              <KeyHint>Keys: 1–9 pick cards, Enter attacks.</KeyHint>
+              <KeyHint>{t('Keys: 1–9 pick cards, Enter attacks.')}</KeyHint>
             </>
           )}
           {v.phase !== 'attack' && v.hand.length > 0 && (
             <p className="small center">
-              Your weapons: <strong>{v.hand.join(' · ')}</strong>
+              {t('Your weapons:')} <strong>{v.hand.join(' · ')}</strong>
             </p>
           )}
           <div className="ma-log">
@@ -241,7 +248,7 @@ export default function MonsterAlliance({ view }: ScreenProps) {
               .map((line, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows at the end
                 <p key={i} className="small">
-                  {names(line)}
+                  {names(t(line))}
                 </p>
               ))}
           </div>

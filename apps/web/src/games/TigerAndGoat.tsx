@@ -1,6 +1,7 @@
 // Bagh Chal: the hunt game on two boards at once. Rules page: docs/games/tiger-and-goat.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './TigerAndGoat.css';
 
@@ -146,19 +147,32 @@ export default function TigerAndGoat({ view: raw }: ScreenProps) {
   const status = (b: BoardView) =>
     b.ended
       ? b.winner
-        ? `${b.winner === b.side ? 'You' : them} won (${b.winner}s)`
-        : 'Ended: turn limit'
+        ? b.winner === b.side
+          ? t('You won ({side})', { side: t(`${b.winner}s`) })
+          : t('{name} won ({side})', { name: them, side: t(`${b.winner}s`) })
+        : t('Ended: turn limit')
       : b.yourTurn
-        ? `Your move (${b.side}s)`
+        ? t('Your move ({side})', { side: t(`${b.side}s`) })
         : b.toMove === b.side
-          ? 'Waiting for the next step'
-          : `${them} is moving`;
+          ? t('Waiting for the next step')
+          : t('{name} is moving', { name: them });
 
   return (
     <Play
-      top={<GameTop title="Bagh Chal" step={`Step ${view.step} · ${them} ${view.theirScore}`} score={view.score} />}
+      top={
+        <GameTop
+          title="Bagh Chal"
+          step={t('Step {n} · {name} {score}', { n: view.step, name: them, score: view.theirScore })}
+          score={view.score}
+        />
+      }
       stage={
-        <svg className="drawing tiger-and-goat-board" viewBox="-0.6 -0.6 5.2 5.2" role="img" aria-label={`Board ${NAMES[shown]}`}>
+        <svg
+          className="drawing tiger-and-goat-board"
+          viewBox="-0.6 -0.6 5.2 5.2"
+          role="img"
+          aria-label={t('Board {name}', { name: NAMES[shown] ?? '' })}
+        >
           {LINES.map(([x1, y1, x2, y2]) => (
             <line key={`${x1}${y1}${x2}${y2}`} x1={x1} y1={y1} x2={x2} y2={y2} className="tiger-and-goat-line" />
           ))}
@@ -197,22 +211,26 @@ export default function TigerAndGoat({ view: raw }: ScreenProps) {
                 className={`tiger-and-goat-tab${i === shown ? ' on' : ''}${b.yourTurn ? ' turn' : ''}`}
                 onClick={() => setPicked(i)}
               >
-                <strong>
-                  Board {NAMES[i]} · you are {b.side}s
-                </strong>
+                <strong>{t('Board {name} · you are {side}', { name: NAMES[i] ?? '', side: t(`${b.side}s`) })}</strong>
                 <span>{status(b)}</span>
                 <span className="muted small">
-                  Captured {b.captured}/5 · goats in hand {b.hand} · turn {b.turns}/{b.maxTurns} · {b.points} pts
+                  {t('Captured {captured}/5 · goats in hand {hand} · turn {turns}/{max} · {points} pts', {
+                    captured: b.captured,
+                    hand: b.hand,
+                    turns: b.turns,
+                    max: b.maxTurns,
+                    points: b.points,
+                  })}
                 </span>
               </button>
             ))}
           </div>
           <p className="muted small center">
             {board.side === 'tiger'
-              ? 'Tigers: slide along a line, or jump over a goat to capture it. Five captures win.'
-              : 'Goats: place all 20, then slide. Trap every tiger to win; never leave a goat open to a jump.'}
+              ? t('Tigers: slide along a line, or jump over a goat to capture it. Five captures win.')
+              : t('Goats: place all 20, then slide. Trap every tiger to win; never leave a goat open to a jump.')}
           </p>
-          <KeyHint>Click a piece, then where it goes. V switches boards, Esc cancels.</KeyHint>
+          <KeyHint>{t('Click a piece, then where it goes. V switches boards, Esc cancels.')}</KeyHint>
         </>
       }
     />

@@ -1,6 +1,7 @@
 // Doubt and Bet. Rules page: docs/games/colour-count-bluff.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './ColourCountBluff.css';
 
@@ -46,7 +47,7 @@ function minCount(bet: Bet | null, colour: number): number {
 /** A life: a faceted heart in the text colour, lit from the top left, with a white glint. */
 function Heart() {
   return (
-    <svg viewBox="0 0 40 40" className="ccb-heart" role="img" aria-label="life">
+    <svg viewBox="0 0 40 40" className="ccb-heart" role="img" aria-label={t('life')}>
       <path d="M20,10 23.5,6 28,4 33.5,5.5 37,11 36,18 29,27 20,36 11,27 4,18 3,11 6.5,5.5 12,4 16.5,6Z" />
       <path fill="#fff" fillOpacity=".1" d="M3,11 12,12.5 4,18Z" />
       <path fill="#fff" fillOpacity=".3" d="M6.5,5.5 12,4 16.5,6 12,12.5Z" />
@@ -65,7 +66,7 @@ function Cards({ hand, small }: { hand: number[]; small?: boolean }) {
       {hand.map((c, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: a hand of plain colours
         <span key={i} className={`ccb-card ccb-c${c}`}>
-          {small ? '' : COLOURS[c]?.[0]?.toUpperCase()}
+          {small ? '' : t(COLOURS[c] ?? '')[0]?.toUpperCase()}
         </span>
       ))}
     </div>
@@ -97,46 +98,52 @@ export default function ColourCountBluff({ view: raw }: ScreenProps) {
     return true;
   });
   const status = view.over
-    ? 'Game over.'
+    ? t('Game over.')
     : mine
       ? view.bet
-        ? 'Your turn: raise the bet or call it.'
-        : 'You open: make the first bet.'
-      : `${nameOf(view.players[view.turn ?? 0] ?? '')} is thinking…`;
+        ? t('Your turn: raise the bet or call it.')
+        : t('You open: make the first bet.')
+      : t('{name} is thinking…', { name: nameOf(view.players[view.turn ?? 0] ?? '') });
   return (
     <Play
-      top={<GameTop title="Doubt and Bet" step={`Round ${view.round} of ${view.maxRounds}`} score={view.lives[view.me] ?? 0} />}
+      top={
+        <GameTop
+          title="Doubt and Bet"
+          step={t('Round {n} of {total}', { n: view.round, total: view.maxRounds })}
+          score={view.lives[view.me] ?? 0}
+        />
+      }
       stage={
         <>
           <ul className="ccb-seats">
             {view.players.map((p, i) => (
               <li key={p} className={`${view.turn === i ? 'turn' : ''}${view.lives[i] === 0 ? ' out' : ''}${i === view.me ? ' me' : ''}`}>
                 <span>{nameOf(p)}</span>
-                <span className="ccb-lives" role="img" aria-label={`${view.lives[i]} lives`}>
+                <span className="ccb-lives" role="img" aria-label={t('{n} lives', { n: view.lives[i] ?? 0 })}>
                   {Array.from({ length: view.lives[i] ?? 0 }, (_, k) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: identical hearts
                     <Heart key={k} />
                   ))}
                 </span>
-                <span className="muted small">{view.cards[i]} cards</span>
+                <span className="muted small">{t('{n} cards', { n: view.cards[i] ?? 0 })}</span>
               </li>
             ))}
           </ul>
           <div className="ccb-bet">
             {view.bet ? (
               <>
-                <span className="muted small">{nameOf(view.players[view.bet.seat] ?? '')} bets at least</span>
+                <span className="muted small">{t('{name} bets at least', { name: nameOf(view.players[view.bet.seat] ?? '') })}</span>
                 <strong>
-                  {view.bet.count} <span className={`ccb-word ccb-c${view.bet.colour}`}>{COLOURS[view.bet.colour]}</span>
+                  {view.bet.count} <span className={`ccb-word ccb-c${view.bet.colour}`}>{t(COLOURS[view.bet.colour] ?? '')}</span>
                 </strong>
               </>
             ) : (
-              <span className="muted">No bet yet this round</span>
+              <span className="muted">{t('No bet yet this round')}</span>
             )}
-            <span className="muted small">{view.totalCards} cards on the table</span>
+            <span className="muted small">{t('{n} cards on the table', { n: view.totalCards })}</span>
           </div>
           <div className="ccb-mine">
-            <div className="label">Your cards</div>
+            <div className="label">{t('Your cards')}</div>
             <Cards hand={view.hand} />
           </div>
         </>
@@ -155,7 +162,7 @@ export default function ColourCountBluff({ view: raw }: ScreenProps) {
                     disabled={minCount(view.bet, c) > view.totalCards}
                     onClick={() => pick(c)}
                   >
-                    {name}
+                    {t(name)}
                   </button>
                 ))}
               </div>
@@ -170,10 +177,10 @@ export default function ColourCountBluff({ view: raw }: ScreenProps) {
               </div>
               <div className="row">
                 <button type="button" className="btn primary" disabled={shown > view.totalCards} onClick={bet}>
-                  Bet {shown} {COLOURS[colour]}
+                  {t('Bet {n} {colour}', { n: shown, colour: t(COLOURS[colour] ?? '') })}
                 </button>
                 <button type="button" className="btn" disabled={!view.bet} onClick={call}>
-                  Call
+                  {t('Call')}
                 </button>
               </div>
             </>
@@ -181,7 +188,12 @@ export default function ColourCountBluff({ view: raw }: ScreenProps) {
           {view.last && (
             <div className="card">
               <div className="label">
-                Round {view.last.round}: {view.last.bet.count} {COLOURS[view.last.bet.colour]} bet, {view.last.actual} there
+                {t('Round {n}: {count} {colour} bet, {actual} there', {
+                  n: view.last.round,
+                  count: view.last.bet.count,
+                  colour: t(COLOURS[view.last.bet.colour] ?? ''),
+                  actual: view.last.actual,
+                })}
               </div>
               <ul className="list">
                 {view.players.map((p, i) =>
@@ -206,10 +218,10 @@ export default function ColourCountBluff({ view: raw }: ScreenProps) {
           <ul className="ccb-log small">
             {view.log.map((l, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows
-              <li key={i}>{said(l)}</li>
+              <li key={i}>{said(t(l))}</li>
             ))}
           </ul>
-          <KeyHint>Keys: R/B/G/Y colour, + / − count, Enter bets, C calls.</KeyHint>
+          <KeyHint>{t('Keys: R/B/G/Y colour, + / − count, Enter bets, C calls.')}</KeyHint>
         </>
       }
     />

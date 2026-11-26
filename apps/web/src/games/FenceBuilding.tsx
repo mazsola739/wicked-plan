@@ -1,5 +1,6 @@
 // Loop Fence Puzzle: one closed fence, numbers count the fenced sides; a race. Rules page: docs/games/fence-building.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, Play, type ScreenProps, TimerBar } from './common';
 import { RaceBar, type RaceView } from './PiecePuzzle';
 import './FenceBuilding.css';
@@ -43,7 +44,7 @@ export default function FenceBuilding({ view: raw }: ScreenProps) {
         <>
           <GameTop
             title="Loop Fence Puzzle"
-            step={`Round ${view.round} of ${view.rounds} · ${n}×${n}`}
+            step={`${t('Round {n} of {total}', { n: view.round, total: view.rounds })} · ${n}×${n}`}
             score={view.racers[0]?.score ?? 0}
           />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundTimeMs} />
@@ -51,7 +52,7 @@ export default function FenceBuilding({ view: raw }: ScreenProps) {
         </>
       }
       stage={
-        <svg className="drawing fb" viewBox={`-0.4 -0.4 ${n + 0.8} ${n + 0.8}`} role="img" aria-label="Field">
+        <svg className="drawing fb" viewBox={`-0.4 -0.4 ${n + 0.8} ${n + 0.8}`} role="img" aria-label={t('Field')}>
           {cells.map((cell) => {
             const k = view.clues[cell];
             if (k === null || k === undefined) return null;
@@ -102,7 +103,7 @@ export default function FenceBuilding({ view: raw }: ScreenProps) {
                 className="fb-hit"
                 role="button"
                 tabIndex={-1}
-                aria-label={`Edge ${e}`}
+                aria-label={t('Edge {n}', { n: e })}
                 onClick={() => cycle(e)}
                 onKeyDown={(ev) => ev.key === 'Enter' && cycle(e)}
               />
@@ -113,18 +114,19 @@ export default function FenceBuilding({ view: raw }: ScreenProps) {
       controls={
         <>
           <p className="muted small center">
-            Build one closed fence along the dotted lines. A number tells how many sides of its plot are fenced. Tap near a side: fence,
-            then cross (a note), then empty.
+            {t(
+              'Build one closed fence along the dotted lines. A number tells how many sides of its plot are fenced. Tap near a side: fence, then cross (a note), then empty.',
+            )}
           </p>
           <div className="row">
             <button type="button" className="btn ghost" onClick={() => move({ type: 'giveUp' })}>
-              Give up this round
+              {t('Give up this round')}
             </button>
             <button type="button" className="btn" onClick={() => move({ type: 'clear' })}>
-              Clear all
+              {t('Clear all')}
             </button>
           </div>
-          <KeyHint>Click near a side of a plot to fence it; click again for a cross.</KeyHint>
+          <KeyHint>{t('Click near a side of a plot to fence it; click again for a cross.')}</KeyHint>
         </>
       }
     />

@@ -8,7 +8,9 @@ The page is for **both desktop and phone**: a desktop browser with mouse and key
 phone held in one hand. Every action works by click/touch; the keyboard adds shortcuts (never the only
 way), and hover only adds highlights.
 
-**Everything in the product and the repo is English** (UI, docs, code, commits).
+**The repo is English** (docs, code, commits); **the page is English and Hungarian** (an EN / HU
+switch; `apps/web/src/i18n.ts`, translations in `apps/web/src/locales/hu/`). The game names stay
+the show's English names in both.
 Chat with the user in Hungarian.
 
 ## Source documents
@@ -122,7 +124,13 @@ A game lives in its own files; a change to one game touches only these:
    `view` to a view type declared in the same file. Use `Play`/`GameTop`/`TimerBar` and `move()`
    from `common.tsx`, `nameOf(id)` for seat names ("you", "bot-1"…). Game-specific CSS goes in
    `apps/web/src/games/<PascalName>.css`, imported by the screen, class names prefixed with the id.
-4. `bun run test`, `bun run wasm`, `bun run typecheck`, `bun run lint`; play it in the preview.
+   Every visible English string goes through `t()` (`apps/web/src/i18n.ts`), and so does every
+   line the rules write that the screen shows (logs, labels).
+4. Hungarian: `apps/web/src/locales/hu/<id>.ts` (the Hungarian name and short, the screen's strings,
+   patterns for the rules' lines and moments) and `apps/web/src/locales/hu/howto/<id>.md` (the How
+   to play in Hungarian). A rule change in `docs/games/<id>.md` changes the Hungarian page too.
+5. `bun run test`, `bun run wasm`, `bun run typecheck`, `bun run lint`; play it in the preview,
+   in both languages.
 
 A new game also needs its module in `registry!(…)` (`crates/rules/src/lib.rs`), its screen in
 `apps/web/src/games/registry.tsx`, its icon `apps/web/src/assets/icons/<id>.webp`, a row in

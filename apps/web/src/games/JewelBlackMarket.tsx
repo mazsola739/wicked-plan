@@ -1,5 +1,6 @@
 // Gem Black Market. Rules page: docs/games/jewel-black-market.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './JewelBlackMarket.css';
 
@@ -126,7 +127,7 @@ function Gem({ card, small }: { card: Card; small?: boolean }) {
         <GemArt kind={card.kind} />
       </svg>
       <strong>{card.value}</strong>
-      {!small && <span>{card.kind}</span>}
+      {!small && <span>{t(card.kind)}</span>}
     </div>
   );
 }
@@ -134,7 +135,7 @@ function Gem({ card, small }: { card: Card; small?: boolean }) {
 function Back({ label, onClick }: { label: string; onClick?: () => void }) {
   return (
     <button type="button" className="jbm-card jbm-back" disabled={!onClick} onClick={onClick}>
-      <span>{label}</span>
+      <span>{t(label)}</span>
     </button>
   );
 }
@@ -156,25 +157,25 @@ export default function JewelBlackMarket({ view: raw }: ScreenProps) {
     return true;
   });
   const status = view.over
-    ? 'Game over.'
+    ? t('Game over.')
     : mine
       ? bomb
-        ? 'You hold a bomb: pass it to a player.'
-        : 'Your turn: keep, or swap with a player, the buyer or the discard.'
-      : `${nameOf(view.players[view.turn ?? 0] ?? '')} is choosing…`;
+        ? t('You hold a bomb: pass it to a player.')
+        : t('Your turn: keep, or swap with a player, the buyer or the discard.')
+      : t('{name} is choosing…', { name: nameOf(view.players[view.turn ?? 0] ?? '') });
   return (
     <Play
       top={
         <GameTop
           title="Gem Black Market"
-          step={`Round ${view.round} of ${view.rounds} · swap ${view.swapRound} of 2`}
+          step={t('Round {n} of {total} · swap {swap} of 2', { n: view.round, total: view.rounds, swap: view.swapRound })}
           score={view.scores[view.me] ?? 0}
         />
       }
       stage={
         <div className="jbm-table">
           <div className="jbm-zone">
-            <div className="label">Buyer's space</div>
+            <div className="label">{t("Buyer's space")}</div>
             <div className="jbm-row">
               {[0, 1, 2].map((slot) => (
                 <Back key={slot} label={`${slot + 1}`} onClick={canTable ? () => move({ type: 'swapBuyer', slot }) : undefined} />
@@ -200,7 +201,7 @@ export default function JewelBlackMarket({ view: raw }: ScreenProps) {
             ))}
           </ul>
           <div className="jbm-mine">
-            <div className="label">Your card</div>
+            <div className="label">{t('Your card')}</div>
             <Gem card={view.myCard} />
           </div>
         </div>
@@ -210,28 +211,28 @@ export default function JewelBlackMarket({ view: raw }: ScreenProps) {
           <p className="ask">{status}</p>
           {mine && !bomb && (
             <button type="button" className="btn primary" onClick={() => move({ type: 'keep' })}>
-              Keep my card
+              {t('Keep my card')}
             </button>
           )}
           <p className="muted small center">
-            A jewel scores its value × the same-type jewels in the buyer's space. A bomb costs its value.
+            {t("A jewel scores its value × the same-type jewels in the buyer's space. A bomb costs its value.")}
           </p>
           <ul className="jbm-log small">
             {view.log.map((l, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows
-              <li key={i}>{said(l)}</li>
+              <li key={i}>{said(t(l))}</li>
             ))}
           </ul>
           {view.last && (
             <div className="card jbm-reveal">
-              <div className="label">Round {view.last.round} revealed</div>
+              <div className="label">{t('Round {n} revealed', { n: view.last.round })}</div>
               <div className="jbm-row">
-                <span className="muted small">Buyer</span>
+                <span className="muted small">{t('Buyer')}</span>
                 {view.last.buyer.map((c, i) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: fixed three slots
                   <Gem key={i} card={c} small />
                 ))}
-                <span className="muted small">Discard</span>
+                <span className="muted small">{t('Discard')}</span>
                 <Gem card={view.last.discard} small />
               </div>
               <ul className="list">
@@ -245,7 +246,7 @@ export default function JewelBlackMarket({ view: raw }: ScreenProps) {
               </ul>
             </div>
           )}
-          <KeyHint>Keys: K keeps, 1–3 buyer card, D discard, A–H a player.</KeyHint>
+          <KeyHint>{t('Keys: K keeps, 1–3 buyer card, D discard, A–H a player.')}</KeyHint>
         </>
       }
     />

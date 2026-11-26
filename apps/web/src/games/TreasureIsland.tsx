@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import './TreasureIsland.css';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 type Square = [number, number];
@@ -93,7 +94,7 @@ function Island({ view, pick, onPick }: { view: IslandView; pick: Square | null;
   const current = view.phase === 'auction' ? view.round - 1 : -1;
   const dig = view.yourDig ?? pick;
   return (
-    <svg className="drawing ti-map" viewBox={`-12 -12 ${n * C + 24} ${n * C + 24}`} role="img" aria-label="Island map">
+    <svg className="drawing ti-map" viewBox={`-12 -12 ${n * C + 24} ${n * C + 24}`} role="img" aria-label={t('Island map')}>
       <defs>
         <marker id="ti-head" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
           <path d="M 0 0 L 10 5 L 0 10 z" className="ti-head" />
@@ -186,7 +187,7 @@ function BidControls({ view }: { view: IslandView }) {
   });
   return (
     <>
-      <p className="ask">Box {view.round} is up. Your secret bid:</p>
+      <p className="ask">{t('Box {n} is up. Your secret bid:', { n: view.round })}</p>
       <div className="ti-bid">
         <button type="button" className="key" disabled={sent} onClick={() => setBid((b) => clamp(b - 10))}>
           −10
@@ -203,9 +204,9 @@ function BidControls({ view }: { view: IslandView }) {
         </button>
       </div>
       <button type="button" className="btn primary" disabled={sent} onClick={send}>
-        {sent ? 'Bid sent, waiting…' : `Bid ${clamp(bid)} coins`}
+        {sent ? t('Bid sent, waiting…') : t('Bid {n} coins', { n: clamp(bid) })}
       </button>
-      <KeyHint>Keys: ↑/↓ change the bid by 1, PgUp/PgDn by 10, Enter bids.</KeyHint>
+      <KeyHint>{t('Keys: ↑/↓ change the bid by 1, PgUp/PgDn by 10, Enter bids.')}</KeyHint>
     </>
   );
 }
@@ -214,7 +215,7 @@ export default function TreasureIsland({ view: raw }: ScreenProps) {
   const view = raw as IslandView;
   const you = view.you ?? 0;
   const [pick, setPick] = useState<Square | null>(null);
-  const who = (k: number) => (k === you ? 'You' : nameOf(view.players[k]!));
+  const who = (k: number) => (k === you ? t('You') : nameOf(view.players[k]!));
   const last = view.history[view.history.length - 1];
   const digNow = () => pick && view.yourDig === null && move({ type: 'dig', x: pick[0], y: pick[1] });
   useKeys((key) => {
@@ -232,14 +233,16 @@ export default function TreasureIsland({ view: raw }: ScreenProps) {
       top={
         <GameTop
           title="Treasure Island"
-          step={view.phase === 'auction' ? `Auction ${view.round} of ${view.auctions}` : 'Dig for the treasure'}
+          step={view.phase === 'auction' ? t('Auction {n} of {total}', { n: view.round, total: view.auctions }) : t('Dig for the treasure')}
           score={view.coins[you] ?? 0}
         />
       }
       stage={
         <>
           <Island view={view} pick={pick} onPick={setPick} />
-          <p className="muted small center">Lit squares still fit your arrows ({view.possible.length}). Your private box has a cyan rim.</p>
+          <p className="muted small center">
+            {t('Lit squares still fit your arrows ({n}). Your private box has a cyan rim.', { n: view.possible.length })}
+          </p>
         </>
       }
       controls={
@@ -249,17 +252,20 @@ export default function TreasureIsland({ view: raw }: ScreenProps) {
             <BidControls key={view.round} view={view} />
           ) : (
             <>
-              <p className="ask">{view.yourDig ? 'Dug. Waiting for the others…' : 'Tap a square, then dig. Only once!'}</p>
+              <p className="ask">{view.yourDig ? t('Dug. Waiting for the others…') : t('Tap a square, then dig. Only once!')}</p>
               <button type="button" className="btn primary" disabled={!pick || view.yourDig !== null} onClick={digNow}>
-                {pick ? `Dig at ${String.fromCharCode(65 + pick[0])}${pick[1] + 1}` : 'Pick a square'}
+                {pick ? t('Dig at {square}', { square: `${String.fromCharCode(65 + pick[0])}${pick[1] + 1}` }) : t('Pick a square')}
               </button>
-              <KeyHint>Keys: arrows move the spade, Enter digs.</KeyHint>
+              <KeyHint>{t('Keys: arrows move the spade, Enter digs.')}</KeyHint>
             </>
           )}
           {last && (
             <p className="last">
-              Box {view.history.length}: {last.winners.length ? `${last.winners.map(who).join(' & ')} paid ${last.price}` : 'nobody bid'} ·{' '}
-              <span className="muted">{last.bids.map((b, k) => `${who(k)} ${b}`).join(', ')}</span>
+              {t('Box {n}:', { n: view.history.length })}{' '}
+              {last.winners.length
+                ? t('{names} paid {price}', { names: last.winners.map(who).join(' & '), price: last.price })
+                : t('nobody bid')}{' '}
+              · <span className="muted">{last.bids.map((b, k) => `${who(k)} ${b}`).join(', ')}</span>
             </p>
           )}
           <ul className="list">
@@ -268,11 +274,11 @@ export default function TreasureIsland({ view: raw }: ScreenProps) {
                 <span>
                   {who(k)} {(view.phase === 'auction' ? view.bidIn[k] : view.dug[k]) && <span className="ti-check">✓</span>}
                 </span>
-                <span className="score">{view.coins[k]} coins</span>
+                <span className="score">{t('{n} coins', { n: view.coins[k] ?? 0 })}</span>
               </li>
             ))}
           </ul>
-          <p className="muted small center">Dig points: exact 500, one step off 300, two 150, three 50; plus the coins you keep.</p>
+          <p className="muted small center">{t('Dig points: exact 500, one step off 300, two 150, three 50; plus the coins you keep.')}</p>
         </>
       }
     />

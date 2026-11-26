@@ -8,11 +8,6 @@
   user-select: none;
 }
 
-.crown {
-  display: inline-block;
-  overflow: visible;
-}
-
 /* The watching Observer: the image plus a cyan and a violet ghost copy that only show during a glitch. */
 .emblem-watch {
   position: relative;

@@ -1,6 +1,7 @@
 // Lay the Grass: everyone lays the same piece each round. Rules page: docs/games/lay-the-grass.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './LayTheGrass.css';
 
@@ -45,7 +46,7 @@ function Piece({ cells, color }: { cells: Cell[]; color: string }) {
       style={{ width: `${w * 1.8}em`, height: `${h * 1.8}em` }}
       viewBox={`-0.05 -0.05 ${w + 0.1} ${h + 0.1}`}
       role="img"
-      aria-label="Grass piece"
+      aria-label={t('Grass piece')}
     >
       {cells.map(([x, y]) => (
         <rect key={`${x},${y}`} x={x + 0.05} y={y + 0.05} width="0.9" height="0.9" rx="0.15" style={{ fill: color }} />
@@ -93,7 +94,7 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
   const me = view.seats[view.you];
   return (
     <Play
-      top={<GameTop title="Lay the Grass" step={`Round ${view.round} of ${view.rounds}`} score={me?.score ?? 0} />}
+      top={<GameTop title="Lay the Grass" step={t('Round {n} of {total}', { n: view.round, total: view.rounds })} score={me?.score ?? 0} />}
       stage={
         <div className="lg-field" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, gridTemplateRows: `repeat(${n}, 1fr)` }}>
           {view.cells.map((c, i) => {
@@ -104,7 +105,7 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
               <button
                 key={`${x},${y}`}
                 type="button"
-                aria-label={`Square ${x + 1}, ${y + 1}`}
+                aria-label={t('Square {x}, {y}', { x: x + 1, y: y + 1 })}
                 className={`lg-sq${c === -2 ? ' rock' : ''}${g ? (fits ? ' ghost' : ' ghost bad') : ''}${lastSet.has(i) ? ' last' : ''}`}
                 style={c >= 0 ? { background: `color-mix(in srgb, ${GRASS[c]} 80%, #15121f)`, borderColor: GRASS[c] } : undefined}
                 disabled={!mine}
@@ -118,34 +119,34 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
         <>
           <p className="last">
             {view.over
-              ? 'The field is full.'
+              ? t('The field is full.')
               : mine
-                ? 'Your turn: tap where the piece goes, tap again to lay it.'
-                : `${nameOf(view.turn ?? '')} is laying grass…`}
+                ? t('Your turn: tap where the piece goes, tap again to lay it.')
+                : t('{name} is laying grass…', { name: nameOf(view.turn ?? '') })}
           </p>
           {view.piece && (
             <div className="lg-pieces">
               <div className="lg-now">
                 <Piece cells={shape} color={GRASS[view.you] ?? 'var(--seat-0)'} />
-                <span className="muted small">this round</span>
+                <span className="muted small">{t('this round')}</span>
               </div>
               {view.next && (
                 <div className="lg-next">
                   <Piece cells={normalize(view.next)} color="var(--muted)" />
-                  <span className="muted small">next</span>
+                  <span className="muted small">{t('next')}</span>
                 </div>
               )}
             </div>
           )}
           <div className="row">
             <button type="button" className="btn" disabled={!mine} onClick={() => setRot((r) => (r + 1) % 4)}>
-              ↻ Turn
+              ↻ {t('Turn')}
             </button>
             <button type="button" className="btn" disabled={!mine} onClick={() => setFlip((f) => !f)}>
-              ⇋ Flip
+              ⇋ {t('Flip')}
             </button>
             <button type="button" className="btn primary" disabled={!mine || !fits} onClick={place}>
-              Lay
+              {t('Lay')}
             </button>
           </div>
           <ul className="list lg-scores">
@@ -154,17 +155,15 @@ export default function LayTheGrass({ view: raw }: ScreenProps) {
                 <span className="lg-who">
                   <span className="lg-swatch" style={{ background: GRASS[i] }} />
                   {nameOf(s.id)}
-                  {view.turn === s.id && <span className="muted small"> · laying</span>}
+                  {view.turn === s.id && <span className="muted small"> · {t('laying')}</span>}
                 </span>
-                <span className="muted small">
-                  patch {s.patch} · square {s.square}×{s.square}
-                </span>
+                <span className="muted small">{t('patch {n} · square {side}×{side}', { n: s.patch, side: s.square })}</span>
                 <span className="score">{s.score}</span>
               </li>
             ))}
           </ul>
-          <p className="muted small center">Score: 10 per square of your largest patch + 20 × side² of your largest grass square.</p>
-          <KeyHint>Keys: arrows move, R turns, F flips, Enter lays.</KeyHint>
+          <p className="muted small center">{t('Score: 10 per square of your largest patch + 20 × side² of your largest grass square.')}</p>
+          <KeyHint>{t('Keys: arrows move, R turns, F flips, Enter lays.')}</KeyHint>
         </>
       }
     />

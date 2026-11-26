@@ -1,5 +1,6 @@
 // Sniper Hold'em: poker where a snipe knocks out every hand of one rank. Rules: docs/games/sniper-holdem.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './SniperHoldem.css';
 
@@ -60,7 +61,7 @@ const RANKS: [Rank, string][] = [
   ['quads', 'Four of a kind'],
   ['straightFlush', 'Straight flush'],
 ];
-const rankName = (r: Rank) => RANKS.find(([k]) => k === r)?.[1] ?? r;
+const rankName = (r: Rank) => t(RANKS.find(([k]) => k === r)?.[1] ?? r);
 const COLOURS = ['red', 'blue', 'green', 'gold'];
 const ACTIONS: Record<Action, string> = { ante: 'ante', check: 'check', call: 'call', raise: 'raise', fold: 'fold' };
 
@@ -70,7 +71,7 @@ const ACTIONS: Record<Action, string> = { ante: 'ante', check: 'check', call: 'c
  */
 function Suit({ suit }: { suit: number }) {
   return (
-    <svg viewBox="0 0 20 20" role="img" aria-label={COLOURS[suit]}>
+    <svg viewBox="0 0 20 20" role="img" aria-label={t(COLOURS[suit] ?? '')}>
       {suit === 0 && (
         <>
           <path d="M6.4,1.2 13.6,1.2 18.8,6.4 18.8,13.6 13.6,18.8 6.4,18.8 1.2,13.6 1.2,6.4Z" />
@@ -147,17 +148,29 @@ export default function SniperHoldem({ view }: ScreenProps) {
   let ask = '';
   if (v.phase === 'betting') {
     const actor = v.seats.find((s) => s.toAct);
-    ask = v.myTurn ? (v.toCall > 0 ? `${v.toCall} to call.` : 'Your turn.') : `${actor ? nameOf(actor.id) : ''} is thinking…`;
+    ask = v.myTurn
+      ? v.toCall > 0
+        ? t('{n} to call.', { n: v.toCall })
+        : t('Your turn.')
+      : t('{name} is thinking…', { name: actor ? nameOf(actor.id) : '' });
   } else if (v.phase === 'snipe') {
-    ask = !meIn ? 'You folded. Waiting for the snipes…' : canSnipe ? 'Snipe a hand rank, or none.' : 'Waiting for the other snipes…';
+    ask = !meIn
+      ? t('You folded. Waiting for the snipes…')
+      : canSnipe
+        ? t('Snipe a hand rank, or none.')
+        : t('Waiting for the other snipes…');
   } else if (last) {
     ask = last.carried
-      ? `Every hand was knocked out: ${last.pot} chips carry over.`
-      : `${last.winners.map(nameOf).join(' and ')} ${last.winners.length === 1 && last.winners[0] !== 'you' ? 'wins' : 'win'} ${last.pot} chips.`;
+      ? t('Every hand was knocked out: {n} chips carry over.', { n: last.pot })
+      : last.winners.length === 1 && last.winners[0] === 'you'
+        ? t('You win {n} chips.', { n: last.pot })
+        : last.winners.length === 1
+          ? t('{name} wins {n} chips.', { name: nameOf(last.winners[0] ?? ''), n: last.pot })
+          : t('{names} win {n} chips.', { names: last.winners.map(nameOf).join(t(' and ')), n: last.pot });
   }
   return (
     <Play
-      top={<GameTop title="Sniper Hold'em" step={`Hand ${v.hand} of ${v.hands}`} score={me?.chips ?? 0} />}
+      top={<GameTop title="Sniper Hold'em" step={t('Hand {n} of {total}', { n: v.hand, total: v.hands })} score={me?.chips ?? 0} />}
       stage={
         <div className="card">
           <div className="sniper-holdem-table">
@@ -167,13 +180,13 @@ export default function SniperHoldem({ view }: ScreenProps) {
               ))}
             </div>
             <div className="muted small center">
-              Pot <strong className="score">{showResult ? last.pot : v.pot}</strong>
-              {v.carry > 0 && ` · ${v.carry} carried over`}
+              {t('Pot')} <strong className="score">{showResult ? last.pot : v.pot}</strong>
+              {v.carry > 0 && ` · ${t('{n} carried over', { n: v.carry })}`}
             </div>
           </div>
           {showResult ? (
             <ul className="list">
-              {last.shown.length === 0 && <li className="muted small">Everyone else folded.</li>}
+              {last.shown.length === 0 && <li className="muted small">{t('Everyone else folded.')}</li>}
               {last.shown.map((h) => (
                 <li key={h.id} className={last.winners.includes(h.id) ? 'sniper-holdem-win' : ''}>
                   <span>
@@ -188,7 +201,7 @@ export default function SniperHoldem({ view }: ScreenProps) {
               ))}
               {last.snipes.some(([, r]) => r) && (
                 <li className="muted small">
-                  Snipes:{' '}
+                  {t('Snipes:')}{' '}
                   {last.snipes
                     .filter(([, r]) => r)
                     .map(([id, r]) => `${nameOf(id)} → ${rankName(r as Rank)}`)
@@ -204,8 +217,8 @@ export default function SniperHoldem({ view }: ScreenProps) {
                     {nameOf(s.id)}
                     {s.dealer && <span className="sniper-holdem-button">D</span>}{' '}
                     <span className="muted small">
-                      {v.phase === 'snipe' && s.inHand ? (s.snipedYet ? 'chosen' : 'aiming…') : s.last ? ACTIONS[s.last] : ''}
-                      {s.bet > 0 && ` · bet ${s.bet}`}
+                      {v.phase === 'snipe' && s.inHand ? (s.snipedYet ? t('chosen') : t('aiming…')) : s.last ? t(ACTIONS[s.last]) : ''}
+                      {s.bet > 0 && ` · ${t('bet {n}', { n: s.bet })}`}
                     </span>
                   </span>
                   <span className="score">{s.chips}</span>
@@ -224,20 +237,20 @@ export default function SniperHoldem({ view }: ScreenProps) {
                   <PlayingCard key={c} c={c} />
                 ))}
               </div>
-              {v.myRank && <span className="label">You have: {rankName(v.myRank)}</span>}
+              {v.myRank && <span className="label">{t('You have: {rank}', { rank: rankName(v.myRank) })}</span>}
             </div>
           )}
           <p className="ask">{ask}</p>
           {v.phase === 'betting' && (
             <div className="row">
               <button type="button" className="btn" disabled={!v.myTurn} onClick={() => move({ type: 'fold' })}>
-                Fold
+                {t('Fold')}
               </button>
               <button type="button" className="btn" disabled={!v.myTurn} onClick={() => move({ type: 'call' })}>
-                {v.toCall > 0 ? `Call ${v.toCall}` : 'Check'}
+                {v.toCall > 0 ? t('Call {n}', { n: v.toCall }) : t('Check')}
               </button>
               <button type="button" className="btn primary" disabled={!v.myTurn || !v.canRaise} onClick={() => move({ type: 'raise' })}>
-                Raise +2
+                {t('Raise +2')}
               </button>
             </div>
           )}
@@ -245,16 +258,18 @@ export default function SniperHoldem({ view }: ScreenProps) {
             <div className="sniper-holdem-snipes">
               {RANKS.map(([r, name]) => (
                 <button key={r} type="button" className={`btn small${r === v.myRank ? ' sniper-holdem-own' : ''}`} onClick={() => snipe(r)}>
-                  {name}
+                  {t(name)}
                 </button>
               ))}
               <button type="button" className="btn small ghost" onClick={() => snipe(null)}>
-                No snipe
+                {t('No snipe')}
               </button>
             </div>
           )}
-          {v.phase === 'snipe' && v.snipeChosen && <p className="last">You snipe: {v.mySnipe ? rankName(v.mySnipe) : 'nothing'}.</p>}
-          <KeyHint>C check/call · R raise · F fold · snipe: 1–9 a rank, 0 none.</KeyHint>
+          {v.phase === 'snipe' && v.snipeChosen && (
+            <p className="last">{t('You snipe: {rank}.', { rank: v.mySnipe ? rankName(v.mySnipe) : t('nothing') })}</p>
+          )}
+          <KeyHint>{t('C check/call · R raise · F fold · snipe: 1–9 a rank, 0 none.')}</KeyHint>
         </>
       }
     />

@@ -3,6 +3,7 @@
 
 import { type CSSProperties, useState } from 'react';
 import './ColourMancala.css';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 type Stones = [number, number, number];
@@ -65,7 +66,7 @@ function Ring({ view }: { view: MancalaView }) {
   const sr = Math.min(pr * 1.25, spacing * 0.55);
   const path = new Set(view.last?.path ?? []);
   return (
-    <svg className="drawing cm-ring" viewBox="-200 -200 400 400" role="img" aria-label="Mancala ring">
+    <svg className="drawing cm-ring" viewBox="-200 -200 400 400" role="img" aria-label={t('Mancala ring')}>
       <circle className="cm-track" r={R} />
       {view.holes.map((stones, h) => {
         // Counter-clockwise; your row is at the bottom, your store at its right end.
@@ -108,10 +109,10 @@ function Ring({ view }: { view: MancalaView }) {
         );
       })}
       <text className="cm-center" y={-8}>
-        {view.over ? 'Game over' : view.yourTurn ? 'Your turn' : nameOf(view.players[view.turn]!)}
+        {view.over ? t('Game over') : view.yourTurn ? t('Your turn') : nameOf(view.players[view.turn]!)}
       </text>
       <text className="cm-center small" y={16}>
-        {view.over ? '' : `${view.turnsLeft} turns left`}
+        {view.over ? '' : t('{n} turns left', { n: view.turnsLeft })}
       </text>
     </svg>
   );
@@ -137,7 +138,7 @@ export default function ColourMancala({ view: raw }: ScreenProps) {
       top={
         <GameTop
           title="Balance Mancala"
-          step={view.yourTurn ? 'Your turn' : `${nameOf(view.players[view.turn]!)} to move`}
+          step={view.yourTurn ? t('Your turn') : t('{name} to move', { name: nameOf(view.players[view.turn]!) })}
           score={view.points[you] ?? 0}
         />
       }
@@ -146,16 +147,18 @@ export default function ColourMancala({ view: raw }: ScreenProps) {
         <>
           {last && (
             <p className="last">
-              {last.seat === you ? 'You' : nameOf(view.players[last.seat]!)} sowed {last.path.length}
-              {last.captured > 0 ? `, captured ${last.captured}` : ''}
-              {last.extra ? ', extra turn' : ''}.
+              {last.seat === you
+                ? t('You sowed {n}', { n: last.path.length })
+                : t('{name} sowed {n}', { name: nameOf(view.players[last.seat]!), n: last.path.length })}
+              {last.captured > 0 ? t(', captured {n}', { n: last.captured }) : ''}
+              {last.extra ? t(', extra turn') : ''}.
             </p>
           )}
           <div className="cm-first">
-            <span className="muted small">Sow first:</span>
+            <span className="muted small">{t('Sow first:')}</span>
             {COLOURS.map((c, i) => (
               <button key={c} type="button" className={`btn small cm-colour ${c}${first === i ? ' on' : ''}`} onClick={() => setFirst(i)}>
-                <span className={`cm-swatch ${c}`} /> {c}
+                <span className={`cm-swatch ${c}`} /> {t(c)}
               </button>
             ))}
           </div>
@@ -198,8 +201,8 @@ export default function ColourMancala({ view: raw }: ScreenProps) {
               );
             })}
           </ul>
-          <p className="muted small center">Points = 50 × your weakest colour in the store + all its stones.</p>
-          <KeyHint>Keys: 1–{view.pits} sow from a pit, R / G / B pick the first colour.</KeyHint>
+          <p className="muted small center">{t('Points = 50 × your weakest colour in the store + all its stones.')}</p>
+          <KeyHint>{t('Keys: 1–{n} sow from a pit, R / G / B pick the first colour.', { n: view.pits })}</KeyHint>
         </>
       }
     />

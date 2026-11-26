@@ -1,6 +1,7 @@
 // Mystery Stock Market: trade seven stocks with secret price rules. Rules: docs/games/mystery-stock-market.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './MysteryStockMarket.css';
 
@@ -43,7 +44,7 @@ function Spark({ values }: { values: number[] }) {
     .join(' ');
   const up = (values[values.length - 1] ?? 0) >= (values[0] ?? 0);
   return (
-    <svg className="msm-spark" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" role="img" aria-label="Price chart">
+    <svg className="msm-spark" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" role="img" aria-label={t('Price chart')}>
       <polyline points={pts} className={up ? 'up' : 'down'} />
     </svg>
   );
@@ -73,7 +74,13 @@ export default function MysteryStockMarket({ view }: ScreenProps) {
   const ranked = [...v.traders].sort((a, b) => (b.worth ?? 0) - (a.worth ?? 0));
   return (
     <Play
-      top={<GameTop title="Mystery Stock Market" step={end ? 'Market closed' : `Round ${v.round} of ${v.rounds}`} score={v.score} />}
+      top={
+        <GameTop
+          title="Mystery Stock Market"
+          step={end ? t('Market closed') : t('Round {n} of {total}', { n: v.round, total: v.rounds })}
+          score={v.score}
+        />
+      }
       stage={
         <div className="msm-board">
           {v.stocks.map((s, k) => {
@@ -94,7 +101,7 @@ export default function MysteryStockMarket({ view }: ScreenProps) {
                   </small>
                 </span>
                 <span className="msm-own">{(v.shares[k] ?? 0) > 0 ? `×${v.shares[k]}` : ''}</span>
-                {s.rule && <span className="msm-rule">{s.rule}</span>}
+                {s.rule && <span className="msm-rule">{t(s.rule)}</span>}
               </button>
             );
           })}
@@ -104,10 +111,10 @@ export default function MysteryStockMarket({ view }: ScreenProps) {
         <>
           <div className="msm-wallet">
             <span>
-              Cash <strong>{money(v.cash)}</strong>
+              {t('Cash')} <strong>{money(v.cash)}</strong>
             </span>
             <span>
-              Worth <strong>{money(v.worth)}</strong>
+              {t('Worth')} <strong>{money(v.worth)}</strong>
             </span>
           </div>
           {stock && !end && (
@@ -115,12 +122,12 @@ export default function MysteryStockMarket({ view }: ScreenProps) {
               <div className="msm-trade-head">
                 <strong>{stock.name}</strong>
                 <span>
-                  {money(price)} · you hold {owned}
+                  {money(price)} · {t('you hold {n}', { n: owned })}
                 </span>
               </div>
               <p className="small muted">
-                Last round: {lastNet === undefined ? '–' : `${lastNet >= 0 ? '+' : ''}${lastNet} shares net`}
-                {lastHolders === undefined ? '' : `, held by ${lastHolders} of ${v.traders.length}`}
+                {t('Last round:')} {lastNet === undefined ? '–' : t('{n} shares net', { n: `${lastNet >= 0 ? '+' : ''}${lastNet}` })}
+                {lastHolders === undefined ? '' : `, ${t('held by {n} of {total}', { n: lastHolders, total: v.traders.length })}`}
               </p>
               <div className="row msm-qty">
                 {[1, 5, 10].map((q) => (
@@ -131,25 +138,25 @@ export default function MysteryStockMarket({ view }: ScreenProps) {
               </div>
               <div className="row">
                 <button type="button" className="btn" disabled={!trading || owned < 1} onClick={() => trade(-Math.min(qty, owned))}>
-                  Sell {Math.min(qty, Math.max(owned, 1))}
+                  {t('Sell {n}', { n: Math.min(qty, Math.max(owned, 1)) })}
                 </button>
                 <button type="button" className="btn" disabled={!trading || maxBuy < 1} onClick={() => trade(Math.min(qty, maxBuy))}>
-                  Buy {Math.min(qty, Math.max(maxBuy, 1))}
+                  {t('Buy {n}', { n: Math.min(qty, Math.max(maxBuy, 1)) })}
                 </button>
               </div>
               <div className="row">
                 <button type="button" className="btn ghost small" disabled={!trading || owned < 1} onClick={() => trade(-owned)}>
-                  Sell all
+                  {t('Sell all')}
                 </button>
                 <button type="button" className="btn ghost small" disabled={!trading || maxBuy < 1} onClick={() => trade(maxBuy)}>
-                  Buy max ({maxBuy})
+                  {t('Buy max ({n})', { n: maxBuy })}
                 </button>
               </div>
             </section>
           )}
           {v.phase === 'trade' ? (
             <button type="button" className="btn primary" disabled={!trading} onClick={() => move({ type: 'done' })}>
-              {trading ? 'Done for this round' : 'Waiting for the others…'}
+              {trading ? t('Done for this round') : t('Waiting for the others…')}
             </button>
           ) : (
             <>
@@ -162,18 +169,18 @@ export default function MysteryStockMarket({ view }: ScreenProps) {
                 ))}
               </ul>
               <button type="button" className="btn primary" onClick={() => move({ type: 'close' })}>
-                See results
+                {t('See results')}
               </button>
             </>
           )}
-          <KeyHint>Keys: 1–7 pick a stock, B buys one, S sells one, Enter is Done.</KeyHint>
-          <p className="small msm-clue">Your clue: {v.clue}.</p>
+          <KeyHint>{t('Keys: 1–7 pick a stock, B buys one, S sells one, Enter is Done.')}</KeyHint>
+          <p className="small msm-clue">{t('Your clue: {clue}.', { clue: t(v.clue) })}</p>
           <details className="msm-rules small">
-            <summary>The ten possible rules</summary>
+            <summary>{t('The ten possible rules')}</summary>
             <ul>
               {v.ruleTexts.map(([name, text]) => (
                 <li key={name}>
-                  <strong>{name}</strong>: {text}
+                  <strong>{t(name)}</strong>: {t(text)}
                 </li>
               ))}
             </ul>
@@ -185,7 +192,7 @@ export default function MysteryStockMarket({ view }: ScreenProps) {
               .map((line, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows at the end
                 <p key={i} className="small">
-                  {line}
+                  {t(line)}
                 </p>
               ))}
           </div>

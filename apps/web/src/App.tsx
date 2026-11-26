@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { airedOf, seasonOf, stageOf } from './aired';
-import { Crown, Emblem, Peeker } from './Emblem';
+import { Emblem, Grin, Peeker } from './Emblem';
 import { GameIcon } from './GameIcon';
 import { GameIdContext, nameOf, useKeys } from './games/common';
 import { SCREENS } from './games/registry';
 import { HowToPlay, rulesHidden } from './HowTo';
+import { currentLang, gameShort, huName, type Lang, setGameScope, setLang, t, useLang } from './i18n';
 import { setPaused, start, stop, usePlay } from './play';
 import { Replay } from './Replay';
 import { Snapshot } from './Snapshot';
@@ -22,13 +23,15 @@ const KINDS: [string, string][] = [
 
 export function App() {
   const play = usePlay();
+  useLang();
   const current = play.current;
   const info = play.games.find((g) => g.id === current?.gameId);
+  setGameScope(info?.id ?? null);
   return (
     <div className="app">
-      {play.error && <div className="banner error">{play.error}</div>}
+      {play.error && <div className="banner error">{t(play.error)}</div>}
       {!play.ready ? (
-        <p className="muted center">Loading…</p>
+        <p className="muted center">{t('Loading…')}</p>
       ) : current && info ? (
         <>
           <GameView info={info} view={current.view} results={current.results} />
@@ -73,7 +76,8 @@ const ANY: Filter = { tag: 'all', level: 'all', seats: 'all', season: 'all', sta
 function matches(g: GameInfo, f: Filter): boolean {
   const solo = g.maxPlayers === 1;
   const words = f.query.toLowerCase().split(/\s+/).filter(Boolean);
-  const text = `${g.name} ${g.short} ${g.tags.map((t) => CATEGORY_NAME[t]).join(' ')}`.toLowerCase();
+  const text =
+    `${g.name} ${huName(g.id) ?? ''} ${gameShort(g.id, g.short)} ${g.tags.map((c) => t(CATEGORY_NAME[c] ?? '')).join(' ')}`.toLowerCase();
   return (
     (f.tag === 'all' || g.tags.includes(f.tag)) &&
     (f.level === 'all' || g.difficulty === f.level) &&
@@ -85,6 +89,7 @@ function matches(g: GameInfo, f: Filter): boolean {
 }
 
 function Picker({ games }: { games: GameInfo[] }) {
+  const lang = useLang();
   const [filter, setFilter] = useState<Filter>(ANY);
   // Below the sidebar width the filters fold away behind a button that counts the active ones.
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -97,32 +102,38 @@ function Picker({ games }: { games: GameInfo[] }) {
   return (
     <div className="screen picker">
       <nav className="topbar">
-        <a className="brand" href="#top" aria-label="Wicked Plan, top of the page">
-          <Crown className="brand-crown" />
+        <a className="brand" href="#top" aria-label={t('Wicked Plan, top of the page')}>
+          <Grin className="brand-grin" />
           <span>Wicked Plan</span>
         </a>
         <span className="topnav">
-          <a href="#how">How it works</a>
-          <a href="#games">Games</a>
+          <a href="#how">{t('How it works')}</a>
+          <a href="#games">{t('Games')}</a>
+          <LangSwitch />
         </span>
       </nav>
 
       <header className="hero" id="top">
         <Emblem className="hero-emblem" watching />
         <div className="hero-text">
-          <p className="wip">Under construction</p>
-          <p className="label tagline">A digital arena of strategy</p>
-          <h1 className="title">Wicked Plan</h1>
-          <p className="lead">Puzzles, bluffs and duels. Think ahead, trust carefully: in the games for several players you face bots.</p>
+          <p className="wip">{t('Under construction')}</p>
+          <p className="label tagline">{t('A digital arena of strategy')}</p>
+          <h1 className="title">
+            Wicked Plan
+            {lang === 'hu' && <span className="title-hu">(Gonosz terv)</span>}
+          </h1>
+          <p className="lead">
+            {t('Puzzles, bluffs and duels. Think ahead, trust carefully: in the games for several players you face bots.')}
+          </p>
           <div className="hero-actions">
             <a className="btn primary" href="#games">
-              Enter the arena
+              {t('Enter the arena')}
             </a>
             <button type="button" className="btn violet" onClick={random}>
-              Random game
+              {t('Random game')}
             </button>
           </div>
-          <p className="muted small credit">Inspired by the Netflix show The Devil's Plan. An unofficial fan project.</p>
+          <p className="muted small credit">{t("Inspired by the Netflix show The Devil's Plan. An unofficial fan project.")}</p>
         </div>
       </header>
 
@@ -130,14 +141,14 @@ function Picker({ games }: { games: GameInfo[] }) {
 
       <section className="how" id="how" aria-labelledby="how-title">
         <h2 className="section-title" id="how-title">
-          How it works
+          {t('How it works')}
         </h2>
         <ol className="steps">
           {STEPS.map(([title, text], i) => (
             <li key={title}>
               <span className="step-no">{['I', 'II', 'III'][i]}</span>
-              <strong>{title}</strong>
-              <span className="muted">{text}</span>
+              <strong>{t(title)}</strong>
+              <span className="muted">{t(text)}</span>
             </li>
           ))}
         </ol>
@@ -147,13 +158,15 @@ function Picker({ games }: { games: GameInfo[] }) {
 
       <section className="catalog" id="games" aria-labelledby="games-title">
         <h2 className="section-title" id="games-title">
-          Games
+          {t('Games')}
         </h2>
         <p className="games-count" aria-live="polite">
-          {shown.length === games.length ? `${games.length} games` : `${shown.length} of ${games.length} games`}
+          {shown.length === games.length
+            ? t('{n} games', { n: games.length })
+            : t('{n} of {total} games', { n: shown.length, total: games.length })}
         </p>
         {/* Jump to a type's group of cards; a type with no game left after the filters is greyed out. */}
-        <nav className="kind-nav" aria-label="Jump to a type of game">
+        <nav className="kind-nav" aria-label={t('Jump to a type of game')}>
           {KINDS.map(([kind, label]) => (
             <button
               key={kind}
@@ -162,12 +175,12 @@ function Picker({ games }: { games: GameInfo[] }) {
               disabled={!shown.some((g) => g.kind === kind)}
               onClick={() => document.getElementById(`group-${kind}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
             >
-              {label.replace(/ games$/, '')}
+              {t(label.replace(/ games$/, ''))}
             </button>
           ))}
         </nav>
         <div className="catalog-body">
-          <aside className="catalog-side" aria-label="Find a game">
+          <aside className="catalog-side" aria-label={t('Find a game')}>
             <Search value={filter.query} onChange={(query) => setFilter({ ...filter, query })} />
             <button
               type="button"
@@ -176,7 +189,7 @@ function Picker({ games }: { games: GameInfo[] }) {
               aria-controls="filters"
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
-              {active ? `Filters · ${active}` : 'Filters'}
+              {active ? `${t('Filters')} · ${active}` : t('Filters')}
             </button>
             <Filters open={filtersOpen} filter={filter} onChange={setFilter} />
             {active > 0 && (
@@ -185,7 +198,7 @@ function Picker({ games }: { games: GameInfo[] }) {
                 className="btn ghost small filter-clear"
                 onClick={() => setFilter({ ...ANY, query: filter.query, seats: filter.seats, level: filter.level })}
               >
-                Clear filters
+                {t('Clear filters')}
               </button>
             )}
             {/* Desktop only: the games found, small icon and name, A to Z. */}
@@ -207,7 +220,7 @@ function Picker({ games }: { games: GameInfo[] }) {
                 in the sidebar). */}
             <div className="card-tabs">
               <fieldset className="seat-tabs">
-                <legend className="sr-only">Players</legend>
+                <legend className="sr-only">{t('Players')}</legend>
                 {SEAT_TABS.map(([value, label]) => (
                   <button
                     key={value}
@@ -216,12 +229,12 @@ function Picker({ games }: { games: GameInfo[] }) {
                     aria-pressed={filter.seats === value}
                     onClick={() => setFilter({ ...filter, seats: value })}
                   >
-                    {label}
+                    {t(label)}
                   </button>
                 ))}
               </fieldset>
               <fieldset className="level-tabs">
-                <legend className="sr-only">Difficulty</legend>
+                <legend className="sr-only">{t('Difficulty')}</legend>
                 {LEVEL_TABS.map(([value, label]) => (
                   <button
                     key={value}
@@ -230,16 +243,16 @@ function Picker({ games }: { games: GameInfo[] }) {
                     aria-pressed={filter.level === value}
                     onClick={() => setFilter({ ...filter, level: value })}
                   >
-                    {label}
+                    {t(label)}
                   </button>
                 ))}
               </fieldset>
             </div>
             {shown.length === 0 && (
               <div className="empty">
-                <p className="muted">No game fits these filters.</p>
+                <p className="muted">{t('No game fits these filters.')}</p>
                 <button type="button" className="btn ghost small" onClick={() => setFilter(ANY)}>
-                  Clear filters
+                  {t('Clear filters')}
                 </button>
               </div>
             )}
@@ -248,17 +261,20 @@ function Picker({ games }: { games: GameInfo[] }) {
               if (!list.length) return null;
               return (
                 <section key={kind} id={`group-${kind}`} className="game-group">
-                  <h3 className={`group-title kind-${kind}`}>{label}</h3>
+                  <h3 className={`group-title kind-${kind}`}>{t(label)}</h3>
                   <ul className="games">
                     {list.map((g) => (
                       <li key={g.id} className={`game-card ${g.difficulty}`}>
                         <Snapshot id={g.id} />
                         <button type="button" className="game-btn" onClick={() => start(g.id)}>
                           <span className="game-head">
-                            <strong>{g.name}</strong>
-                            <span className="level">{LEVELS[g.difficulty]}</span>
+                            <strong>
+                              {g.name}
+                              {huName(g.id) && <span className="name-hu">({huName(g.id)})</span>}
+                            </strong>
+                            <span className="level">{t(LEVELS[g.difficulty])}</span>
                           </span>
-                          <span className="game-short">{g.short}</span>
+                          <span className="game-short">{gameShort(g.id, g.short)}</span>
                           {/* The card's foot: players on the left, where it was on the show on the right. */}
                           <span className="card-foot">
                             <span className="players">
@@ -266,7 +282,7 @@ function Picker({ games }: { games: GameInfo[] }) {
                                 <circle cx="8" cy="5" r="3" />
                                 <path d="M2.5 15 C2.5 10.5 13.5 10.5 13.5 15 Z" />
                               </svg>
-                              <span className="sr-only">Players: </span>
+                              <span className="sr-only">{t('Players')}: </span>
                               {playersText(g)}
                             </span>
                             <Aired id={g.id} />
@@ -284,14 +300,14 @@ function Picker({ games }: { games: GameInfo[] }) {
 
       <Divider />
       <footer className="footer muted small">
-        <Crown className="footer-crown" />
-        <span>Wicked Plan · an unofficial fan project · all games run in your browser</span>
-        <nav className="footer-links" aria-label="About the maker">
+        <Grin className="footer-grin" />
+        <span>{t('Wicked Plan · an unofficial fan project · all games run in your browser')}</span>
+        <nav className="footer-links" aria-label={t('About the maker')}>
           <a href="https://mazsola739.github.io/mazsola739/" target="_blank" rel="noreferrer">
-            Portfolio
+            {t('Portfolio')}
           </a>
           <a href="https://github.com/mazsola739/wicked-plan" target="_blank" rel="noreferrer">
-            Source code
+            {t('Source code')}
           </a>
         </nav>
       </footer>
@@ -356,12 +372,12 @@ function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; on
       <div className="show-picks">
         {SHOW_PICKS.map((p) => (
           <label key={p.key} className="filter">
-            <span className="label">{p.label}</span>
+            <span className="label">{t(p.label)}</span>
             <span className={`pick ${tint(p.key, filter[p.key])}`}>
               <select value={filter[p.key]} onChange={(e) => onChange({ ...filter, [p.key]: e.target.value })}>
                 {p.options.map(([value, label]) => (
                   <option key={value} value={value} className={tint(p.key, value)}>
-                    {label}
+                    {t(label)}
                   </option>
                 ))}
               </select>
@@ -371,7 +387,7 @@ function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; on
       </div>
       {FILTERS.map((f) => (
         <fieldset key={f.key} className={`filter filter-${f.key}`}>
-          <legend className="label">{f.label}</legend>
+          <legend className="label">{t(f.label)}</legend>
           <div className="chips">
             {f.options.map(([value, label]) => (
               <button
@@ -381,7 +397,7 @@ function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; on
                 aria-pressed={filter[f.key] === value}
                 onClick={() => onChange({ ...filter, [f.key]: filter[f.key] === value ? 'all' : value })}
               >
-                {label}
+                {t(label)}
               </button>
             ))}
           </div>
@@ -409,12 +425,29 @@ function Search({ value, onChange }: { value: string; onChange: (q: string) => v
         ref={input}
         type="search"
         value={value}
-        placeholder="Search games"
-        aria-label="Search games"
+        placeholder={t('Search games')}
+        aria-label={t('Search games')}
         onChange={(e) => onChange(e.target.value)}
       />
       <kbd className="key-hint search-key">/</kbd>
     </label>
+  );
+}
+
+/** EN / HU in the top bar. */
+function LangSwitch() {
+  const lang = useLang();
+  const pick = (l: Lang) => (
+    <button type="button" className="lang-btn" aria-pressed={lang === l} onClick={() => setLang(l)}>
+      {l.toUpperCase()}
+    </button>
+  );
+  return (
+    <fieldset className="lang-switch">
+      <legend className="sr-only">{t('Language')}</legend>
+      {pick('en')}
+      {pick('hu')}
+    </fieldset>
   );
 }
 
@@ -452,11 +485,11 @@ function GameView({ info, view, results }: { info: GameInfo; view: unknown; resu
       <Peeker active={!rules && !results} />
       <nav className="game-nav">
         <button type="button" className="btn small ghost" onClick={stop}>
-          ← Games
+          ← {t('Games')}
         </button>
         {!rules && (
           <button ref={howTo} type="button" className="btn small ghost" onClick={() => setRules(true)}>
-            How to play
+            {t('How to play')}
           </button>
         )}
       </nav>
@@ -491,7 +524,7 @@ function Board({
           </GameIdContext.Provider>
         </div>
       ) : (
-        !results && <p className="muted center">Loading…</p>
+        !results && <p className="muted center">{t('Loading…')}</p>
       )}
     </>
   );
@@ -505,7 +538,7 @@ function Results({ info, results }: { info: GameInfo; results: PlayerResult[] })
       <Emblem className="result-emblem" />
       <div className="label">{info.name}</div>
       <h2>{heading(results, mine)}</h2>
-      <div className="score big">{mine?.points ?? 0} points</div>
+      <div className="score big">{t('{n} points', { n: mine?.points ?? 0 })}</div>
       {results.length > 1 && (
         <ol className="list">
           {ranked.map((r) => (
@@ -520,10 +553,10 @@ function Results({ info, results }: { info: GameInfo; results: PlayerResult[] })
       )}
       <div className="row">
         <button type="button" className="btn ghost" onClick={stop}>
-          Back to games
+          {t('Back to games')}
         </button>
         <button type="button" className="btn primary" onClick={() => start(info.id)}>
-          Play again
+          {t('Play again')}
         </button>
       </div>
     </section>
@@ -531,10 +564,11 @@ function Results({ info, results }: { info: GameInfo; results: PlayerResult[] })
 }
 
 function heading(results: PlayerResult[], mine: PlayerResult | undefined): string {
-  if (results.length === 1) return 'Finished';
+  if (results.length === 1) return t('Finished');
   // Team games give every seat the same rank and points.
-  if (results.every((r) => r.rank === 1 && r.points === results[0]?.points)) return 'Team result';
-  return mine?.rank === 1 ? 'You won!' : `You came ${ordinal(mine?.rank ?? 0)}`;
+  if (results.every((r) => r.rank === 1 && r.points === results[0]?.points)) return t('Team result');
+  if (mine?.rank === 1) return t('You won!');
+  return currentLang() === 'hu' ? `${mine?.rank ?? 0}. lettél` : `You came ${ordinal(mine?.rank ?? 0)}`;
 }
 
 function ordinal(n: number): string {

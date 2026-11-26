@@ -2,6 +2,7 @@
 // RaceBar (the racers and the last round) is also used by Loop Fence Puzzle and Symmetrical Puzzle.
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
 import './PiecePuzzle.css';
 
@@ -32,7 +33,7 @@ interface PieceView extends RaceView {
   pieces: { shape: Cell[]; placed: Cell[] | null }[];
 }
 
-const ordinal = (n: number) => `${n}${n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'}`;
+const ordinal = (n: number) => t(`{n}${n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'}`, { n });
 
 /** Racers with their scores (a tick when done this round) and how the last round went. */
 export function RaceBar({ view }: { view: RaceView }) {
@@ -51,7 +52,10 @@ export function RaceBar({ view }: { view: RaceView }) {
       )}
       {mine && (
         <p className={`last ${mine.place ? 'ok' : 'bad'}`}>
-          Last round: {mine.place ? `${view.racers.length > 1 ? `${ordinal(mine.place)} place, ` : ''}+${mine.points}` : 'not finished'}
+          {t('Last round:')}{' '}
+          {mine.place
+            ? `${view.racers.length > 1 ? t('{place} place, ', { place: ordinal(mine.place) }) : ''}+${mine.points}`
+            : t('not finished')}
           {view.racers.length > 1 &&
             ` · ${view.last
               ?.filter((f) => f.id !== 'you')
@@ -158,13 +162,17 @@ export default function PiecePuzzle({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Piece Puzzle" step={`Round ${view.round} of ${view.rounds}`} score={view.racers[0]?.score ?? 0} />
+          <GameTop
+            title="Piece Puzzle"
+            step={t('Round {n} of {total}', { n: view.round, total: view.rounds })}
+            score={view.racers[0]?.score ?? 0}
+          />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundTimeMs} />
           <RaceBar view={view} />
         </>
       }
       stage={
-        <svg className="drawing pp-board" viewBox={`-0.2 -0.2 ${w + 0.4} ${h + 0.4}`} role="img" aria-label="Target shape">
+        <svg className="drawing pp-board" viewBox={`-0.2 -0.2 ${w + 0.4} ${h + 0.4}`} role="img" aria-label={t('Target shape')}>
           {view.target.map((t, i) => {
             if (!t) return null;
             const x = i % w;
@@ -200,7 +208,7 @@ export default function PiecePuzzle({ view: raw }: ScreenProps) {
                 type="button"
                 className={`pp-piece${sel?.piece === k ? ' sel' : ''}${p.placed ? ' placed' : ''}`}
                 onClick={() => pick(k)}
-                aria-label={`Piece ${k + 1}`}
+                aria-label={t('Piece {n}', { n: k + 1 })}
               >
                 <ShapeIcon
                   cells={sel?.piece === k ? sel.shape : normalize(p.placed ?? p.shape)}
@@ -212,21 +220,21 @@ export default function PiecePuzzle({ view: raw }: ScreenProps) {
           </div>
           <p className="muted small center">
             {sel
-              ? 'Tap the shape where the dotted cell should go.'
-              : 'Pick a piece, turn or flip it, then tap the shape. Tap a placed piece to pick it up.'}
+              ? t('Tap the shape where the dotted cell should go.')
+              : t('Pick a piece, turn or flip it, then tap the shape. Tap a placed piece to pick it up.')}
           </p>
           <div className="row">
             <button type="button" className="btn" disabled={!sel} onClick={doTurn}>
-              ⟳ Turn
+              {t('⟳ Turn')}
             </button>
             <button type="button" className="btn" disabled={!sel} onClick={doFlip}>
-              ⇋ Flip
+              {t('⇋ Flip')}
             </button>
           </div>
           <button type="button" className="btn ghost" onClick={() => move({ type: 'giveUp' })}>
-            Give up this round
+            {t('Give up this round')}
           </button>
-          <KeyHint>Keys: 1–{view.pieces.length} pick a piece, R turns, F flips, Esc drops it.</KeyHint>
+          <KeyHint>{t('Keys: 1–{n} pick a piece, R turns, F flips, Esc drops it.', { n: view.pieces.length })}</KeyHint>
         </>
       }
     />

@@ -1,5 +1,6 @@
 // Crooked Cops: a chase on a metro map with a secret corrupt officer. Rules: docs/games/thieves-and-cops.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './ThievesAndCops.css';
 
@@ -105,12 +106,18 @@ export default function ThievesAndCops({ view }: ScreenProps) {
       top={
         <GameTop
           title="Crooked Cops"
-          step={end ? 'Everything revealed' : v.phase === 'unmask' ? 'Unmask the corrupt officer' : `Round ${v.round} of ${v.rounds}`}
+          step={
+            end
+              ? t('Everything revealed')
+              : v.phase === 'unmask'
+                ? t('Unmask the corrupt officer')
+                : t('Round {n} of {total}', { n: v.round, total: v.rounds })
+          }
           score={v.score}
         />
       }
       stage={
-        <svg className="drawing tc-map" viewBox="20 30 560 550" role="img" aria-label="Metro map">
+        <svg className="drawing tc-map" viewBox="20 30 560 550" role="img" aria-label={t('Metro map')}>
           {v.edges.map(([a, b, line]) => {
             const p = v.stations[a];
             const q = v.stations[b];
@@ -140,7 +147,7 @@ export default function ThievesAndCops({ view }: ScreenProps) {
                   </text>
                 )}
                 <text x={s.x} y={s.y + 32} className="tc-name">
-                  {s.name}
+                  {t(s.name)}
                 </text>
               </g>
             );
@@ -152,7 +159,7 @@ export default function ThievesAndCops({ view }: ScreenProps) {
               <g key={`ghost-${a.id}`} className="tc-ghost">
                 <circle cx={s.x + 16} cy={s.y - 18} r={11} />
                 <text x={s.x + 16} y={s.y - 14}>
-                  R{round}
+                  {t('R{n}', { n: round })}
                 </text>
               </g>
             ) : null;
@@ -186,31 +193,31 @@ export default function ThievesAndCops({ view }: ScreenProps) {
         <>
           <section className={`tc-card tc-${v.role}`}>
             <strong>
-              {nameOf(me?.id ?? 'you')} · {v.role === 'cop' ? 'police' : v.role}
+              {nameOf(me?.id ?? 'you')} · {t(v.role === 'cop' ? 'police' : v.role)}
             </strong>
-            <p className="small">{ROLE_TEXT[v.role]}</p>
+            <p className="small">{t(ROLE_TEXT[v.role])}</p>
             <p className="small muted">
-              Pieces kept by the thieves: <strong>{v.keptTotal}</strong> of {v.toWin} needed
+              {t('Pieces kept by the thieves:')} <strong>{v.keptTotal}</strong> {t('of {n} needed', { n: v.toWin })}
             </p>
           </section>
           {v.phase === 'move' &&
             (me?.caught ? (
-              <p className="muted center">You were caught.</p>
+              <p className="muted center">{t('You were caught.')}</p>
             ) : v.options.length > 0 ? (
               <>
-                <p className="muted small center">Tap a lit station to move one stop, or stay.</p>
+                <p className="muted small center">{t('Tap a lit station to move one stop, or stay.')}</p>
                 <button type="button" className="btn primary" onClick={() => me?.pos != null && go(me.pos)}>
-                  Stay at {me?.pos != null ? v.stations[me.pos]?.name : ''}
+                  {t('Stay at {station}', { station: me?.pos != null ? t(v.stations[me.pos]?.name ?? '') : '' })}
                 </button>
-                <KeyHint>S stays.</KeyHint>
+                <KeyHint>{t('S stays.')}</KeyHint>
               </>
             ) : (
-              <p className="muted center">Waiting for the others…</p>
+              <p className="muted center">{t('Waiting for the others…')}</p>
             ))}
           {v.phase === 'unmask' &&
             (v.canAccuse ? (
               <div className="tc-accuse">
-                <p className="muted small center">Who is the corrupt officer?</p>
+                <p className="muted small center">{t('Who is the corrupt officer?')}</p>
                 {officers.map((a) => (
                   <button key={a.id} type="button" className="btn" onClick={() => move({ type: 'accuse', target: a.index })}>
                     {nameOf(a.id)}
@@ -218,16 +225,16 @@ export default function ThievesAndCops({ view }: ScreenProps) {
                 ))}
               </div>
             ) : (
-              <p className="muted center">{v.role === 'thief' ? 'The police are voting…' : 'Vote sent. Waiting…'}</p>
+              <p className="muted center">{v.role === 'thief' ? t('The police are voting…') : t('Vote sent. Waiting…')}</p>
             ))}
           {end && (
             <>
               <p className={`last ${(v.winner === 'thieves') === (v.role !== 'cop') ? 'ok' : 'bad'}`}>
-                {v.winner === 'thieves' ? 'The thieves win.' : 'The police win.'}
-                {v.unmasked ? ' The corrupt officer was unmasked.' : ''} Your score: {v.score}
+                {v.winner === 'thieves' ? t('The thieves win.') : t('The police win.')}
+                {v.unmasked ? ` ${t('The corrupt officer was unmasked.')}` : ''} {t('Your score: {n}', { n: v.score })}
               </p>
               <button type="button" className="btn primary" onClick={() => move({ type: 'close' })}>
-                See results
+                {t('See results')}
               </button>
             </>
           )}
@@ -236,10 +243,12 @@ export default function ThievesAndCops({ view }: ScreenProps) {
               <li key={a.id} className={a.index === v.me ? 'me' : ''}>
                 <span>
                   <span className={`tc-badge ${a.role}`}>{a.role === 'thief' ? 'T' : a.role === 'corrupt' ? 'C' : 'P'}</span> {nameOf(a.id)}
-                  {a.caught ? ' · caught' : ''}
+                  {a.caught ? ` · ${t('caught')}` : ''}
                 </span>
                 <small className="muted">
-                  {a.role === 'thief' ? `${a.kept} piece${a.kept === 1 ? '' : 's'}` : `${a.catches} catch${a.catches === 1 ? '' : 'es'}`}
+                  {a.role === 'thief'
+                    ? t(a.kept === 1 ? '{n} piece' : '{n} pieces', { n: a.kept })
+                    : t(a.catches === 1 ? '{n} catch' : '{n} catches', { n: a.catches })}
                   {!end && !a.done ? ' · …' : ''}
                 </small>
               </li>
@@ -252,7 +261,7 @@ export default function ThievesAndCops({ view }: ScreenProps) {
               .map((line, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows at the end
                 <p key={i} className="small">
-                  {names(line)}
+                  {names(t(line))}
                 </p>
               ))}
           </div>

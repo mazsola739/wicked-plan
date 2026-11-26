@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import './WeightBalancePuzzle.css';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 interface Load {
@@ -40,9 +41,9 @@ const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 const EMPTY: Load = { left: [], right: [], leftExtra: 0, rightExtra: 0 };
 
 const panText = (blocks: number[], extra: number) =>
-  [...blocks.map((b) => LETTERS[b]), ...(extra > 0 ? [`${extra} g`] : [])].join(' + ') || 'nothing';
+  [...blocks.map((b) => LETTERS[b]), ...(extra > 0 ? [`${extra} g`] : [])].join(' + ') || t('nothing');
 
-const resultText = (r: number) => (r > 0 ? 'left heavier' : r < 0 ? 'right heavier' : 'balanced');
+const resultText = (r: number) => (r > 0 ? t('left heavier') : r < 0 ? t('right heavier') : t('balanced'));
 
 /**
  * The scale: a beam tilted by `tilt` (1 left down, -1 right down, 0 level, null unknown). The metal
@@ -84,7 +85,7 @@ function Scale({ load, tilt }: { load: Load; tilt: number | null }) {
     </g>
   );
   return (
-    <svg className="drawing wb-scale" viewBox="-200 -40 400 200" role="img" aria-label="Balance scale">
+    <svg className="drawing wb-scale" viewBox="-200 -40 400 200" role="img" aria-label={t('Balance scale')}>
       <path className="wb-stand" d="M -40 150 L 40 150 L 6 0 L -6 0 Z" />
       <path fill="#fff" fillOpacity=".1" d="M -40 150 L 0 150 L 0 0 L -6 0 Z" />
       <path fill="#000" fillOpacity=".25" d="M 0 150 L 40 150 L 6 0 L 0 0 Z" />
@@ -113,7 +114,7 @@ function Scale({ load, tilt }: { load: Load; tilt: number | null }) {
 }
 
 function Log({ view }: { view: BalanceView }) {
-  if (view.log.length === 0) return <p className="muted small center">No weighings yet.</p>;
+  if (view.log.length === 0) return <p className="muted small center">{t('No weighings yet.')}</p>;
   return (
     <ol className="list wb-log">
       {view.log
@@ -122,10 +123,10 @@ function Log({ view }: { view: BalanceView }) {
         .map(({ w, n }) => (
           <li key={n}>
             <span className="muted">
-              {n}. {w.seat === view.you ? 'You' : nameOf(view.players[w.seat]!)}
+              {n}. {w.seat === view.you ? t('You') : nameOf(view.players[w.seat]!)}
             </span>
             <span>
-              {panText(w.load.left, w.load.leftExtra)} <b>vs</b> {panText(w.load.right, w.load.rightExtra)}:{' '}
+              {panText(w.load.left, w.load.leftExtra)} <b>{t('vs')}</b> {panText(w.load.right, w.load.rightExtra)}:{' '}
               <strong className="wb-res">{resultText(w.result)}</strong>
             </span>
           </li>
@@ -137,7 +138,7 @@ function Log({ view }: { view: BalanceView }) {
 function Stepper({ label, value, max, onChange }: { label: string; value: number; max: number; onChange: (v: number) => void }) {
   return (
     <div className="wb-stepper">
-      <span className="muted small">{label}</span>
+      <span className="muted small">{t(label)}</span>
       <button type="button" className="key" disabled={value <= 0} onClick={() => onChange(value - 1)}>
         −
       </button>
@@ -175,13 +176,15 @@ function WeighControls({ view, load, setLoad }: { view: BalanceView; load: Load;
   return (
     <>
       <p className="ask">
-        {view.yourTurn ? 'Your weighing: tap blocks to put them on a pan.' : `${nameOf(view.players[view.turn]!)} is weighing…`}
+        {view.yourTurn
+          ? t('Your weighing: tap blocks to put them on a pan.')
+          : t('{name} is weighing…', { name: nameOf(view.players[view.turn]!) })}
       </p>
       <div className="wb-blocks">
         {LETTERS.map((l, b) => (
           <button key={l} type="button" className={`wb-block-btn ${side(b)}`} disabled={!view.yourTurn} onClick={() => cycle(b)}>
             <strong>{l}</strong>
-            <span>{side(b)}</span>
+            <span>{t(side(b))}</span>
           </button>
         ))}
       </div>
@@ -191,13 +194,13 @@ function WeighControls({ view, load, setLoad }: { view: BalanceView; load: Load;
       </div>
       <div className="row">
         <button type="button" className="btn ghost" disabled={!view.yourTurn} onClick={() => move({ type: 'answer' })}>
-          Answer now
+          {t('Answer now')}
         </button>
         <button type="button" className="btn primary" disabled={!canWeigh} onClick={weigh}>
-          Weigh
+          {t('Weigh')}
         </button>
       </div>
-      <KeyHint>Keys: A–E move a block (off → left → right), Enter weighs.</KeyHint>
+      <KeyHint>{t('Keys: A–E move a block (off → left → right), Enter weighs.')}</KeyHint>
     </>
   );
 }
@@ -224,7 +227,7 @@ function AnswerControls({ view }: { view: BalanceView }) {
   const shown = view.yourAnswer ?? draft;
   return (
     <>
-      <p className="ask">{done ? 'Sent. Waiting for your teammate…' : 'Write down every block’s weight (1–9, all different).'}</p>
+      <p className="ask">{done ? t('Sent. Waiting for your teammate…') : t('Write down every block’s weight (1–9, all different).')}</p>
       <div className="wb-blocks">
         {LETTERS.map((l, b) => (
           <button
@@ -249,9 +252,9 @@ function AnswerControls({ view }: { view: BalanceView }) {
             ))}
           </div>
           <button type="button" className="btn primary" disabled={!full} onClick={submit}>
-            Send answer
+            {t('Send answer')}
           </button>
-          <KeyHint>Keys: A–E pick a block, 1–9 write its weight, Enter sends.</KeyHint>
+          <KeyHint>{t('Keys: A–E pick a block, 1–9 write its weight, Enter sends.')}</KeyHint>
         </>
       )}
     </>
@@ -265,7 +268,8 @@ export default function WeightBalancePuzzle({ view: raw }: ScreenProps) {
   const composing = view.yourTurn && load.left.length + load.right.length + load.leftExtra + load.rightExtra > 0;
   const shown = composing || !last ? load : last.load;
   const tilt = composing || !last ? null : last.result;
-  const step = view.phase === 'weigh' ? `Weighing · ${view.weighingsLeft} of ${view.weighings} left` : 'Answer in secret';
+  const step =
+    view.phase === 'weigh' ? t('Weighing · {n} of {total} left', { n: view.weighingsLeft, total: view.weighings }) : t('Answer in secret');
   return (
     <Play
       top={<GameTop title="Weight Balance" step={step} score={view.score} />}
@@ -279,7 +283,9 @@ export default function WeightBalancePuzzle({ view: raw }: ScreenProps) {
         <>
           {view.phase === 'weigh' ? <WeighControls view={view} load={load} setLoad={setLoad} /> : <AnswerControls view={view} />}
           <p className="muted small center">
-            Five blocks, different whole weights 1–9 g. 150 points per block everyone gets right; all five right: +50 per unused weighing.
+            {t(
+              'Five blocks, different whole weights 1–9 g. 150 points per block everyone gets right; all five right: +50 per unused weighing.',
+            )}
           </p>
         </>
       }

@@ -1,6 +1,7 @@
 // Equation High-Low. Rules page: docs/games/equation-hi-lo.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './EquationHiLo.css';
 
@@ -66,7 +67,7 @@ function evaluate(nums: number[], ops: string[]): number | null {
   return sum + term;
 }
 
-const fmt = (v: number | null) => (v === null ? 'invalid' : Number.isInteger(v) ? String(v) : v.toFixed(2));
+const fmt = (v: number | null) => (v === null ? t('invalid') : Number.isInteger(v) ? String(v) : v.toFixed(2));
 
 function Builder({ cards, hand, onSubmit }: { cards: number[]; hand: number; onSubmit: (b: Omit<Build, 'value' | 'text'>) => void }) {
   const [order, setOrder] = useState<number[]>([]);
@@ -118,7 +119,8 @@ function Builder({ cards, hand, onSubmit }: { cards: number[]; hand: number; onS
         ))}
       </div>
       <p className="center small muted">
-        {done ? `= ${fmt(value)}` : wantNumber ? 'Tap a card' : 'Tap a symbol'} · aim for {side === 'low' ? '1' : '20'}
+        {done ? `= ${fmt(value)}` : wantNumber ? t('Tap a card') : t('Tap a symbol')} ·{' '}
+        {t('aim for {n}', { n: side === 'low' ? '1' : '20' })}
       </p>
       <div className="ehl-pick">
         {cards.map((c, i) => (
@@ -141,18 +143,18 @@ function Builder({ cards, hand, onSubmit }: { cards: number[]; hand: number; onS
       </div>
       <div className="row">
         <button type="button" className={`btn${side === 'low' ? ' primary' : ''}`} onClick={() => setSide('low')}>
-          Low · 1
+          {t('Low · 1')}
         </button>
         <button type="button" className={`btn${side === 'high' ? ' primary' : ''}`} onClick={() => setSide('high')}>
-          High · 20
+          {t('High · 20')}
         </button>
       </div>
       <div className="row">
         <button type="button" className="btn" disabled={order.length === 0} onClick={undo}>
-          ⌫ Undo
+          {t('⌫ Undo')}
         </button>
         <button type="button" className="btn primary" disabled={!done} onClick={submit}>
-          Submit
+          {t('Submit')}
         </button>
       </div>
     </div>
@@ -173,13 +175,13 @@ export default function EquationHiLo({ view: raw }: ScreenProps) {
     else return false;
     return true;
   });
-  const steps = { bet1: 'betting 1', build: 'build', bet2: 'betting 2', over: '' };
+  const steps = { bet1: t('betting 1'), build: t('build'), bet2: t('betting 2'), over: '' };
   return (
     <Play
       top={
         <GameTop
           title="Equation High-Low"
-          step={view.over ? 'Game over' : `Hand ${view.hand} of ${view.hands} · ${steps[view.phase]}`}
+          step={view.over ? t('Game over') : `${t('Hand {n} of {total}', { n: view.hand, total: view.hands })} · ${steps[view.phase]}`}
           score={me?.chips ?? 0}
         />
       }
@@ -210,13 +212,17 @@ export default function EquationHiLo({ view: raw }: ScreenProps) {
                   )}
                 </div>
                 <div className="muted small">
-                  {s.folded ? 'folded' : s.inHand ? `in ${s.put}${view.phase === 'build' && s.built ? ' · built ✓' : ''}` : 'out'}
+                  {s.folded
+                    ? t('folded')
+                    : s.inHand
+                      ? `${t('in {n}', { n: s.put })}${view.phase === 'build' && s.built ? ` · ${t('built ✓')}` : ''}`
+                      : t('out')}
                 </div>
               </li>
             ))}
           </ul>
           <div className="ehl-pot">
-            Pot <strong>{view.pot}</strong>
+            {t('Pot')} <strong>{view.pot}</strong>
           </div>
           {view.cards && (
             <div className="ehl-mine">
@@ -224,14 +230,14 @@ export default function EquationHiLo({ view: raw }: ScreenProps) {
                 // biome-ignore lint/suspicious/noArrayIndexKey: four fixed cards
                 <span key={i} className={`ehl-card${i >= 2 ? ' hidden' : ''}`}>
                   {c}
-                  <em>{i >= 2 ? 'hidden' : 'face up'}</em>
+                  <em>{i >= 2 ? t('hidden') : t('face up')}</em>
                 </span>
               ))}
             </div>
           )}
           {view.build && (
             <p className="center">
-              Your equation: <strong>{view.build.text}</strong> = {fmt(view.build.value)} ({view.build.side})
+              {t('Your equation:')} <strong>{view.build.text}</strong> = {fmt(view.build.value)} ({t(view.build.side)})
             </p>
           )}
         </>
@@ -242,26 +248,26 @@ export default function EquationHiLo({ view: raw }: ScreenProps) {
           {myTurn && (
             <div className="row">
               <button type="button" className="btn primary" onClick={() => move({ type: 'call' })}>
-                {view.toCall > 0 ? `Call ${view.toCall}` : 'Check'}
+                {view.toCall > 0 ? t('Call {n}', { n: view.toCall }) : t('Check')}
               </button>
               <button type="button" className="btn" disabled={!view.canRaise} onClick={() => move({ type: 'raise' })}>
-                Raise 2
+                {t('Raise 2')}
               </button>
               <button type="button" className="btn" onClick={() => move({ type: 'fold' })}>
-                Fold
+                {t('Fold')}
               </button>
             </div>
           )}
           {!myTurn && !building && !view.over && (
             <p className="muted center">
-              {view.phase === 'build' ? 'Waiting for the others to build…' : `${nameOf(view.seats[view.turn ?? 0]?.id ?? '')} is betting…`}
+              {view.phase === 'build'
+                ? t('Waiting for the others to build…')
+                : t('{name} is betting…', { name: nameOf(view.seats[view.turn ?? 0]?.id ?? '') })}
             </p>
           )}
           {view.last && (
             <div className="card">
-              <div className="label">
-                Hand {view.last.hand}: pot {view.last.pot}
-              </div>
+              <div className="label">{t('Hand {n}: pot {pot}', { n: view.last.hand, pot: view.last.pot })}</div>
               <ul className="list small">
                 {view.seats.map((s, i) => {
                   const b = view.last?.builds[i];
@@ -269,7 +275,7 @@ export default function EquationHiLo({ view: raw }: ScreenProps) {
                   return (
                     <li key={s.id}>
                       <span>{nameOf(s.id)}</span>
-                      <span>{b ? `${b.text} = ${fmt(b.value)} · ${b.side}` : '—'}</span>
+                      <span>{b ? `${b.text} = ${fmt(b.value)} · ${t(b.side)}` : '—'}</span>
                       <strong className="score">{g > 0 ? `+${g}` : g}</strong>
                     </li>
                   );
@@ -280,10 +286,10 @@ export default function EquationHiLo({ view: raw }: ScreenProps) {
           <ul className="ehl-log small">
             {view.log.map((l, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows
-              <li key={i}>{said(l)}</li>
+              <li key={i}>{said(t(l))}</li>
             ))}
           </ul>
-          <KeyHint>Keys: C call, R raise, F fold · build: 1–4 cards, + − * / symbols, L / H side, Enter.</KeyHint>
+          <KeyHint>{t('Keys: C call, R raise, F fold · build: 1–4 cards, + − * / symbols, L / H side, Enter.')}</KeyHint>
         </>
       }
     />

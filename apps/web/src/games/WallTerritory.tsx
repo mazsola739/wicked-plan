@@ -1,6 +1,7 @@
 // Wall Go: move a piece, build a wall, fence off the biggest area. Rules page: docs/games/wall-territory.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './WallTerritory.css';
 
@@ -79,18 +80,18 @@ export default function WallTerritory({ view: raw }: ScreenProps) {
   const moving = piece !== null ? mine.find((p) => p.index === piece) : undefined;
   const status = view.yourTurn
     ? piece === null
-      ? 'Tap one of your pieces.'
-      : 'Tap where it goes (or keep it), then pick a side for the wall.'
+      ? t('Tap one of your pieces.')
+      : t('Tap where it goes (or keep it), then pick a side for the wall.')
     : view.over
-      ? 'Game over.'
-      : `${nameOf(view.seats[view.turn]?.id ?? '')} is building…`;
+      ? t('Game over.')
+      : t('{name} is building…', { name: nameOf(view.seats[view.turn]?.id ?? '') });
 
   return (
     <Play
       top={
         <GameTop
           title="Wall Go"
-          step={`Turn ${view.turnNo}${view.yourTurn ? ' · your move' : ''}`}
+          step={`${t('Turn {n}', { n: view.turnNo })}${view.yourTurn ? ` · ${t('your move')}` : ''}`}
           score={view.seats[view.me]?.area ?? 0}
         />
       }
@@ -177,14 +178,14 @@ export default function WallTerritory({ view: raw }: ScreenProps) {
               <li key={s.id} className={i === view.turn && !view.over ? 'wall-territory-turn' : ''}>
                 <span>
                   <i className="wall-territory-dot" style={{ background: COLOURS[i] }} /> {nameOf(s.id)}
-                  {s.sealed && <span className="muted small"> · sealed in</span>}
+                  {s.sealed && <span className="muted small"> · {t('sealed in')}</span>}
                 </span>
                 <span className="score">{s.area}</span>
               </li>
             ))}
           </ul>
           <p className="ask">{status}</p>
-          <div className="label center">Wall side</div>
+          <div className="label center">{t('Wall side')}</div>
           <div className="wall-territory-sides">
             {SIDES.map((s) => (
               <button
@@ -194,11 +195,11 @@ export default function WallTerritory({ view: raw }: ScreenProps) {
                 disabled={dest === null || !canWall(dest, s.dir)}
                 onClick={() => build(s.dir)}
               >
-                {s.label}
+                {t(s.label)}
               </button>
             ))}
           </div>
-          <KeyHint>Arrow keys build the wall on that side; Esc cancels.</KeyHint>
+          <KeyHint>{t('Arrow keys build the wall on that side; Esc cancels.')}</KeyHint>
         </>
       }
     />

@@ -1,6 +1,7 @@
 // Auction Bingo. Rules page: docs/games/auction-bingo.md
 
 import { type CSSProperties, useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './AuctionBingo.css';
 
@@ -33,7 +34,7 @@ const NAMES = ['circle', 'triangle', 'star'];
  */
 function Shape({ shape }: { shape: number }) {
   return (
-    <svg viewBox="0 0 40 40" className={`ab-shape ab-s${shape}`} aria-label={NAMES[shape]}>
+    <svg viewBox="0 0 40 40" className={`ab-shape ab-s${shape}`} aria-label={t(NAMES[shape] ?? '')}>
       {shape === 0 && (
         <>
           <path d="M20,6 27,7.9 32.1,13 34,20 32.1,27 27,32.1 20,34 13,32.1 7.9,27 6,20 7.9,13 13,7.9Z" />
@@ -134,12 +135,12 @@ function BidBox({ max, round, onBid }: { max: number; round: number; onBid: (n: 
         {[0, 2, 5, max].map((n, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: fixed quick bids
           <button key={i} type="button" className="btn small" onClick={() => set(n)}>
-            {i === 3 ? 'All' : n}
+            {i === 3 ? t('All') : n}
           </button>
         ))}
       </div>
       <button type="button" className="btn primary" onClick={() => onBid(value)}>
-        Bid {value} coin{value === 1 ? '' : 's'}
+        {t(value === 1 ? 'Bid {n} coin' : 'Bid {n} coins', { n: value })}
       </button>
     </div>
   );
@@ -162,7 +163,11 @@ export default function AuctionBingo({ view: raw }: ScreenProps) {
       top={
         <GameTop
           title="Auction Bingo"
-          step={view.phase === 'over' ? 'Game over' : `Round ${view.round} of ${view.rounds} · ${view.phase}`}
+          step={
+            view.phase === 'over'
+              ? t('Game over')
+              : `${t('Round {n} of {total}', { n: view.round, total: view.rounds })} · ${t(view.phase)}`
+          }
           score={view.score}
         />
       }
@@ -170,13 +175,13 @@ export default function AuctionBingo({ view: raw }: ScreenProps) {
         <>
           <Grid board={view.board} pick={view.myPick} onCell={picking ? pickCell : undefined} />
           <p className="muted small center">
-            Coins: <strong className="score">{view.coins}</strong> · 5 per line, 1 per cell, 1 per 5 coins left
+            {t('Coins:')} <strong className="score">{view.coins}</strong> · {t('5 per line, 1 per cell, 1 per 5 coins left')}
           </p>
         </>
       }
       controls={
         <>
-          {picking && <p className="ask">Pick an empty cell: you go for its shape.</p>}
+          {picking && <p className="ask">{t('Pick an empty cell: you go for its shape.')}</p>}
           {view.counts && (
             <div className="ab-counts">
               {view.counts.map((n, shape) => (
@@ -184,7 +189,8 @@ export default function AuctionBingo({ view: raw }: ScreenProps) {
                 <div key={shape} className={shape === myShape ? 'mine' : ''}>
                   <Shape shape={shape} />
                   <span>
-                    {n} picked{shape === myShape ? ' (you)' : ''}
+                    {t('{n} picked', { n })}
+                    {shape === myShape ? t(' (you)') : ''}
                   </span>
                 </div>
               ))}
@@ -192,11 +198,13 @@ export default function AuctionBingo({ view: raw }: ScreenProps) {
           )}
           {bidding && <BidBox max={view.coins} round={view.round} onBid={(coins) => move({ type: 'bid', coins })} />}
           {view.phase !== 'over' && !picking && !bidding && (
-            <p className="muted center">Waiting for {waiting.join(', ') || 'the others'}…</p>
+            <p className="muted center">
+              {waiting.length ? t('Waiting for {names}…', { names: waiting.join(', ') }) : t('Waiting for the others…')}
+            </p>
           )}
           {view.result && (
             <div className="card">
-              <div className="label">Final boards</div>
+              <div className="label">{t('Final boards')}</div>
               <div className="ab-finals">
                 {view.players.map((p, i) => (
                   <div key={p} className="ab-final" style={{ '--ab-own': `var(--seat-${i})` } as CSSProperties}>
@@ -213,11 +221,11 @@ export default function AuctionBingo({ view: raw }: ScreenProps) {
             {view.log.map((l, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows
               <li key={i} className={l.startsWith('You') ? 'own' : ''}>
-                {l}
+                {t(l)}
               </li>
             ))}
           </ul>
-          <KeyHint>Keys: 1–9 pick a cell; type a bid and press Enter.</KeyHint>
+          <KeyHint>{t('Keys: 1–9 pick a cell; type a bid and press Enter.')}</KeyHint>
         </>
       }
     />

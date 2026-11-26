@@ -1,6 +1,7 @@
 // Zoo. Rules page: docs/games/animal-tile-auction.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './AnimalTileAuction.css';
 
@@ -36,7 +37,7 @@ const said = (line: string) => line.replace(/\bbot-\d+\b|\byou\b/g, nameOf);
  */
 function Animal({ animal }: { animal: number }) {
   return (
-    <svg viewBox="0 0 40 40" className={`ata-animal ata-a${animal}`} role="img" aria-label={ANIMALS[animal]}>
+    <svg viewBox="0 0 40 40" className={`ata-animal ata-a${animal}`} role="img" aria-label={t(ANIMALS[animal] ?? '')}>
       {animal === 0 && (
         <>
           <path d="M7,4 16,12 20,11 24,12 33,4 34,18 36,23 25,30 20,36 15,30 4,23 6,18Z" />
@@ -177,7 +178,7 @@ function BidBox({ max, round, onBid }: { max: number; round: number; onBid: (n: 
         ))}
       </div>
       <button type="button" className="btn primary" onClick={() => onBid(value)}>
-        Bid {value} chip{value === 1 ? '' : 's'}
+        {value === 1 ? t('Bid {n} chip', { n: value }) : t('Bid {n} chips', { n: value })}
       </button>
     </div>
   );
@@ -204,20 +205,20 @@ export default function AnimalTileAuction({ view: raw }: ScreenProps) {
   const waiting = view.players.filter((_, i) => !view.bidDone[i]).map(nameOf);
   const status =
     view.phase === 'over'
-      ? 'Game over: every pattern is scored.'
+      ? t('Game over: every pattern is scored.')
       : placing
-        ? 'You won the tile: tap an empty cell to place it.'
+        ? t('You won the tile: tap an empty cell to place it.')
         : view.phase === 'place'
-          ? `${nameOf(view.players[view.placer ?? 0] ?? '')} is placing the tile…`
+          ? t('{name} is placing the tile…', { name: nameOf(view.players[view.placer ?? 0] ?? '') })
           : bidding
-            ? 'Bid for this tile.'
-            : `Waiting for ${waiting.join(', ') || 'the others'}…`;
+            ? t('Bid for this tile.')
+            : t('Waiting for {names}…', { names: waiting.join(', ') || t('the others') });
   return (
     <Play
       top={
         <GameTop
           title="Zoo"
-          step={view.phase === 'over' ? 'Game over' : `Auction ${view.auction} of ${view.auctions}`}
+          step={view.phase === 'over' ? t('Game over') : t('Auction {n} of {total}', { n: view.auction, total: view.auctions })}
           score={view.patternScore + (view.chips[view.me] ?? 0)}
         />
       }
@@ -231,7 +232,7 @@ export default function AnimalTileAuction({ view: raw }: ScreenProps) {
               className={`ata-cell${placing && cursor === c ? ' cursor' : ''}`}
               disabled={!placing || a !== null}
               onClick={() => place(c)}
-              aria-label={`${String.fromCharCode(65 + (c % 5))}${Math.floor(c / 5) + 1}${a === null ? '' : ` ${ANIMALS[a]}`}`}
+              aria-label={`${String.fromCharCode(65 + (c % 5))}${Math.floor(c / 5) + 1}${a === null ? '' : ` ${t(ANIMALS[a] ?? '')}`}`}
             >
               {a !== null && <Animal animal={a} />}
             </button>
@@ -243,17 +244,17 @@ export default function AnimalTileAuction({ view: raw }: ScreenProps) {
           <div className="ata-top">
             {view.tile !== null && (
               <div className="ata-offer">
-                <span className="label">On offer</span>
+                <span className="label">{t('On offer')}</span>
                 <span className="ata-cell big">
                   <Animal animal={view.tile} />
                 </span>
-                <span className="small">{ANIMALS[view.tile]}</span>
+                <span className="small">{t(ANIMALS[view.tile] ?? '')}</span>
               </div>
             )}
             <div className="ata-offer">
-              <span className="label">Your pattern</span>
+              <span className="label">{t('Your pattern')}</span>
               <PatternCard parts={view.pattern} />
-              <span className="small muted">any rotation</span>
+              <span className="small muted">{t('any rotation')}</span>
             </div>
           </div>
           <p className="ask">{status}</p>
@@ -268,7 +269,7 @@ export default function AnimalTileAuction({ view: raw }: ScreenProps) {
           </ul>
           {view.result && (
             <div className="card">
-              <div className="label">Patterns</div>
+              <div className="label">{t('Patterns')}</div>
               <ul className="list">
                 {view.players.map((p, i) => (
                   <li key={p}>
@@ -283,10 +284,10 @@ export default function AnimalTileAuction({ view: raw }: ScreenProps) {
           <ul className="ata-log small">
             {view.log.map((l, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows
-              <li key={i}>{said(l)}</li>
+              <li key={i}>{said(t(l))}</li>
             ))}
           </ul>
-          <KeyHint>Keys: digits + Enter bid; arrows + Enter place.</KeyHint>
+          <KeyHint>{t('Keys: digits + Enter bid; arrows + Enter place.')}</KeyHint>
         </>
       }
     />

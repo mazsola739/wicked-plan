@@ -1,6 +1,7 @@
 // The Virus Game: hidden roles, contacts, reports and quarantine votes. Rules: docs/games/virus-game.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './VirusGame.css';
 
@@ -92,7 +93,7 @@ export default function VirusGame({ view }: ScreenProps) {
       top={
         <GameTop
           title="The Virus Game"
-          step={end ? 'Roles revealed' : `Round ${v.round} of ${v.rounds} · ${PHASE[v.phase] ?? ''}`}
+          step={end ? t('Roles revealed') : `${t('Round {n} of {total}', { n: v.round, total: v.rounds })} · ${t(PHASE[v.phase] ?? '')}`}
           score={v.score}
         />
       }
@@ -101,16 +102,16 @@ export default function VirusGame({ view }: ScreenProps) {
           <section className={`virus-card virus-${v.role}`}>
             <div className="virus-me">
               <strong>
-                #{byIndex(v.me)?.number} · {v.role}
+                #{byIndex(v.me)?.number} · {t(v.role)}
               </strong>
-              <span className={`virus-status ${status.toLowerCase()}`}>{status}</span>
+              <span className={`virus-status ${status.toLowerCase()}`}>{t(status)}</span>
             </div>
-            <p className="small">{v.roleText}</p>
-            <p className="small muted">Mission: {v.mission}</p>
+            <p className="small">{t(v.roleText)}</p>
+            <p className="small muted">{t('Mission: {mission}', { mission: t(v.mission) })}</p>
             {v.notes.length > 0 && (
               <ul className="virus-notes small">
                 {v.notes.map((n) => (
-                  <li key={n}>{n}</li>
+                  <li key={n}>{t(n)}</li>
                 ))}
               </ul>
             )}
@@ -127,9 +128,15 @@ export default function VirusGame({ view }: ScreenProps) {
                 <span className="virus-num">#{a.number}</span>
                 <span>{nameOf(a.id)}</span>
                 <small>
-                  {a.role && a.index !== v.me ? a.role : a.revealed === true ? 'terrorist' : a.revealed === false ? 'not a terrorist' : ''}
-                  {a.quarantined ? ' · quarantine' : ''}
-                  {end && a.infected ? ' · infected' : ''}
+                  {a.role && a.index !== v.me
+                    ? t(a.role)
+                    : a.revealed === true
+                      ? t('terrorist')
+                      : a.revealed === false
+                        ? t('not a terrorist')
+                        : ''}
+                  {a.quarantined ? ` · ${t('quarantine')}` : ''}
+                  {end && a.infected ? ` · ${t('infected')}` : ''}
                 </small>
                 {!end && a.done && <span className="virus-done">✓</span>}
               </button>
@@ -142,47 +149,51 @@ export default function VirusGame({ view }: ScreenProps) {
           {end ? (
             <>
               <p className={`last ${(v.winner === 'terrorists') === (v.role === 'terrorist') ? 'ok' : 'bad'}`}>
-                {v.winner === 'terrorists' ? 'The terrorists win.' : 'The city wins.'} Your score: {v.score}
+                {v.winner === 'terrorists' ? t('The terrorists win.') : t('The city wins.')} {t('Your score: {n}', { n: v.score })}
               </p>
               <button type="button" className="btn primary" onClick={() => move({ type: 'close' })}>
-                See results
+                {t('See results')}
               </button>
             </>
           ) : acting ? (
             <>
               <p className="muted small center">
                 {v.phase === 'contact'
-                  ? `Choose whom to meet (${ACTION[v.role].toLowerCase()}).`
+                  ? t('Choose whom to meet ({action}).', { action: t(ACTION[v.role]).toLowerCase() })
                   : v.phase === 'report'
-                    ? 'Accuse someone in public, or stay quiet.'
-                    : 'Vote someone into quarantine, or nobody.'}
+                    ? t('Accuse someone in public, or stay quiet.')
+                    : t('Vote someone into quarantine, or nobody.')}
               </p>
               <button type="button" className="btn primary" disabled={picked === null} onClick={() => send(picked)}>
-                {picked === null ? `${verb}…` : `${verb} ${label(picked)}`}
+                {picked === null ? `${t(verb)}…` : `${t(verb)} ${label(picked)}`}
               </button>
               {v.phase !== 'contact' && (
                 <button type="button" className="btn ghost" onClick={() => send(null)}>
-                  {v.phase === 'report' ? 'Stay quiet' : 'Nobody'}
+                  {v.phase === 'report' ? t('Stay quiet') : t('Nobody')}
                 </button>
               )}
-              <KeyHint>Keys: a player's number picks them, Enter confirms.</KeyHint>
+              <KeyHint>{t("Keys: a player's number picks them, Enter confirms.")}</KeyHint>
             </>
           ) : (
-            <p className="muted center">{v.quarantined && v.phase === 'contact' ? 'You are in quarantine.' : 'Waiting for the others…'}</p>
+            <p className="muted center">
+              {v.quarantined && v.phase === 'contact' ? t('You are in quarantine.') : t('Waiting for the others…')}
+            </p>
           )}
           {v.newInfections.length > 0 && (
-            <p className="small center">New infections per round: {v.newInfections.map((n) => String(n)).join(' · ')}</p>
+            <p className="small center">
+              {t('New infections per round: {list}', { list: v.newInfections.map((n) => String(n)).join(' · ') })}
+            </p>
           )}
           {v.reports.length > 0 && (
             <div>
-              <div className="label">Reports</div>
+              <div className="label">{t('Reports')}</div>
               <ul className="virus-reports small">
                 {v.reports
                   .slice()
                   .reverse()
                   .map((r) => (
                     <li key={`${r.round}-${r.by}`}>
-                      R{r.round}: {label(r.by)} accuses {label(r.target)}
+                      {t('R{n}: {by} accuses {target}', { n: r.round, by: label(r.by), target: label(r.target) })}
                     </li>
                   ))}
               </ul>
@@ -195,7 +206,7 @@ export default function VirusGame({ view }: ScreenProps) {
               .map((line, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows at the end
                 <p key={i} className="small">
-                  {line}
+                  {t(line)}
                 </p>
               ))}
           </div>

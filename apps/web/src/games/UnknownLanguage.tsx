@@ -1,5 +1,6 @@
 // Unknown Language: crack a picture script from examples. Rules page: docs/games/unknown-language.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, Play, RoundDots, type ScreenProps, useKeys } from './common';
 import './UnknownLanguage.css';
 
@@ -56,16 +57,16 @@ function prompt(q: Question): React.ReactNode {
   if (q.kind === 'read')
     return (
       <>
-        <p className="ask">What does this say?</p>
+        <p className="ask">{t('What does this say?')}</p>
         <div className="ul-ask-script">
           <Script words={q.script} />
         </div>
       </>
     );
-  if (q.kind === 'write') return <p className="ask">How is this written? “{q.english}”</p>;
+  if (q.kind === 'write') return <p className="ask">{t('How is this written? “{text}”', { text: q.english })}</p>;
   return (
     <>
-      <p className="ask">What does this word mean?</p>
+      <p className="ask">{t('What does this word mean?')}</p>
       <div className="ul-ask-script">
         <Glyph word={q.word} />
       </div>
@@ -94,7 +95,7 @@ export default function UnknownLanguage({ view: raw }: ScreenProps) {
         <>
           <GameTop
             title="Unknown Language"
-            step={`Stage ${view.stage} of 3 · question ${view.question} of ${view.questions}`}
+            step={t('Stage {stage} of 3 · question {n} of {total}', { stage: view.stage, n: view.question, total: view.questions })}
             score={view.score}
           />
           <RoundDots results={view.results} total={view.questions} />
@@ -102,7 +103,7 @@ export default function UnknownLanguage({ view: raw }: ScreenProps) {
       }
       stage={
         <div className="ul-wall">
-          <div className="label">Carvings with a translation</div>
+          <div className="label">{t('Carvings with a translation')}</div>
           <ul className="ul-examples">
             {view.examples.map((e) => (
               <li key={e.english}>
@@ -115,7 +116,7 @@ export default function UnknownLanguage({ view: raw }: ScreenProps) {
       }
       controls={
         <>
-          <p className="muted small center">{STAGE_TEXT[view.stage - 1]}</p>
+          <p className="muted small center">{t(STAGE_TEXT[view.stage - 1] ?? '')}</p>
           {q && prompt(q)}
           {q && (
             <div className="ul-options">
@@ -130,15 +131,15 @@ export default function UnknownLanguage({ view: raw }: ScreenProps) {
           )}
           {last && (
             <div className={`last ${last.correct ? 'ok' : 'bad'}`}>
-              {last.correct ? `Right, +${last.points}` : 'Not right. '}
+              {last.correct ? t('Right, +{n}', { n: last.points }) : t('Not right. ')}
               {!last.correct && (
                 <>
-                  It was: <OptionBody q={last.question} i={last.solution} />
+                  {t('It was:')} <OptionBody q={last.question} i={last.solution} />
                 </>
               )}
             </div>
           )}
-          <KeyHint>Keys: 1–4 pick an option.</KeyHint>
+          <KeyHint>{t('Keys: 1–4 pick an option.')}</KeyHint>
         </>
       }
     />

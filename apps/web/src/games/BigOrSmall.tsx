@@ -1,6 +1,7 @@
 // Big Small: play a card in secret, bet on the opponent's card. Rules page: docs/games/big-or-small.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './BigOrSmall.css';
 
@@ -72,23 +73,23 @@ export default function BigOrSmall({ view: raw }: ScreenProps) {
 
   return (
     <Play
-      top={<GameTop title="Big Small" step={`Round ${view.round} of ${view.rounds}`} score={view.chips} />}
+      top={<GameTop title="Big Small" step={t('Round {n} of {total}', { n: view.round, total: view.rounds })} score={view.chips} />}
       stage={
         <div className="big-or-small-table">
           <div className="big-or-small-chips">
             <span>
-              You <strong>{view.chips}</strong>
+              {t('You')} <strong>{view.chips}</strong>
             </span>
             <span>
               {them} <strong>{view.theirChips}</strong>
             </span>
           </div>
           <div className="big-or-small-dealer">
-            <div className="label">Dealer</div>
+            <div className="label">{t('Dealer')}</div>
             <div className="big-or-small-card">{view.dealer}</div>
           </div>
           <div>
-            <div className="label">{them}&apos;s cards left</div>
+            <div className="label">{t("{name}'s cards left", { name: them })}</div>
             <div className="big-or-small-mini">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((c) => (
                 <span key={c} className={played.has(c) ? 'gone' : ''}>
@@ -99,9 +100,12 @@ export default function BigOrSmall({ view: raw }: ScreenProps) {
           </div>
           {last && (
             <p className="last">
-              Last round (dealer {last.dealer}): {them} played <strong>{last.theirs.card}</strong>, your bet {SIGN[last.mine.guess]}{' '}
+              {t('Last round (dealer {n}): {name} played', { n: last.dealer, name: them })} <strong>{last.theirs.card}</strong>
+              {t(', your bet')} {SIGN[last.mine.guess]}{' '}
               <span className={last.mine.right ? 'big-or-small-ok' : 'big-or-small-bad'}>{fmt(last.mine.change)}</span>
-              {' · '}you played <strong>{last.mine.card}</strong>, {them} bet {SIGN[last.theirs.guess]}{' '}
+              {' · '}
+              {t('you played')} <strong>{last.mine.card}</strong>
+              {t(', {name} bet', { name: them })} {SIGN[last.theirs.guess]}{' '}
               <span className={last.theirs.right ? 'big-or-small-ok' : 'big-or-small-bad'}>{fmt(last.theirs.change)}</span>
             </p>
           )}
@@ -109,10 +113,12 @@ export default function BigOrSmall({ view: raw }: ScreenProps) {
       }
       controls={
         view.chosen ? (
-          <p className="ask">Waiting for {them}…</p>
+          <p className="ask">{t('Waiting for {name}…', { name: them })}</p>
         ) : (
           <>
-            <div className="label">Your card {view.theyChose && <span className="muted">· {them} has chosen</span>}</div>
+            <div className="label">
+              {t('Your card')} {view.theyChose && <span className="muted">· {t('{name} has chosen', { name: them })}</span>}
+            </div>
             <div className="cards">
               {view.hand.map((c) => (
                 <button key={c} type="button" className={`card-btn${card === c ? ' picked' : ''}`} onClick={() => setCard(c)}>
@@ -120,30 +126,28 @@ export default function BigOrSmall({ view: raw }: ScreenProps) {
                 </button>
               ))}
             </div>
-            <div className="label">
-              {them}&apos;s card compared with {view.dealer}
-            </div>
+            <div className="label">{t("{name}'s card compared with {n}", { name: them, n: view.dealer })}</div>
             <div className="row">
               {GUESSES.map((g) => (
                 <button key={g.id} type="button" className={`btn${guess === g.id ? ' primary' : ''}`} onClick={() => setGuess(g.id)}>
-                  {g.label}
+                  {t(g.label)}
                 </button>
               ))}
             </div>
-            <div className="label">Stake</div>
+            <div className="label">{t('Stake')}</div>
             <div className="row">
               {Array.from({ length: view.maxStake + 1 }, (_, i) => i)
                 .filter((n) => n >= least && n <= most)
                 .map((n) => (
                   <button key={n} type="button" className={`btn${bet === n ? ' primary' : ''}`} onClick={() => setStake(n)}>
-                    {n} chip{n === 1 ? '' : 's'}
+                    {n === 1 ? t('{n} chip', { n }) : t('{n} chips', { n })}
                   </button>
                 ))}
             </div>
             <button type="button" className="btn primary" disabled={!ready} onClick={submit}>
-              Play
+              {t('Play')}
             </button>
-            <KeyHint>Keys: 1–9 card, S / E / B bet, ↑ ↓ stake, Enter plays.</KeyHint>
+            <KeyHint>{t('Keys: 1–9 card, S / E / B bet, ↑ ↓ stake, Enter plays.')}</KeyHint>
           </>
         )
       }

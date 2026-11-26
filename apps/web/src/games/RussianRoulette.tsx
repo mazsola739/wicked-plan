@@ -1,5 +1,6 @@
 // Russian Roulette: a paint drum goes round; spend credits to peek, spin or tamper. Rules: docs/games/russian-roulette.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './RussianRoulette.css';
 
@@ -26,13 +27,13 @@ function line(e: { id: string; event: Event }): string {
   const who = nameOf(e.id);
   switch (e.event) {
     case 'spin':
-      return `${who} spun the drum.`;
+      return t('{name} spun the drum.', { name: who });
     case 'click':
-      return `${who} pulled: click, safe.`;
+      return t('{name} pulled: click, safe.', { name: who });
     case 'hit':
-      return `${who} pulled: SPLAT, hit!`;
+      return t('{name} pulled: SPLAT, hit!', { name: who });
     case 'reload':
-      return 'Both charges spent: the drum is reloaded.';
+      return t('Both charges spent: the drum is reloaded.');
   }
 }
 
@@ -80,7 +81,7 @@ function Drum({ v }: { v: RrView }) {
   const shotEvent = [...v.log].reverse().find((e) => e.event === 'hit' || e.event === 'click');
   const splat = v.phase === 'shot' && shotEvent?.event === 'hit';
   return (
-    <svg className={`russian-roulette-drum${splat ? ' splat' : ''}`} viewBox="-60 -60 120 120" role="img" aria-label="The drum">
+    <svg className={`russian-roulette-drum${splat ? ' splat' : ''}`} viewBox="-60 -60 120 120" role="img" aria-label={t('The drum')}>
       <path className="body" d={DRUM_EDGE} />
       {DRUM.map((f) => f.s && <path key={f.d} d={f.d} {...f.s} />)}
       {CHAMBERS.map((c, i) => (
@@ -151,33 +152,41 @@ export default function RussianRoulette({ view }: ScreenProps) {
   let ask = '';
   if (v.phase === 'shot' && last) ask = line(last);
   else if (v.phase === 'turn')
-    ask = v.myTurn ? (v.lives > 0 ? 'Your turn: act, then pull.' : '') : `${actor ? nameOf(actor.id) : ''} has the drum…`;
-  else if (v.phase === 'over') ask = 'The show is over.';
+    ask = v.myTurn
+      ? v.lives > 0
+        ? t('Your turn: act, then pull.')
+        : ''
+      : t('{name} has the drum…', { name: actor ? nameOf(actor.id) : '' });
+  else if (v.phase === 'over') ask = t('The show is over.');
   return (
     <Play
-      top={<GameTop title="Russian Roulette" step={`Pull ${Math.min(v.pulls + 1, v.maxPulls)} of ${v.maxPulls}`} score={v.credits} />}
+      top={
+        <GameTop
+          title="Russian Roulette"
+          step={t('Pull {n} of {total}', { n: Math.min(v.pulls + 1, v.maxPulls), total: v.maxPulls })}
+          score={v.credits}
+        />
+      }
       stage={
         <div className="card">
           <div className="russian-roulette-top">
             <Drum v={v} />
             <div className="russian-roulette-odds">
-              <div className="label">Charges left</div>
+              <div className="label">{t('Charges left')}</div>
               <div className="russian-roulette-charges">
                 {Array.from({ length: 2 }, (_, i) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: two fixed charges
                   <Pip key={i} kind="drop" on={i < v.chargesLeft} />
                 ))}
               </div>
-              <div className="muted small">
-                Table odds: {v.chargesLeft} in {unknown}
-              </div>
+              <div className="muted small">{t('Table odds: {n} in {total}', { n: v.chargesLeft, total: unknown })}</div>
             </div>
           </div>
           <ul className="list">
             {v.seats.map((s) => (
               <li key={s.id} className={s.toAct ? 'russian-roulette-turn' : s.lives === 0 ? 'russian-roulette-out' : ''}>
                 <span>
-                  {nameOf(s.id)} {s.lives === 0 && <span className="muted small">out</span>}
+                  {nameOf(s.id)} {s.lives === 0 && <span className="muted small">{t('out')}</span>}
                 </span>
                 <span className="russian-roulette-lives">
                   {Array.from({ length: 2 }, (_, i) => (
@@ -205,26 +214,27 @@ export default function RussianRoulette({ view }: ScreenProps) {
         <>
           <p className={`ask${v.phase === 'shot' && last?.event === 'hit' ? ' russian-roulette-hit' : ''}`}>{ask}</p>
           <p className="muted small center">
-            Your credits: <strong className="score">{v.credits}</strong> (secret)
+            {t('Your credits:')} <strong className="score">{v.credits}</strong> {t('(secret)')}
             {v.peek !== null && (
               <>
                 {' · '}
-                <strong className={v.peek ? 'russian-roulette-hit' : 'russian-roulette-safe'}>Peek: {v.peek ? 'CHARGED' : 'empty'}</strong>
+                <strong className={v.peek ? 'russian-roulette-hit' : 'russian-roulette-safe'}>
+                  {t('Peek:')} {v.peek ? t('CHARGED') : t('empty')}
+                </strong>
               </>
             )}
           </p>
           <div className="row">
             {(['peek', 'spin', 'tamper'] as const).map((a) => (
               <button key={a} type="button" className="btn" disabled={!v.myTurn || v.credits < COSTS[a]} onClick={() => act(a)}>
-                {a[0]?.toUpperCase()}
-                {a.slice(1)} ({COSTS[a]})
+                {t(`${a[0]?.toUpperCase()}${a.slice(1)}`)} ({COSTS[a]})
               </button>
             ))}
           </div>
           <button type="button" className="btn primary russian-roulette-pull" disabled={!v.myTurn} onClick={() => act('pull')}>
-            Pull
+            {t('Pull')}
           </button>
-          <KeyHint>P peek · S spin · T tamper · Space pull.</KeyHint>
+          <KeyHint>{t('P peek · S spin · T tamper · Space pull.')}</KeyHint>
         </>
       }
     />

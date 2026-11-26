@@ -1,6 +1,7 @@
 // Remove One: show two cards, keep one; the lowest unique card wins. Rules: docs/games/minus-one.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './MinusOne.css';
 
@@ -49,15 +50,18 @@ export default function MinusOne({ view }: ScreenProps) {
   const last = v.log[v.log.length - 1];
   const winnerKept = last?.kept.find(([id]) => id === last.winner)?.[1];
   let ask = '';
-  if (v.phase === 'show') ask = v.myPair ? 'Waiting for the others to show…' : 'Pick two cards to show.';
-  else if (v.phase === 'keep') ask = v.myKept !== null ? `You keep ${v.myKept}. Waiting…` : 'Keep one of your two cards.';
+  if (v.phase === 'show') ask = v.myPair ? t('Waiting for the others to show…') : t('Pick two cards to show.');
+  else if (v.phase === 'keep')
+    ask = v.myKept !== null ? t('You keep {card}. Waiting…', { card: v.myKept }) : t('Keep one of your two cards.');
   else if (last)
     ask = last.winner
-      ? `${nameOf(last.winner)} ${last.winner === 'you' ? 'win' : 'wins'} ${last.pot} with the ${winnerKept}.`
-      : 'No unique card: nobody scores.';
+      ? last.winner === 'you'
+        ? t('You win {pot} with the {card}.', { pot: last.pot, card: winnerKept ?? '' })
+        : t('{name} wins {pot} with the {card}.', { name: nameOf(last.winner), pot: last.pot, card: winnerKept ?? '' })
+      : t('No unique card: nobody scores.');
   return (
     <Play
-      top={<GameTop title="Remove One" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
+      top={<GameTop title="Remove One" step={t('Round {n} of {total}', { n: v.round, total: v.rounds })} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <ul className="list">
@@ -72,7 +76,7 @@ export default function MinusOne({ view }: ScreenProps) {
                     {s.pair ? (
                       s.pair.map((c) => <Card key={c} n={c} small dim={s.kept !== null && s.kept !== c} on={s.kept === c} />)
                     ) : (
-                      <span className="muted small">{s.done ? 'ready' : 'thinking…'}</span>
+                      <span className="muted small">{s.done ? t('ready') : t('thinking…')}</span>
                     )}
                   </span>
                 </li>
@@ -86,7 +90,14 @@ export default function MinusOne({ view }: ScreenProps) {
                 .reverse()
                 .map((l) => (
                   <li key={l.round}>
-                    Round {l.round}: kept {l.kept.map(([, c]) => c).join(', ')} → {l.winner ? `${nameOf(l.winner)} +${l.pot}` : 'no winner'}
+                    {l.winner
+                      ? t('Round {n}: kept {cards} → {name} +{pot}', {
+                          n: l.round,
+                          cards: l.kept.map(([, c]) => c).join(', '),
+                          name: nameOf(l.winner),
+                          pot: l.pot,
+                        })
+                      : t('Round {n}: kept {cards} → no winner', { n: l.round, cards: l.kept.map(([, c]) => c).join(', ') })}
                   </li>
                 ))}
             </ul>
@@ -101,7 +112,7 @@ export default function MinusOne({ view }: ScreenProps) {
               {v.myPair.map((c) => (
                 <button key={c} type="button" className="minus-one-big" onClick={() => keep(c)}>
                   {c}
-                  <small>keep</small>
+                  <small>{t('keep')}</small>
                 </button>
               ))}
             </div>
@@ -126,10 +137,10 @@ export default function MinusOne({ view }: ScreenProps) {
           )}
           {canShow && (
             <button type="button" className="btn primary" disabled={picked.length !== 2} onClick={show}>
-              Show {picked.length === 2 ? `${picked[0]} and ${picked[1]}` : 'two cards'}
+              {picked.length === 2 ? t('Show {a} and {b}', { a: picked[0] ?? '', b: picked[1] ?? '' }) : t('Show two cards')}
             </button>
           )}
-          <KeyHint>Keys 1–9 and 0 (for 10) pick cards, Enter shows.</KeyHint>
+          <KeyHint>{t('Keys 1–9 and 0 (for 10) pick cards, Enter shows.')}</KeyHint>
         </>
       }
     />

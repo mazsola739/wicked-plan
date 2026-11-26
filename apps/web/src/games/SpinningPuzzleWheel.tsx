@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import './SpinningPuzzleWheel.css';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
 
 type Cell = [number, number];
@@ -104,10 +105,10 @@ function PuzzleCells({
 
 function Wheel({ view }: { view: WheelView }) {
   const n = view.puzzles.length;
-  const t = 14;
-  const size = view.grid * t;
+  const u = 14;
+  const size = view.grid * u;
   return (
-    <svg className="drawing spw-wheel" viewBox="-170 -170 340 340" role="img" aria-label="Puzzle wheel">
+    <svg className="drawing spw-wheel" viewBox="-170 -170 340 340" role="img" aria-label={t('Puzzle wheel')}>
       <circle className="spw-rim" r={150} />
       <path className="spw-pointer" d="M -12 -168 L 12 -168 L 0 -146 Z" />
       {view.puzzles
@@ -123,7 +124,7 @@ function Wheel({ view }: { view: WheelView }) {
               style={{ transform: `translate(${x}px, ${y}px)` }}
             >
               <rect className="spw-plate" x={-6} y={-6} width={size + 12} height={size + 12} rx={10} />
-              <PuzzleCells p={p} grid={view.grid} c={t} />
+              <PuzzleCells p={p} grid={view.grid} c={u} />
             </g>
           );
         })}
@@ -131,7 +132,7 @@ function Wheel({ view }: { view: WheelView }) {
         {view.done}/{n}
       </text>
       <text className="spw-center small" y={16}>
-        done
+        {t('done')}
       </text>
     </svg>
   );
@@ -188,7 +189,7 @@ export default function SpinningPuzzleWheel({ view: raw }: ScreenProps) {
     else return false;
     return true;
   });
-  const who = (s: number) => (s === you ? 'You' : nameOf(view.players[s]!));
+  const who = (s: number) => (s === you ? t('You') : nameOf(view.players[s]!));
   const C = 60;
   return (
     <Play
@@ -196,7 +197,7 @@ export default function SpinningPuzzleWheel({ view: raw }: ScreenProps) {
         <>
           <GameTop
             title="Cooperative Puzzle"
-            step={view.yourTurn ? 'Your turn: quick!' : `${who(view.turn)}'s turn · ${view.turnsLeft} turns left`}
+            step={view.yourTurn ? t('Your turn: quick!') : t("{name}'s turn · {n} turns left", { name: who(view.turn), n: view.turnsLeft })}
             score={view.score}
           />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.turnMs} />
@@ -205,7 +206,7 @@ export default function SpinningPuzzleWheel({ view: raw }: ScreenProps) {
       stage={
         <div className="spw-stage">
           <Wheel view={view} />
-          <svg className="drawing spw-board" viewBox={`-6 -6 ${g * C + 12} ${g * C + 12}`} role="img" aria-label="Current puzzle">
+          <svg className="drawing spw-board" viewBox={`-6 -6 ${g * C + 12} ${g * C + 12}`} role="img" aria-label={t('Current puzzle')}>
             <PuzzleCells p={p} grid={g} c={C} ghost={view.yourTurn ? ghost : []} ok={ok} onCell={(x, y) => setAt([x, y])} />
           </svg>
         </div>
@@ -213,7 +214,9 @@ export default function SpinningPuzzleWheel({ view: raw }: ScreenProps) {
       controls={
         <>
           <p className="ask">
-            {view.yourTurn ? 'Place one piece on the shape (or take one back).' : `${who(view.turn)} is on puzzle ${view.current + 1}…`}
+            {view.yourTurn
+              ? t('Place one piece on the shape (or take one back).')
+              : t('{name} is on puzzle {n}…', { name: who(view.turn), n: view.current + 1 })}
           </p>
           <div className="spw-tray">
             {p.pieces.map((cells, i) => {
@@ -240,27 +243,27 @@ export default function SpinningPuzzleWheel({ view: raw }: ScreenProps) {
           </div>
           <div className="row">
             <button type="button" className="btn" disabled={placed} onClick={turn}>
-              ↻ Turn
+              {t('↻ Turn')}
             </button>
             <button type="button" className="btn" disabled={placed} onClick={flip}>
-              ⇋ Flip
+              {t('⇋ Flip')}
             </button>
           </div>
           <div className="row">
             <button type="button" className="btn ghost" disabled={!view.yourTurn} onClick={() => move({ type: 'pass' })}>
-              Pass
+              {t('Pass')}
             </button>
             <button type="button" className="btn primary" disabled={!view.yourTurn || (!placed && !ok)} onClick={act}>
-              {placed ? 'Take back' : 'Place'}
+              {placed ? t('Take back') : t('Place')}
             </button>
           </div>
           {view.last && (
             <p className="muted small center">
-              {view.last.replace(/^(you|bot-\d+):/, (_, id: string) => `${id === 'you' ? 'You' : nameOf(id)}:`)}
+              {t(view.last.replace(/^(you|bot-\d+):/, (_, id: string) => `${id === 'you' ? 'You' : nameOf(id)}:`))}
             </p>
           )}
-          <p className="muted small center">100 per finished shape; all six: +10 per turn left.</p>
-          <KeyHint>Keys: 1–4 pick, R turns, F flips, arrows move, Enter places, P passes.</KeyHint>
+          <p className="muted small center">{t('100 per finished shape; all six: +10 per turn left.')}</p>
+          <KeyHint>{t('Keys: 1–4 pick, R turns, F flips, arrows move, Enter places, P passes.')}</KeyHint>
         </>
       }
     />

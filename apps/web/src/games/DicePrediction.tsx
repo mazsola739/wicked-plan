@@ -1,5 +1,6 @@
 // Triple Dice: three dice, one hidden from you; predict your own rank. Rules: docs/games/dice-prediction.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './DicePrediction.css';
 
@@ -52,7 +53,7 @@ function Die({ n, tone, small }: { n: number | null; tone?: 'secret' | 'blind'; 
   const pips = n === null ? [] : (PIPS[n] ?? []);
   return (
     <span className={`dice-prediction-die${tone ? ` ${tone}` : ''}${small ? ' small' : ''}`}>
-      <svg viewBox="0 0 40 40" role="img" aria-label={n === null ? 'unknown die' : `die ${n}`}>
+      <svg viewBox="0 0 40 40" role="img" aria-label={n === null ? t('unknown die') : t('die {n}', { n })}>
         <path className="edge" d="M6,1 34,1 39,6 39,34 34,39 6,39 1,34 1,6Z" />
         <path fill="#fff" fillOpacity=".5" d="M1,6 6,1 8,4 4,8Z" />
         <path fill="#fff" fillOpacity=".3" d="M6,1 34,1 32,4 8,4Z" />
@@ -87,12 +88,19 @@ export default function DicePrediction({ view }: ScreenProps) {
   const showResult = (v.phase === 'result' || v.phase === 'over') && last;
   const mine = showResult ? last.seats.find((s) => s.id === 'you') : undefined;
   let ask = '';
-  if (v.phase === 'build') ask = v.built ? 'Waiting for the others…' : 'Keep your secret die, or reroll it once?';
-  else if (v.phase === 'predict') ask = v.prediction ? `You predict ${ORD[v.prediction]}. Waiting…` : 'Where will your hand rank?';
-  else if (mine) ask = `Your hand: ${KINDS[mine.kind]}, ranked ${ORD[mine.rank]} (you said ${ORD[mine.prediction]}): +${mine.points}.`;
+  if (v.phase === 'build') ask = v.built ? t('Waiting for the others…') : t('Keep your secret die, or reroll it once?');
+  else if (v.phase === 'predict')
+    ask = v.prediction ? t('You predict {rank}. Waiting…', { rank: t(ORD[v.prediction] ?? '') }) : t('Where will your hand rank?');
+  else if (mine)
+    ask = t('Your hand: {kind}, ranked {rank} (you said {said}): +{points}.', {
+      kind: t(KINDS[mine.kind]),
+      rank: t(ORD[mine.rank] ?? ''),
+      said: t(ORD[mine.prediction] ?? ''),
+      points: mine.points,
+    });
   return (
     <Play
-      top={<GameTop title="Triple Dice" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
+      top={<GameTop title="Triple Dice" step={t('Round {n} of {total}', { n: v.round, total: v.rounds })} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <ul className="list">
@@ -102,9 +110,9 @@ export default function DicePrediction({ view }: ScreenProps) {
                   .map((s) => (
                     <li key={s.id}>
                       <span>
-                        {ORD[s.rank]} {nameOf(s.id)}{' '}
+                        {t(ORD[s.rank] ?? '')} {nameOf(s.id)}{' '}
                         <span className="muted small">
-                          {KINDS[s.kind]} · said {ORD[s.prediction]} · +{s.points}
+                          {t(KINDS[s.kind])} · {t('said {rank}', { rank: t(ORD[s.prediction] ?? '') })} · +{s.points}
                         </span>
                       </span>
                       <span className="dice-prediction-dice">
@@ -119,8 +127,8 @@ export default function DicePrediction({ view }: ScreenProps) {
                     <span>
                       {nameOf(s.id)} <span className="score">{s.score}</span>{' '}
                       <span className="muted small">
-                        {s.rerolled ? 'rerolled · ' : ''}
-                        {s.done ? 'ready' : 'thinking…'}
+                        {s.rerolled ? `${t('rerolled')} · ` : ''}
+                        {s.done ? t('ready') : t('thinking…')}
                       </span>
                     </span>
                     <span className="dice-prediction-dice">
@@ -131,7 +139,7 @@ export default function DicePrediction({ view }: ScreenProps) {
                   </li>
                 ))}
           </ul>
-          <p className="muted small center">Triple › straight › pair › nothing; then the higher sum.</p>
+          <p className="muted small center">{t('Triple › straight › pair › nothing; then the higher sum.')}</p>
         </div>
       }
       controls={
@@ -139,25 +147,25 @@ export default function DicePrediction({ view }: ScreenProps) {
           <div className="dice-prediction-mine">
             <figure>
               <Die n={v.open} />
-              <figcaption>open</figcaption>
+              <figcaption>{t('open')}</figcaption>
             </figure>
             <figure>
               <Die n={v.secret} tone="secret" />
-              <figcaption>secret</figcaption>
+              <figcaption>{t('secret')}</figcaption>
             </figure>
             <figure>
               <Die n={mine ? mine.dice[2] : null} tone="blind" />
-              <figcaption>blind</figcaption>
+              <figcaption>{t('blind')}</figcaption>
             </figure>
           </div>
           <p className="ask">{ask}</p>
           {canBuild && (
             <div className="row">
               <button type="button" className="btn" onClick={() => move({ type: 'keep' })}>
-                Keep
+                {t('Keep')}
               </button>
               <button type="button" className="btn primary" onClick={() => move({ type: 'reroll' })}>
-                Reroll secret
+                {t('Reroll secret')}
               </button>
             </div>
           )}
@@ -165,12 +173,12 @@ export default function DicePrediction({ view }: ScreenProps) {
             <div className="dice-prediction-ranks">
               {Array.from({ length: v.players }, (_, i) => i + 1).map((r) => (
                 <button key={r} type="button" className="key" onClick={() => move({ type: 'predict', rank: r })}>
-                  {ORD[r]}
+                  {t(ORD[r] ?? '')}
                 </button>
               ))}
             </div>
           )}
-          <KeyHint>K keep · R reroll · 1–{v.players} predict your rank.</KeyHint>
+          <KeyHint>{t('K keep · R reroll · 1–{n} predict your rank.', { n: v.players })}</KeyHint>
         </>
       }
     />

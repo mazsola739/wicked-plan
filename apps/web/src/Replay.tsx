@@ -3,6 +3,7 @@
 
 import { useEffect } from 'react';
 import { nameOf } from './games/common';
+import { t } from './i18n';
 import { endReplay } from './play';
 import type { Moment } from './types';
 import './Replay.css';
@@ -32,13 +33,13 @@ export function Replay({ moment }: { moment: Moment }) {
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M11 6 L3 12 L11 18 Z M21 6 L13 12 L21 18 Z" />
           </svg>
-          Replay
+          {t('Replay')}
         </span>
         <strong className="replay-who">{nameOf(moment.by)}</strong>
-        <p className="replay-text">{fill(moment.text)}</p>
+        <p className="replay-text">{fill(t(moment.text))}</p>
         <span className="replay-time" aria-hidden="true" />
       </div>
-      <p className="replay-skip">Tap or press any key to go on</p>
+      <p className="replay-skip">{t('Tap or press any key to go on')}</p>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 // Heavy 13: add cards to coloured stacks without going over 13. Rules: docs/games/heavy-13.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './Heavy13.css';
 
@@ -40,8 +41,8 @@ function Rock({ c, on, onClick, disabled }: { c: number; on?: boolean; onClick?:
 }
 
 function describe(p: PlayT): string {
-  if (p.card === null) return 'passed';
-  return `${COLOURS[col(p.card)]} ${val(p.card)} → ${COLOURS[p.stack]}${p.rainbow ? ' (rainbow)' : ''}`;
+  if (p.card === null) return t('passed');
+  return `${t(COLOURS[col(p.card)] ?? '')} ${val(p.card)} → ${t(COLOURS[p.stack] ?? '')}${p.rainbow ? ` (${t('rainbow')})` : ''}`;
 }
 
 export default function Heavy13({ view }: ScreenProps) {
@@ -74,14 +75,18 @@ export default function Heavy13({ view }: ScreenProps) {
   const showResult = (v.phase === 'result' || v.phase === 'over') && last;
   let ask = '';
   if (v.phase === 'play')
-    ask = v.myPlay ? `You ${describe(v.myPlay)}. Waiting…` : card === null ? 'Pick a card, or pass.' : 'Tap a stack to play it there.';
+    ask = v.myPlay
+      ? t('You {play}. Waiting…', { play: describe(v.myPlay) })
+      : card === null
+        ? t('Pick a card, or pass.')
+        : t('Tap a stack to play it there.');
   else if (last) {
     const mine = last.plays.find(([id]) => id === 'you');
-    ask = mine ? `You ${describe(mine[1])}: ${mine[2] >= 0 ? '+' : ''}${mine[2]}.` : '';
+    ask = mine ? t('You {play}: {points}.', { play: describe(mine[1]), points: `${mine[2] >= 0 ? '+' : ''}${mine[2]}` }) : '';
   }
   return (
     <Play
-      top={<GameTop title="Heavy 13" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
+      top={<GameTop title="Heavy 13" step={t('Round {n} of {total}', { n: v.round, total: v.rounds })} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <div className="heavy-13-stacks">
@@ -99,7 +104,7 @@ export default function Heavy13({ view }: ScreenProps) {
                 >
                   <span className="heavy-13-fill" style={{ height: `${(Math.min(total, 13) / 13) * 100}%` }} />
                   <strong>{total}</strong>
-                  <small>{log ? (log.outcome === 'stays' ? `+${log.added}` : log.outcome) : `${13 - total} left`}</small>
+                  <small>{log ? (log.outcome === 'stays' ? `+${log.added}` : t(log.outcome)) : t('{n} left', { n: 13 - total })}</small>
                 </button>
               );
             })}
@@ -114,10 +119,10 @@ export default function Heavy13({ view }: ScreenProps) {
                     <span className="muted small">
                       {play
                         ? `${describe(play[1])} ${play[2] >= 0 ? '+' : ''}${play[2]}`
-                        : `${s.cards} cards · ${s.passes} passes${s.rainbow ? ' · chip' : ''}`}
+                        : `${t('{n} cards · {p} passes', { n: s.cards, p: s.passes })}${s.rainbow ? ` · ${t('chip')}` : ''}`}
                     </span>
                   </span>
-                  {v.phase === 'play' && <span className="muted small">{s.done ? 'ready' : 'thinking…'}</span>}
+                  {v.phase === 'play' && <span className="muted small">{s.done ? t('ready') : t('thinking…')}</span>}
                 </li>
               );
             })}
@@ -135,7 +140,7 @@ export default function Heavy13({ view }: ScreenProps) {
           </div>
           <div className="row">
             <button type="button" className="btn" disabled={!canPlay || v.passes === 0} onClick={pass}>
-              Pass ({v.passes} left)
+              {t('Pass ({n} left)', { n: v.passes })}
             </button>
             <button
               type="button"
@@ -143,11 +148,13 @@ export default function Heavy13({ view }: ScreenProps) {
               disabled={!canPlay || card === null}
               onClick={() => card !== null && playOn(col(card))}
             >
-              Play on its colour
+              {t('Play on its colour')}
             </button>
           </div>
-          <p className="muted small center">{v.rainbow ? 'Rainbow chip ready: tap another stack to use it.' : 'Rainbow chip used.'}</p>
-          <KeyHint>1–8 pick a card · Q W E R stack · Enter its own stack · P pass.</KeyHint>
+          <p className="muted small center">
+            {v.rainbow ? t('Rainbow chip ready: tap another stack to use it.') : t('Rainbow chip used.')}
+          </p>
+          <KeyHint>{t('1–8 pick a card · Q W E R stack · Enter its own stack · P pass.')}</KeyHint>
         </>
       }
     />

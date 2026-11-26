@@ -1,6 +1,7 @@
 // Unknown: race to the centre and work out each colour's secret rule. Rules: docs/games/hidden-rules-race.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './HiddenRulesRace.css';
 
@@ -37,7 +38,7 @@ const KEYS: Record<string, Dir> = { ArrowUp: 'up', ArrowRight: 'right', ArrowDow
 /** The goal: a faceted star, every arm cut along its ridge and lit from the top left. */
 function Star() {
   return (
-    <svg viewBox="0 0 40 40" className="hrr-star" role="img" aria-label="goal">
+    <svg viewBox="0 0 40 40" className="hrr-star" role="img" aria-label={t('goal')}>
       <path d="M20,2 24.7,14.5 38.1,15.1 27.6,23.5 31.2,36.4 20,29 8.8,36.4 12.4,23.5 1.9,15.1 15.3,14.5Z" />
       <path fill="#fff" fillOpacity=".42" d="M1.9,15.1 15.3,14.5 20,21Z" />
       <path fill="#fff" fillOpacity=".34" d="M20,2 15.3,14.5 20,21Z" />
@@ -54,13 +55,13 @@ function Star() {
 }
 
 function describe(s: Step): string {
-  if (!s.dir) return 'stayed (no choice)';
+  if (!s.dir) return t('stayed (no choice)');
   const dx = s.to[0] - s.from[0];
   const dy = s.to[1] - s.from[1];
-  if (dx === 0 && dy === 0) return `${ARROW[s.dir]} · did not move`;
+  if (dx === 0 && dy === 0) return t('{arrow} · did not move', { arrow: ARROW[s.dir] });
   const n = Math.abs(dx) + Math.abs(dy);
   const way = dx > 0 ? '→' : dx < 0 ? '←' : dy > 0 ? '↓' : '↑';
-  return `${ARROW[s.dir]} · moved ${n} ${way}`;
+  return t('{arrow} · moved {n} {way}', { arrow: ARROW[s.dir], n, way });
 }
 
 export default function HiddenRulesRace({ view }: ScreenProps) {
@@ -83,7 +84,7 @@ export default function HiddenRulesRace({ view }: ScreenProps) {
       top={
         <GameTop
           title="Unknown"
-          step={v.phase === 'choose' ? `Round ${v.round} of ${v.maxRounds}` : 'The rules revealed'}
+          step={v.phase === 'choose' ? t('Round {n} of {total}', { n: v.round, total: v.maxRounds }) : t('The rules revealed')}
           score={v.score}
         />
       }
@@ -113,8 +114,10 @@ export default function HiddenRulesRace({ view }: ScreenProps) {
             <>
               <p className="muted small center">
                 {v.myChoice
-                  ? `You chose ${ARROW[v.myChoice]}. Waiting for the others…`
-                  : `You stand on ${me ? v.colours[v.board[me.pos[1] * v.size + me.pos[0]] ?? 0] : '?'}. Pick a direction.`}
+                  ? t('You chose {arrow}. Waiting for the others…', { arrow: ARROW[v.myChoice] })
+                  : t('You stand on {colour}. Pick a direction.', {
+                      colour: me ? t(v.colours[v.board[me.pos[1] * v.size + me.pos[0]] ?? 0] ?? '?') : '?',
+                    })}
               </p>
               <div className="hrr-pad">
                 {(['up', 'left', 'right', 'down'] as Dir[]).map((d) => (
@@ -129,28 +132,30 @@ export default function HiddenRulesRace({ view }: ScreenProps) {
                   </button>
                 ))}
               </div>
-              <KeyHint>Arrow keys choose a direction.</KeyHint>
+              <KeyHint>{t('Arrow keys choose a direction.')}</KeyHint>
             </>
           ) : (
             <button type="button" className="btn primary" onClick={() => move({ type: 'close' })}>
-              See results
+              {t('See results')}
             </button>
           )}
           <div>
-            <div className="label">Colours {v.phase === 'choose' ? '(tap to note your guess)' : ''}</div>
+            <div className="label">
+              {t('Colours')} {v.phase === 'choose' ? t('(tap to note your guess)') : ''}
+            </div>
             <ul className="list hrr-notes">
               {v.colours.map((name, c) => {
                 const known = knownOf(c);
                 return (
                   <li key={name}>
                     <span>
-                      <span className={`hrr-swatch hrr-${name}`} /> {name}
+                      <span className={`hrr-swatch hrr-${name}`} /> {t(name)}
                     </span>
                     {known ? (
-                      <strong>{known}</strong>
+                      <strong>{t(known)}</strong>
                     ) : (
                       <button type="button" className="btn small ghost" onClick={() => cycle(c)}>
-                        {(notes[c] ?? -1) >= 0 ? `${v.ruleNames[notes[c] ?? 0]}?` : '?'}
+                        {(notes[c] ?? -1) >= 0 ? `${t(v.ruleNames[notes[c] ?? 0] ?? '')}?` : '?'}
                       </button>
                     )}
                   </li>
@@ -160,7 +165,7 @@ export default function HiddenRulesRace({ view }: ScreenProps) {
           </div>
           {last.length > 0 && (
             <div>
-              <div className="label">Last round</div>
+              <div className="label">{t('Last round')}</div>
               <ul className="list hrr-log">
                 {last.map((s) => (
                   <li key={s.player} className={s.player === 'you' ? 'me' : ''}>

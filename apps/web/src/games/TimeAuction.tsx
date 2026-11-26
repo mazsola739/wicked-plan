@@ -1,6 +1,7 @@
 // Time Auction: hold the button to bid time from your bank. Rules: docs/games/time-auction.md
 
 import { useContext, useEffect, useRef } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, PreviewContext, type ScreenProps, TimerBar } from './common';
 import './TimeAuction.css';
 
@@ -48,19 +49,27 @@ function status(v: TaView): string {
   const last = v.log[v.log.length - 1];
   switch (v.phase) {
     case 'ready':
-      return v.bankMs === 0 ? 'Your bank is empty: you sit this one out.' : v.holding ? 'Keep holding…' : 'Press and hold the button.';
+      return v.bankMs === 0
+        ? t('Your bank is empty: you sit this one out.')
+        : v.holding
+          ? t('Keep holding…')
+          : t('Press and hold the button.');
     case 'countdown':
-      return v.holding ? `Starting in ${Math.ceil(v.timeLeftMs / 1000)}… let go now to pass.` : 'You pass this round.';
+      return v.holding ? t('Starting in {n}… let go now to pass.', { n: Math.ceil(v.timeLeftMs / 1000) }) : t('You pass this round.');
     case 'bidding':
       return v.holding
-        ? `Bidding: ${secs(v.heldMs)}`
+        ? t('Bidding: {time}', { time: secs(v.heldMs) })
         : v.bidding
-          ? `You let go at ${secs(v.heldMs)}. Waiting…`
-          : 'You sit this one out. Waiting…';
+          ? t('You let go at {time}. Waiting…', { time: secs(v.heldMs) })
+          : t('You sit this one out. Waiting…');
     case 'result':
     case 'over':
       if (!last) return '';
-      return last.winner ? `${nameOf(last.winner)} ${last.winner === 'you' ? 'win' : 'wins'} the token.` : 'Nobody wins the token.';
+      return last.winner
+        ? last.winner === 'you'
+          ? t('You win the token.')
+          : t('{name} wins the token.', { name: nameOf(last.winner) })
+        : t('Nobody wins the token.');
   }
 }
 
@@ -97,14 +106,14 @@ export default function TimeAuction({ view }: ScreenProps) {
     };
   });
   const me = v.seats.find((s) => s.id === 'you');
-  const step = v.phase === 'over' ? 'Final round' : `Round ${v.round} of ${v.rounds}`;
+  const step = v.phase === 'over' ? t('Final round') : t('Round {n} of {total}', { n: v.round, total: v.rounds });
   return (
     <Play
       top={
         <>
           <GameTop title="Time Auction" step={step} score={me?.tokens ?? 0} />
           {v.phase === 'bidding' ? (
-            <div className="timer time-auction-live">Clock running</div>
+            <div className="timer time-auction-live">{t('Clock running')}</div>
           ) : (
             v.phaseMs > 0 && <TimerBar leftMs={v.timeLeftMs} totalMs={v.phaseMs} />
           )}
@@ -117,17 +126,17 @@ export default function TimeAuction({ view }: ScreenProps) {
               <li key={s.id}>
                 <span>
                   {nameOf(s.id)}
-                  {s.outOfTime && <span className="muted small"> · out of time</span>}
+                  {s.outOfTime && <span className="muted small"> · {t('out of time')}</span>}
                   {s.ready !== null && (
-                    <span className={`time-auction-dot${s.ready ? ' on' : ''}`} title={s.ready ? 'holding' : 'not yet'} />
+                    <span className={`time-auction-dot${s.ready ? ' on' : ''}`} title={s.ready ? t('holding') : t('not yet')} />
                   )}
                 </span>
-                <span className="time-auction-tokens" title="tokens">
+                <span className="time-auction-tokens" title={t('tokens')}>
                   {Array.from({ length: s.tokens }, (_, i) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: identical tokens
                     <Token key={i} />
                   ))}
-                  {s.tokens === 0 && <span className="muted small">no tokens</span>}
+                  {s.tokens === 0 && <span className="muted small">{t('no tokens')}</span>}
                 </span>
               </li>
             ))}
@@ -139,7 +148,11 @@ export default function TimeAuction({ view }: ScreenProps) {
                 .reverse()
                 .map((l) => (
                   <li key={l.round}>
-                    Round {l.round}: {l.winner ? `${nameOf(l.winner)} won` : 'no winner'} ({l.bidders} bid)
+                    {l.winner === 'you'
+                      ? t('Round {n}: You won ({b} bid)', { n: l.round, b: l.bidders })
+                      : l.winner
+                        ? t('Round {n}: {name} won ({b} bid)', { n: l.round, name: nameOf(l.winner), b: l.bidders })
+                        : t('Round {n}: no winner ({b} bid)', { n: l.round, b: l.bidders })}
                   </li>
                 ))}
             </ol>
@@ -149,14 +162,16 @@ export default function TimeAuction({ view }: ScreenProps) {
       controls={
         <>
           <div className="time-auction-bank">
-            <div className="label">Your bank</div>
+            <div className="label">{t('Your bank')}</div>
             <div className="time-auction-bar">
               <div style={{ width: `${(100 * v.bankMs) / v.startBankMs}%` }} />
               <span>{secs(v.bankMs)}</span>
             </div>
           </div>
           <p className="ask">{status(v)}</p>
-          {(v.phase === 'result' || v.phase === 'over') && v.lastHeldMs > 0 && <p className="last">You held {secs(v.lastHeldMs)}.</p>}
+          {(v.phase === 'result' || v.phase === 'over') && v.lastHeldMs > 0 && (
+            <p className="last">{t('You held {time}.', { time: secs(v.lastHeldMs) })}</p>
+          )}
           <button
             type="button"
             className={`time-auction-btn${v.holding ? ' held' : ''}`}
@@ -169,9 +184,9 @@ export default function TimeAuction({ view }: ScreenProps) {
             onPointerCancel={release}
             onContextMenu={(e) => e.preventDefault()}
           >
-            {v.holding ? 'HOLDING' : 'HOLD'}
+            {v.holding ? t('HOLDING') : t('HOLD')}
           </button>
-          <KeyHint>Or hold Space.</KeyHint>
+          <KeyHint>{t('Or hold Space.')}</KeyHint>
         </>
       }
     />

@@ -2,6 +2,7 @@
 // Rules page: docs/games/polyomino-territory.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import './PolyominoTerritory.css';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
@@ -119,18 +120,18 @@ export default function PolyominoTerritory({ view: raw }: ScreenProps) {
   });
   const lastCells = new Set(view.last?.cells.map(([x, y]) => `${x},${y}`));
   const cells = Array.from({ length: n * n }, (_, i) => ({ x: i % n, y: Math.floor(i / n), o: view.board[i] ?? -1 }));
-  const who = (s: number) => (s === you ? 'You' : nameOf(view.players[s]!));
+  const who = (s: number) => (s === you ? t('You') : nameOf(view.players[s]!));
   return (
     <Play
       top={
         <GameTop
           title="Laying Grass"
-          step={view.yourTurn ? (view.encore ? 'Encore: place again!' : 'Your turn') : `${who(view.turn)} to move`}
+          step={view.yourTurn ? (view.encore ? t('Encore: place again!') : t('Your turn')) : t('{name} to move', { name: who(view.turn) })}
           score={(view.squares[you] ?? 0) * 10}
         />
       }
       stage={
-        <svg className="drawing pt-board" viewBox={`-2 -2 ${n * C + 4} ${n * C + 4}`} role="img" aria-label="Territory board">
+        <svg className="drawing pt-board" viewBox={`-2 -2 ${n * C + 4} ${n * C + 4}`} role="img" aria-label={t('Territory board')}>
           {cells.map((c) => (
             // biome-ignore lint/a11y/useSemanticElements: an SVG cell cannot be a <button>
             <rect
@@ -169,7 +170,9 @@ export default function PolyominoTerritory({ view: raw }: ScreenProps) {
       controls={
         <>
           <p className="ask">
-            {view.yourTurn ? 'Pick a piece, tap the board to put it there, then Place.' : `${who(view.turn)} is placing…`}
+            {view.yourTurn
+              ? t('Pick a piece, tap the board to put it there, then Place.')
+              : t('{name} is placing…', { name: who(view.turn) })}
           </p>
           <div className="pt-hand">
             {view.hand.map((p, i) => (
@@ -186,19 +189,19 @@ export default function PolyominoTerritory({ view: raw }: ScreenProps) {
           </div>
           <div className="row">
             <button type="button" className="btn" onClick={turn}>
-              ↻ Turn
+              ↻ {t('Turn')}
             </button>
             <button type="button" className="btn" onClick={flip}>
-              ⇋ Flip
+              ⇋ {t('Flip')}
             </button>
             {(view.leaps[you] ?? 0) > 0 && (
               <button type="button" className={`btn${leap ? ' pt-leap-on' : ''}`} onClick={() => setLeap((v) => !v)}>
-                ↗ Leap ({view.leaps[you]})
+                ↗ {t('Leap')} ({view.leaps[you]})
               </button>
             )}
           </div>
           <button type="button" className="btn primary" disabled={!view.yourTurn || !ok} onClick={place}>
-            {at && !ok && view.yourTurn ? (free ? 'Must touch your squares' : 'Squares taken') : 'Place'}
+            {at && !ok && view.yourTurn ? (free ? t('Must touch your squares') : t('Squares taken')) : t('Place')}
           </button>
           <ul className="list">
             {view.players.map((p, s) => (
@@ -207,12 +210,12 @@ export default function PolyominoTerritory({ view: raw }: ScreenProps) {
                   <span className={`pt-swatch s${s}`} /> {who(s)}
                   {(view.leaps[s] ?? 0) > 0 && <span className="muted small"> · ↗{view.leaps[s]}</span>}
                 </span>
-                <span className="score">{view.squares[s]} sq</span>
+                <span className="score">{t('{n} sq', { n: view.squares[s] ?? 0 })}</span>
               </li>
             ))}
           </ul>
-          <p className="muted small center">⟳ encore: place again · ↗ leap: one later piece anywhere. 10 points per square.</p>
-          <KeyHint>Keys: 1–3 pick, R turns, F flips, arrows move, L leap, Enter places.</KeyHint>
+          <p className="muted small center">{t('⟳ encore: place again · ↗ leap: one later piece anywhere. 10 points per square.')}</p>
+          <KeyHint>{t('Keys: 1–3 pick, R turns, F flips, arrows move, L leap, Enter places.')}</KeyHint>
         </>
       }
     />

@@ -1,6 +1,7 @@
 // Four Player Three in a Row: three in a row for three, against the Shadow. Rules page: docs/games/hidden-fourth-player.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './HiddenFourthPlayer.css';
 
@@ -46,13 +47,15 @@ export default function HiddenFourthPlayer({ view: raw }: ScreenProps) {
 
   const status = view.yourTurn
     ? danger.size > 0
-      ? `Your stone. The Shadow threatens ${danger.size} square${danger.size > 1 ? 's' : ''}!`
-      : 'Your stone: build lines, keep the Shadow down.'
-    : `${nameOf(view.players[view.turn] ?? '')} is placing…`;
+      ? danger.size > 1
+        ? t('Your stone. The Shadow threatens {n} squares!', { n: danger.size })
+        : t('Your stone. The Shadow threatens {n} square!', { n: danger.size })
+      : t('Your stone: build lines, keep the Shadow down.')
+    : t('{name} is placing…', { name: nameOf(view.players[view.turn] ?? '') });
 
   return (
     <Play
-      top={<GameTop title="Four Player Three in a Row" step={`Round ${view.round}`} score={view.lines[view.me] ?? 0} />}
+      top={<GameTop title="Four Player Three in a Row" step={t('Round {n}', { n: view.round })} score={view.lines[view.me] ?? 0} />}
       stage={
         <div className="hidden-fourth-player-board" style={{ gridTemplateColumns: `repeat(${n}, 1fr)` }}>
           {view.board
@@ -86,24 +89,23 @@ export default function HiddenFourthPlayer({ view: raw }: ScreenProps) {
                 <span>
                   <i className="hidden-fourth-player-dot" style={{ background: COLOURS[i + 1] }} /> {nameOf(p)}
                 </span>
-                <span className="score">
-                  {view.lines[i]} line{view.lines[i] === 1 ? '' : 's'}
-                </span>
+                <span className="score">{view.lines[i] === 1 ? t('{n} line', { n: 1 }) : t('{n} lines', { n: view.lines[i] ?? 0 })}</span>
               </li>
             ))}
             <li>
               <span>
-                <i className="hidden-fourth-player-dot shadow" /> The Shadow
+                <i className="hidden-fourth-player-dot shadow" /> {t('The Shadow')}
               </span>
-              <span className="muted small">plays after the three of you</span>
+              <span className="muted small">{t('plays after the three of you')}</span>
             </li>
           </ul>
           <p className={`ask${danger.size > 0 ? ' hidden-fourth-player-alert' : ''}`}>{status}</p>
           <p className="muted small center">
-            Lines score 100 each, and everyone gets +300 if the board fills up. If the Shadow makes three in a row, the game ends and lines
-            are worth half.
+            {t(
+              'Lines score 100 each, and everyone gets +300 if the board fills up. If the Shadow makes three in a row, the game ends and lines are worth half.',
+            )}
           </p>
-          <KeyHint>Arrow keys move, Enter places.</KeyHint>
+          <KeyHint>{t('Arrow keys move, Enter places.')}</KeyHint>
         </>
       }
     />

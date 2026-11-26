@@ -1,6 +1,7 @@
 // Count the Cubes, Count the Rectangles and Equation Pyramid: rounds of one question.
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import type { CubesPuzzle, EquationAnswer, EquationPuzzle, Op, QuizView, RectanglesPuzzle } from '../types';
 import { GameTop, KeyHint, move, NumberPad, Play, RoundDots, TimerBar, useKeys } from './common';
 
@@ -19,7 +20,7 @@ function QuizFrame<P, A>({
     <Play
       top={
         <>
-          <GameTop title={title} step={`Round ${view.round} of ${view.rounds}`} score={view.score} />
+          <GameTop title={title} step={t('Round {n} of {total}', { n: view.round, total: view.rounds })} score={view.score} />
           <RoundDots results={view.history.map((h) => h.correct)} total={view.rounds} />
           {view.roundTimeMs > 0 && <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundTimeMs} />}
         </>
@@ -38,10 +39,13 @@ function QuizFrame<P, A>({
 function LastRound<P, A>({ history }: { history: QuizView<P, A>['history'] }) {
   const last = history[history.length - 1];
   if (!last) return null;
-  const show = (a: A | null) => (a === null ? 'no answer' : typeof a === 'number' ? String(a) : formatEquation(a as EquationAnswer));
+  const show = (a: A | null) => (a === null ? t('no answer') : typeof a === 'number' ? String(a) : formatEquation(a as EquationAnswer));
   return (
     <p className={`last ${last.correct ? 'ok' : 'bad'}`}>
-      Last round: {last.correct ? `right, +${last.points}` : `${show(last.given)} – the answer: ${show(last.solution)}`}
+      {t('Last round:')}{' '}
+      {last.correct
+        ? t('right, +{n}', { n: last.points })
+        : t('{given} – the answer: {answer}', { given: show(last.given), answer: show(last.solution) })}
     </p>
   );
 }
@@ -75,7 +79,7 @@ function CubesDrawing({ puzzle }: { puzzle: CubesPuzzle }) {
   const top = -maxH * C - 4;
   const bottom = (puzzle.cols + puzzle.rows) * B + 4;
   return (
-    <svg className="drawing" viewBox={`${left} ${top} ${right - left} ${bottom - top}`} role="img" aria-label="Cubes">
+    <svg className="drawing" viewBox={`${left} ${top} ${right - left} ${bottom - top}`} role="img" aria-label={t('Cubes')}>
       {cubes.map(([x, y, z]) => (
         <g key={`${x}-${y}-${z}`} className="cube">
           <polygon
@@ -119,7 +123,7 @@ export function CubesGame({ view }: { view: QuizView<CubesPuzzle, number> }) {
       stage={view.puzzle && <CubesDrawing puzzle={view.puzzle} />}
       controls={
         <>
-          <p className="ask">How many cubes are there?</p>
+          <p className="ask">{t('How many cubes are there?')}</p>
           <NumberPad round={view.round} onSubmit={(value) => move({ type: 'answer', value })} />
         </>
       }
@@ -149,7 +153,7 @@ function RectanglesDrawing({ puzzle }: { puzzle: RectanglesPuzzle }) {
       className="drawing"
       viewBox={`${-pad} ${-pad} ${puzzle.cols * U + 2 * pad} ${puzzle.rows * U + 2 * pad}`}
       role="img"
-      aria-label="Figure"
+      aria-label={t('Figure')}
     >
       {lines.map(([x1, y1, x2, y2]) => (
         <line key={`${x1}-${y1}-${x2}-${y2}`} className="segment" x1={x1 * U} y1={y1 * U} x2={x2 * U} y2={y2 * U} />
@@ -166,7 +170,7 @@ export function RectanglesGame({ view }: { view: QuizView<RectanglesPuzzle, numb
       stage={view.puzzle && <RectanglesDrawing puzzle={view.puzzle} />}
       controls={
         <>
-          <p className="ask">How many rectangles are there? (Squares count too.)</p>
+          <p className="ask">{t('How many rectangles are there? (Squares count too.)')}</p>
           <NumberPad round={view.round} onSubmit={(value) => move({ type: 'answer', value })} />
         </>
       }
@@ -217,7 +221,7 @@ export function EquationGame({ view }: { view: QuizView<EquationPuzzle, Equation
         p && (
           <div className="equation">
             <div className="target">
-              Target: <strong>{p.target}</strong>
+              {t('Target:')} <strong>{p.target}</strong>
             </div>
             <div className="expr">
               <span className="paren">(</span>
@@ -238,7 +242,7 @@ export function EquationGame({ view }: { view: QuizView<EquationPuzzle, Equation
       controls={
         p && (
           <>
-            <p className="muted small center">Tap three cards; tap an operator to change it.</p>
+            <p className="muted small center">{t('Tap three cards; tap an operator to change it.')}</p>
             <div className="cards">
               {p.cards.map((c, i) => (
                 <button
@@ -254,9 +258,9 @@ export function EquationGame({ view }: { view: QuizView<EquationPuzzle, Equation
               ))}
             </div>
             <button type="button" className="btn primary" disabled={picks.length !== 3} onClick={submit}>
-              Submit
+              {t('Submit')}
             </button>
-            <KeyHint>Keys: 1–9, 0 pick the cards in order, + − * set the operators, Enter submits.</KeyHint>
+            <KeyHint>{t('Keys: 1–9, 0 pick the cards in order, + − * set the operators, Enter submits.')}</KeyHint>
           </>
         )
       }

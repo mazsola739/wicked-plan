@@ -1,6 +1,7 @@
 // Hexagon, The Knight's Tour and Divine Test.
 
 import { useRef, useState } from 'react';
+import { t } from '../i18n';
 import type { HexView, KnightView, MagicView } from '../types';
 import { GameTop, KeyHint, move, Play, RoundDots, TimerBar, useKeys } from './common';
 
@@ -45,7 +46,11 @@ export function HexagonGame({ view }: { view: HexView }) {
     <Play
       top={
         <>
-          <GameTop title="Hexagon" step={view.studying ? 'Memorise!' : `Round ${view.round} of ${view.rounds}`} score={view.score} />
+          <GameTop
+            title="Hexagon"
+            step={view.studying ? t('Memorise!') : t('Round {n} of {total}', { n: view.round, total: view.rounds })}
+            score={view.score}
+          />
           <RoundDots results={view.history.map((h) => h.correct)} total={view.rounds} />
           {view.studying && <TimerBar leftMs={view.timeLeftMs} totalMs={view.phaseTimeMs} />}
         </>
@@ -55,7 +60,7 @@ export function HexagonGame({ view }: { view: HexView }) {
           className="drawing hex"
           viewBox={`${-3 * w} ${-3.2 * R * 1.5} ${6 * w} ${6.4 * R * 1.5}`}
           role="img"
-          aria-label="Hexagon board"
+          aria-label={t('Hexagon board')}
         >
           {HEX_CELLS.map(([q, r], i) => {
             const cx = w * (q + r / 2);
@@ -84,26 +89,28 @@ export function HexagonGame({ view }: { view: HexView }) {
         <>
           {view.target !== null && (
             <div className="target">
-              Target: <strong>{view.target}</strong>
+              {t('Target:')} <strong>{view.target}</strong>
             </div>
           )}
           {view.studying ? (
             <button type="button" className="btn primary" onClick={() => move({ type: 'ready' })}>
-              Ready
+              {t('Ready')}
             </button>
           ) : (
             <button type="button" className="btn primary" disabled={picked.length !== 3} onClick={submit}>
-              Submit
+              {t('Submit')}
             </button>
           )}
-          <p className="muted small center">Three neighbouring cells in a straight line that add up to the target.</p>
+          <p className="muted small center">{t('Three neighbouring cells in a straight line that add up to the target.')}</p>
           {last && (
             <p className={`last ${last.correct ? 'ok' : 'bad'}`}>
-              Last round:{' '}
-              {last.correct ? `right, +${last.points}` : `the answer: ${last.solution.map((i) => String.fromCharCode(65 + i)).join('')}`}
+              {t('Last round:')}{' '}
+              {last.correct
+                ? t('right, +{n}', { n: last.points })
+                : t('the answer: {answer}', { answer: last.solution.map((i) => String.fromCharCode(65 + i)).join('') })}
             </p>
           )}
-          <KeyHint>Keys: letters A–S pick cells, Enter submits.</KeyHint>
+          <KeyHint>{t('Keys: letters A–S pick cells, Enter submits.')}</KeyHint>
         </>
       }
     />
@@ -124,7 +131,7 @@ function Knight() {
       height="1.2em"
       fill="currentColor"
       role="img"
-      aria-label="knight"
+      aria-label={t('knight')}
       style={{ display: 'block', margin: 'auto' }}
     >
       <path d="M22,2.5 24.5,6 27,9 30.5,16 31.5,25 30,32 11,32 13.5,26.5 15,21.5 10.5,23.5 6,22.5 5.5,18.5 12,11 18.5,6.5Z" />
@@ -156,7 +163,7 @@ export function KnightGame({ view }: { view: KnightView }) {
         <>
           <GameTop
             title="The Knight's Tour"
-            step={`Board ${view.board} of ${view.boards} · ${view.size}×${view.size}`}
+            step={`${t('Board {n} of {total}', { n: view.board, total: view.boards })} · ${view.size}×${view.size}`}
             score={view.score}
           />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.totalTimeMs} />
@@ -187,16 +194,18 @@ export function KnightGame({ view }: { view: KnightView }) {
       controls={
         <>
           <p className="muted small center">
-            {view.path.length === 0 ? 'Put the knight on any square.' : `${view.path.length} / ${view.size * view.size} squares`}
+            {view.path.length === 0
+              ? t('Put the knight on any square.')
+              : t('{n} / {total} squares', { n: view.path.length, total: view.size * view.size })}
           </p>
-          {view.stuck && <p className="last bad">Stuck: no free jump.</p>}
+          {view.stuck && <p className="last bad">{t('Stuck: no free jump.')}</p>}
           <button
             type="button"
             className={`btn${view.stuck ? ' primary' : ''}`}
             disabled={view.path.length === 0}
             onClick={() => move({ type: 'restart' })}
           >
-            Restart this board
+            {t('Restart this board')}
           </button>
         </>
       }
@@ -227,17 +236,17 @@ export function MagicGame({ view }: { view: MagicView }) {
   // Desktop: type a number (two digits when needed), arrows move, Backspace clears, Enter checks.
   const typed = useRef({ digits: '', timer: 0 });
   useKeys((key) => {
-    const t = typed.current;
+    const typing = typed.current;
     if (/^[0-9]$/.test(key) && sel !== null) {
-      window.clearTimeout(t.timer);
-      t.digits += key;
-      const value = Number(t.digits);
-      if (t.digits.length === 2 || value * 10 > max) {
-        t.digits = '';
+      window.clearTimeout(typing.timer);
+      typing.digits += key;
+      const value = Number(typing.digits);
+      if (typing.digits.length === 2 || value * 10 > max) {
+        typing.digits = '';
         if (value >= 1 && value <= max) set(value);
       } else {
-        t.timer = window.setTimeout(() => {
-          t.digits = '';
+        typing.timer = window.setTimeout(() => {
+          typing.digits = '';
           if (value >= 1) set(value);
         }, 700);
       }
@@ -253,7 +262,11 @@ export function MagicGame({ view }: { view: MagicView }) {
     <Play
       top={
         <>
-          <GameTop title="Divine Test" step={`Board ${view.board} of ${view.boards} · ${n}×${n}`} score={view.score} />
+          <GameTop
+            title="Divine Test"
+            step={`${t('Board {n} of {total}', { n: view.board, total: view.boards })} · ${n}×${n}`}
+            score={view.score}
+          />
           <RoundDots results={view.solved} total={view.boards} />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.boardTimeMs} />
         </>
@@ -277,7 +290,7 @@ export function MagicGame({ view }: { view: MagicView }) {
       controls={
         <>
           <p className="muted small center">
-            Use 1–{max} once each; every row, column and diagonal adds up to <strong>{view.magicSum}</strong>.
+            {t('Use 1–{max} once each; every row, column and diagonal adds up to', { max })} <strong>{view.magicSum}</strong>.
           </p>
           <div className="numbers" style={{ gridTemplateColumns: `repeat(${Math.min(n + 2, 7)}, 1fr)` }}>
             {Array.from({ length: max }, (_, k) => k + 1).map((v) => (
@@ -289,16 +302,16 @@ export function MagicGame({ view }: { view: MagicView }) {
               ⌫
             </button>
           </div>
-          {view.wrongTries > 0 && <p className="last bad">Not right yet ({view.wrongTries}×).</p>}
+          {view.wrongTries > 0 && <p className="last bad">{t('Not right yet ({n}×).', { n: view.wrongTries })}</p>}
           <div className="row">
             <button type="button" className="btn ghost" onClick={() => move({ type: 'skip' })}>
-              Give up
+              {t('Give up')}
             </button>
             <button type="button" className="btn primary" disabled={!full} onClick={() => move({ type: 'submit' })}>
-              Check
+              {t('Check')}
             </button>
           </div>
-          <KeyHint>Keys: type a number, arrows move, Backspace clears, Enter checks.</KeyHint>
+          <KeyHint>{t('Keys: type a number, arrows move, Backspace clears, Enter checks.')}</KeyHint>
         </>
       }
     />

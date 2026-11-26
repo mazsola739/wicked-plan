@@ -1,6 +1,7 @@
 // Spot the Difference: tap what changed, faster than the rivals. Rules page: docs/games/find-the-differences.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
 import './FindTheDifferences.css';
 
@@ -217,7 +218,11 @@ export default function FindTheDifferences({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Spot the Difference" step={`Round ${view.round} of ${view.rounds}`} score={me?.points ?? 0} />
+          <GameTop
+            title="Spot the Difference"
+            step={t('Round {n} of {total}', { n: view.round, total: view.rounds })}
+            score={me?.points ?? 0}
+          />
           <TimerBar leftMs={view.revealing ? view.revealLeftMs : view.timeLeftMs} totalMs={view.revealing ? 4000 : view.roundMs} />
         </>
       }
@@ -229,7 +234,7 @@ export default function FindTheDifferences({ view: raw }: ScreenProps) {
             found={view.found}
             all={view.all}
             miss={lastMiss}
-            label="Left picture"
+            label={t('Left picture')}
             onTap={tap}
           />
           <Picture
@@ -238,7 +243,7 @@ export default function FindTheDifferences({ view: raw }: ScreenProps) {
             found={view.found}
             all={view.all}
             miss={lastMiss}
-            label="Right picture"
+            label={t('Right picture')}
             onTap={tap}
           />
         </div>
@@ -246,19 +251,19 @@ export default function FindTheDifferences({ view: raw }: ScreenProps) {
       controls={
         <>
           <div className="fd-count">
-            <strong>{view.found.length}</strong> / {view.diffs} found
-            {view.misses > 0 && <span className="muted small"> · missed {view.misses}×</span>}
+            <strong>{view.found.length}</strong> / {view.diffs} {t('found')}
+            {view.misses > 0 && <span className="muted small"> · {t('missed {n}×', { n: view.misses })}</span>}
           </div>
           {view.revealing && (
             <button type="button" className="btn primary" onClick={() => move({ type: 'next' })}>
-              {view.round < view.rounds ? 'Next pictures' : 'Finish'}
+              {view.round < view.rounds ? t('Next pictures') : t('Finish')}
             </button>
           )}
           <ul className="list fd-seats">
             {view.seats.map((s, i) => (
               <li key={s.id} className={i === view.you ? 'me' : ''}>
                 <span className="fd-who">{nameOf(s.id)}</span>
-                <span className="fd-bar" title={`${s.found} of ${view.diffs}`}>
+                <span className="fd-bar" title={t('{n} of {total}', { n: s.found, total: view.diffs })}>
                   {Array.from({ length: view.diffs }, (_, k) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: fixed number of pips
                     <span key={k} className={k < s.found ? 'on' : ''} />
@@ -269,9 +274,9 @@ export default function FindTheDifferences({ view: raw }: ScreenProps) {
             ))}
           </ul>
           <p className="muted small center">
-            Tap a difference in either picture: +30 each, −10 for a tap on nothing. Finding all first: +100.
+            {t('Tap a difference in either picture: +30 each, −10 for a tap on nothing. Finding all first: +100.')}
           </p>
-          <KeyHint>Keys: Enter or N goes on after the reveal.</KeyHint>
+          <KeyHint>{t('Keys: Enter or N goes on after the reveal.')}</KeyHint>
         </>
       }
     />

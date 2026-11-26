@@ -1,6 +1,7 @@
 // Rising Water Well: four picture riddles before the well fills. Rules page: docs/games/rising-water-well.md
 
 import type { ReactNode } from 'react';
+import { t } from '../i18n';
 import { GameTop, move, NumberPad, Play, type ScreenProps, TimerBar } from './common';
 import './RisingWaterWell.css';
 
@@ -325,15 +326,17 @@ function Drawing({ riddle }: { riddle: Riddle }) {
 function question(riddle: Riddle): string {
   switch (riddle.kind) {
     case 'stones':
-      return `How many ${riddle.colour === null ? '' : `${COLOUR_NAMES[riddle.colour]} `}${SHAPE_NAMES[riddle.shape]}s${riddle.colour === null ? ' of any colour' : ''}?`;
+      return riddle.colour === null
+        ? t('How many {shape}s of any colour?', { shape: t(SHAPE_NAMES[riddle.shape] ?? '') })
+        : t('How many {colour} {shape}s?', { colour: t(COLOUR_NAMES[riddle.colour] ?? ''), shape: t(SHAPE_NAMES[riddle.shape] ?? '') });
     case 'scratches':
-      return 'The scratches follow a rule. How many marks come next?';
+      return t('The scratches follow a rule. How many marks come next?');
     case 'scales':
-      return 'Both scales balance. How many circles weigh as much as one triangle?';
+      return t('Both scales balance. How many circles weigh as much as one triangle?');
     case 'symbols':
-      return 'Each symbol stands for a number. What is the last sum?';
+      return t('Each symbol stands for a number. What is the last sum?');
     case 'reflection':
-      return 'This clock is seen in the water below it. What hour does the real clock show?';
+      return t('This clock is seen in the water below it. What hour does the real clock show?');
   }
 }
 
@@ -345,12 +348,12 @@ export default function RisingWaterWell({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Rising Water Well" step={`Riddle ${view.index} of ${view.riddles}`} score={view.score} />
+          <GameTop title="Rising Water Well" step={t('Riddle {n} of {total}', { n: view.index, total: view.riddles })} score={view.score} />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.totalMs} />
         </>
       }
       stage={
-        <svg className="drawing rww" viewBox={`-10 -10 ${W + 20} ${H + 30}`} role="img" aria-label="The riddle on the well wall">
+        <svg className="drawing rww" viewBox={`-10 -10 ${W + 20} ${H + 30}`} role="img" aria-label={t('The riddle on the well wall')}>
           <defs>
             <pattern id="rww-bricks" width="40" height="24" patternUnits="userSpaceOnUse">
               <rect width="40" height="24" className="rww-wall" />
@@ -366,7 +369,7 @@ export default function RisingWaterWell({ view: raw }: ScreenProps) {
       }
       controls={
         <>
-          <div className="rww-locks" role="img" aria-label={`${view.solved} of ${view.riddles} locks open`}>
+          <div className="rww-locks" role="img" aria-label={t('{n} of {total} locks open', { n: view.solved, total: view.riddles })}>
             {Array.from({ length: view.riddles }, (_, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: locks are positional
               <Lock key={i} open={i < view.solved} />
@@ -375,14 +378,14 @@ export default function RisingWaterWell({ view: raw }: ScreenProps) {
           {view.riddle ? (
             <>
               <p className="ask">{question(view.riddle)}</p>
-              {view.lastWrong !== null && <p className="last bad">{view.lastWrong} is wrong: the water rises!</p>}
+              {view.lastWrong !== null && <p className="last bad">{t('{n} is wrong: the water rises!', { n: view.lastWrong })}</p>}
               <NumberPad round={view.index * 1000 + view.wrongTries} onSubmit={(value) => move({ type: 'answer', value })} />
               <button type="button" className="btn ghost" onClick={() => move({ type: 'giveUp' })}>
-                Give up
+                {t('Give up')}
               </button>
             </>
           ) : (
-            <p className="ask">{view.escaped ? 'The grate opens: you climb out!' : 'The well is full.'}</p>
+            <p className="ask">{view.escaped ? t('The grate opens: you climb out!') : t('The well is full.')}</p>
           )}
         </>
       }

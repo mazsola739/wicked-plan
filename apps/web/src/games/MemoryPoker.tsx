@@ -1,5 +1,6 @@
 // Memory Poker: study 16 cards, take two blind. Rules page: docs/games/memory-poker.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './MemoryPoker.css';
 
@@ -29,7 +30,7 @@ const SUITS = ['spades', 'hearts', 'diamonds', 'clubs'];
  */
 function Suit({ suit }: { suit: number }) {
   return (
-    <svg viewBox="0 0 40 40" className="mp-suit" role="img" aria-label={SUITS[suit]}>
+    <svg viewBox="0 0 40 40" className="mp-suit" role="img" aria-label={t(SUITS[suit] ?? '')}>
       {suit === 0 && (
         <>
           <path d="M20,3 28.5,10 35,16 36.5,22.5 33.5,28 27.5,29.5 22.5,26 24,32 28.5,37 11.5,37 16,32 17.5,26 12.5,29.5 6.5,28 3.5,22.5 5,16 11.5,10Z" />
@@ -140,20 +141,26 @@ export default function MemoryPoker({ view: raw }: ScreenProps) {
   const status =
     view.phase === 'study'
       ? me?.ready
-        ? 'Waiting for the others…'
-        : 'Tap Ready when you have them memorised.'
+        ? t('Waiting for the others…')
+        : t('Tap Ready when you have them memorised.')
       : view.phase === 'pick'
         ? myTurn
-          ? 'Your pick: tap a face-down card.'
-          : `${nameOf(view.turn ?? '')} is picking…`
-        : 'Two cards + the shared three make each hand.';
+          ? t('Your pick: tap a face-down card.')
+          : t('{name} is picking…', { name: nameOf(view.turn ?? '') })
+        : t('Two cards + the shared three make each hand.');
   return (
     <Play
-      top={<GameTop title="Memory Poker" step={`Round ${view.round} of ${view.rounds} · ${step}`} score={me?.points ?? 0} />}
+      top={
+        <GameTop
+          title="Memory Poker"
+          step={`${t('Round {n} of {total}', { n: view.round, total: view.rounds })} · ${t(step)}`}
+          score={me?.points ?? 0}
+        />
+      }
       stage={
         <div className="mp-table">
           <div className="mp-shared">
-            <span className="label">Shared</span>
+            <span className="label">{t('Shared')}</span>
             {view.shared.map((f) => (
               <Card key={`${f.rank}-${f.suit}`} face={f} />
             ))}
@@ -170,7 +177,7 @@ export default function MemoryPoker({ view: raw }: ScreenProps) {
                   className={`mp-slot${mine ? ' mine' : ''}${other ? ' taken' : ''}${myTurn && !g.takenBy ? ' can' : ''}`}
                   disabled={!myTurn || g.takenBy !== null}
                   onClick={() => pick(i)}
-                  aria-label={`Square ${String.fromCharCode(65 + i)}`}
+                  aria-label={t('Square {letter}', { letter: String.fromCharCode(65 + i) })}
                 >
                   {other && view.phase === 'pick' ? <span className="mp-gone">{nameOf(g.takenBy ?? '')}</span> : <Card face={g.card} />}
                   {other && view.phase === 'show' && <span className="mp-tag">{nameOf(g.takenBy ?? '')}</span>}
@@ -186,7 +193,7 @@ export default function MemoryPoker({ view: raw }: ScreenProps) {
           <p className="last">{status}</p>
           {(view.phase === 'study' || view.phase === 'show') && (
             <button type="button" className="btn primary" disabled={view.phase === 'study' && me?.ready} onClick={primary}>
-              {view.phase === 'study' ? 'Ready' : view.round < view.rounds ? 'Next round' : 'Finish'}
+              {view.phase === 'study' ? t('Ready') : view.round < view.rounds ? t('Next round') : t('Finish')}
             </button>
           )}
           <ul className="list mp-seats">
@@ -194,14 +201,14 @@ export default function MemoryPoker({ view: raw }: ScreenProps) {
               <li key={s.id} className={i === view.you ? 'me' : ''}>
                 <span className="mp-who">
                   {nameOf(s.id)}
-                  {view.turn === s.id && <span className="muted small"> · picking</span>}
+                  {view.turn === s.id && <span className="muted small"> · {t('picking')}</span>}
                 </span>
                 <span className="mp-hand">
                   {s.cards.map((c, j) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: two cards
                     <Card key={j} face={c} small />
                   ))}
-                  {s.hand && <span className="muted small">{s.hand}</span>}
+                  {s.hand && <span className="muted small">{t(s.hand)}</span>}
                 </span>
                 <span className="score">
                   {view.phase === 'show' && s.roundPoints > 0 && <small>+{s.roundPoints} </small>}
@@ -211,9 +218,11 @@ export default function MemoryPoker({ view: raw }: ScreenProps) {
             ))}
           </ul>
           <p className="muted small center">
-            Pair 50 · two pair 90 · three 130 · straight 180 · flush 200 · full house 250 · four 320 · straight flush 400 · best hand +60
+            {t(
+              'Pair 50 · two pair 90 · three 130 · straight 180 · flush 200 · full house 250 · four 320 · straight flush 400 · best hand +60',
+            )}
           </p>
-          <KeyHint>Keys: A–P pick a square, Enter is Ready / Next.</KeyHint>
+          <KeyHint>{t('Keys: A–P pick a square, Enter is Ready / Next.')}</KeyHint>
         </>
       }
     />

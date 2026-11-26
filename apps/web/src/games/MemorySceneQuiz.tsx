@@ -3,6 +3,7 @@
 
 import type { ReactNode } from 'react';
 import './MemorySceneQuiz.css';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, RoundDots, type ScreenProps, useKeys } from './common';
 
 interface SceneObject {
@@ -156,7 +157,7 @@ function Scene({ view }: { view: SceneView }) {
     y: Math.floor(i / view.cols) * CELL,
   }));
   return (
-    <svg className="drawing msq-scene" viewBox={`-4 -4 ${w + 8} ${h + 8}`} role="img" aria-label="Scene to remember">
+    <svg className="drawing msq-scene" viewBox={`-4 -4 ${w + 8} ${h + 8}`} role="img" aria-label={t('Scene to remember')}>
       {cells.map((c) => (
         <rect key={c.id} className="msq-cell" x={c.x + 3} y={c.y + 3} width={CELL - 6} height={CELL - 6} rx={10} />
       ))}
@@ -193,14 +194,14 @@ export default function MemorySceneQuiz({ view: raw }: ScreenProps) {
     return true;
   });
   const last = view.history[view.history.length - 1];
-  const who = (seat: number) => (seat === you ? 'You' : nameOf(view.players[seat]!));
+  const who = (seat: number) => (seat === you ? t('You') : nameOf(view.players[seat]!));
   return (
     <Play
       top={
         <>
           <GameTop
             title="Memory Scene"
-            step={studying ? 'Memorise the scene!' : `Question ${view.number} of ${view.questions}`}
+            step={studying ? t('Memorise the scene!') : t('Question {n} of {total}', { n: view.number, total: view.questions })}
             score={view.score}
           />
           <RoundDots results={view.history.map((h) => h.correct)} total={view.questions} />
@@ -210,34 +211,37 @@ export default function MemorySceneQuiz({ view: raw }: ScreenProps) {
       controls={
         studying ? (
           <>
-            <p className="ask">Shapes, colours, how many, and where. Then 10 questions, one wrong answer fails the team.</p>
+            <p className="ask">{t('Shapes, colours, how many, and where. Then 10 questions, one wrong answer fails the team.')}</p>
             <button type="button" className="btn primary" disabled={iAmReady} onClick={() => move({ type: 'ready' })}>
-              {iAmReady ? 'Waiting for the team…' : 'Ready'}
+              {iAmReady ? t('Waiting for the team…') : t('Ready')}
             </button>
             <p className="muted small center">
-              {view.ready.filter(Boolean).length} of {view.players.length} ready
+              {t('{n} of {total} ready', { n: view.ready.filter(Boolean).length, total: view.players.length })}
             </p>
-            <KeyHint>Keys: Enter = Ready.</KeyHint>
+            <KeyHint>{t('Keys: Enter = Ready.')}</KeyHint>
           </>
         ) : (
           <>
             {last && (
               <p className={`last ${last.correct ? 'ok' : 'bad'}`}>
-                {who(last.seat)}: {last.options[last.given]} {last.correct ? '✓' : `✗ (it was ${last.options[last.answer]})`}
+                {who(last.seat)}: {t(last.options[last.given] ?? '')}{' '}
+                {last.correct ? '✓' : `✗ (${t('it was {answer}', { answer: t(last.options[last.answer] ?? '') })})`}
               </p>
             )}
             {view.question && (
               <>
-                <p className="muted small center">{view.yourTurn ? 'Your question' : `${who(view.answerer ?? 0)} answers this one`}</p>
-                <p className="ask msq-question">{view.question.text}</p>
+                <p className="muted small center">
+                  {view.yourTurn ? t('Your question') : t('{name} answers this one', { name: who(view.answerer ?? 0) })}
+                </p>
+                <p className="ask msq-question">{t(view.question.text)}</p>
                 <div className="msq-options">
                   {view.question.options.map((o, i) => (
                     <button key={o} type="button" className="btn msq-option" disabled={!view.yourTurn} onClick={() => answer(i)}>
-                      <span className="msq-key">{i + 1}</span> {o}
+                      <span className="msq-key">{i + 1}</span> {t(o)}
                     </button>
                   ))}
                 </div>
-                <KeyHint>Keys: 1–4 answer.</KeyHint>
+                <KeyHint>{t('Keys: 1–4 answer.')}</KeyHint>
               </>
             )}
           </>

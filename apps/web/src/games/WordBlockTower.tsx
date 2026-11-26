@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import './WordBlockTower.css';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 
 interface Block {
@@ -73,14 +74,14 @@ export default function WordBlockTower({ view: raw }: ScreenProps) {
     else return false;
     return true;
   });
-  const who = (seat: number) => (seat === you ? 'You' : nameOf(view.players[seat]!));
+  const who = (seat: number) => (seat === you ? t('You') : nameOf(view.players[seat]!));
   return (
     <Play
-      top={<GameTop title="Word Tower" step={`Round ${view.round} of ${view.rounds}`} score={view.score} />}
+      top={<GameTop title="Word Tower" step={t('Round {n} of {total}', { n: view.round, total: view.rounds })} score={view.score} />}
       stage={
         <div className="card wbt-stage">
           <div className="wbt-topic">
-            <span className="label">Topic</span>
+            <span className="label">{t('Topic')}</span>
             <strong>{view.topic}</strong>
           </div>
           <ol className="list wbt-tower">
@@ -89,7 +90,7 @@ export default function WordBlockTower({ view: raw }: ScreenProps) {
               return (
                 <li key={seat} className={`${seat === you ? 'me' : ''}${seat === view.turn ? ' wbt-now' : ''}`}>
                   <span>{who(seat)}</span>
-                  {w ? <Tiles word={w} small /> : <span className="muted small">{seat === view.turn ? 'building…' : 'waiting'}</span>}
+                  {w ? <Tiles word={w} small /> : <span className="muted small">{seat === view.turn ? t('building…') : t('waiting')}</span>}
                 </li>
               );
             })}
@@ -106,7 +107,7 @@ export default function WordBlockTower({ view: raw }: ScreenProps) {
                 {b.letter}
               </button>
             ))}
-            {free.length === 0 && <span className="muted small">No blocks left.</span>}
+            {free.length === 0 && <span className="muted small">{t('No blocks left.')}</span>}
           </div>
         </div>
       }
@@ -115,25 +116,25 @@ export default function WordBlockTower({ view: raw }: ScreenProps) {
           <p className="ask">
             {view.yourTurn
               ? view.lastWord
-                ? `Your word: use every block left (${free.length}).`
-                : `Your word: one ${view.topic.toLowerCase()} word from the blocks.`
-              : `${who(view.turn ?? 0)} is building…`}
+                ? t('Your word: use every block left ({n}).', { n: free.length })
+                : t('Your word: one {topic} word from the blocks.', { topic: view.topic.toLowerCase() })
+              : t('{name} is building…', { name: who(view.turn ?? 0) })}
           </p>
-          <div className="wbt-word">{word ? <Tiles word={word} /> : <span className="muted">tap blocks</span>}</div>
+          <div className="wbt-word">{word ? <Tiles word={word} /> : <span className="muted">{t('tap blocks')}</span>}</div>
           <div className="row">
             <button type="button" className="btn" disabled={picked.length === 0} onClick={() => setPicked((p) => p.slice(0, -1))}>
               ⌫
             </button>
             <button type="button" className="btn" disabled={picked.length === 0} onClick={() => setPicked([])}>
-              Clear
+              {t('Clear')}
             </button>
             <button type="button" className="btn primary" disabled={!view.yourTurn || word.length === 0} onClick={build}>
-              Build
+              {t('Build')}
             </button>
           </div>
           {view.yourTurn && view.canTakeBack && (
             <button type="button" className="btn ghost" onClick={() => move({ type: 'takeBack' })}>
-              Take back the word before (−30)
+              {t('Take back the word before (−30)')}
             </button>
           )}
           {view.results.length > 0 && (
@@ -148,7 +149,7 @@ export default function WordBlockTower({ view: raw }: ScreenProps) {
               ))}
             </ul>
           )}
-          <KeyHint>Keys: type letters, Backspace undoes, Enter builds.</KeyHint>
+          <KeyHint>{t('Keys: type letters, Backspace undoes, Enter builds.')}</KeyHint>
         </>
       }
     />

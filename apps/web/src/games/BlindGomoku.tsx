@@ -1,6 +1,7 @@
 // Blind Gomoku: five in a row, older tiles face down. Rules page: docs/games/blind-gomoku.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, Play, type ScreenProps, TimerBar, useKeys } from './common';
 import './BlindGomoku.css';
 
@@ -39,17 +40,17 @@ export default function BlindGomoku({ view: raw }: ScreenProps) {
     return true;
   });
   const status = view.over
-    ? { won: 'Five in a row: you won!', lost: 'The bot made five in a row.', draw: 'The board is full: a draw.' }[view.outcome ?? 'draw']
+    ? t({ won: 'Five in a row: you won!', lost: 'The bot made five in a row.', draw: 'The board is full: a draw.' }[view.outcome ?? 'draw'])
     : view.yourTurn
       ? cursor !== null && free(cursor)
-        ? 'Tap again (or Place) to put your tile here.'
-        : 'Your turn: tap an empty square.'
-      : 'The bot is thinking…';
+        ? t('Tap again (or Place) to put your tile here.')
+        : t('Your turn: tap an empty square.')
+      : t('The bot is thinking…');
   return (
     <Play
       top={
         <>
-          <GameTop title="Blind Gomoku" step={`${view.tiles} tiles on the board`} score={view.score} />
+          <GameTop title="Blind Gomoku" step={t('{n} tiles on the board', { n: view.tiles })} score={view.score} />
           {view.peeking && <TimerBar leftMs={view.peekLeftMs} totalMs={3000} />}
         </>
       }
@@ -63,7 +64,7 @@ export default function BlindGomoku({ view: raw }: ScreenProps) {
               // biome-ignore lint/suspicious/noArrayIndexKey: squares are positional
               key={i}
               type="button"
-              aria-label={`Square ${i + 1}: ${cell ?? 'empty'}`}
+              aria-label={t('Square {n}: {state}', { n: i + 1, state: t(cell ?? 'empty') })}
               className={`bg-sq${cursor === i ? ' cursor' : ''}${view.last === i ? ' last' : ''}${view.winLine.includes(i) ? ' win' : ''}`}
               disabled={view.over}
               onClick={() => tap(i)}
@@ -79,29 +80,29 @@ export default function BlindGomoku({ view: raw }: ScreenProps) {
           <p className={`last${view.outcome === 'won' ? ' ok' : view.outcome === 'lost' ? ' bad' : ''}`}>{status}</p>
           <div className="bg-legend muted small">
             <span>
-              <span className="bg-tile dark" /> yours
+              <span className="bg-tile dark" /> {t('yours')}
             </span>
             <span>
-              <span className="bg-tile light" /> bot
+              <span className="bg-tile light" /> {t('bot')}
             </span>
             <span>
-              <span className="bg-tile down" /> face down
+              <span className="bg-tile down" /> {t('face down')}
             </span>
           </div>
           {!view.over && (
             <div className="row">
               <button type="button" className="btn" disabled={view.peeksLeft === 0 || view.peeking} onClick={() => move({ type: 'peek' })}>
-                Peek ({view.peeksLeft})
+                {t('Peek ({n})', { n: view.peeksLeft })}
               </button>
               <button type="button" className="btn primary" disabled={!view.yourTurn || !free(cursor)} onClick={() => place(cursor)}>
-                Place
+                {t('Place')}
               </button>
             </div>
           )}
           <p className="muted small center">
-            Only the newest tile shows its colour. A peek shows every tile for 3 seconds but costs 100 points of a win.
+            {t('Only the newest tile shows its colour. A peek shows every tile for 3 seconds but costs 100 points of a win.')}
           </p>
-          <KeyHint>Keys: arrows move, Enter places, P peeks.</KeyHint>
+          <KeyHint>{t('Keys: arrows move, Enter places, P peeks.')}</KeyHint>
         </>
       }
     />

@@ -1,6 +1,7 @@
 // Nine Men's Morris: place, slide and fly; mills remove pieces. Rules page: docs/games/nine-mens-morris.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './NineMensMorris.css';
 
@@ -70,19 +71,19 @@ export default function NineMensMorris({ view: raw }: ScreenProps) {
     return true;
   });
 
-  const status = view.yourTurn ? HELP[view.phase] : view.over ? HELP.over : `${them} is thinking…`;
+  const status = view.yourTurn ? t(HELP[view.phase]) : view.over ? t(HELP.over) : t('{name} is thinking…', { name: them });
 
   return (
     <Play
       top={
         <GameTop
           title="Nine Men's Morris"
-          step={`Turn ${view.turnNo}${view.yourTurn ? ' · your move' : ''}`}
+          step={`${t('Turn {n}', { n: view.turnNo })}${view.yourTurn ? ` · ${t('your move')}` : ''}`}
           score={view.onBoard + view.hand}
         />
       }
       stage={
-        <svg className="drawing nine-mens-morris-board" viewBox="-0.6 -0.6 7.2 7.2" role="img" aria-label="Morris board">
+        <svg className="drawing nine-mens-morris-board" viewBox="-0.6 -0.6 7.2 7.2" role="img" aria-label={t('Morris board')}>
           {[0, 1, 2].map((r) => (
             <rect key={r} x={r} y={r} width={6 - 2 * r} height={6 - 2 * r} className="nine-mens-morris-line" />
           ))}
@@ -112,17 +113,17 @@ export default function NineMensMorris({ view: raw }: ScreenProps) {
       controls={
         <>
           <div className="nine-mens-morris-side">
-            <span>You</span>
+            <span>{t('You')}</span>
             <Pieces n={view.hand} cls="mine" />
-            <span className="muted small">{view.onBoard} on board</span>
+            <span className="muted small">{t('{n} on board', { n: view.onBoard })}</span>
           </div>
           <div className="nine-mens-morris-side">
             <span>{them}</span>
             <Pieces n={view.theirHand} cls="theirs" />
-            <span className="muted small">{view.theirOnBoard} on board</span>
+            <span className="muted small">{t('{n} on board', { n: view.theirOnBoard })}</span>
           </div>
           <p className={`ask${view.phase === 'remove' ? ' nine-mens-morris-mill' : ''}`}>{status}</p>
-          <KeyHint>Click a piece, then where it goes. Esc cancels.</KeyHint>
+          <KeyHint>{t('Click a piece, then where it goes. Esc cancels.')}</KeyHint>
         </>
       }
     />

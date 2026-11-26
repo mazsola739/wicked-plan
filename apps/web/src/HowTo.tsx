@@ -6,6 +6,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Emblem, reducedMotion } from './Emblem';
 import { GameIcon } from './GameIcon';
+import { howToHu, huName, t, useLang } from './i18n';
 
 const PAGES = import.meta.glob('../../../docs/games/*.md', {
   query: '?raw',
@@ -16,8 +17,9 @@ const PAGES = import.meta.glob('../../../docs/games/*.md', {
 type Block = { list: boolean; lines: string[] };
 
 function blocks(id: string): Block[] {
+  // In Hungarian the game's own Hungarian page (the whole file is the section), else the English one.
   const md = PAGES[`../../../docs/games/${id}.md`] ?? '';
-  const section = md.split(/^## How to play\s*$/m)[1]?.split(/^## /m)[0] ?? '';
+  const section = howToHu(id) ?? md.split(/^## How to play\s*$/m)[1]?.split(/^## /m)[0] ?? '';
   const out: Block[] = [];
   let cur: Block | null = null;
   for (const raw of section.split(/\r?\n/)) {
@@ -45,7 +47,7 @@ function inline(text: string): ReactNode[] {
   return text.split(/\*\*(.+?)\*\*/).map((part, i) => (i % 2 ? <strong key={part}>{part}</strong> : part));
 }
 
-const GOAL = /^\*\*Goal:\*\*\s*/;
+const GOAL = /^\*\*(?:Goal|Cél):\*\*\s*/;
 const TYPE_MS = 22;
 
 /**
@@ -71,9 +73,11 @@ function TypedGoal({ goal, skip, onDone }: { goal: string; skip: boolean; onDone
   }, [done, onDone]);
   return (
     <p className="tx-goal">
-      <span className="sr-only">Goal: {plain}</span>
+      <span className="sr-only">
+        {t('Goal:')} {plain}
+      </span>
       <span aria-hidden="true">
-        <strong>Goal:</strong>{' '}
+        <strong>{t('Goal:')}</strong>{' '}
         {done ? (
           inline(goal)
         ) : (
@@ -108,7 +112,9 @@ function setRulesHidden(id: string, hide: boolean): void {
 }
 
 export function HowToPlay({ id, name, onClose }: { id: string; name: string; onClose: () => void }) {
-  const list = useMemo(() => blocks(id), [id]);
+  const lang = useLang();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the text changes with the language
+  const list = useMemo(() => blocks(id), [id, lang]);
   const [hide, setHide] = useState(() => rulesHidden(id));
   const first = list[0];
   const goal = first && !first.list && GOAL.test(first.lines[0] ?? '') ? (first.lines[0] ?? '').replace(GOAL, '') : '';
@@ -137,8 +143,8 @@ export function HowToPlay({ id, name, onClose }: { id: string; name: string; onC
   return (
     <section ref={box} className="card howto transmission">
       <header className="tx-bar">
-        <span className="tx-live">Live</span>
-        <span className="label">From the Observer</span>
+        <span className="tx-live">{t('Live')}</span>
+        <span className="label">{t('From the Observer')}</span>
         <span className="tx-channel">CH 08</span>
       </header>
       {/* The monitor sits in the top-left corner; the text flows around it, to its right and below. */}
@@ -148,9 +154,10 @@ export function HowToPlay({ id, name, onClose }: { id: string; name: string; onC
           <Emblem className="tx-emblem" watching decorative />
           <GameIcon id={id} className="tx-icon" neon />
         </div>
-        <div className="label">How to play</div>
+        <div className="label">{t('How to play')}</div>
         <h2 ref={heading} tabIndex={-1} className="tx-title">
           {name}
+          {huName(id) && <span className="name-hu">({huName(id)})</span>}
         </h2>
         {goal && <TypedGoal goal={goal} skip={skip} onDone={finish} />}
         <div className={done ? 'tx-rest' : 'tx-rest waiting'}>
@@ -180,10 +187,10 @@ export function HowToPlay({ id, name, onClose }: { id: string; name: string; onC
             setRulesHidden(id, e.target.checked);
           }}
         />
-        Don't show again for this game
+        {t("Don't show again for this game")}
       </label>
       <button type="button" className="btn primary" onClick={onClose}>
-        Play
+        {t('Play')}
       </button>
     </section>
   );

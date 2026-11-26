@@ -1,6 +1,7 @@
 // Piggy Bank: drop coins, claim what is inside, doubt the others. Rules: docs/games/piggy-bank.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './PiggyBank.css';
 
@@ -39,7 +40,7 @@ interface PbView {
 
 /** A faceted coin (an octagon cut like a gem, a minted diamond in the middle), lit from the top left. */
 const Coin = ({ c }: { c: Colour }) => (
-  <svg viewBox="0 0 20 20" className={`piggy-bank-coin piggy-bank-${c}`} role="img" aria-label={`${c} coin`}>
+  <svg viewBox="0 0 20 20" className={`piggy-bank-coin piggy-bank-${c}`} role="img" aria-label={t('{colour} coin', { colour: t(c) })}>
     <path className="edge" d="M6.4,1.2 13.6,1.2 18.8,6.4 18.8,13.6 13.6,18.8 6.4,18.8 1.2,13.6 1.2,6.4Z" />
     <path fill="#fff" fillOpacity=".5" d="M1.2,6.4 6.4,1.2 7.6,4.2 4.2,7.6Z" />
     <path fill="#fff" fillOpacity=".3" d="M6.4,1.2 13.6,1.2 12.4,4.2 7.6,4.2Z M7,10 10,7 10,10Z" />
@@ -58,7 +59,12 @@ const LEGS = [44, 66, 94, 116];
 /** A faceted pink pig facing right, lit from the top left; the count sits on its side. */
 function Pig({ coins, open }: { coins: number; open: boolean }) {
   return (
-    <svg className={`piggy-bank-pig${open ? ' open' : ''}`} viewBox="0 0 160 110" role="img" aria-label={`Piggy bank, ${coins} coins`}>
+    <svg
+      className={`piggy-bank-pig${open ? ' open' : ''}`}
+      viewBox="0 0 160 110"
+      role="img"
+      aria-label={t('Piggy bank, {n} coins', { n: coins })}
+    >
       <path d="M88,22 96,6 105,22Z" />
       <path fill="#000" fillOpacity=".3" d="M88,22 96,6 105,22Z" />
       <path d="M24,50 12,41 8,49 15,52 10,58 22,61Z" />
@@ -144,44 +150,50 @@ export default function PiggyBank({ view }: ScreenProps) {
   const showResult = (v.phase === 'result' || v.phase === 'over') && last;
   let ask = '';
   if (v.phase === 'drop')
-    ask = canDrop ? 'Drop 1 or 2 coins, then pass the bank.' : `${holder ? nameOf(holder.id) : ''} is dropping coins…`;
+    ask = canDrop ? t('Drop 1 or 2 coins, then pass the bank.') : t('{name} is dropping coins…', { name: holder ? nameOf(holder.id) : '' });
   else if (v.phase === 'claim')
-    ask = canClaim ? `How many ${v.colour} coins are inside?` : `${holder ? nameOf(holder.id) : ''} is peeking…`;
+    ask = canClaim
+      ? t('How many {colour} coins are inside?', { colour: t(v.colour) })
+      : t('{name} is peeking…', { name: holder ? nameOf(holder.id) : '' });
   else if (v.phase === 'doubt' && lastClaim)
     ask = canDoubt
-      ? `${nameOf(lastClaim.id)} says ${lastClaim.count} ${v.colour}. Doubt it?`
+      ? t('{name} says {n} {colour}. Doubt it?', { name: nameOf(lastClaim.id), n: lastClaim.count, colour: t(v.colour) })
       : v.myChoice !== null
-        ? `You ${v.myChoice ? 'doubt' : 'trust'} it. Waiting…`
-        : `Waiting for the others to judge your claim…`;
+        ? v.myChoice
+          ? t('You doubt it. Waiting…')
+          : t('You trust it. Waiting…')
+        : t('Waiting for the others to judge your claim…');
   else if (showResult) {
     const right = last.claim === last.truth;
-    const verdict = right ? 'right' : 'wrong';
+    const verdict = right ? t('right') : t('wrong');
     const lost = last.losers.length
-      ? `${last.losers.map(nameOf).join(', ')} ${last.losers.length === 1 && last.losers[0] !== 'you' ? 'loses' : 'lose'} a point.`
-      : 'Nobody loses.';
-    ask = `${last.full ? 'Full bank! ' : ''}${nameOf(last.claimer)} said ${last.claim}, there were ${last.truth}: ${verdict}. ${lost}`;
+      ? last.losers.length === 1 && last.losers[0] !== 'you'
+        ? t('{names} loses a point.', { names: last.losers.map(nameOf).join(', ') })
+        : t('{names} lose a point.', { names: last.losers.map(nameOf).join(', ') })
+      : t('Nobody loses.');
+    ask = `${last.full ? `${t('Full bank!')} ` : ''}${t('{name} said {claim}, there were {truth}: {verdict}.', { name: nameOf(last.claimer), claim: last.claim, truth: last.truth, verdict })} ${lost}`;
   }
   return (
     <Play
-      top={<GameTop title="Piggy Bank" step={`Round ${v.round} of ${v.rounds}`} score={me?.score ?? 0} />}
+      top={<GameTop title="Piggy Bank" step={t('Round {n} of {total}', { n: v.round, total: v.rounds })} score={me?.score ?? 0} />}
       stage={
         <div className="card">
           <div className="piggy-bank-top">
             <Pig coins={showResult ? last.white + last.black : v.coins} open={!!showResult} />
             <div className="piggy-bank-info">
-              <div className="label">This round counts</div>
+              <div className="label">{t('This round counts')}</div>
               <div>
-                <Coin c={v.colour} /> {v.colour}
+                <Coin c={v.colour} /> {t(v.colour)}
               </div>
               {showResult ? (
                 <div className="small">
-                  Inside: {last.white} <Coin c="white" /> {last.black} <Coin c="black" />
+                  {t('Inside:')} {last.white} <Coin c="white" /> {last.black} <Coin c="black" />
                 </div>
               ) : (
-                <div className="muted small">Last accepted claim: {v.accepted}</div>
+                <div className="muted small">{t('Last accepted claim: {n}', { n: v.accepted })}</div>
               )}
               <div className="muted small">
-                Your coins: {v.mine[0]} {v.colour}, {v.mine[1]} other
+                {t('Your coins: {n} {colour}, {other} other', { n: v.mine[0], colour: t(v.colour), other: v.mine[1] })}
               </div>
             </div>
           </div>
@@ -191,22 +203,25 @@ export default function PiggyBank({ view }: ScreenProps) {
                 <span>
                   {nameOf(s.id)} <span className="score">{s.score}</span>{' '}
                   {v.phase === 'doubt' && (
-                    <span className="muted small">{s.id === lastClaim?.id ? 'claimer' : s.done ? 'decided' : 'thinking…'}</span>
+                    <span className="muted small">{s.id === lastClaim?.id ? t('claimer') : s.done ? t('decided') : t('thinking…')}</span>
                   )}
-                  {showResult && last.doubters.includes(s.id) && <span className="muted small">doubted</span>}
+                  {showResult && last.doubters.includes(s.id) && <span className="muted small">{t('doubted')}</span>}
                 </span>
                 <span className="muted small">
                   {v.drops
                     .filter(([id]) => id === s.id)
                     .map(([, n]) => n)
                     .join(' + ') || ''}
-                  {v.drops.some(([id]) => id === s.id) ? ' dropped' : ''}
+                  {v.drops.some(([id]) => id === s.id) ? ` ${t('dropped')}` : ''}
                 </span>
               </li>
             ))}
           </ul>
           {v.claims.length > 0 && !showResult && (
-            <p className="muted small">Claims: {v.claims.map((c) => `${nameOf(c.id)} ${c.count} of ${c.coins}`).join(' · ')}</p>
+            <p className="muted small">
+              {t('Claims:')}{' '}
+              {v.claims.map((c) => t('{name} {n} of {total}', { name: nameOf(c.id), n: c.count, total: c.coins })).join(' · ')}
+            </p>
           )}
         </div>
       }
@@ -216,7 +231,7 @@ export default function PiggyBank({ view }: ScreenProps) {
           {canDrop && (
             <>
               <div className="piggy-bank-pending">
-                {pending.length === 0 && <span className="muted small">No coins yet</span>}
+                {pending.length === 0 && <span className="muted small">{t('No coins yet')}</span>}
                 {pending.map((c, i) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: at most two coins
                   <Coin key={i} c={c} />
@@ -224,17 +239,17 @@ export default function PiggyBank({ view }: ScreenProps) {
               </div>
               <div className="row">
                 <button type="button" className="btn" disabled={pending.length >= 2} onClick={() => add('white')}>
-                  + White
+                  {t('+ White')}
                 </button>
                 <button type="button" className="btn" disabled={pending.length >= 2} onClick={() => add('black')}>
-                  + Black
+                  {t('+ Black')}
                 </button>
                 <button type="button" className="btn ghost" disabled={pending.length === 0} onClick={() => setPending([])}>
-                  Clear
+                  {t('Clear')}
                 </button>
               </div>
               <button type="button" className="btn primary" disabled={pending.length === 0} onClick={drop}>
-                Drop and pass
+                {t('Drop and pass')}
               </button>
             </>
           )}
@@ -242,7 +257,7 @@ export default function PiggyBank({ view }: ScreenProps) {
             <>
               {v.seen && (
                 <p className="center">
-                  You see the last drop: {v.seen[0] > 0 && `${v.seen[0]} `}
+                  {t('You see the last drop:')} {v.seen[0] > 0 && `${v.seen[0]} `}
                   {Array.from({ length: v.seen[0] }, (_, i) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: identical coins
                     <Coin key={`w${i}`} c="white" />
@@ -264,21 +279,21 @@ export default function PiggyBank({ view }: ScreenProps) {
                 </button>
               </div>
               <button type="button" className="btn primary" onClick={sendClaim}>
-                Claim {value} {v.colour}
+                {t('Claim {n} {colour}', { n: value, colour: t(v.colour) })}
               </button>
             </>
           )}
           {canDoubt && (
             <div className="row">
               <button type="button" className="btn" onClick={() => move({ type: 'trust' })}>
-                Trust
+                {t('Trust')}
               </button>
               <button type="button" className="btn primary" onClick={() => move({ type: 'doubt' })}>
-                Doubt!
+                {t('Doubt!')}
               </button>
             </div>
           )}
-          <KeyHint>W / B add a coin, Enter drops · digits and Enter claim · D doubt, T trust.</KeyHint>
+          <KeyHint>{t('W / B add a coin, Enter drops · digits and Enter claim · D doubt, T trust.')}</KeyHint>
         </>
       }
     />

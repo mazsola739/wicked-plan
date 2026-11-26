@@ -8,11 +8,14 @@ pick one and play. Solo puzzles are played alone; games for several players are 
 - **Platform:** a single-page React + TypeScript web app for desktop (wider layout, keyboard shortcuts)
   and phone (portrait, one hand). No native app.
 - **Language:** everything in the product and the docs is English.
-  - **Hungarian is coming** (decided 2026-11-26, not built yet): the page gets an EN / HU switch in
-    the header and starts in the browser's language. In Hungarian everything is translated except
+  - **Hungarian** (decided 2026-11-26): the page has an EN / HU switch in the top bar and starts in
+    the browser's language (the choice is kept). In Hungarian everything is translated except
     the names: the game names stay the show's English names, with the Hungarian one under them in
     brackets, and the title stays "Wicked Plan" with "(Gonosz terv)" under it. The repo, code, docs
-    and commits stay English.
+    and commits stay English. How: `apps/web/src/i18n.ts` (`t(english)`: the English text is the
+    key, a missing translation shows the English); `locales/hu/common.ts` for the page,
+    `locales/hu/<game-id>.ts` per game (Hungarian name and short, screen strings, patterns for the
+    lines the rules write) and `locales/hu/howto/<game-id>.md` (the Hungarian How to play).
 - **No rooms and no server for now:** the page is a game picker. A room/server layer may come later;
   the rules keep secrets out of the views so a server could referee without changes.
 - **Rules in Rust:** one `crates/rules` crate, run in the browser through WebAssembly.
@@ -35,8 +38,9 @@ pick one and play. Solo puzzles are played alone; games for several players are 
   `apps/web/src/assets/hood.webp`, a pointed hood seen from the front, a black void for a face drawn
   by glowing LED features (a cyan nested-diamond eye, a violet slash eye, a zigzag grin), shown large
   on the landing page, the How to play monitor and the results; and `face.webp`, its LED eyes and
-  grin alone on transparent (the peeking face). The crown alone is the small mark (top bar, footer,
-  favicon), drawn in SVG in `Emblem.tsx`.
+  grin alone on transparent (the peeking face). The grin is also the small brand mark (top bar,
+  footer; `Grin` in `Emblem.tsx`, the owner's `logo.webp`) and the favicon (`public/favicon.png`,
+  transparent; the phone home-screen icon sits on a dark rounded square).
 - **On the show** (2026-11-26): each game's card shows, small and quiet in its bottom-right corner,
   where the game was on the show: season and day (`S01 · D04`), `FINAL`, `EXILE n` or `HIDDEN`,
   from the English Wikipedia article (it gives days, not episodes); `apps/web/src/aired.ts`. The

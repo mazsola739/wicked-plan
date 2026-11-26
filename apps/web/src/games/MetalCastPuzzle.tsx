@@ -1,5 +1,6 @@
 // Metal Cast Puzzle: slide every ring off the metal loop. Rules page: docs/games/metal-cast-puzzle.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, Play, RoundDots, type ScreenProps, useKeys } from './common';
 import './MetalCastPuzzle.css';
 
@@ -38,12 +39,16 @@ export default function MetalCastPuzzle({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Metal Cast Puzzle" step={`Level ${view.level} of ${view.levels} · ${n} rings`} score={view.score} />
+          <GameTop
+            title="Metal Cast Puzzle"
+            step={t('Level {n} of {total} · {rings} rings', { n: view.level, total: view.levels, rings: n })}
+            score={view.score}
+          />
           <RoundDots results={view.solved} total={view.levels} />
         </>
       }
       stage={
-        <svg className="drawing mcp" viewBox={`0 0 ${width} 210`} role="img" aria-label="Rings on a metal loop">
+        <svg className="drawing mcp" viewBox={`0 0 ${width} 210`} role="img" aria-label={t('Rings on a metal loop')}>
           <defs>
             <linearGradient id="mcp-steel" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" style={{ stopColor: 'var(--silver)' }} />
@@ -63,7 +68,7 @@ export default function MetalCastPuzzle({ view: raw }: ScreenProps) {
                 className={`mcp-ring${on ? ' on' : ''}`}
                 role="button"
                 tabIndex={0}
-                aria-label={`Ring ${i + 1} ${on ? 'on' : 'off'}`}
+                aria-label={on ? t('Ring {n} on', { n: i + 1 }) : t('Ring {n} off', { n: i + 1 })}
                 onClick={() => toggle(i + 1)}
                 onKeyDown={(e) => e.key === 'Enter' && toggle(i + 1)}
               >
@@ -98,8 +103,8 @@ export default function MetalCastPuzzle({ view: raw }: ScreenProps) {
       controls={
         <>
           <p className="muted small center">
-            Ring 1 always slides. Any other ring slides only when the ring just below it is <strong>on</strong> and every ring below that
-            one is <strong>off</strong>. Take every ring off.
+            {t('Ring 1 always slides. Any other ring slides only when the ring just below it is')} <strong>{t('on')}</strong>{' '}
+            {t('and every ring below that one is')} <strong>{t('off')}</strong>. {t('Take every ring off.')}
           </p>
           <div className="mcp-keys" style={{ gridTemplateColumns: `repeat(${n}, 1fr)` }}>
             {view.rings
@@ -112,17 +117,18 @@ export default function MetalCastPuzzle({ view: raw }: ScreenProps) {
               ))}
           </div>
           <p className="center">
-            {onCount} ring{onCount === 1 ? '' : 's'} on · {view.moves} move{view.moves === 1 ? '' : 's'} · best possible {view.best}
+            {t(onCount === 1 ? '{n} ring on' : '{n} rings on', { n: onCount })} ·{' '}
+            {t(view.moves === 1 ? '{n} move' : '{n} moves', { n: view.moves })} · {t('best possible {n}', { n: view.best })}
           </p>
           <div className="row">
             <button type="button" className="btn ghost" onClick={() => move({ type: 'skip' })}>
-              Give up
+              {t('Give up')}
             </button>
             <button type="button" className="btn" onClick={() => move({ type: 'reset' })}>
-              Reset level
+              {t('Reset level')}
             </button>
           </div>
-          <KeyHint>Keys: 1–{n} slide that ring, Backspace resets.</KeyHint>
+          <KeyHint>{t('Keys: 1–{n} slide that ring, Backspace resets.', { n })}</KeyHint>
         </>
       }
     />

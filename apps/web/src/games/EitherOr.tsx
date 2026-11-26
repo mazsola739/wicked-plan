@@ -1,5 +1,6 @@
 // Either Or. Rules page: docs/games/either-or.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './EitherOr.css';
 
@@ -43,13 +44,13 @@ const said = (line: string) => line.replace(/\bbot-\d+\b|\byou\b/g, nameOf);
 function choices(round: Round, view: EitherView): [number, string][] {
   if (round.kind === 'lowestUnique') return [1, 2, 3, 4, 5].map((v) => [v, String(v)]);
   if (round.kind === 'finger') return view.players.flatMap((p, i) => (i === view.me ? [] : [[i, nameOf(p)] as [number, string]]));
-  return round.options.map((o, i) => [i, o]);
+  return round.options.map((o, i) => [i, t(o)]);
 }
 
 function pickLabel(o: Outcome, view: EitherView, v: number): string {
   if (o.kind === 'lowestUnique') return String(v);
   if (o.kind === 'finger') return `→ ${nameOf(view.players[v] ?? '')}`;
-  return o.options[v] ?? '';
+  return t(o.options[v] ?? '');
 }
 
 export default function EitherOr({ view: raw }: ScreenProps) {
@@ -76,7 +77,7 @@ export default function EitherOr({ view: raw }: ScreenProps) {
       top={
         <GameTop
           title="Either Or"
-          step={view.over ? 'Game over' : `Round ${view.number} of ${view.total}`}
+          step={view.over ? t('Game over') : t('Round {n} of {total}', { n: view.number, total: view.total })}
           score={view.scores[view.me] ?? 0}
         />
       }
@@ -84,8 +85,8 @@ export default function EitherOr({ view: raw }: ScreenProps) {
         <>
           {round && (
             <div className={`eo-round${round.kind === 'majority' || round.kind === 'minority' ? '' : ' surprise'}`}>
-              <div className="label">{TITLES[round.kind]}</div>
-              <p className="eo-prompt">{round.prompt}</p>
+              <div className="label">{t(TITLES[round.kind])}</div>
+              <p className="eo-prompt">{t(round.prompt)}</p>
             </div>
           )}
           <ul className="eo-scores">
@@ -119,13 +120,13 @@ export default function EitherOr({ view: raw }: ScreenProps) {
               ))}
             </div>
           )}
-          {round && !open && <p className="muted center">Waiting for {waiting.join(', ') || 'the others'}…</p>}
+          {round && !open && <p className="muted center">{t('Waiting for {names}…', { names: waiting.join(', ') || t('the others') })}</p>}
           {view.last && (
             <div className="card">
               <div className="label">
-                Round {view.last.number}: {TITLES[view.last.kind]}
+                {t('Round {n}', { n: view.last.number })}: {t(TITLES[view.last.kind])}
               </div>
-              {view.last.options.length > 0 && view.last.kind !== 'shareGrab' && <p className="muted small">{view.last.prompt}</p>}
+              {view.last.options.length > 0 && view.last.kind !== 'shareGrab' && <p className="muted small">{t(view.last.prompt)}</p>}
               <ul className="list">
                 {view.players.map((p, i) => (
                   <li key={p}>
@@ -138,10 +139,10 @@ export default function EitherOr({ view: raw }: ScreenProps) {
                   </li>
                 ))}
               </ul>
-              <p className="ask small">{said(view.last.note)}</p>
+              <p className="ask small">{said(t(view.last.note))}</p>
             </div>
           )}
-          <KeyHint>Keys: 1 / 2 for the answers, 1–5 for numbers, A–H for players.</KeyHint>
+          <KeyHint>{t('Keys: 1 / 2 for the answers, 1–5 for numbers, A–H for players.')}</KeyHint>
         </>
       }
     />

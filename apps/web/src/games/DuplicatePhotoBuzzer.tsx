@@ -1,5 +1,6 @@
 // Montage: buzz when a picture repeats. Rules page: docs/games/duplicate-photo-buzzer.md
 
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, nameOf, Play, type ScreenProps, TimerBar, useKeys } from './common';
 import './DuplicatePhotoBuzzer.css';
 
@@ -145,7 +146,7 @@ function Mark({ kind, colour, x, y }: { kind: number; colour: number; x: number;
 function PictureArt({ p, className }: { p: Picture; className?: string }) {
   const spots = LAYOUTS[p.layout] ?? LAYOUTS[0] ?? [];
   return (
-    <svg className={`db-pic ${className ?? ''}`} viewBox="0 0 1000 1000" role="img" aria-label="Picture">
+    <svg className={`db-pic ${className ?? ''}`} viewBox="0 0 1000 1000" role="img" aria-label={t('Picture')}>
       <rect width="1000" height="1000" style={{ fill: GROUNDS[p.ground] }} />
       {p.marks.map((m, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: three marks in fixed spots
@@ -171,7 +172,7 @@ export default function DuplicatePhotoBuzzer({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Montage" step={`Round ${view.round} of ${view.rounds}`} score={me?.points ?? 0} />
+          <GameTop title="Montage" step={t('Round {n} of {total}', { n: view.round, total: view.rounds })} score={me?.points ?? 0} />
           {r ? <TimerBar leftMs={view.revealLeftMs} totalMs={2500} /> : <TimerBar leftMs={view.frameLeftMs} totalMs={view.frameMs} />}
         </>
       }
@@ -180,15 +181,13 @@ export default function DuplicatePhotoBuzzer({ view: raw }: ScreenProps) {
           {r ? (
             <>
               <PictureArt p={r.picture} />
-              <p className="db-caption">
-                Picture {r.first} came back as picture {r.second}.
-              </p>
+              <p className="db-caption">{t('Picture {first} came back as picture {second}.', { first: r.first, second: r.second })}</p>
             </>
           ) : (
             view.picture && (
               <>
                 <PictureArt key={view.number} p={view.picture} className="flash" />
-                <p className="db-caption muted">Picture {view.number}</p>
+                <p className="db-caption muted">{t('Picture {n}', { n: view.number })}</p>
               </>
             )
           )}
@@ -199,15 +198,19 @@ export default function DuplicatePhotoBuzzer({ view: raw }: ScreenProps) {
           {r ? (
             <>
               <p className={`last ${r.winner === me?.id ? 'ok' : 'bad'}`}>
-                {r.winner ? (r.winner === me?.id ? 'You buzzed first!' : `${nameOf(r.winner)} buzzed first.`) : 'Nobody caught the repeat.'}
+                {r.winner
+                  ? r.winner === me?.id
+                    ? t('You buzzed first!')
+                    : t('{name} buzzed first.', { name: nameOf(r.winner) })
+                  : t('Nobody caught the repeat.')}
               </p>
               <button type="button" className="btn primary" onClick={() => move({ type: 'next' })}>
-                {view.round < view.rounds ? 'Next round' : 'Finish'}
+                {view.round < view.rounds ? t('Next round') : t('Finish')}
               </button>
             </>
           ) : (
             <button type="button" className="db-buzz" disabled={!canBuzz} onClick={buzz}>
-              {view.locked ? 'Out this round' : 'BUZZ'}
+              {view.locked ? t('Out this round') : t('BUZZ')}
             </button>
           )}
           <ul className="list db-seats">
@@ -215,16 +218,16 @@ export default function DuplicatePhotoBuzzer({ view: raw }: ScreenProps) {
               <li key={s.id} className={i === view.you ? 'me' : ''}>
                 <span>{nameOf(s.id)}</span>
                 <span className={`small ${s.buzz === true ? 'db-right' : s.buzz === false ? 'db-wrong' : 'muted'}`}>
-                  {s.buzz === true ? 'buzzed first' : s.buzz === false ? 'wrong buzz' : ''}
+                  {s.buzz === true ? t('buzzed first') : s.buzz === false ? t('wrong buzz') : ''}
                 </span>
                 <span className="score">{s.points}</span>
               </li>
             ))}
           </ul>
           <p className="muted small center">
-            Buzz while the repeat or the picture after it is up: 100 + up to 60 for speed. A wrong buzz: −30.
+            {t('Buzz while the repeat or the picture after it is up: 100 + up to 60 for speed. A wrong buzz: −30.')}
           </p>
-          <KeyHint>Keys: Space or B buzzes, Enter goes on.</KeyHint>
+          <KeyHint>{t('Keys: Space or B buzzes, Enter goes on.')}</KeyHint>
         </>
       }
     />

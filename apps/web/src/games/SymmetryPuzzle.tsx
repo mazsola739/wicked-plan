@@ -1,6 +1,7 @@
 // Symmetrical Puzzle: paint the missing mirror cells, a race. Rules page: docs/games/symmetry-puzzle.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, Play, type ScreenProps, TimerBar, useKeys } from './common';
 import { RaceBar, type RaceView } from './PiecePuzzle';
 import './SymmetryPuzzle.css';
@@ -44,7 +45,11 @@ export default function SymmetryPuzzle({ view: raw }: ScreenProps) {
     <Play
       top={
         <>
-          <GameTop title="Symmetrical Puzzle" step={`Round ${view.round} of ${view.rounds}`} score={view.racers[0]?.score ?? 0} />
+          <GameTop
+            title="Symmetrical Puzzle"
+            step={t('Round {n} of {total}', { n: view.round, total: view.rounds })}
+            score={view.racers[0]?.score ?? 0}
+          />
           <TimerBar leftMs={view.timeLeftMs} totalMs={view.roundTimeMs} />
           <RaceBar view={view} />
         </>
@@ -61,7 +66,7 @@ export default function SymmetryPuzzle({ view: raw }: ScreenProps) {
                 style={c ? { background: PAINT[c] } : undefined}
                 disabled={view.given[i]}
                 onClick={() => paint(i)}
-                aria-label={`Cell ${i + 1}`}
+                aria-label={t('Cell {n}', { n: i + 1 })}
               />
             ))}
           </div>
@@ -75,7 +80,9 @@ export default function SymmetryPuzzle({ view: raw }: ScreenProps) {
       controls={
         <>
           <p className="muted small center">
-            Make the figure symmetric about {AXIS_TEXT[view.axis]}. The cells with a dot are given; add only what the mirror needs.
+            {t('Make the figure symmetric about {axis}. The cells with a dot are given; add only what the mirror needs.', {
+              axis: t(AXIS_TEXT[view.axis]),
+            })}
           </p>
           <div className="sym-palette" style={{ gridTemplateColumns: `repeat(${view.colours + 1}, 1fr)` }}>
             {Array.from({ length: view.colours }, (_, k) => k + 1).map((c) => (
@@ -85,7 +92,7 @@ export default function SymmetryPuzzle({ view: raw }: ScreenProps) {
                 className={`key sym-colour${colour === c ? ' sel' : ''}`}
                 style={{ background: PAINT[c] }}
                 onClick={() => setColour(c)}
-                aria-label={`Colour ${c}`}
+                aria-label={t('Colour {n}', { n: c })}
               >
                 {c}
               </button>
@@ -95,9 +102,9 @@ export default function SymmetryPuzzle({ view: raw }: ScreenProps) {
             </button>
           </div>
           <button type="button" className="btn ghost" onClick={() => move({ type: 'giveUp' })}>
-            Give up this round
+            {t('Give up this round')}
           </button>
-          <KeyHint>Keys: 1–{view.colours} pick a colour, 0 the eraser. Tap a cell to paint it.</KeyHint>
+          <KeyHint>{t('Keys: 1–{n} pick a colour, 0 the eraser. Tap a cell to paint it.', { n: view.colours })}</KeyHint>
         </>
       }
     />

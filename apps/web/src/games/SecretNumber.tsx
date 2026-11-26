@@ -1,6 +1,7 @@
 // Secret Number. Rules page: docs/games/secret-number.md
 
 import { useState } from 'react';
+import { t } from '../i18n';
 import { GameTop, KeyHint, move, NumberPad, nameOf, Play, type ScreenProps, useKeys } from './common';
 import './SecretNumber.css';
 
@@ -52,32 +53,34 @@ export default function SecretNumber({ view: raw }: ScreenProps) {
     return true;
   });
   const ask = view.over
-    ? 'Game over: all numbers are shown.'
+    ? t('Game over: all numbers are shown.')
     : !open
-      ? `Waiting for ${view.seats
-          .filter((s) => !s.done)
-          .map((s) => nameOf(s.id))
-          .join(', ')}…`
+      ? t('Waiting for {names}…', {
+          names: view.seats
+            .filter((s) => !s.done)
+            .map((s) => nameOf(s.id))
+            .join(', '),
+        })
       : view.phase === 'trade'
-        ? 'Trade clues: tap a player (they learn about you too), or skip.'
+        ? t('Trade clues: tap a player (they learn about you too), or skip.')
         : guessing
-          ? `Guess ${nameOf(view.seats[target]?.id ?? '')}'s number.`
-          : 'Guess: tap a player to guess their number, or pass.';
+          ? t("Guess {name}'s number.", { name: nameOf(view.seats[target]?.id ?? '') })
+          : t('Guess: tap a player to guess their number, or pass.');
   return (
     <Play
       top={
         <GameTop
           title="Secret Number"
-          step={view.over ? 'Game over' : `Round ${view.round} of ${view.rounds} · ${view.phase}`}
+          step={view.over ? t('Game over') : `${t('Round {n} of {total}', { n: view.round, total: view.rounds })} · ${t(view.phase)}`}
           score={view.seats[view.me]?.score ?? 0}
         />
       }
       stage={
         <>
           <div className="sn-mine">
-            <span className="label">Your secret number</span>
+            <span className="label">{t('Your secret number')}</span>
             <strong>{view.number}</strong>
-            {view.seats[view.me]?.exposed !== null && <span className="sn-bad small">Exposed</span>}
+            {view.seats[view.me]?.exposed !== null && <span className="sn-bad small">{t('Exposed')}</span>}
           </div>
           <ul className="sn-seats">
             {view.seats.map((s, i) =>
@@ -99,12 +102,10 @@ export default function SecretNumber({ view: raw }: ScreenProps) {
                       {s.exposed !== null || view.numbers ? (
                         <b>{s.exposed ?? view.numbers?.[i]}</b>
                       ) : (
-                        <span>
-                          {s.possible} possible ({s.low}–{s.high})
-                        </span>
+                        <span>{t('{n} possible ({low}–{high})', { n: s.possible, low: s.low, high: s.high })}</span>
                       )}
                     </div>
-                    {s.clues.length > 0 && <div className="sn-clues small">{s.clues.join(' · ')}</div>}
+                    {s.clues.length > 0 && <div className="sn-clues small">{s.clues.map((c) => t(c)).join(' · ')}</div>}
                   </button>
                 </li>
               ),
@@ -117,7 +118,7 @@ export default function SecretNumber({ view: raw }: ScreenProps) {
           <p className="ask">{ask}</p>
           {open && view.phase === 'trade' && (
             <button type="button" className="btn" onClick={() => move({ type: 'skip' })}>
-              Skip the trade
+              {t('Skip the trade')}
             </button>
           )}
           {guessing && target !== null && (
@@ -125,16 +126,16 @@ export default function SecretNumber({ view: raw }: ScreenProps) {
           )}
           {open && view.phase === 'guess' && (
             <button type="button" className="btn" onClick={() => move({ type: 'pass' })}>
-              Pass
+              {t('Pass')}
             </button>
           )}
           {view.notes.length > 0 && (
             <div className="card sn-notes">
-              <div className="label">What you learned</div>
+              <div className="label">{t('What you learned')}</div>
               <ul className="small">
                 {view.notes.map((l, i) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: the notes only grow
-                  <li key={i}>{said(l)}</li>
+                  <li key={i}>{said(t(l))}</li>
                 ))}
               </ul>
             </div>
@@ -142,10 +143,10 @@ export default function SecretNumber({ view: raw }: ScreenProps) {
           <ul className="sn-log small">
             {view.log.map((l, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: the log only grows
-              <li key={i}>{said(l)}</li>
+              <li key={i}>{said(t(l))}</li>
             ))}
           </ul>
-          <KeyHint>Keys: A–H pick a player, S skips, P passes, digits + Enter guess.</KeyHint>
+          <KeyHint>{t('Keys: A–H pick a player, S skips, P passes, digits + Enter guess.')}</KeyHint>
         </>
       }
     />
