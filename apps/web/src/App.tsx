@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { airedOf, seasonOf, stageOf } from './aired';
 import { Crown, Emblem, Peeker } from './Emblem';
 import { GameIcon } from './GameIcon';
 import { GameIdContext, nameOf, useKeys } from './games/common';
@@ -42,11 +43,10 @@ export function App() {
 
 /** The five difficulty levels (docs/games.md); a game's level n of 5 is the n-th key. */
 const LEVELS = { easy: 'Easy', normal: 'Normal', medium: 'Medium', hard: 'Hard', expert: 'Expert' };
-const levelText = (d: keyof typeof LEVELS) => `${LEVELS[d]} ${Object.keys(LEVELS).indexOf(d) + 1}/5`;
 
-function seatsText(g: GameInfo): string {
-  const seats = Math.max(g.minPlayers, Math.min(4, g.maxPlayers));
-  return seats === 1 ? 'Solo' : `You + ${seats - 1} bot${seats > 2 ? 's' : ''}`;
+/** Players, as a board game box says it: 1 for a solo game, otherwise the fewest players and a plus. */
+function playersText(g: GameInfo): string {
+  return g.maxPlayers === 1 ? '1' : `${g.minPlayers}+`;
 }
 
 const STEPS: [string, string][] = [
@@ -67,18 +67,19 @@ const CATEGORIES: [string, string][] = [
 ];
 const CATEGORY_NAME = Object.fromEntries(CATEGORIES);
 
-type Filter = { kind: string; tag: string; level: string; seats: string; query: string };
-const ANY: Filter = { kind: 'all', tag: 'all', level: 'all', seats: 'all', query: '' };
+type Filter = { tag: string; level: string; seats: string; season: string; stage: string; query: string };
+const ANY: Filter = { tag: 'all', level: 'all', seats: 'all', season: 'all', stage: 'all', query: '' };
 
 function matches(g: GameInfo, f: Filter): boolean {
   const solo = g.maxPlayers === 1;
   const words = f.query.toLowerCase().split(/\s+/).filter(Boolean);
   const text = `${g.name} ${g.short} ${g.tags.map((t) => CATEGORY_NAME[t]).join(' ')}`.toLowerCase();
   return (
-    (f.kind === 'all' || g.kind === f.kind) &&
     (f.tag === 'all' || g.tags.includes(f.tag)) &&
     (f.level === 'all' || g.difficulty === f.level) &&
     (f.seats === 'all' || (f.seats === 'solo') === solo) &&
+    (f.season === 'all' || seasonOf(g.id) === f.season) &&
+    (f.stage === 'all' || stageOf(g.id) === f.stage) &&
     words.every((w) => text.includes(w))
   );
 }
@@ -87,7 +88,7 @@ function Picker({ games }: { games: GameInfo[] }) {
   const [filter, setFilter] = useState<Filter>(ANY);
   // Below the sidebar width the filters fold away behind a button that counts the active ones.
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const active = FILTERS.filter((f) => filter[f.key] !== 'all').length;
+  const active = [...FILTERS.map((f) => f.key), ...SHOW_PICKS.map((p) => p.key)].filter((k) => filter[k] !== 'all').length;
   const shown = games.filter((g) => matches(g, filter));
   const random = () => {
     const pick = shown[Math.floor(Math.random() * shown.length)] ?? games[0];
@@ -148,6 +149,23 @@ function Picker({ games }: { games: GameInfo[] }) {
         <h2 className="section-title" id="games-title">
           Games
         </h2>
+        <p className="games-count" aria-live="polite">
+          {shown.length === games.length ? `${games.length} games` : `${shown.length} of ${games.length} games`}
+        </p>
+        {/* Jump to a type's group of cards; a type with no game left after the filters is greyed out. */}
+        <nav className="kind-nav" aria-label="Jump to a type of game">
+          {KINDS.map(([kind, label]) => (
+            <button
+              key={kind}
+              type="button"
+              className={`chip kind-${kind}`}
+              disabled={!shown.some((g) => g.kind === kind)}
+              onClick={() => document.getElementById(`group-${kind}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            >
+              {label.replace(/ games$/, '')}
+            </button>
+          ))}
+        </nav>
         <div className="catalog-body">
           <aside className="catalog-side" aria-label="Find a game">
             <Search value={filter.query} onChange={(query) => setFilter({ ...filter, query })} />
@@ -161,22 +179,62 @@ function Picker({ games }: { games: GameInfo[] }) {
               {active ? `Filters · ${active}` : 'Filters'}
             </button>
             <Filters open={filtersOpen} filter={filter} onChange={setFilter} />
-            <p className="muted small" aria-live="polite">
-              {shown.length === games.length ? `${games.length} games` : `${shown.length} of ${games.length} games`}
-            </p>
-            {/* Desktop only: the games found, small icon and name, in the order of the cards. */}
+            {active > 0 && (
+              <button
+                type="button"
+                className="btn ghost small filter-clear"
+                onClick={() => setFilter({ ...ANY, query: filter.query, seats: filter.seats, level: filter.level })}
+              >
+                Clear filters
+              </button>
+            )}
+            {/* Desktop only: the games found, small icon and name, A to Z. */}
             <ul className="side-list">
-              {KINDS.flatMap(([kind]) => shown.filter((g) => g.kind === kind)).map((g) => (
-                <li key={g.id}>
-                  <button type="button" onClick={() => start(g.id)}>
-                    <GameIcon id={g.id} />
-                    <span>{g.name}</span>
-                  </button>
-                </li>
-              ))}
+              {[...shown]
+                .sort((a, b) => a.name.localeCompare(b.name, 'en'))
+                .map((g) => (
+                  <li key={g.id}>
+                    <button type="button" className={`kind-${g.kind}`} onClick={() => start(g.id)}>
+                      <GameIcon id={g.id} />
+                      <span>{g.name}</span>
+                    </button>
+                  </li>
+                ))}
             </ul>
           </aside>
           <div className="catalog-list">
+            {/* Over the cards: solo or with bots, and under it the difficulty (the other filters are
+                in the sidebar). */}
+            <div className="card-tabs">
+              <fieldset className="seat-tabs">
+                <legend className="sr-only">Players</legend>
+                {SEAT_TABS.map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className="seat-tab"
+                    aria-pressed={filter.seats === value}
+                    onClick={() => setFilter({ ...filter, seats: value })}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </fieldset>
+              <fieldset className="level-tabs">
+                <legend className="sr-only">Difficulty</legend>
+                {LEVEL_TABS.map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`level-tab ${value}`}
+                    aria-pressed={filter.level === value}
+                    onClick={() => setFilter({ ...filter, level: value })}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </fieldset>
+            </div>
             {shown.length === 0 && (
               <div className="empty">
                 <p className="muted">No game fits these filters.</p>
@@ -189,22 +247,30 @@ function Picker({ games }: { games: GameInfo[] }) {
               const list = shown.filter((g) => g.kind === kind);
               if (!list.length) return null;
               return (
-                <section key={kind}>
-                  <h3 className="group-title">{label}</h3>
+                <section key={kind} id={`group-${kind}`} className="game-group">
+                  <h3 className={`group-title kind-${kind}`}>{label}</h3>
                   <ul className="games">
                     {list.map((g) => (
                       <li key={g.id} className={`game-card ${g.difficulty}`}>
                         <Snapshot id={g.id} />
                         <button type="button" className="game-btn" onClick={() => start(g.id)}>
                           <span className="game-head">
-                            <strong>
-                              <GameIcon id={g.id} className="name-icon" />
-                              {g.name}
-                            </strong>
-                            <span className="level">{levelText(g.difficulty)}</span>
+                            <strong>{g.name}</strong>
+                            <span className="level">{LEVELS[g.difficulty]}</span>
                           </span>
                           <span className="game-short">{g.short}</span>
-                          <em>{seatsText(g)}</em>
+                          {/* The card's foot: players on the left, where it was on the show on the right. */}
+                          <span className="card-foot">
+                            <span className="players">
+                              <svg viewBox="0 0 16 16" aria-hidden="true">
+                                <circle cx="8" cy="5" r="3" />
+                                <path d="M2.5 15 C2.5 10.5 13.5 10.5 13.5 15 Z" />
+                              </svg>
+                              <span className="sr-only">Players: </span>
+                              {playersText(g)}
+                            </span>
+                            <Aired id={g.id} />
+                          </span>
                         </button>
                       </li>
                     ))}
@@ -233,39 +299,87 @@ function Picker({ games }: { games: GameInfo[] }) {
   );
 }
 
-const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }[] = [
-  { key: 'kind', label: 'Type', options: [['all', 'All'], ...KINDS.map(([k, l]): [string, string] => [k, l.replace(/ games$/, '')])] },
-  { key: 'tag', label: 'Category', options: [['all', 'All'], ...CATEGORIES] },
+const SEAT_TABS: [string, string][] = [
+  ['all', 'All games'],
+  ['solo', 'Solo'],
+  ['bots', 'With bots'],
+];
+
+const LEVEL_TABS: [string, string][] = [['all', 'Any level'], ...Object.entries(LEVELS)];
+
+// Where the game was on the show (aired.ts): two dropdowns side by side. Final, Exile and Hidden
+// are types (the jump buttons under the title), so Day lists only the days.
+const SHOW_PICKS: { key: 'season' | 'stage'; label: string; options: [string, string][] }[] = [
   {
-    key: 'level',
-    label: 'Difficulty',
-    options: [['all', 'All'], ...Object.entries(LEVELS).map(([k, l], i): [string, string] => [k, `${l} ${i + 1}`])],
-  },
-  {
-    key: 'seats',
-    label: 'Players',
+    key: 'season',
+    label: 'Season',
     options: [
-      ['all', 'All'],
-      ['solo', 'Solo'],
-      ['bots', 'With bots'],
+      ['all', 'Any season'],
+      ['1', 'Season 1'],
+      ['2', 'Season 2'],
+      ['3', 'Season 3'],
     ],
   },
+  {
+    key: 'stage',
+    label: 'Day',
+    options: [['all', 'Any day'], ...[1, 2, 3, 4, 5, 6].map((d): [string, string] => [`d${d}`, `Day ${d}`])],
+  },
 ];
+
+/** The tint class of a season (season-1 …) or a day (day-1 … day-6); none for "any". */
+const tint = (key: 'season' | 'stage', value: string) =>
+  value === 'all' ? '' : key === 'season' ? `season-${value}` : `day-${value.slice(1)}`;
+
+// No "All" chip: a filter is off until a chip is picked, and picking the pressed chip again turns
+// it off.
+const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }[] = [
+  { key: 'tag', label: 'Category', options: CATEGORIES },
+];
+
+/** Where the game was on the show, on its card: the season in its colour, the day in its shade. */
+function Aired({ id }: { id: string }) {
+  const mark = airedOf(id);
+  if (!mark) return null;
+  const [season, stage = ''] = mark.split(' · ');
+  const day = stageOf(id).startsWith('d') ? ` day-${stageOf(id).slice(1)}` : '';
+  return (
+    <span className={`aired season-${seasonOf(id)}`}>
+      <span className="aired-season">{season}</span> · <span className={`aired-stage${day}`}>{stage}</span>
+    </span>
+  );
+}
 
 function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; onChange: (f: Filter) => void }) {
   return (
     <div id="filters" className={`filters${open ? ' open' : ''}`}>
+      <div className="show-picks">
+        {SHOW_PICKS.map((p) => (
+          <label key={p.key} className="filter">
+            <span className="label">{p.label}</span>
+            <span className={`pick ${tint(p.key, filter[p.key])}`}>
+              <select value={filter[p.key]} onChange={(e) => onChange({ ...filter, [p.key]: e.target.value })}>
+                {p.options.map(([value, label]) => (
+                  <option key={value} value={value} className={tint(p.key, value)}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </span>
+          </label>
+        ))}
+      </div>
       {FILTERS.map((f) => (
-        <fieldset key={f.key} className="filter">
+        <fieldset key={f.key} className={`filter filter-${f.key}`}>
           <legend className="label">{f.label}</legend>
           <div className="chips">
             {f.options.map(([value, label]) => (
               <button
                 key={value}
                 type="button"
-                className={`chip${value !== 'all' && f.key === 'level' ? ` ${value}` : ''}`}
+                className="chip"
                 aria-pressed={filter[f.key] === value}
-                onClick={() => onChange({ ...filter, [f.key]: value })}
+                onClick={() => onChange({ ...filter, [f.key]: filter[f.key] === value ? 'all' : value })}
               >
                 {label}
               </button>

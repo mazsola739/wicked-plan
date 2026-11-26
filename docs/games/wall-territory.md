@@ -7,11 +7,17 @@ screen: `apps/web/src/games/WallTerritory.tsx`.
 
 **Goal:** wall off the biggest area of the 7×7 board for your own two pieces.
 
-- Players take turns. On your turn, tap one of your pieces, then tap where it goes: 0, 1 or 2 squares straight, turning allowed, never through walls or pieces.
-- Then build a wall on one side of the square it stands on: tap **Top**, **Right**, **Bottom** or **Left**. Walls never come down, and you can't build on the board edge.
-- Once no other player's piece can reach your pieces' area, you are **sealed in** and skip your turns.
-- The game ends when everyone is sealed in.
-- Your score is **100 + 20 per square** of the areas holding only your pieces. Most area wins.
+**The table:** you and two bots, **2 pieces** each, on fixed squares. You take turns; every turn is one move and one wall.
+
+- **Move.** Tap one of your pieces, then one of its lit squares: up to **2 steps**, straight or round one corner. Walls and other pieces block the way. Staying put (0 steps) is allowed too.
+- **Build.** Then put a wall on one side of the square that piece stands on: tap **Top**, **Right**, **Bottom** or **Left**. The board edge already works as a wall, and a wall never comes down.
+- **Sealed in.** Once no rival can reach any square your pieces can reach, your area is closed for good, and you skip your turns from then on.
+- **End.** The game ends when every player is sealed in.
+- **Score.** Count the squares of the areas that hold only your pieces: you get **100 + 20 per square**. Most squares wins; the same number of squares shares the place.
+
+**Example:** your pieces end up in two areas, one of 12 squares and one of 5. That is 17 squares: 100 + 17 × 20 = **440** points.
+
+**Watch out:** an area with nobody's pieces in it counts for no one, and an area where a rival's piece stands is not yours yet. Close your area before a rival walks in.
 
 **On the show:** Three players took turns moving one of their pieces and building a wall beside it on a Go board (here the board is 7×7), until each player's pieces were walled off from everyone else's. Player A finished with the largest territory, won a prize and was safe from elimination. Player B and Player C then replayed the game by the same rules, and Player B, left with the smaller territory, was eliminated.
 

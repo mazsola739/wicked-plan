@@ -146,11 +146,11 @@ export function HowToPlay({ id, name, onClose }: { id: string; name: string; onC
         {/* The Observer and the game's icon take turns on the monitor, switching with a flicker. */}
         <div className="tx-screen" aria-hidden="true">
           <Emblem className="tx-emblem" watching decorative />
-          <GameIcon id={id} className="tx-icon" />
+          <GameIcon id={id} className="tx-icon" neon />
         </div>
-        <div className="label">{name}</div>
-        <h2 ref={heading} tabIndex={-1}>
-          How to play
+        <div className="label">How to play</div>
+        <h2 ref={heading} tabIndex={-1} className="tx-title">
+          {name}
         </h2>
         {goal && <TypedGoal goal={goal} skip={skip} onDone={finish} />}
         <div className={done ? 'tx-rest' : 'tx-rest waiting'}>

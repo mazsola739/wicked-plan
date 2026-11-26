@@ -8,6 +8,11 @@ pick one and play. Solo puzzles are played alone; games for several players are 
 - **Platform:** a single-page React + TypeScript web app for desktop (wider layout, keyboard shortcuts)
   and phone (portrait, one hand). No native app.
 - **Language:** everything in the product and the docs is English.
+  - **Hungarian is coming** (decided 2026-11-26, not built yet): the page gets an EN / HU switch in
+    the header and starts in the browser's language. In Hungarian everything is translated except
+    the names: the game names stay the show's English names, with the Hungarian one under them in
+    brackets, and the title stays "Wicked Plan" with "(Gonosz terv)" under it. The repo, code, docs
+    and commits stay English.
 - **No rooms and no server for now:** the page is a game picker. A room/server layer may come later;
   the rules keep secrets out of the views so a server could referee without changes.
 - **Rules in Rust:** one `crates/rules` crate, run in the browser through WebAssembly.
@@ -32,14 +37,32 @@ pick one and play. Solo puzzles are played alone; games for several players are 
   on the landing page, the How to play monitor and the results; and `face.webp`, its LED eyes and
   grin alone on transparent (the peeking face). The crown alone is the small mark (top bar, footer,
   favicon), drawn in SVG in `Emblem.tsx`.
-- **Game icons** (the owner's art, 2026-11-23): one neon icon per game, `assets/icons/<game-id>.webp`
-  (256 px, transparent), shown by `GameIcon.tsx`, loaded only when in view. It is small beside the
-  name on the game's card (the card's picture is the still of the game) and in the sidebar's game
-  list, beside the title in the game (`GameTop`), and on the How to play monitor, taking turns with
-  the Observer (a flicker at each switch).
+- **On the show** (2026-11-26): each game's card shows, small and quiet in its bottom-right corner,
+  where the game was on the show: season and day (`S01 · D04`), `FINAL`, `EXILE n` or `HIDDEN`,
+  from the English Wikipedia article (it gives days, not episodes); `apps/web/src/aired.ts`. The
+  catalogue filters by it too, with two dropdowns side by side at the top of the sidebar: Season
+  (any, 1–3) and Day (any, 1–6; finals, exile and hidden games are types). Seasons have a colour
+  (1 cyan, 2 pink, 3 orange) and days a silver shade (dim day 1 to bright day 6), on the dropdowns
+  and on the card's mark. Under them the Category chips: no "All" chip, a chip is off until picked,
+  the pressed chip again turns it off, and "Clear filters" resets the sidebar. Players and
+  Difficulty are tabs over the cards instead: All games · Solo · With bots, and under them smaller
+  sub-tabs Any level · Easy … Expert, each lit in its level's colour. The count of games shown sits
+  under the "Games" title, and under it the types are jump buttons, each in its colour, that scroll
+  to their group of cards; a type with no game left after the filters is grey and disabled. The
+  sidebar's game list is A to Z.
+  Metal Cast Puzzle, Rising Water Well and Unknown Language are not in the article and have none.
+- **Game icons** (the owner's art, 2026-11-23; two sets since 2026-11-26): two icons per game,
+  256 px, transparent, shown by `GameIcon.tsx`, loaded only when in view. The metal set
+  (`assets/icons/<game-id>.webp`) is small in the sidebar's game list, beside the title in the game
+  (`GameTop`). The How to play shows no metal icon; its big title is the game's name.
+  The game's card has no icon: its picture is the still of the game. The neon set
+  (`assets/icons-neon/<game-id>.webp`) is on the How to play monitor, taking turns with the
+  Observer (a flicker at each switch).
 - **Palette:** near-black background, dark violet-grey surfaces, **cyan** for highlights and the main
   action, **violet** for fills and the second action, **silver** for the title and line art.
-  Difficulty has five levels (from the owner's catalogue brief, 2026-11-24): green easy, blue normal, yellow medium, red hard, purple expert; the pill also says the level as n/5.
+  Difficulty has five levels (from the owner's catalogue brief, 2026-11-24): green easy, blue normal, yellow medium, red hard, purple expert; the pill says only the level's name, and all the pills are one width.
+  Each type of game has its colour too, on its jump button and over its group of cards: main cyan,
+  mini green, team blue, prison orange, hidden purple, exile pink, final duels silver.
 - **Type:** Cinzel (bundled, `@fontsource/cinzel`) for the title and headings; the system sans for
   everything else; tiny labels in letter-spaced capitals.
 - **Shapes:** long hexagonal buttons (pointed ends); filter chips, step badges and difficulty pills
