@@ -45,16 +45,29 @@ pick one and play. Solo puzzles are played alone; games for several players are 
   where the game was on the show: season and day (`S01 · D04`), `FINAL`, `EXILE n` or `HIDDEN`,
   from the English Wikipedia article (it gives days, not episodes); `apps/web/src/aired.ts`. The
   catalogue filters by it too, with two dropdowns side by side at the top of the sidebar: Season
-  (any, 1–3) and Day (any, 1–6; finals, exile and hidden games are types). Seasons have a colour
-  (1 cyan, 2 pink, 3 orange) and days a silver shade (dim day 1 to bright day 6), on the dropdowns
-  and on the card's mark. Under them the Category chips: no "All" chip, a chip is off until picked,
-  the pressed chip again turns it off, and "Clear filters" resets the sidebar. Players and
-  Difficulty are tabs over the cards instead: All games · Solo · With bots, and under them smaller
-  sub-tabs Any level · Easy … Expert, each lit in its level's colour. The count of games shown sits
-  under the "Games" title, and under it the types are jump buttons, each in its colour, that scroll
+  (any, 1–3) and Day (any, 1–6; finals, exile and hidden games are types). The two are the page's own
+  dropdowns (`Dropdown.tsx`, the listbox pattern): a hexagon trigger with the chosen season's or
+  day's colour as a dot (and, once one is chosen, the trigger looks like a chosen chip in that
+  colour), and a dark list with a dot per row and a tick on the chosen one. Under them the Category chips: no "All" chip, a chip is off until picked,
+  the pressed chip again turns it off ("Clear all" by the count resets everything). Players and
+  Difficulty sit over the cards instead, as two rows of hexagon chips like the filters: All games ·
+  Solo · Multiplayer (not solo: a game for several players), and under them smaller ones, Any level · Easy … Expert, each in its colour. The count of games shown sits
+  under the "Games" title, with a quiet "× Clear all" beside it while anything (search, a filter,
+  a tab) narrows the list, the one way back to all the games, and under it the types are jump buttons, each in its colour, that scroll
   to their group of cards; a type with no game left after the filters is grey and disabled. The
   sidebar's game list is A to Z.
   Metal Cast Puzzle, Rising Water Well and Unknown Language are not in the article and have none.
+- **Filter icons** (the owner's art, 2026-11-26): neon icons for the seven types, five levels,
+  seven categories and the two player modes (solo, multiplayer),
+  `assets/ui-icons/<kind|level|category|mode>-<id>.webp` (128 px, transparent), named by the ids
+  the code uses. Each card shows them as **badges**: hexagons like icon roundels, one size on every card, sized from the card's width so the most a card has (six) fill one row
+  on the line between its picture and its text, half over the picture, at the left; only the edge carries
+  the group's colour (the inside is neutral dark), and over the card the edge lights up
+  bright with a glow around the hexagon (the inside stays dark) and the icon goes from 80% to full at 110% brightness: solo or multiplayer, the difficulty, the type, then the categories; the badge is the card's only difficulty
+  mark (the name is the tooltip and what a screen reader says). The filter chips
+  carry the same icon in front of the label (the type jumps, the levels and the categories; not the
+  neutral "all"/"any" ones), so the filters are the key to the cards' badges; a chip's icon is at 80% at rest and full,
+  a touch brighter (110%), when the chip lights up or is chosen.
 - **Game icons** (the owner's art, 2026-11-23; two sets since 2026-11-26): two icons per game,
   256 px, transparent, shown by `GameIcon.tsx`, loaded only when in view. The metal set
   (`assets/icons/<game-id>.webp`) is small in the sidebar's game list, beside the title in the game
@@ -62,11 +75,28 @@ pick one and play. Solo puzzles are played alone; games for several players are 
   The game's card has no icon: its picture is the still of the game. The neon set
   (`assets/icons-neon/<game-id>.webp`) is on the How to play monitor, taking turns with the
   Observer (a flicker at each switch).
-- **Palette:** near-black background, dark violet-grey surfaces, **cyan** for highlights and the main
-  action, **violet** for fills and the second action, **silver** for the title and line art.
-  Difficulty has five levels (from the owner's catalogue brief, 2026-11-24): green easy, blue normal, yellow medium, red hard, purple expert; the pill says only the level's name, and all the pills are one width.
-  Each type of game has its colour too, on its jump button and over its group of cards: main cyan,
-  mini green, team blue, prison orange, hidden purple, exile pink, final duels silver.
+- **Palette** (the owner's colour system, 2026-11-26; the tokens are in `:root` of `styles.css`):
+  near-black background (#08090F), graphite surfaces (#141520, raised #0E0F18), neutral edges
+  (#343447); the mascot's **cyan** (#20E9FF) for focus and the main action and **violet** (#A855F7)
+  for emphasis; **silver** for the title. Each kind of filter has its own colours, never one shared
+  set: difficulty (easy #44D6A0, normal #609EFF, medium #EAC568, hard #F07891, expert #BE73FA), season (1 antique gold #D4AA62, 2 jade
+  #52C6BA, 3 orchid #D77AB8), day (one indigo-to-violet scale, #60749F … #C079FF), category (logic
+  #27D9ED, strategy #9B85F5, bluff #E27CAB, social #55B6A1, auction #DCA45C, memory #6B9DE5, speed
+  #ED9566), players (solo #73B8E8, multiplayer #51D1C0) and the muted game types (main #50BEE9, mini
+  #60C5A3, team #819DEB, prison #D18E7C, hidden #B184E2, exile #D881C1, final duels #B8B8CA). The
+  neutral resets (All games, Any level, Any season, Any day) are cyan or plain. Small text keeps
+  4.5:1 contrast: a too-dark accent is brightened for text (the darkest days on the card).
+- **Filter buttons:** one size for every hexagon control (38 px high, one label size: `--hex-h`,
+  `--hex-font`; the type jumps and the player and level rows also one width, `--hex-w`, three a
+  row on a phone) and one behaviour for all: a dark fill with a hint of the accent, an edge half-way
+  to it and the label in it; hover lights every hexagon button up like a lamp from its bottom edge (a bright
+  line in its accent and a glow rising from it), with the full accent edge and a lighter label; chosen a stronger tint,
+  a 2px edge and a bright label; pressed a moment darker; disabled grey (#11121A, #292A39, #66677D),
+  not just faded; keyboard focus a bright #8DEEFF edge. No permanent glow. Hover, keyboard focus and an open dropdown
+  share one glass look on every control (chips, type jumps, the player and level rows, dropdown
+  triggers and rows). The
+  dropdown list is an angular panel with hexagon rows. A game card on hover lifts a little with a
+  quiet cyan-to-violet edge.
 - **Type:** Cinzel (bundled, `@fontsource/cinzel`) for the title and headings; the system sans for
   everything else; tiny labels in letter-spaced capitals.
 - **Shapes:** long hexagonal buttons (pointed ends); filter chips, step badges and difficulty pills

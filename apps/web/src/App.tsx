@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { airedOf, seasonOf, stageOf } from './aired';
+import { Dropdown } from './Dropdown';
 import { Emblem, Grin, Peeker } from './Emblem';
 import { GameIcon } from './GameIcon';
 import { GameIdContext, nameOf, useKeys } from './games/common';
@@ -161,11 +162,22 @@ function Picker({ games }: { games: GameInfo[] }) {
         <h2 className="section-title" id="games-title">
           {t('Games')}
         </h2>
-        <p className="games-count" aria-live="polite">
-          {shown.length === games.length
-            ? t('{n} games', { n: games.length })
-            : t('{n} of {total} games', { n: shown.length, total: games.length })}
-        </p>
+        {/* The count, and while anything narrows the list (search, a filter, a tab) one way back to all. */}
+        <div className="games-count">
+          <p aria-live="polite">
+            {shown.length === games.length
+              ? t('{n} games', { n: games.length })
+              : t('{n} of {total} games', { n: shown.length, total: games.length })}
+          </p>
+          {shown.length < games.length || JSON.stringify(filter) !== JSON.stringify(ANY) ? (
+            <button type="button" className="clear-all" onClick={() => setFilter(ANY)}>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M4 4 L12 12 M12 4 L4 12" />
+              </svg>
+              {t('Clear all')}
+            </button>
+          ) : null}
+        </div>
         {/* Jump to a type's group of cards; a type with no game left after the filters is greyed out. */}
         <nav className="kind-nav" aria-label={t('Jump to a type of game')}>
           {KINDS.map(([kind, label]) => (
@@ -176,7 +188,8 @@ function Picker({ games }: { games: GameInfo[] }) {
               disabled={!shown.some((g) => g.kind === kind)}
               onClick={() => document.getElementById(`group-${kind}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
             >
-              {t(label.replace(/ games$/, ''))}
+              <img className="chip-icon" src={uiIcon(`kind-${kind}`)} alt="" />
+              {t(kind === 'final-duel' ? 'Finals' : label.replace(/ games$/, ''))}
             </button>
           ))}
         </nav>
@@ -193,15 +206,6 @@ function Picker({ games }: { games: GameInfo[] }) {
               {active ? `${t('Filters')} · ${active}` : t('Filters')}
             </button>
             <Filters open={filtersOpen} filter={filter} onChange={setFilter} />
-            {active > 0 && (
-              <button
-                type="button"
-                className="btn ghost small filter-clear"
-                onClick={() => setFilter({ ...ANY, query: filter.query, seats: filter.seats, level: filter.level })}
-              >
-                {t('Clear filters')}
-              </button>
-            )}
             {/* Desktop only: the games found, small icon and name, A to Z. */}
             <ul className="side-list">
               {[...shown]
@@ -226,10 +230,11 @@ function Picker({ games }: { games: GameInfo[] }) {
                   <button
                     key={value}
                     type="button"
-                    className="seat-tab"
+                    className={`chip tab-chip mode-${value}`}
                     aria-pressed={filter.seats === value}
                     onClick={() => setFilter({ ...filter, seats: value })}
                   >
+                    {value !== 'all' && <img className="chip-icon" src={uiIcon(`mode-${value}`)} alt="" />}
                     {t(label)}
                   </button>
                 ))}
@@ -240,10 +245,11 @@ function Picker({ games }: { games: GameInfo[] }) {
                   <button
                     key={value}
                     type="button"
-                    className={`level-tab ${value}`}
+                    className={`chip tab-chip lv-${value}`}
                     aria-pressed={filter.level === value}
                     onClick={() => setFilter({ ...filter, level: value })}
                   >
+                    {value !== 'all' && <img className="chip-icon" src={uiIcon(`level-${value}`)} alt="" />}
                     {t(label)}
                   </button>
                 ))}
@@ -267,13 +273,13 @@ function Picker({ games }: { games: GameInfo[] }) {
                     {list.map((g) => (
                       <li key={g.id} className={`game-card ${g.difficulty}`}>
                         <Snapshot id={g.id} />
+                        <CardBadges g={g} />
                         <button type="button" className="game-btn" onClick={() => start(g.id)}>
                           <span className="game-head">
                             <strong>
                               {g.name}
                               {huName(g.id) && <span className="name-hu">({huName(g.id)})</span>}
                             </strong>
-                            <span className="level">{t(LEVELS[g.difficulty])}</span>
                           </span>
                           <span className="game-short">{gameShort(g.id, g.short)}</span>
                           {/* The card's foot: players on the left, where it was on the show on the right. */}
@@ -319,7 +325,7 @@ function Picker({ games }: { games: GameInfo[] }) {
 const SEAT_TABS: [string, string][] = [
   ['all', 'All games'],
   ['solo', 'Solo'],
-  ['bots', 'With bots'],
+  ['multi', 'Multiplayer'],
 ];
 
 const LEVEL_TABS: [string, string][] = [['all', 'Any level'], ...Object.entries(LEVELS)];
@@ -331,7 +337,7 @@ const SHOW_PICKS: { key: 'season' | 'stage'; label: string; options: [string, st
     key: 'season',
     label: 'Season',
     options: [
-      ['all', 'Any season'],
+      ['all', 'Any'],
       ['1', 'Season 1'],
       ['2', 'Season 2'],
       ['3', 'Season 3'],
@@ -340,7 +346,7 @@ const SHOW_PICKS: { key: 'season' | 'stage'; label: string; options: [string, st
   {
     key: 'stage',
     label: 'Day',
-    options: [['all', 'Any day'], ...[1, 2, 3, 4, 5, 6].map((d): [string, string] => [`d${d}`, `Day ${d}`])],
+    options: [['all', 'Any'], ...[1, 2, 3, 4, 5, 6].map((d): [string, string] => [`d${d}`, `Day ${d}`])],
   },
 ];
 
@@ -353,6 +359,37 @@ const tint = (key: 'season' | 'stage', value: string) =>
 const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }[] = [
   { key: 'tag', label: 'Category', options: CATEGORIES.map(([id, , short]): [string, string] => [id, short]) },
 ];
+
+/** The owner's neon icons for the types, levels and categories (assets/ui-icons). */
+const UI_ICONS = import.meta.glob<string>('./assets/ui-icons/*.webp', { eager: true, import: 'default' });
+const uiIcon = (name: string) => UI_ICONS[`./assets/ui-icons/${name}.webp`];
+
+/**
+ * A card's badges, on the line between its picture and its text, at the left: hexagons like icon
+ * roundels, each in its own colour with its neon icon: solo or multiplayer, the difficulty, the type,
+ * then the categories.
+ */
+function CardBadges({ g }: { g: GameInfo }) {
+  const kind = KINDS.find(([k]) => k === g.kind)?.[1] ?? '';
+  const mode = g.maxPlayers === 1 ? 'solo' : 'multi';
+  const badges: [string, string, string][] = [
+    [`mode-${mode}`, `mode-${mode}`, t(mode === 'solo' ? 'Solo' : 'Multiplayer')],
+    [`lv`, `level-${g.difficulty}`, t(LEVELS[g.difficulty])],
+    [`kind-${g.kind}`, `kind-${g.kind}`, t(kind)],
+    ...g.tags.map((c): [string, string, string] => [`cat-${c}`, `category-${c}`, t(CATEGORY_NAME[c] ?? '')]),
+  ];
+  return (
+    <span className="card-badges">
+      {badges.map(([tint, icon, name]) => (
+        <span key={icon} className={`hex-glow ${tint}`} role="img" aria-label={name} title={name}>
+          <span className="hex-badge">
+            <img src={uiIcon(icon)} alt="" />
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /** Where the game was on the show, on its card: the season in its colour, the day in its shade. */
 function Aired({ id }: { id: string }) {
@@ -371,19 +408,15 @@ function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; on
   return (
     <div id="filters" className={`filters${open ? ' open' : ''}`}>
       <div className="show-picks">
-        {SHOW_PICKS.map((p) => (
-          <label key={p.key} className="filter">
-            <span className="label">{t(p.label)}</span>
-            <span className={`pick ${tint(p.key, filter[p.key])}`}>
-              <select value={filter[p.key]} onChange={(e) => onChange({ ...filter, [p.key]: e.target.value })}>
-                {p.options.map(([value, label]) => (
-                  <option key={value} value={value} className={tint(p.key, value)}>
-                    {t(label)}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </label>
+        {SHOW_PICKS.map((p, i) => (
+          <Dropdown
+            key={p.key}
+            label={t(p.label)}
+            value={filter[p.key]}
+            align={i === 0 ? 'left' : 'right'}
+            options={p.options.map(([value, label]) => ({ value, label: t(label), tint: tint(p.key, value) }))}
+            onChange={(value) => onChange({ ...filter, [p.key]: value })}
+          />
         ))}
       </div>
       {FILTERS.map((f) => (
@@ -394,11 +427,12 @@ function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; on
               <button
                 key={value}
                 type="button"
-                className="chip"
+                className={`chip cat-${value}`}
                 title={f.key === 'tag' ? t(CATEGORY_NAME[value] ?? '') : undefined}
                 aria-pressed={filter[f.key] === value}
                 onClick={() => onChange({ ...filter, [f.key]: filter[f.key] === value ? 'all' : value })}
               >
+                {f.key === 'tag' && <img className="chip-icon" src={uiIcon(`category-${value}`)} alt="" />}
                 {t(label)}
               </button>
             ))}

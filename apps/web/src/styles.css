@@ -1,16 +1,23 @@
 /* The theme (docs/design.md, Visual identity): near-black, cyan highlights, violet fills, silver lines.
    Game screens use these names: --accent is a fill under white text, --accent-2 a highlight colour. */
 :root {
-  --bg: #08080c;
-  --panel: #12111a;
-  --panel-2: #1b1926;
-  --line: #2a2738;
-  --text: #eef0f6;
-  --muted: #9d9bb0;
+  /* Foundation (the owner's colour system, 2026-11-26, docs/design.md): black and graphite
+     surfaces, the mascot's cyan and violet as the accents. */
+  --bg: #08090f;
+  --bg-raised: #0e0f18;
+  --panel: #141520;
+  --panel-2: #1b1c2a;
+  --line: #343447;
+  --line-soft: #242536;
+  --text: #f1f0fa;
+  --muted: #a6a5bc;
+  --text-disabled: #66677d;
   --accent: #7c3aed;
-  --accent-2: #22d3ee;
-  --cyan: #22d3ee;
+  --accent-2: #20e9ff;
+  --cyan: #20e9ff;
   --violet: #a855f7;
+  --focus: #8deeff;
+  --danger: #f07891;
   --silver: #d7dbe4;
   --ok: #34d399;
   --warn: #facc15;
@@ -18,6 +25,45 @@
   --touch: 48px;
   --display: "Cinzel", Georgia, "Times New Roman", serif;
   --chamfer: 14px;
+  /* Every hexagon control (chips, type jumps, player and level rows, dropdown triggers) is this tall,
+     with this label size. */
+  --hex-h: 38px;
+  --hex-w: 128px;
+  --hex-font: 0.68rem;
+
+  /* Semantic palettes: each kind of filter has its own colours, so a colour never has to mean two
+     things in one place; a label or icon always says what it is too. */
+  --lv-easy: #44d6a0;
+  --lv-normal: #609eff;
+  --lv-medium: #eac568;
+  --lv-hard: #f07891;
+  --lv-expert: #be73fa;
+  --season-1: #d4aa62;
+  --season-2: #52c6ba;
+  --season-3: #d77ab8;
+  --day-1: #60749f;
+  --day-2: #697fba;
+  --day-3: #728add;
+  --day-4: #8388ef;
+  --day-5: #a07efa;
+  --day-6: #c079ff;
+  --cat-logic: #27d9ed;
+  --cat-strategy: #9b85f5;
+  --cat-bluff: #e27cab;
+  --cat-social: #55b6a1;
+  --cat-auction: #dca45c;
+  --cat-memory: #6b9de5;
+  --cat-speed: #ed9566;
+  --mode-solo: #73b8e8;
+  --mode-multi: #51d1c0;
+  /* The game types: kept muted, since many colours already share the page. */
+  --kind-main: #50bee9;
+  --kind-mini: #60c5a3;
+  --kind-team: #819deb;
+  --kind-prison: #d18e7c;
+  --kind-hidden: #b184e2;
+  --kind-exile: #d881c1;
+  --kind-final: #b8b8ca;
 
   /* Inside the games (docs/design.md): named colours as neon on near-black, one seat order
      (you first, in cyan), dark boards with silver lines, cards and tiles as dark glass. */
@@ -84,8 +130,8 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
 }
 
 button,
@@ -320,99 +366,230 @@ h2 {
   fill: currentColor;
 }
 
-/* Seasons have their colour (1 cyan, 2 pink, 3 orange: none of the difficulty colours, which sit on
-   the same card) and days a silver shade, dim on day 1 to bright on day 6; the same on the filter
-   chips and on the card's mark. Final, exile and hidden stay grey. */
+/* Seasons have their colour (1 antique gold, 2 jade, 3 orchid) and days one indigo-to-violet scale
+   (a progression, not six meanings); the same on the dropdowns and on the card's mark. Final,
+   exile and hidden stay grey. */
 .season-1 {
-  --season: var(--g-cyan);
+  --season: var(--season-1);
 }
 
 .season-2 {
-  --season: var(--g-pink);
+  --season: var(--season-2);
 }
 
 .season-3 {
-  --season: var(--g-orange);
+  --season: var(--season-3);
 }
 
 .day-1 {
-  --day: color-mix(in srgb, var(--silver) 45%, var(--panel));
+  --day: var(--day-1);
 }
 
 .day-2 {
-  --day: color-mix(in srgb, var(--silver) 56%, var(--panel));
+  --day: var(--day-2);
 }
 
 .day-3 {
-  --day: color-mix(in srgb, var(--silver) 67%, var(--panel));
+  --day: var(--day-3);
 }
 
 .day-4 {
-  --day: color-mix(in srgb, var(--silver) 78%, var(--panel));
+  --day: var(--day-4);
 }
 
 .day-5 {
-  --day: color-mix(in srgb, var(--silver) 89%, var(--panel));
+  --day: var(--day-5);
 }
 
 .day-6 {
-  --day: var(--g-white);
+  --day: var(--day-6);
 }
 
-/* Season and Day: two dropdowns side by side, drawn like the chips (a hexagon, edge = background,
-   fill = ::before), in the chosen season's colour or day's shade; cyan while on "any". */
+/* The page's one language for its controls (chips, type jumps, the dropdowns, the tabs over the
+   cards): each has an accent, --glass. Under the mouse, under keyboard focus and while a dropdown is
+   open it lights up the same way, like a lamp from its bottom edge (a bright line and a glow rising
+   from it), the edge in the accent (in the focus colour for keyboard focus) and a lighter label. Chosen
+   reads stronger: a deeper tint, a 2px edge and a white label. */
+.chip,
+.pick,
+.dropdown-option {
+  /* Like a lamp switching on at the bottom: a bright line along the lower edge and a glow rising
+     from it, fading out towards the top. */
+  --glass-fill:
+    linear-gradient(to top, var(--glass) 0 2px, transparent 2px),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--glass) 42%, transparent),
+      color-mix(in srgb, var(--glass) 12%, transparent) 45%,
+      transparent 85%
+    ),
+    var(--panel);
+  --glass-text: color-mix(in srgb, var(--glass) 55%, #ffffff);
+}
+
+.chip {
+  --glass: var(--chip);
+}
+
+.pick {
+  --glass: var(--cyan);
+}
+
+/* Season and Day: two dropdowns side by side (Dropdown.tsx). Closed: a hexagon like the chips
+   (edge = background, fill = ::before) on the raised dark surface with a neutral edge, the chosen
+   value's colour as a small dot; the edge turns cyan under the mouse and while open. Open: a dark
+   panel with a thin edge and a soft shadow, a dot per row, a tick on the chosen row, and a quiet
+   dark highlight on the row under the mouse or the keys. "Any" has no dot. */
 .show-picks {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
 
+.dropdown {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
 .pick {
-  --pick: var(--cyan);
+  --pick: transparent;
+  --edge: var(--line);
   position: relative;
   isolation: isolate;
-  display: block;
-  margin-top: 6px;
-  background: color-mix(in srgb, var(--pick) 45%, #34304a);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--hex-h);
+  padding: 0 28px 0 30px;
+  border: none;
+  background: var(--edge);
+  color: var(--text);
+  font-size: var(--hex-font);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease;
   clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%);
 }
 
 .pick::before {
   content: "";
   position: absolute;
-  inset: 1px;
+  inset: var(--edge-w, 1px);
   z-index: -1;
-  background: var(--panel);
+  background: var(--fill, var(--bg-raised));
   clip-path: inherit;
 }
 
-.pick.season-1,
-.pick.season-2,
-.pick.season-3 {
-  --pick: var(--season);
+.dropdown.open .pick {
+  --edge: var(--glass);
+  --fill: var(--glass-fill);
+  color: var(--glass-text);
 }
 
-.pick[class*="day-"] {
-  --pick: var(--day);
+.pick:focus-visible {
+  --edge: var(--focus);
+  --fill: var(--glass-fill);
+  outline: none;
 }
 
-.pick select {
-  appearance: none;
-  width: 100%;
-  min-height: 40px;
-  padding: 0 26px 0 16px;
-  border: none;
-  background: transparent;
-  color: var(--pick);
-  font: inherit;
+.dropdown-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 20;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 100%;
+  margin: 0;
+  padding: 8px;
+  background: #3b3b50;
+  clip-path: polygon(
+    10px 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    10px 100%,
+    0 calc(100% - 10px),
+    0 10px
+  );
+  outline: none;
+}
+
+.dropdown-list::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: #10111b;
+  clip-path: inherit;
+}
+
+/* The list is a dark sheet over the page: a soft shadow under it (on the wrapper, since the clipped
+   list cannot cast one). */
+.dropdown.open {
+  z-index: 30;
+  filter: drop-shadow(0 12px 18px rgb(0 0 0 / 0.45));
+}
+
+.dropdown-list.left {
+  left: 0;
+}
+
+.dropdown-list.right {
+  right: 0;
+}
+
+.dropdown-option {
+  --pick: transparent;
+  --glass: var(--cyan);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px 0 32px;
+  color: color-mix(in srgb, var(--glass) 35%, var(--text));
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
+  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
 }
 
-/* The arrow, drawn in the dropdown's colour. */
+.dropdown-option.season-1,
+.dropdown-option.season-2,
+.dropdown-option.season-3,
+.dropdown-option[class*="day-"] {
+  --glass: var(--pick);
+}
+
+.dropdown-option.active {
+  background: var(--glass-fill);
+  color: var(--glass-text);
+}
+
+.dropdown-option[aria-selected="true"] {
+  background: color-mix(in srgb, var(--glass) 20%, var(--panel));
+  color: var(--text);
+}
+
+.pick-value {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The arrow; it turns over while the list is open. */
 .pick::after {
   content: "";
   position: absolute;
@@ -421,25 +598,76 @@ h2 {
   width: 6px;
   height: 6px;
   margin-top: -5px;
-  border-right: 2px solid var(--pick);
-  border-bottom: 2px solid var(--pick);
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
   transform: rotate(45deg);
+  transition: transform 160ms ease;
   pointer-events: none;
 }
 
-.pick option {
-  background: var(--panel);
-  color: var(--text);
+.dropdown.open .pick::after {
+  margin-top: -1px;
+  transform: rotate(225deg);
 }
 
-.pick option.season-1,
-.pick option.season-2,
-.pick option.season-3 {
-  color: var(--season);
+/* The value's colour, a small dot at the start of the trigger and of each row. */
+.pick-dot {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--pick);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--pick) 70%, transparent);
+  pointer-events: none;
 }
 
-.pick option[class*="day-"] {
-  color: var(--day);
+.dropdown-option .pick-dot {
+  left: 14px;
+}
+
+.pick.season-1,
+.pick.season-2,
+.pick.season-3,
+.dropdown-option.season-1,
+.dropdown-option.season-2,
+.dropdown-option.season-3 {
+  --pick: var(--season);
+}
+
+.pick[class*="day-"],
+.dropdown-option[class*="day-"] {
+  --pick: var(--day);
+}
+
+/* A chosen season or day: the trigger takes its colour and looks like a chosen chip (a tint, a 2px
+   edge in the colour, a white label). */
+.pick.season-1,
+.pick.season-2,
+.pick.season-3,
+.pick[class*="day-"] {
+  --glass: var(--pick);
+  --edge: var(--pick);
+  --edge-w: 2px;
+  --fill: color-mix(in srgb, var(--pick) 18%, var(--panel));
+}
+
+.dropdown-tick {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 2;
+}
+
+/* "Any" has no colour: its dot is an empty ring, so every row and the trigger line up. */
+.pick:not([class*="season-"], [class*="day-"]) .pick-dot,
+.dropdown-option:not([class*="season-"], [class*="day-"]) .pick-dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--muted);
 }
 
 .aired-season {
@@ -447,17 +675,20 @@ h2 {
 }
 
 .aired-stage[class*="day-"] {
-  color: var(--day);
+  /* Brightened a little: the darkest day colours are too dim for small text on a card. */
+  color: color-mix(in srgb, var(--day) 80%, var(--text));
 }
 
 .game-card {
-  --level: var(--warn);
+  --level: var(--lv-medium);
+  /* The card is a size container: its badges are sized from its width (six fill one row). */
+  container-type: inline-size;
   position: relative;
   display: flex;
   flex-direction: column;
   border-radius: 12px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  background: var(--panel);
   overflow: hidden;
   transition:
     transform 0.06s,
@@ -466,24 +697,109 @@ h2 {
 }
 
 .game-card.easy {
-  --level: var(--ok);
+  --level: var(--lv-easy);
 }
 
 .game-card.normal {
-  --level: var(--g-blue);
+  --level: var(--lv-normal);
 }
 
 .game-card.hard {
-  --level: var(--bad);
+  --level: var(--lv-hard);
 }
 
 .game-card.expert {
-  --level: var(--g-purple);
+  --level: var(--lv-expert);
 }
 
 .game-card:has(.game-btn:focus-visible) {
-  outline: 2px solid var(--accent-2);
-  outline-offset: 2px;
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* A card's badges sit on the line between its picture and its text, half over the picture, at the
+   left like the title: hexagons like icon roundels, each in its own colour (edge = background,
+   fill = ::before, like the chips) with the owner's neon icon. */
+.card-badges {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: var(--badge-gap);
+  height: 0;
+  padding: 0 14px;
+  pointer-events: none;
+}
+
+/* One badge size on every card: six badges (the most a card has) fill the card's inner width. */
+.card-badges,
+.game-btn {
+  --badge-gap: 5px;
+  --badge-w: calc((100cqw - 28px - 5 * var(--badge-gap)) / 6);
+  --badge-h: calc(var(--badge-w) * 0.87);
+}
+
+/* A badge sits in a wrapper that carries its colour and, over the card, a glow around the hexagon
+   (the hexagon itself is clipped, so its own glow would be cut away). */
+.hex-glow {
+  --badge: var(--cyan);
+  display: block;
+  flex: none;
+  margin-top: calc(var(--badge-h) / -2);
+  pointer-events: auto;
+  transition: filter 0.3s ease-out;
+}
+
+.hex-badge {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  width: var(--badge-w);
+  height: var(--badge-h);
+  /* Only the edge carries the group's colour; the inside is the neutral dark. */
+  background: color-mix(in srgb, var(--badge) 75%, var(--line));
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  transition: background-color 0.3s ease-out;
+}
+
+.hex-badge::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: var(--panel);
+  clip-path: inherit;
+}
+
+.hex-badge img {
+  width: 58%;
+  height: auto;
+  aspect-ratio: 1;
+  /* Like the filter chips' icons: 80% at rest, full and a touch brighter (110%) over the card. */
+  opacity: 0.8;
+  transition:
+    opacity 0.3s ease-out,
+    filter 0.3s ease-out;
+}
+
+.hex-glow[class*="kind-"] {
+  --badge: var(--kind);
+}
+
+.hex-glow.mode-solo {
+  --badge: var(--mode-solo);
+}
+
+.hex-glow.mode-multi {
+  --badge: var(--mode-multi);
+}
+
+.hex-glow.lv {
+  --badge: var(--level);
+}
+
+.hex-glow[class*="cat-"] {
+  --badge: var(--chip);
 }
 
 .snap {
@@ -525,7 +841,8 @@ h2 {
   width: 100%;
   min-height: 64px;
   text-align: left;
-  padding: 10px 14px;
+  /* Room on top for the badges that sit half over the picture's edge. */
+  padding: calc(var(--badge-h) / 2 + 10px) 14px 10px;
   border: none;
   background: none;
   display: flex;
@@ -543,39 +860,8 @@ h2 {
 
 .game-head {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-}
-
-/* The difficulty pill: a small hexagon, drawn like .chip (edge = background, fill = ::before). */
-.level {
-  position: relative;
-  isolation: isolate;
-  flex: none;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  /* One width for every level, so the pills line up from card to card. */
-  width: 86px;
-  padding: 3px 0;
-  text-align: center;
-  color: var(--level);
-  background: color-mix(in srgb, var(--level) 75%, transparent);
-  clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 7px 100%, 0 50%);
-  transition:
-    color 0.25s,
-    text-shadow 0.25s;
-}
-
-.level::before {
-  content: "";
-  position: absolute;
-  inset: 1px;
-  z-index: -1;
-  background: color-mix(in srgb, var(--level) 16%, var(--panel));
-  clip-path: inherit;
 }
 
 .game-short {
@@ -958,53 +1244,60 @@ h2 {
     filter: brightness(1.2);
   }
 
-  /* Hover lights the card up like a neon tube in its difficulty colour: it warms up slowly after a
-     short pause (so sweeping across cards does not flash them) and goes out faster. */
+  /* Hover lifts the card a little, with a quiet cyan-to-violet edge; only its difficulty pill
+     lights up in its own colour. No heavy glow, so a row of cards stays calm. */
   .game-card:hover {
     transition:
-      transform 0.06s,
-      border-color 0.5s ease-out 0.12s,
-      box-shadow 0.5s ease-out 0.12s;
-    border-color: color-mix(in srgb, var(--level) 85%, #ffffff);
+      transform 0.18s ease-out,
+      border-color 0.18s,
+      box-shadow 0.18s;
+    transform: translateY(-2px);
+    border-color: #5d557d;
     box-shadow:
-      0 0 0 1px var(--level),
-      0 0 12px color-mix(in srgb, var(--level) 60%, transparent),
-      0 0 34px color-mix(in srgb, var(--level) 28%, transparent),
-      inset 0 0 22px color-mix(in srgb, var(--level) 14%, transparent);
+      inset 0 1px 0 color-mix(in srgb, var(--cyan) 35%, transparent),
+      -6px 0 18px -14px var(--cyan),
+      6px 0 18px -14px var(--violet),
+      0 8px 20px -12px #000000;
   }
 
-  .game-card:hover .level {
-    transition:
-      color 0.5s ease-out 0.12s,
-      text-shadow 0.5s ease-out 0.12s;
-    color: color-mix(in srgb, var(--level) 70%, #ffffff);
-    text-shadow: 0 0 8px var(--level);
+  /* Over a card (or a badge) the badges' edges light up bright in their colour with a glow around
+     them (the inside stays dark), and their icons go from 80% to full at 110% brightness. */
+  .hex-glow:hover,
+  .game-card:hover .hex-glow {
+    filter: drop-shadow(0 0 3px var(--badge)) drop-shadow(0 0 7px color-mix(in srgb, var(--badge) 65%, transparent));
   }
 
-  .chip:hover:not([aria-pressed="true"]) {
-    --edge: color-mix(in srgb, var(--chip) 60%, #34304a);
-    color: color-mix(in srgb, var(--chip) 75%, var(--text));
+  .hex-glow:hover .hex-badge,
+  .game-card:hover .hex-badge {
+    background: color-mix(in srgb, var(--badge) 55%, #ffffff);
   }
 
-  .seat-tab:hover:not([aria-pressed="true"]),
-  .level-tab:hover:not([aria-pressed="true"]) {
-    color: var(--text);
+  .hex-glow:hover img,
+  .game-card:hover .hex-badge img {
+    opacity: 1;
+    filter: brightness(1.1);
   }
 
-  /* A jump button turns to glass under the mouse: a see-through fill tinted with its type's colour,
-     a sheen across the top, and a brighter edge and text. */
-  .kind-nav .chip:hover:not(:disabled) {
-    --edge: color-mix(in srgb, var(--chip) 85%, white);
-    --fill:
-      linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.02) 48%, transparent 52%),
-      linear-gradient(160deg, color-mix(in srgb, var(--chip) 30%, rgb(34 31 51 / 0.6)), rgb(18 17 25 / 0.55));
-    /* The text lights up like the difficulty pill on a card under the mouse. */
-    transition:
-      color 0.5s ease-out 0.12s,
-      text-shadow 0.5s ease-out 0.12s;
-    color: color-mix(in srgb, var(--chip) 70%, #ffffff);
-    text-shadow: 0 0 8px var(--chip);
+
+
+  .clear-all:hover {
+    border-color: var(--cyan);
+    background: color-mix(in srgb, var(--cyan) 10%, transparent);
   }
+
+  .chip:hover:not(:disabled) .chip-icon {
+    opacity: 1;
+    filter: brightness(1.1);
+  }
+
+  .chip:hover:not([aria-pressed="true"], :disabled),
+  .pick:not([class*="season-"], [class*="day-"]):hover {
+    --edge: var(--glass);
+    --fill: var(--glass-fill);
+    color: var(--glass-text);
+  }
+
+
 
   .card-btn:hover {
     border-color: var(--accent-2);
@@ -1345,12 +1638,54 @@ a.btn {
 
 /* How many games the catalogue shows, under its title. */
 .games-count {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 14px;
   margin: -8px 0 16px;
-  text-align: center;
   color: var(--muted);
   font-size: 0.8rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.games-count p {
+  margin: 0;
+}
+
+/* Back to all the games: a quiet "× Clear all" beside the count, lit cyan under the mouse. */
+.clear-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--cyan);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.clear-all svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.clear-all:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 /* Under the count: one button per type of game, in its colour, that jumps to its group of cards.
@@ -1447,10 +1782,6 @@ a.btn {
 }
 
 /* A way back to all the games while a filter is on. */
-.filter-clear {
-  align-self: flex-start;
-}
-
 .filters:not(.open) {
   display: none;
 }
@@ -1613,16 +1944,6 @@ a.btn {
     gap: 14px;
   }
 
-  .catalog-side .chip,
-  .catalog-side .pick select {
-    min-height: 30px;
-    font-size: 0.68rem;
-  }
-
-  .catalog-side .chip {
-    padding: 0 12px;
-  }
-
   .side-list {
     display: block;
     border-top: 1px solid var(--line);
@@ -1725,68 +2046,123 @@ a.btn {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-/* Filter chips are pills like the difficulty pill on the cards (.level): small hexagons with
-   uppercase text in cyan, dim until chosen. */
+/* The one filter button (categories, type jumps): a hexagon like the difficulty pill (edge =
+   background, fill = ::before) in its own accent colour, --chip. Default: a dark fill with a hint
+   of the accent, an edge half-way to it and the label in it. Hover: a stronger tint and the full
+   accent edge. Chosen: a stronger tint still, a 2px edge and a bright label. Disabled: grey, not
+   just faded. Focus shows as a bright focus-coloured edge (the hexagon clips an outline away). */
 .chip {
   --chip: var(--cyan);
-  --edge: color-mix(in srgb, var(--chip) 30%, #34304a);
-  --fill: var(--panel);
+  --edge: color-mix(in srgb, var(--chip) 48%, var(--line));
+  --fill: color-mix(in srgb, var(--chip) 4%, var(--panel));
+  --edge-w: 1px;
   position: relative;
   isolation: isolate;
-  min-height: 40px;
-  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--hex-h);
+  padding: 0 12px;
   border: none;
   background: var(--edge);
   clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%);
-  color: color-mix(in srgb, var(--chip) 45%, var(--muted));
-  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--chip) 80%, var(--text));
+  font-size: var(--hex-font);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
-  transition: filter 0.15s;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+/* Chips with icons line up: the icon at a fixed place after the left point and the label after
+   it, so icons and labels form one column; the neutral "all"/"any" chips, without an icon, keep
+   their label centred. */
+button.chip:has(.chip-icon) {
+  justify-content: flex-start;
+  padding-left: 18px;
+}
+
+/* A chip's neon icon (types, levels, categories), in front of its label; grey on a disabled chip. */
+.chip-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  /* A little dimmed at rest; full and a touch brighter when the chip lights up or is chosen. */
+  opacity: 0.8;
+  transition:
+    opacity 160ms ease,
+    filter 160ms ease;
+}
+
+.chip[aria-pressed="true"] .chip-icon,
+.chip:focus-visible .chip-icon {
+  opacity: 1;
+  filter: brightness(1.1);
+}
+
+.chip:disabled .chip-icon {
+  filter: grayscale(1);
+  opacity: 0.4;
 }
 
 .chip::before {
   content: "";
   position: absolute;
-  inset: 1px;
+  inset: var(--edge-w);
   z-index: -1;
   background: var(--fill);
   clip-path: inherit;
 }
 
 .chip[aria-pressed="true"] {
-  --edge: color-mix(in srgb, var(--chip) 75%, transparent);
-  --fill: color-mix(in srgb, var(--chip) 16%, var(--panel));
-  color: var(--chip);
-  text-shadow: 0 0 8px color-mix(in srgb, var(--chip) 60%, transparent);
+  --edge: var(--chip);
+  --fill: color-mix(in srgb, var(--chip) 18%, var(--panel));
+  --edge-w: 2px;
+  color: var(--text);
 }
 
-/* Every jump button is one width, the width of the longest name; three a row on a phone. */
-.kind-nav .chip {
-  width: 132px;
+.chip:active:not(:disabled) {
+  --fill: color-mix(in srgb, var(--chip) 23%, var(--panel));
+}
+
+/* The type jumps and the player and level rows share one width; three a row on a phone. */
+.kind-nav .chip,
+.tab-chip {
+  width: var(--hex-w);
   padding: 0 8px;
 }
 
 @media (max-width: 719px) {
-  .kind-nav .chip {
+  .kind-nav .chip,
+  .tab-chip {
     width: calc((100% - 12px) / 3);
     padding: 0 4px;
-    font-size: 0.64rem;
   }
 }
 
-.kind-nav .chip:disabled {
-  --chip: var(--muted);
-  opacity: 0.35;
-  cursor: default;
+.chip:disabled {
+  --edge: #292a39;
+  --fill: #11121a;
+  color: var(--text-disabled);
+  cursor: not-allowed;
 }
 
 /* Hexagon controls clip their own outline away, so focus shows as a bright edge instead. */
-.btn:focus-visible,
+.btn:focus-visible {
+  --edge: var(--focus);
+  --edge-w: 2px;
+  outline: none;
+}
+
 .chip:focus-visible {
-  --edge: #ffffff;
+  --edge: var(--focus);
+  --edge-w: 2px;
+  --fill: var(--glass-fill);
+  color: var(--glass-text);
   outline: none;
 }
 
@@ -1832,84 +2208,54 @@ a.btn {
   text-decoration: underline;
 }
 
-/* Over the cards: All games / Solo / With bots tabs, and under them smaller difficulty sub-tabs.
-   The chosen tab is lit in its colour (cyan; green, blue, yellow, red, purple for the levels). */
+/* Over the cards: All games / Solo / Multiplayer, and under them the difficulty, as hexagon chips like
+   the filters (the same hover, focus and chosen look), each in its colour: cyan for the neutral
+   "all"/"any", light blue solo, teal multiplayer, the levels in theirs. A line closes the block. */
 .card-tabs {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
 }
 
 .seat-tabs,
 .level-tabs {
   display: flex;
   flex-wrap: wrap;
+  gap: 6px;
   min-width: 0;
   margin: 0;
   padding: 0;
   border: none;
 }
 
-.seat-tabs {
-  gap: 4px;
-  border-bottom: 1px solid var(--line);
+.tab-chip.mode-solo {
+  --chip: var(--mode-solo);
 }
 
-.level-tabs {
-  gap: 0 2px;
+.tab-chip.mode-multi {
+  --chip: var(--mode-multi);
 }
 
-.seat-tab,
-.level-tab {
-  --tab: var(--cyan);
-  min-height: var(--touch);
-  padding: 0 18px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  cursor: pointer;
+.tab-chip.lv-easy {
+  --chip: var(--lv-easy);
 }
 
-.seat-tab {
-  margin-bottom: -1px;
+.tab-chip.lv-normal {
+  --chip: var(--lv-normal);
 }
 
-.level-tab {
-  padding: 0 12px;
-  font-size: 0.7rem;
-  color: color-mix(in srgb, var(--tab) 45%, var(--muted));
+.tab-chip.lv-medium {
+  --chip: var(--lv-medium);
 }
 
-.level-tab.easy {
-  --tab: var(--ok);
+.tab-chip.lv-hard {
+  --chip: var(--lv-hard);
 }
 
-.level-tab.normal {
-  --tab: var(--g-blue);
-}
-
-.level-tab.medium {
-  --tab: var(--warn);
-}
-
-.level-tab.hard {
-  --tab: var(--bad);
-}
-
-.level-tab.expert {
-  --tab: var(--g-purple);
-}
-
-.seat-tab[aria-pressed="true"],
-.level-tab[aria-pressed="true"] {
-  color: var(--tab);
-  border-bottom-color: var(--tab);
-  text-shadow: 0 0 8px color-mix(in srgb, var(--tab) 60%, transparent);
+.tab-chip.lv-expert {
+  --chip: var(--lv-expert);
 }
 
 .group-title {
@@ -1922,35 +2268,63 @@ a.btn {
   margin: 0 0 10px;
 }
 
-/* Each type of game has its colour, the same on its filter chip and over its group of cards:
-   main cyan, mini green, team blue, prison orange (danger), hidden purple (secret), exile pink,
-   final duels silver (the top). */
+/* Each type of game has its colour (muted), the same on its jump button, over its group of cards
+   and on its rows in the sidebar list. */
 .kind-main {
-  --kind: var(--g-cyan);
+  --kind: var(--kind-main);
 }
 
 .kind-mini-solo {
-  --kind: var(--g-green);
+  --kind: var(--kind-mini);
 }
 
 .kind-mini-team {
-  --kind: var(--g-blue);
+  --kind: var(--kind-team);
 }
 
 .kind-prison {
-  --kind: var(--g-orange);
+  --kind: var(--kind-prison);
 }
 
 .kind-hidden {
-  --kind: var(--g-purple);
+  --kind: var(--kind-hidden);
 }
 
 .kind-exile {
-  --kind: var(--g-pink);
+  --kind: var(--kind-exile);
 }
 
 .kind-final-duel {
-  --kind: var(--silver);
+  --kind: var(--kind-final);
+}
+
+/* The categories, each in its colour. */
+.cat-logic-puzzles {
+  --chip: var(--cat-logic);
+}
+
+.cat-strategy-territory {
+  --chip: var(--cat-strategy);
+}
+
+.cat-bluff-deduction {
+  --chip: var(--cat-bluff);
+}
+
+.cat-social-alliances {
+  --chip: var(--cat-social);
+}
+
+.cat-auction-economy {
+  --chip: var(--cat-auction);
+}
+
+.cat-memory-observation {
+  --chip: var(--cat-memory);
+}
+
+.cat-speed-risk {
+  --chip: var(--cat-speed);
 }
 
 .chip[class*="kind-"] {
