@@ -1278,8 +1278,6 @@ h2 {
     filter: brightness(1.1);
   }
 
-
-
   .clear-all:hover {
     border-color: var(--cyan);
     background: color-mix(in srgb, var(--cyan) 10%, transparent);
@@ -1296,8 +1294,6 @@ h2 {
     --fill: var(--glass-fill);
     color: var(--glass-text);
   }
-
-
 
   .card-btn:hover {
     border-color: var(--accent-2);
