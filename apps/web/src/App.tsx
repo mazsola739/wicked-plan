@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { airedOf, seasonOf, stageOf } from './aired';
 import { Dropdown } from './Dropdown';
 import { Emblem, Grin, Peeker } from './Emblem';
@@ -188,8 +188,8 @@ function Picker({ games }: { games: GameInfo[] }) {
               disabled={!shown.some((g) => g.kind === kind)}
               onClick={() => document.getElementById(`group-${kind}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
             >
-              <img className="chip-icon" src={uiIcon(`kind-${kind}`)} alt="" />
-              {t(kind === 'final-duel' ? 'Finals' : label.replace(/ games$/, ''))}
+              <UiIcon className="chip-icon" name={`kind-${kind}`} />
+              <span className="chip-label">{t(kind === 'final-duel' ? 'Finals' : label.replace(/ games$/, ''))}</span>
             </button>
           ))}
         </nav>
@@ -234,8 +234,8 @@ function Picker({ games }: { games: GameInfo[] }) {
                     aria-pressed={filter.seats === value}
                     onClick={() => setFilter({ ...filter, seats: value })}
                   >
-                    {value !== 'all' && <img className="chip-icon" src={uiIcon(`mode-${value}`)} alt="" />}
-                    {t(label)}
+                    {value !== 'all' && <UiIcon className="chip-icon" name={`mode-${value}`} />}
+                    <span className="chip-label">{t(label)}</span>
                   </button>
                 ))}
               </fieldset>
@@ -249,8 +249,8 @@ function Picker({ games }: { games: GameInfo[] }) {
                     aria-pressed={filter.level === value}
                     onClick={() => setFilter({ ...filter, level: value })}
                   >
-                    {value !== 'all' && <img className="chip-icon" src={uiIcon(`level-${value}`)} alt="" />}
-                    {t(label)}
+                    {value !== 'all' && <UiIcon className="chip-icon" name={`level-${value}`} />}
+                    <span className="chip-label">{t(label)}</span>
                   </button>
                 ))}
               </fieldset>
@@ -284,7 +284,7 @@ function Picker({ games }: { games: GameInfo[] }) {
                           <span className="game-short">{gameShort(g.id, g.short)}</span>
                           {/* The card's foot: players on the left, where it was on the show on the right. */}
                           <span className="card-foot">
-                            <span className="players">
+                            <span className={`players mode-${g.maxPlayers === 1 ? 'solo' : 'multi'}`}>
                               <svg viewBox="0 0 16 16" aria-hidden="true">
                                 <circle cx="8" cy="5" r="3" />
                                 <path d="M2.5 15 C2.5 10.5 13.5 10.5 13.5 15 Z" />
@@ -364,6 +364,11 @@ const FILTERS: { key: keyof Filter; label: string; options: [string, string][] }
 const UI_ICONS = import.meta.glob<string>('./assets/ui-icons/*.webp', { eager: true, import: 'default' });
 const uiIcon = (name: string) => UI_ICONS[`./assets/ui-icons/${name}.webp`];
 
+/** A UI icon drawn in its button's colour: the art is the mask, the colour comes from CSS. */
+function UiIcon({ name, className }: { name: string; className?: string }) {
+  return <span className={className} aria-hidden="true" style={{ '--icon': `url(${uiIcon(name)})` } as CSSProperties} />;
+}
+
 /**
  * A card's badges, on the line between its picture and its text, at the left: hexagons like icon
  * roundels, each in its own colour with its neon icon: solo or multiplayer, the difficulty, the type,
@@ -383,7 +388,7 @@ function CardBadges({ g }: { g: GameInfo }) {
       {badges.map(([tint, icon, name]) => (
         <span key={icon} className={`hex-glow ${tint}`} role="img" aria-label={name} title={name}>
           <span className="hex-badge">
-            <img src={uiIcon(icon)} alt="" />
+            <UiIcon className="badge-icon" name={icon} />
           </span>
         </span>
       ))}
@@ -432,8 +437,8 @@ function Filters({ open, filter, onChange }: { open: boolean; filter: Filter; on
                 aria-pressed={filter[f.key] === value}
                 onClick={() => onChange({ ...filter, [f.key]: filter[f.key] === value ? 'all' : value })}
               >
-                {f.key === 'tag' && <img className="chip-icon" src={uiIcon(`category-${value}`)} alt="" />}
-                {t(label)}
+                {f.key === 'tag' && <UiIcon className="chip-icon" name={`category-${value}`} />}
+                <span className="chip-label">{t(label)}</span>
               </button>
             ))}
           </div>

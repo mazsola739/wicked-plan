@@ -63,11 +63,14 @@ pick one and play. Solo puzzles are played alone; games for several players are 
   the code uses. Each card shows them as **badges**: hexagons like icon roundels, one size on every card, sized from the card's width so the most a card has (six) fill one row
   on the line between its picture and its text, half over the picture, at the left; only the edge carries
   the group's colour (the inside is neutral dark), and over the card the edge lights up
-  bright with a glow around the hexagon (the inside stays dark) and the icon goes from 80% to full at 110% brightness: solo or multiplayer, the difficulty, the type, then the categories; the badge is the card's only difficulty
+  bright with a glow around the hexagon (the inside stays dark) and the icon goes from 80% to full at 110% brightness with a glow of its own (the card's foot
+  lights up with it: the players in the mode's silver or gold, the season and the day in theirs): solo or multiplayer, the difficulty, the type, then the categories; the badge is the card's only difficulty
   mark (the name is the tooltip and what a screen reader says). The filter chips
   carry the same icon in front of the label (the type jumps, the levels and the categories; not the
   neutral "all"/"any" ones), so the filters are the key to the cards' badges; a chip's icon is at 80% at rest and full,
-  a touch brighter (110%), when the chip lights up or is chosen.
+  a touch brighter (110%), when the chip lights up or is chosen. Every such icon is drawn in its
+  button's (or badge's) one colour: the art's shape is a CSS mask and the accent paints it; a
+  disabled chip's icon is grey (#66677D).
 - **Game icons** (the owner's art, 2026-11-23; two sets since 2026-11-26): two icons per game,
   256 px, transparent, shown by `GameIcon.tsx`, loaded only when in view. The metal set
   (`assets/icons/<game-id>.webp`) is small in the sidebar's game list, beside the title in the game
@@ -79,16 +82,19 @@ pick one and play. Solo puzzles are played alone; games for several players are 
   near-black background (#08090F), graphite surfaces (#141520, raised #0E0F18), neutral edges
   (#343447); the mascot's **cyan** (#20E9FF) for focus and the main action and **violet** (#A855F7)
   for emphasis; **silver** for the title. Each kind of filter has its own colours, never one shared
-  set: difficulty (easy #44D6A0, normal #609EFF, medium #EAC568, hard #F07891, expert #BE73FA), season (1 antique gold #D4AA62, 2 jade
-  #52C6BA, 3 orchid #D77AB8), day (one indigo-to-violet scale, #60749F … #C079FF), category (logic
-  #27D9ED, strategy #9B85F5, bluff #E27CAB, social #55B6A1, auction #DCA45C, memory #6B9DE5, speed
-  #ED9566), players (solo #73B8E8, multiplayer #51D1C0) and the muted game types (main #50BEE9, mini
-  #60C5A3, team #819DEB, prison #D18E7C, hidden #B184E2, exile #D881C1, final duels #B8B8CA). The
-  neutral resets (All games, Any level, Any season, Any day) are cyan or plain. Small text keeps
+  set, each one hue growing stronger: difficulty (clear and strong: easy green #00E05A, normal blue
+  #0A6CFF, medium yellow #FFD000, hard red #FF1430, expert purple #9D1CFF), season (light blue growing
+  stronger as the show got harsher: 1 #A8DCFF, 2 #4DBBFF, 3 #0A8CFF), day (pink from light to dark,
+  #FFC2DF … #8E0B52), category (violet growing stronger: logic #E8D4FF, strategy #D4B0FF, bluff
+  #C08CFF, social #A855F7, auction #9333EA, memory #7E22CE, speed #6B12B8), players (solo silver
+  #C9CED8, multiplayer gold #E8B84A) and the game types (cyan growing stronger: main #C2F8FF, mini
+  #92F2FF, team #5CEDFF, prison #20E9FF, hidden #00D0F2, exile #00B2DE, final duels #0092C8). The
+  neutral resets (All games, Any level, Any season, Any day) are quiet and share one soft white with the search field and the dropdowns (`--soft`, the text colour 62% over the edge grey): their edge, chosen row, tick and lamp. Small text keeps
   4.5:1 contrast: a too-dark accent is brightened for text (the darkest days on the card).
 - **Filter buttons:** one size for every hexagon control (38 px high, one label size: `--hex-h`,
   `--hex-font`; the type jumps and the player and level rows also one width, `--hex-w`, three a
-  row on a phone) and one behaviour for all: a dark fill with a hint of the accent, an edge half-way
+  row on a desktop; on a phone the chips with an icon show the icon alone, 48 px tall, each row
+  on one line, the name kept for screen readers) and one behaviour for all: a dark fill with a hint of the accent, an edge half-way
   to it and the label in it; hover lights every hexagon button up like a lamp from its bottom edge (a bright
   line in its accent and a glow rising from it), with the full accent edge and a lighter label; chosen a stronger tint,
   a 2px edge and a bright label; pressed a moment darker; disabled grey (#11121A, #292A39, #66677D),

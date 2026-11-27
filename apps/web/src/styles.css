@@ -30,40 +30,44 @@
   --hex-h: 38px;
   --hex-w: 128px;
   --hex-font: 0.68rem;
+  /* The neutral controls' accent (search, the dropdowns, "All games", "Any level", "Any"): a soft
+     white that lights up without shouting. */
+  --soft: color-mix(in srgb, var(--text) 62%, var(--line));
 
   /* Semantic palettes: each kind of filter has its own colours, so a colour never has to mean two
      things in one place; a label or icon always says what it is too. */
-  --lv-easy: #44d6a0;
-  --lv-normal: #609eff;
-  --lv-medium: #eac568;
-  --lv-hard: #f07891;
-  --lv-expert: #be73fa;
-  --season-1: #d4aa62;
-  --season-2: #52c6ba;
-  --season-3: #d77ab8;
-  --day-1: #60749f;
-  --day-2: #697fba;
-  --day-3: #728add;
-  --day-4: #8388ef;
-  --day-5: #a07efa;
-  --day-6: #c079ff;
-  --cat-logic: #27d9ed;
-  --cat-strategy: #9b85f5;
-  --cat-bluff: #e27cab;
-  --cat-social: #55b6a1;
-  --cat-auction: #dca45c;
-  --cat-memory: #6b9de5;
-  --cat-speed: #ed9566;
-  --mode-solo: #73b8e8;
-  --mode-multi: #51d1c0;
-  /* The game types: kept muted, since many colours already share the page. */
-  --kind-main: #50bee9;
-  --kind-mini: #60c5a3;
-  --kind-team: #819deb;
-  --kind-prison: #d18e7c;
-  --kind-hidden: #b184e2;
-  --kind-exile: #d881c1;
-  --kind-final: #b8b8ca;
+  --lv-easy: #00e05a;
+  --lv-normal: #0a6cff;
+  --lv-medium: #ffd000;
+  --lv-hard: #ff1430;
+  --lv-expert: #9d1cff;
+  --season-1: #a8dcff;
+  --season-2: #4dbbff;
+  --season-3: #0a8cff;
+  --day-1: #ffc2df;
+  --day-2: #ff94c6;
+  --day-3: #ff63ac;
+  --day-4: #f0338f;
+  --day-5: #c81873;
+  --day-6: #8e0b52;
+  --cat-logic: #e8d4ff;
+  --cat-strategy: #d4b0ff;
+  --cat-bluff: #c08cff;
+  --cat-social: #a855f7;
+  --cat-auction: #9333ea;
+  --cat-memory: #7e22ce;
+  --cat-speed: #6b12b8;
+  --mode-solo: #c9ced8;
+  --mode-multi: #e8b84a;
+  /* The game types: cyan, stronger from Main to Finals (categories: violet, stronger; seasons: light
+     blue, stronger; days: pink, light to dark). */
+  --kind-main: #c2f8ff;
+  --kind-mini: #92f2ff;
+  --kind-team: #5cedff;
+  --kind-prison: #20e9ff;
+  --kind-hidden: #00d0f2;
+  --kind-exile: #00b2de;
+  --kind-final: #0092c8;
 
   /* Inside the games (docs/design.md): named colours as neon on near-black, one seat order
      (you first, in cyan), dark boards with silver lines, cards and tiles as dark glass. */
@@ -355,9 +359,17 @@ h2 {
 }
 
 .card-foot .players {
+  --players: var(--mode-multi);
   display: inline-flex;
+  transition:
+    color 0.3s ease-out,
+    text-shadow 0.3s ease-out;
   align-items: center;
   gap: 4px;
+}
+
+.card-foot .players.mode-solo {
+  --players: var(--mode-solo);
 }
 
 .card-foot svg {
@@ -432,12 +444,12 @@ h2 {
 }
 
 .pick {
-  --glass: var(--cyan);
+  --glass: var(--soft);
 }
 
 /* Season and Day: two dropdowns side by side (Dropdown.tsx). Closed: a hexagon like the chips
    (edge = background, fill = ::before) on the raised dark surface with a neutral edge, the chosen
-   value's colour as a small dot; the edge turns cyan under the mouse and while open. Open: a dark
+   value's colour as a small dot; the edge turns soft white (--soft) under the mouse and while open. Open: a dark
    panel with a thin edge and a soft shadow, a dot per row, a tick on the chosen row, and a quiet
    dark highlight on the row under the mouse or the keys. "Any" has no dot. */
 .show-picks {
@@ -549,7 +561,7 @@ h2 {
 
 .dropdown-option {
   --pick: transparent;
-  --glass: var(--cyan);
+  --glass: var(--soft);
   position: relative;
   display: flex;
   align-items: center;
@@ -579,7 +591,7 @@ h2 {
 }
 
 .dropdown-option[aria-selected="true"] {
-  background: color-mix(in srgb, var(--glass) 20%, var(--panel));
+  background: color-mix(in srgb, var(--glass) 14%, var(--panel));
   color: var(--text);
 }
 
@@ -659,7 +671,7 @@ h2 {
   height: 14px;
   margin-left: auto;
   fill: none;
-  stroke: var(--cyan);
+  stroke: var(--soft);
   stroke-width: 2;
 }
 
@@ -771,7 +783,10 @@ h2 {
   clip-path: inherit;
 }
 
-.hex-badge img {
+/* A badge's icon in the badge's one colour: the art's shape masks the ::before, which CSS paints
+   (the mask sits on the child, so a glow on the icon itself is not cut away). */
+.hex-badge .badge-icon {
+  display: block;
   width: 58%;
   height: auto;
   aspect-ratio: 1;
@@ -780,6 +795,14 @@ h2 {
   transition:
     opacity 0.3s ease-out,
     filter 0.3s ease-out;
+}
+
+.badge-icon::before {
+  content: "";
+  display: block;
+  height: 100%;
+  background: var(--badge);
+  mask: var(--icon) center / contain no-repeat;
 }
 
 .hex-glow[class*="kind-"] {
@@ -1272,10 +1295,30 @@ h2 {
     background: color-mix(in srgb, var(--badge) 55%, #ffffff);
   }
 
-  .hex-glow:hover img,
-  .game-card:hover .hex-badge img {
+  .hex-glow:hover .badge-icon,
+  .game-card:hover .badge-icon {
     opacity: 1;
-    filter: brightness(1.1);
+    filter: brightness(1.1) drop-shadow(0 0 3px var(--badge));
+  }
+
+  /* The card's foot lights up with it: the players in their mode's colour, the season and the day
+     in theirs, each with a soft glow. */
+  .game-card:hover .card-foot .players {
+    color: var(--players);
+    text-shadow: 0 0 6px var(--players);
+  }
+
+  .game-card:hover .card-foot svg {
+    filter: drop-shadow(0 0 3px var(--players));
+  }
+
+  .game-card:hover .aired-season {
+    text-shadow: 0 0 6px var(--season, transparent);
+  }
+
+  .game-card:hover .aired-stage[class*="day-"] {
+    color: color-mix(in srgb, var(--day) 60%, var(--text));
+    text-shadow: 0 0 6px var(--day);
   }
 
   .clear-all:hover {
@@ -1973,7 +2016,7 @@ a.btn {
 }
 
 .search:focus-within {
-  --edge: var(--cyan);
+  --edge: var(--soft);
 }
 
 .search-icon {
@@ -2082,11 +2125,15 @@ button.chip:has(.chip-icon) {
   padding-left: 18px;
 }
 
-/* A chip's neon icon (types, levels, categories), in front of its label; grey on a disabled chip. */
+/* A chip's icon (types, levels, categories), in front of its label, in the chip's one colour (the
+   art's shape is the mask, CSS paints it); grey on a disabled chip. */
 .chip-icon {
+  display: block;
+  mask: var(--icon) center / contain no-repeat;
   flex: none;
   width: 18px;
   height: 18px;
+  background: var(--chip);
   /* A little dimmed at rest; full and a touch brighter when the chip lights up or is chosen. */
   opacity: 0.8;
   transition:
@@ -2101,8 +2148,7 @@ button.chip:has(.chip-icon) {
 }
 
 .chip:disabled .chip-icon {
-  filter: grayscale(1);
-  opacity: 0.4;
+  background: var(--text-disabled);
 }
 
 .chip::before {
@@ -2125,6 +2171,20 @@ button.chip:has(.chip-icon) {
   --fill: color-mix(in srgb, var(--chip) 23%, var(--panel));
 }
 
+/* The neutral "All games" and "Any level" stay quiet, in the search's and the dropdowns' soft
+   white: chosen is a thin soft edge, a barely tinted fill and a soft label. */
+.tab-chip.mode-all,
+.tab-chip.lv-all {
+  --chip: var(--soft);
+}
+
+.tab-chip.mode-all[aria-pressed="true"],
+.tab-chip.lv-all[aria-pressed="true"] {
+  --fill: color-mix(in srgb, var(--chip) 5%, var(--panel));
+  --edge-w: 1px;
+  color: color-mix(in srgb, var(--text) 85%, var(--panel));
+}
+
 /* The type jumps and the player and level rows share one width; three a row on a phone. */
 .kind-nav .chip,
 .tab-chip {
@@ -2132,11 +2192,57 @@ button.chip:has(.chip-icon) {
   padding: 0 8px;
 }
 
+/* On a phone the chips with an icon show the icon alone (the name stays for screen readers) and
+   are touch size; each row fits on one line, a neutral "all"/"any" chip taking the room left. */
 @media (max-width: 719px) {
+  .kind-nav,
+  .card-tabs .seat-tabs,
+  .card-tabs .level-tabs,
+  .filters .filter-tag .chips {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+  }
+
   .kind-nav .chip,
-  .tab-chip {
-    width: calc((100% - 12px) / 3);
-    padding: 0 4px;
+  .tab-chip,
+  .filters .filter-tag .chip {
+    min-height: var(--touch);
+  }
+
+  button.chip:has(.chip-icon) {
+    flex: 1 1 44px;
+    width: auto;
+    min-width: 40px;
+    max-width: 60px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  button.chip:has(.chip-icon) .chip-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  button.chip:has(.chip-icon) .chip-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The neutral chip shares the room left and wraps its label, so the icons keep their size. */
+  .tab-chip:not(:has(.chip-icon)) {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 96px;
+    padding: 0 12px;
+    white-space: normal;
+    line-height: 1.15;
   }
 }
 
