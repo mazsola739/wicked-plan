@@ -8,4 +8,4 @@
 - Ha mindkét töltet elfogyott, a dobot újratöltik.
 - A játék akkor ér véget, ha már csak egy játékosnak maradt élete, vagy fejenként 6 húzás után. A több élet nyer; azonos életszámnál a több megmaradt kredit dönt.
 
-**A műsorban:** minden játékos egy közös fegyver egy-egy betűvel jelölt kamrájánál állt; a kamrák közül kettő rejtett töltetet. A játékosok 14 kreditjüket (itt 16) körönként egy akcióra költötték: kamrák felfedésére, forgatására vagy cseréjére. Miután három játékos elköltötte a kreditjeit, a kamrák elsültek, és az a két játékos, aki a töltött kamráknál állt, kiesett (itt a dob csak annál sül el, aki meghúzza, egyesével, és egy találat a két életből egybe kerül).
+**A műsorban:** minden játékos egy közös fegyver egy-egy kamrájával szemben ült; a kamrák közül kettő rejtett töltetet. A játékosok 16 kreditjüket (mint itt) körönként egy akcióra költötték: kamrák felfedésére, forgatására vagy cseréjére. Miután három játékos elköltötte a kreditjeit, a kamrák elsültek, és az a két játékos, akivel szemben a töltött kamrák voltak, kiesett (itt a dob csak annál sül el, aki meghúzza, egyesével, és egy találat a két életből egybe kerül).

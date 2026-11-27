@@ -7,6 +7,7 @@ Add a row here for every new page.
 |---|---|
 | [Design](design.md) | the main plan: a game picker page, bots, milestones, open questions |
 | [Game catalogue](games.md) | all 51 games by type, in short; all playable |
+| [On the show](show/README.md) | how each game went on TV: a page per game and per season (index of its own) |
 | [Dev tools](dev.md) | commands, phone testing through a tunnel, pre-commit, Biome, agents |
 | [Zoo](games/animal-tile-auction.md) | rules page |
 | [Auction Bingo](games/auction-bingo.md) | rules page |

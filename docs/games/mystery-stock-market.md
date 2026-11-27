@@ -14,7 +14,7 @@ Main game, 3–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 - Watch the price charts and the public totals of how many shares were bought and sold to work out each stock's rule.
 - At the end your worth is your cash plus your shares at the final prices.
 
-**On the show:** every player also started with 100,000, but there were ten made-up stocks (here seven). Every 5 rounds a few more words of each secret rule appeared, until all were complete by round 20 (here one whole rule is shown to everyone after rounds 8 and 16). Player A secretly had to name one player and see them knocked out, so Player A falsely told Player B that finishing last would bring an advantage to Player B and to the next player in the ranking. A last-minute gain then left Player B in last place, and Player B was out of the game.
+**On the show:** every player also started with 100,000, and there were seven made-up stocks too. Every 5 rounds a few more words of each secret rule appeared, until all were complete by round 20 (here one whole rule is shown to everyone after rounds 8 and 16). Player A secretly had to name one player and see them knocked out, so Player A falsely told Player B that finishing last was the only way for Player B to survive. Player B then lowered their own total over several rounds, finished last and was out of the game.
 
 ## Rules in detail
 

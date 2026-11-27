@@ -7,4 +7,4 @@
 - A 6., 12. és 18. kör után egy szabály mindenki számára kiderül.
 - A verseny akkor ér véget, amikor egy bábu eléri a célt, vagy 30 kör után. Minél közelebb vagy a célhoz, annál jobb a helyezésed.
 
-**A műsorban:** A játékos vezetett elsőként kockát a középső mezőre, és 3 játékzsetont nyert. A többiek közül az a négy, akinek a kockája a legmagasabb számú mezőkön állt meg, egy-egy zsetont kapott (itt a mezőknek nincs számuk, így mindenki mást a céltól mért távolság rangsorol).
+**A műsorban:** A játékos kockája ért elsőként a célmezőre, egy másik játékos tolta oda, és A játékos 3 játékzsetont nyert. A többiek közül az a négy, akinek a kockája a legmagasabb számú mezőkön állt meg, egy-egy zsetont kapott (itt a mezőknek nincs számuk, így mindenki mást a céltól mért távolság rangsorol).

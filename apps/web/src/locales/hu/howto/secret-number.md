@@ -7,4 +7,4 @@
 - A rossz tipp 5 pontodba kerül, de megtudod belőle, hogy a száma nagyobb vagy kisebb.
 - A végén mindenki, akinek a számát soha nem fedték fel, +40 pontot kap. A legmagasabb összpontszám nyer.
 
-**A műsorban:** egy nagy szövetség fenyegetésnek látta A játékost, és összeesküdött, hogy kiejtse, B játékos segítségével, aki pedig A játékos szövetségese volt. A terv bevált, és A játékos kiesett (itt senki sem esik ki: a jó tipp 30 pontjába kerül annak, akinek a számát kitalálták). C játékos, A játékos egy másik szövetségese, szintén kiesett B játékos árulása miatt.
+**A műsorban:** egy nagy szövetség tévesen arra jutott, hogy A játékos számokat szivárogtatott ki, és ezt elmondta B játékosnak, aki A játékos szövetségese volt. B játékos ekkor átadta nekik A játékos számát, és A játékos kiesett (itt senki sem esik ki: a jó tipp 30 pontjába kerül annak, akinek a számát kitalálták). C játékos, A játékos egy másik szövetségese, szintén kiesett B játékos árulása miatt.

@@ -19,7 +19,7 @@ screen: `apps/web/src/games/WallTerritory.tsx`.
 
 **Watch out:** an area with nobody's pieces in it counts for no one, and an area where a rival's piece stands is not yours yet. Close your area before a rival walks in.
 
-**On the show:** Three players took turns moving one of their pieces and building a wall beside it on a Go board (here the board is 7×7), until each player's pieces were walled off from everyone else's. Player A finished with the largest territory, won a prize and was safe from elimination. Player B and Player C then replayed the game by the same rules, and Player B, left with the smaller territory, was eliminated.
+**On the show:** Three players took turns moving one of their pieces and building a wall beside it on a 7×7 board, as here, until each player's pieces were walled off from everyone else's. Player A finished with the largest territory, won a prize and was safe from elimination. Player B and Player C then played a second game with four pieces each, and Player B, left with the smaller territory, was eliminated.
 
 ## Rules in detail
 

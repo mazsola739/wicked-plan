@@ -7,4 +7,4 @@
 - A kör első játékosának licitálnia kell.
 - Ha elfogy az életed, kiesel. A játék akkor ér véget, amikor egy játékos marad, vagy 12 kör után.
 
-**A műsorban:** a játékosok játékzsetonokat tettek fel a licitjeikre, vagy helyette lemondtak az egyik kártyahelyükről. A játékos és B játékos mindkettőből kifogyott, és kiestek, C játékos pedig a legtöbb zsetonnal végzett, és továbbjutott a döntőbe (itt semmi sincs feltéve: aki egy kétkedésnél téved, elveszti a 3 életéből az egyiket).
+**A műsorban:** a játékosok játékzsetonokat tettek fel a licitjeikre, vagy helyette az egyik kártyahelyüket. A játékos és B játékos mindkettőből kifogyott, és kiestek, C játékos pedig a legtöbb zsetonnal végzett, és továbbjutott a döntőbe (itt semmi sincs feltéve: aki egy kétkedésnél téved, elveszti a 3 életéből az egyiket).

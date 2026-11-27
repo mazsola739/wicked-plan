@@ -13,7 +13,7 @@ Main game, 6–10 players (the page seats you and 5 bots). Code: `crates/rules/s
 - **Vote:** vote someone into **Quarantine**, or **Nobody**. It takes at least 2 votes and no tie, and their side is then shown.
 - There are **4 rounds**. The winning side gets 500 each, the losers 200; you get +150 for your secret mission.
 
-**On the show:** Acting on a tip from the journalist, the officer shot one of the two terrorists (here nobody is shot: the officer only learns whether a player is a terrorist, and the table votes suspects into quarantine). Even so, the terrorists won the game, and both of them received four of the show's game tokens.
+**On the show:** Taking an accused player's crossed arms for a secret ability, the officer shot that player, one of the two terrorists (here nobody is shot: the officer only learns whether a player is a terrorist, and the table votes suspects into quarantine). Even so, the terrorists won the game, and both of them received four of the show's game tokens.
 
 ## Rules in detail
 

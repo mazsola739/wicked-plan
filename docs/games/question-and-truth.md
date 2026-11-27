@@ -13,7 +13,7 @@ Final duel, 2 players. Code: `crates/rules/src/games/question_and_truth.rs`, scr
 - With no tokens left, you can only guess.
 - You score 100 per right position, +100 for the whole row, and 10 per token left when you guessed. More points wins.
 
-**On the show:** In the final, each finalist secretly arranged eight cards (here the row is dealt at random) and had ten tokens to spend on questions the other had to answer truthfully. A player's exact token count stayed hidden, and only crossing the line of five tokens was announced (here both counts are open). Player A worked out the opponent's whole row and won the game, a second win that took the best-of-three final.
+**On the show:** In the final, each finalist secretly arranged eight cards (here the row is dealt at random) and started with ten tokens, which they bid each turn for the right to ask a question the other had to answer truthfully, or to name the other's row. A warning light came on when a player had fewer than five tokens (here both exact counts are shown). Player A worked out the opponent's whole row and won the game, a second win that took the best-of-three final.
 
 ## Rules in detail
 

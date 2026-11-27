@@ -15,7 +15,7 @@ No gore: the drum holds **paint charges**; a hit costs a life, and a player with
 - When both charges are spent, the drum is reloaded.
 - The game ends when one player has lives left, or after 6 pulls each. Most lives wins; equal lives go to more credits left.
 
-**On the show:** Each player stood at a lettered chamber of one shared gun, two of which hid a charge, and spent their 14 credits (here 16), one action per round, on revealing, rotating or swapping chambers. Once three players had used up their credits the chambers fired, and the two players standing at the loaded ones were out (here the drum fires only at whoever pulls, one turn at a time, and a hit costs one of two lives).
+**On the show:** Each player sat facing one chamber of one shared gun, two of which hid a charge, and spent their 16 credits (as here), one action per round, on revealing, rotating or swapping chambers. Once three players had used up their credits the chambers fired, and the two players facing the loaded ones were out (here the drum fires only at whoever pulls, one turn at a time, and a hit costs one of two lives).
 
 ## Rules in detail
 

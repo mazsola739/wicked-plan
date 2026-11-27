@@ -13,7 +13,7 @@ Main game, 3–6 seats (the page: you + 3 bots). Code: `crates/rules/src/games/c
 - The first player of a round must bet.
 - With no lives left you are out. The game ends when one player is left or after 12 rounds.
 
-**On the show:** Players staked game tokens on their bets, or gave up one of their card slots instead. Player A and Player B ran out of both and were knocked out, while Player C finished with the most tokens and went through to the final (here nothing is staked: whoever is wrong at a call loses one of their 3 lives).
+**On the show:** Players staked game tokens on their bets, or one of their card slots instead. Player A and Player B ran out of both and were knocked out, while Player C finished with the most tokens and went through to the final (here nothing is staked: whoever is wrong at a call loses one of their 3 lives).
 
 ## Rules in detail
 

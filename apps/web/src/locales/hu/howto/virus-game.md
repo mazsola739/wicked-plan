@@ -7,4 +7,4 @@
 - **Szavazás:** szavazz valakit **Karanténba**, vagy válaszd a **Senki** gombot. Legalább 2 szavazat kell, és nem lehet holtverseny; ekkor kiderül, melyik oldalon áll.
 - **4 kör** van. A győztes oldal tagjai 500-at kapnak, a vesztesek 200-at; a titkos küldetésedért +150 jár.
 
-**A műsorban:** az újságíró tippje alapján a rendőr lelőtte a két terrorista egyikét (itt senkit sem lőnek le: a rendőr csak azt tudja meg, hogy egy játékos terrorista-e, a karanténba zárásról pedig az asztal szavaz). A terroristák ennek ellenére megnyerték a játékot, és mindketten négy játékzsetont kaptak a műsorban.
+**A műsorban:** a rendőr egy megvádolt játékos keresztbe font karját egy titkos képesség mozdulatának vélte, és lelőtte őt, a két terrorista egyikét (itt senkit sem lőnek le: a rendőr csak azt tudja meg, hogy egy játékos terrorista-e, a karanténba zárásról pedig az asztal szavaz). A terroristák ennek ellenére megnyerték a játékot, és mindketten négy játékzsetont kaptak a műsorban.

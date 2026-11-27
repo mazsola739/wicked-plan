@@ -13,7 +13,7 @@ Main game, 4–8 players (the page seats you and 3 bots). Code: `crates/rules/sr
 - The thieves' side wins by keeping **5 pieces**; otherwise the police win.
 - At the end the police vote on who is corrupt. Unmasking them costs the corrupt officer 300 and gives each honest officer 100.
 
-**On the show:** Two thieves, secretly helped by two corrupt officers, collected the 12 pieces they needed by round 11 of 15, and neither thief was ever arrested (here, at a table of four, there is one thief and one corrupt officer, and the thieves' side needs 5 pieces within 12 rounds on a smaller map). In the final vote neither corrupt officer was unmasked, and as no thief had been arrested either, all four players on the thieves' side won 3 bonus pieces each (here a win is worth 500 points).
+**On the show:** Two thieves, secretly helped by two corrupt officers, collected the 12 pieces they needed by round 11 of 15, and neither thief was ever arrested (here, at a table of four, there is one thief and one corrupt officer, and the thieves' side needs 5 pieces within 12 rounds on a smaller map). In the final vote neither corrupt officer was unmasked, and as no thief had been arrested either, all four players on the thieves' side won 3 game tokens each (here a win is worth 500 points).
 
 ## Rules in detail
 

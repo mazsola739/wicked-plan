@@ -15,7 +15,7 @@ screen: `apps/web/src/games/HiddenFourthPlayer.tsx`.
 - If the Shadow wins, everyone gets 100 plus only 50 per own line.
 - **Tip:** blocking pays more than your own lines. Squares where the Shadow could finish a line are marked as danger.
 
-**On the show:** Three players sat in separate rooms and played three-in-a-row against one another and an unknown fourth player, without being told how the colours were handed out. Their way to keep that fourth player from winning was to pick starting squares that only the three of them knew. In the end Player A wrongly took Player B for the impostor, and Player B was eliminated (here the Shadow always plays openly in its own colour, so nobody has to be unmasked).
+**On the show:** Three players sat in separate rooms and played three-in-a-row against one another and an unknown fourth player, without being told how the colours were handed out. Their way to keep that fourth player from winning was to pick starting squares that only the three of them knew, so that its colour would show at once (here the Shadow always plays openly in its own colour, so nobody has to be unmasked). In the last round Player A misread the turn order and the fourth player won, and Player B, who had won no round, was eliminated.
 
 ## Rules in detail
 

@@ -12,4 +12,4 @@
 
 **Vigyázz:** az a terület, ahol senkinek nincs bábuja, senkié, és az a terület, ahol egy ellenfél bábuja áll, még nem a tiéd. Zárd le a területedet, mielőtt egy ellenfél besétál.
 
-**A műsorban:** három játékos felváltva lépett az egyik bábujával, és falat épített mellé egy gótáblán (itt a tábla 7×7-es), amíg minden játékos bábuit el nem választották a falak a többiekétől. A Játékos a legnagyobb területtel végzett, nyereményt kapott, és megmenekült a kieséstől. B és C játékos ezután ugyanezekkel a szabályokkal újrajátszotta a játékot, és B játékos, akinek kisebb terület maradt, kiesett.
+**A műsorban:** három játékos felváltva lépett az egyik bábujával, és falat épített mellé egy 7×7-es táblán, mint itt, amíg minden játékos bábuit el nem választották a falak a többiekétől. A játékos a legnagyobb területtel végzett, nyereményt kapott, és megmenekült a kieséstől. B és C játékos ezután egy második játszmát játszott, fejenként négy bábuval, és B játékos, akinek kisebb terület maradt, kiesett.
